@@ -30,19 +30,17 @@ export class CountriesPage implements OnInit {
         this.loadCountries();
     }
 
-    loadCountries(): void {
+    async loadCountries(): Promise<void> {
         this.loading = true;
-        this.addressesService.getCountries().subscribe({
-            next: (response: any) => {
-                console.log('Countries response:', response);
-                this.countries = this.extractArray(response);
-                this.loading = false;
-            },
-            error: (err) => {
-                console.error('Countries error:', err);
-                this.loading = false;
-            },
-        });
+        try {
+            const response = await this.addressesService.getCountries();
+            console.log('Countries response:', response);
+            this.countries = this.extractArray(response);
+        } catch (err) {
+            console.error('Countries error:', err);
+        } finally {
+            this.loading = false;
+        }
     }
 
     private extractArray(response: any): any[] {
@@ -73,40 +71,39 @@ export class CountriesPage implements OnInit {
         this.showModal = true;
     }
 
-    save(): void {
-        if (this.editMode && this.selectedCountry) {
-            const req: UpdateCountryRequest = {
-                name: this.form.name,
-                code: this.form.code,
-                phoneCode: this.form.phoneCode,
-                isBlocked: this.form.isBlocked ?? false,
-            };
-            this.addressesService.updateCountry(this.selectedCountry.id, req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadCountries();
-                },
-            });
-        } else {
-            const req: CreateCountryRequest = {
-                name: this.form.name,
-                code: this.form.code,
-                phoneCode: this.form.phoneCode,
-            };
-            this.addressesService.createCountry(req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadCountries();
-                },
-            });
+    async save(): Promise<void> {
+        try {
+            if (this.editMode && this.selectedCountry) {
+                const req: UpdateCountryRequest = {
+                    name: this.form.name,
+                    code: this.form.code,
+                    phoneCode: this.form.phoneCode,
+                    isBlocked: this.form.isBlocked ?? false,
+                };
+                await this.addressesService.updateCountry(this.selectedCountry.id, req);
+            } else {
+                const req: CreateCountryRequest = {
+                    name: this.form.name,
+                    code: this.form.code,
+                    phoneCode: this.form.phoneCode,
+                };
+                await this.addressesService.createCountry(req);
+            }
+            this.showModal = false;
+            await this.loadCountries();
+        } catch (err) {
+            console.error('Save error:', err);
         }
     }
 
-    deleteCountry(country: Country): void {
+    async deleteCountry(country: Country): Promise<void> {
         if (confirm(`"${country.name}" ülkesini silmek istediğinize emin misiniz?`)) {
-            this.addressesService.deleteCountry(country.id).subscribe({
-                next: () => this.loadCountries(),
-            });
+            try {
+                await this.addressesService.deleteCountry(country.id);
+                await this.loadCountries();
+            } catch (err) {
+                console.error('Delete error:', err);
+            }
         }
     }
 

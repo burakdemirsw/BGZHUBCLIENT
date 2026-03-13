@@ -38,40 +38,30 @@ export class SocialMediaDescriptionsPage implements OnInit {
         this.loadDescriptions();
     }
 
-    loadAccounts(): void {
-        this.socialMediaService.getAccounts().subscribe({
-            next: (response: any) => {
-                this.accounts = this.extractArray(response);
-            },
-        });
+    async loadAccounts(): Promise<void> {
+        try {
+            const response = await this.socialMediaService.getAccounts();
+            this.accounts = this.extractArray(response);
+        } catch (err) {
+            console.error('Accounts error:', err);
+        }
     }
 
-    loadDescriptions(): void {
+    async loadDescriptions(): Promise<void> {
         this.loading = true;
-        if (this.filterAccountId) {
-            this.socialMediaService.getDescriptionsByAccount(this.filterAccountId).subscribe({
-                next: (response: any) => {
-                    console.log('Descriptions response:', response);
-                    this.descriptions = this.extractArray(response);
-                    this.loading = false;
-                },
-                error: (err) => {
-                    console.error('Descriptions error:', err);
-                    this.loading = false;
-                },
-            });
-        } else {
-            this.socialMediaService.getDescriptions().subscribe({
-                next: (response: any) => {
-                    console.log('Descriptions response:', response);
-                    this.descriptions = this.extractArray(response);
-                    this.loading = false;
-                },
-                error: (err) => {
-                    console.error('Descriptions error:', err);
-                    this.loading = false;
-                },
-            });
+        try {
+            let response;
+            if (this.filterAccountId) {
+                response = await this.socialMediaService.getDescriptionsByAccount(this.filterAccountId);
+            } else {
+                response = await this.socialMediaService.getDescriptions();
+            }
+            console.log('Descriptions response:', response);
+            this.descriptions = this.extractArray(response);
+        } catch (err) {
+            console.error('Descriptions error:', err);
+        } finally {
+            this.loading = false;
         }
     }
 
@@ -116,40 +106,39 @@ export class SocialMediaDescriptionsPage implements OnInit {
         this.showModal = true;
     }
 
-    save(): void {
-        if (this.editMode && this.selectedDescription) {
-            const req: UpdateSocialMediaAccountDescriptionRequest = {
-                socialMediaAccountId: this.form.socialMediaAccountId,
-                langCode: this.form.langCode,
-                description: this.form.description,
-                isBlocked: this.form.isBlocked ?? false,
-            };
-            this.socialMediaService.updateDescription(this.selectedDescription.id, req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadDescriptions();
-                },
-            });
-        } else {
-            const req: CreateSocialMediaAccountDescriptionRequest = {
-                socialMediaAccountId: this.form.socialMediaAccountId,
-                langCode: this.form.langCode,
-                description: this.form.description,
-            };
-            this.socialMediaService.createDescription(req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadDescriptions();
-                },
-            });
+    async save(): Promise<void> {
+        try {
+            if (this.editMode && this.selectedDescription) {
+                const req: UpdateSocialMediaAccountDescriptionRequest = {
+                    socialMediaAccountId: this.form.socialMediaAccountId,
+                    langCode: this.form.langCode,
+                    description: this.form.description,
+                    isBlocked: this.form.isBlocked ?? false,
+                };
+                await this.socialMediaService.updateDescription(this.selectedDescription.id, req);
+            } else {
+                const req: CreateSocialMediaAccountDescriptionRequest = {
+                    socialMediaAccountId: this.form.socialMediaAccountId,
+                    langCode: this.form.langCode,
+                    description: this.form.description,
+                };
+                await this.socialMediaService.createDescription(req);
+            }
+            this.showModal = false;
+            await this.loadDescriptions();
+        } catch (err) {
+            console.error('Save error:', err);
         }
     }
 
-    deleteDescription(desc: SocialMediaAccountDescription): void {
+    async deleteDescription(desc: SocialMediaAccountDescription): Promise<void> {
         if (confirm('Bu açıklamayı silmek istediğinize emin misiniz?')) {
-            this.socialMediaService.deleteDescription(desc.id).subscribe({
-                next: () => this.loadDescriptions(),
-            });
+            try {
+                await this.socialMediaService.deleteDescription(desc.id);
+                await this.loadDescriptions();
+            } catch (err) {
+                console.error('Delete error:', err);
+            }
         }
     }
 

@@ -32,19 +32,17 @@ export class NetGsmSettingsPage implements OnInit {
         this.loadSettings();
     }
 
-    loadSettings(): void {
+    async loadSettings(): Promise<void> {
         this.loading = true;
-        this.netGsmService.getAll().subscribe({
-            next: (response: any) => {
-                console.log('NetGsmSettings response:', response);
-                this.settings = this.extractArray(response);
-                this.loading = false;
-            },
-            error: (err) => {
-                console.error('NetGsmSettings error:', err);
-                this.loading = false;
-            },
-        });
+        try {
+            const response = await this.netGsmService.getAll();
+            console.log('NetGsmSettings response:', response);
+            this.settings = this.extractArray(response);
+        } catch (err) {
+            console.error('NetGsmSettings error:', err);
+        } finally {
+            this.loading = false;
+        }
     }
 
     private extractArray(response: any): any[] {
@@ -77,44 +75,43 @@ export class NetGsmSettingsPage implements OnInit {
         this.showModal = true;
     }
 
-    save(): void {
-        if (this.editMode && this.selectedSetting) {
-            const req: UpdateNetGsmSettingRequest = {
-                applicationId: this.form.applicationId,
-                userName: this.form.userName,
-                password: this.form.password,
-                messageHeader: this.form.messageHeader,
-                isFirst: this.form.isFirst,
-                isBlocked: this.form.isBlocked,
-            };
-            this.netGsmService.update(this.selectedSetting.id, req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadSettings();
-                },
-            });
-        } else {
-            const req: CreateNetGsmSettingRequest = {
-                applicationId: this.form.applicationId,
-                userName: this.form.userName,
-                password: this.form.password,
-                messageHeader: this.form.messageHeader,
-                isFirst: this.form.isFirst,
-            };
-            this.netGsmService.create(req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadSettings();
-                },
-            });
+    async save(): Promise<void> {
+        try {
+            if (this.editMode && this.selectedSetting) {
+                const req: UpdateNetGsmSettingRequest = {
+                    applicationId: this.form.applicationId,
+                    userName: this.form.userName,
+                    password: this.form.password,
+                    messageHeader: this.form.messageHeader,
+                    isFirst: this.form.isFirst,
+                    isBlocked: this.form.isBlocked,
+                };
+                await this.netGsmService.update(this.selectedSetting.id, req);
+            } else {
+                const req: CreateNetGsmSettingRequest = {
+                    applicationId: this.form.applicationId,
+                    userName: this.form.userName,
+                    password: this.form.password,
+                    messageHeader: this.form.messageHeader,
+                    isFirst: this.form.isFirst,
+                };
+                await this.netGsmService.create(req);
+            }
+            this.showModal = false;
+            await this.loadSettings();
+        } catch (err) {
+            console.error('Save error:', err);
         }
     }
 
-    deleteSetting(setting: NetGsmSetting): void {
+    async deleteSetting(setting: NetGsmSetting): Promise<void> {
         if (confirm(`"${setting.userName}" NetGsm ayarını silmek istediğinize emin misiniz?`)) {
-            this.netGsmService.delete(setting.id).subscribe({
-                next: () => this.loadSettings(),
-            });
+            try {
+                await this.netGsmService.delete(setting.id);
+                await this.loadSettings();
+            } catch (err) {
+                console.error('Delete error:', err);
+            }
         }
     }
 

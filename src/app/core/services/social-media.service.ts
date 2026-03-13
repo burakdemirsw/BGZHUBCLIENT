@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { HttpClientService } from './http-client.service';
 import {
   CreateSocialMediaAccountRequest,
@@ -19,106 +18,106 @@ export class SocialMediaService {
   constructor(private http: HttpClientService) {}
 
   // === Accounts ===
-  getAccounts(): Observable<any> {
+  getAccounts(): Promise<any> {
     return this.http.get_new({ controller: 'SocialMedia', action: 'accounts' });
   }
 
-  getAccountById(id: string): Observable<any> {
+  getAccountById(id: string): Promise<any> {
     return this.http.get_new({ controller: 'SocialMedia', action: `accounts/${id}` });
   }
 
-  getAccountsByUser(userId: string): Observable<any> {
+  getAccountsByUser(userId: string): Promise<any> {
     return this.http.get_new({ controller: 'SocialMedia', action: `accounts/by-user/${userId}` });
   }
 
-  createAccount(request: CreateSocialMediaAccountRequest): Observable<any> {
+  createAccount(request: CreateSocialMediaAccountRequest): Promise<any> {
     return this.http.post({ controller: 'SocialMedia', action: 'accounts' }, request);
   }
 
-  updateAccount(id: string, request: UpdateSocialMediaAccountRequest): Observable<any> {
+  updateAccount(id: string, request: UpdateSocialMediaAccountRequest): Promise<any> {
     return this.http.post({ controller: 'SocialMedia', action: `update/accounts/${id}` }, request);
   }
 
-  deleteAccount(id: string): Observable<any> {
+  deleteAccount(id: string): Promise<any> {
     return this.http.post({ controller: 'SocialMedia', action: `delete/accounts/${id}` }, {});
   }
 
   // === Descriptions ===
-  getDescriptions(): Observable<any> {
+  getDescriptions(): Promise<any> {
     return this.http.get_new({ controller: 'SocialMedia', action: 'descriptions' });
   }
 
-  getDescriptionById(id: string): Observable<any> {
+  getDescriptionById(id: string): Promise<any> {
     return this.http.get_new({ controller: 'SocialMedia', action: `descriptions/${id}` });
   }
 
-  getDescriptionsByAccount(accountId: string): Observable<any> {
+  getDescriptionsByAccount(accountId: string): Promise<any> {
     return this.http.get_new({ controller: 'SocialMedia', action: `accounts/${accountId}/descriptions` });
   }
 
-  createDescription(request: CreateSocialMediaAccountDescriptionRequest): Observable<any> {
+  createDescription(request: CreateSocialMediaAccountDescriptionRequest): Promise<any> {
     return this.http.post({ controller: 'SocialMedia', action: 'descriptions' }, request);
   }
 
-  updateDescription(id: string, request: UpdateSocialMediaAccountDescriptionRequest): Observable<any> {
+  updateDescription(id: string, request: UpdateSocialMediaAccountDescriptionRequest): Promise<any> {
     return this.http.post({ controller: 'SocialMedia', action: `update/descriptions/${id}` }, request);
   }
 
-  deleteDescription(id: string): Observable<any> {
+  deleteDescription(id: string): Promise<any> {
     return this.http.post({ controller: 'SocialMedia', action: `delete/descriptions/${id}` }, {});
   }
 
   // === Properties ===
-  getProperties(): Observable<any> {
+  getProperties(): Promise<any> {
     return this.http.get_new({ controller: 'SocialMedia', action: 'properties' });
   }
 
-  getPropertyById(id: string): Observable<any> {
+  getPropertyById(id: string): Promise<any> {
     return this.http.get_new({ controller: 'SocialMedia', action: `properties/${id}` });
   }
 
-  getPropertiesByAccount(accountId: string): Observable<any> {
+  getPropertiesByAccount(accountId: string): Promise<any> {
     return this.http.get_new({ controller: 'SocialMedia', action: `accounts/${accountId}/properties` });
   }
 
-  createProperty(request: CreateSocialMediaAccountPropertyRequest): Observable<any> {
+  createProperty(request: CreateSocialMediaAccountPropertyRequest): Promise<any> {
     return this.http.post({ controller: 'SocialMedia', action: 'properties' }, request);
   }
 
-  updateProperty(id: string, request: UpdateSocialMediaAccountPropertyRequest): Observable<any> {
+  updateProperty(id: string, request: UpdateSocialMediaAccountPropertyRequest): Promise<any> {
     return this.http.post({ controller: 'SocialMedia', action: `update/properties/${id}` }, request);
   }
 
-  deleteProperty(id: string): Observable<any> {
+  deleteProperty(id: string): Promise<any> {
     return this.http.post({ controller: 'SocialMedia', action: `delete/properties/${id}` }, {});
   }
 
   // === User Accounts ===
-  getUserAccounts(): Observable<any> {
+  getUserAccounts(): Promise<any> {
     return this.http.get_new({ controller: 'SocialMedia', action: 'user-accounts' });
   }
 
-  getUserAccountById(id: string): Observable<any> {
+  getUserAccountById(id: string): Promise<any> {
     return this.http.get_new({ controller: 'SocialMedia', action: `user-accounts/${id}` });
   }
 
-  getUserAccountsByUser(userId: string): Observable<any> {
+  getUserAccountsByUser(userId: string): Promise<any> {
     return this.http.get_new({ controller: 'SocialMedia', action: `user-accounts/by-user/${userId}` });
   }
 
-  getUserAccountsByAccount(accountId: string): Observable<any> {
+  getUserAccountsByAccount(accountId: string): Promise<any> {
     return this.http.get_new({ controller: 'SocialMedia', action: `user-accounts/by-account/${accountId}` });
   }
 
-  createUserAccount(request: CreateUserSocialMediaAccountRequest): Observable<any> {
+  createUserAccount(request: CreateUserSocialMediaAccountRequest): Promise<any> {
     return this.http.post({ controller: 'SocialMedia', action: 'user-accounts' }, request);
   }
 
-  updateUserAccount(id: string, request: UpdateUserSocialMediaAccountRequest): Observable<any> {
+  updateUserAccount(id: string, request: UpdateUserSocialMediaAccountRequest): Promise<any> {
     return this.http.post({ controller: 'SocialMedia', action: `update/user-accounts/${id}` }, request);
   }
 
-  deleteUserAccount(id: string): Observable<any> {
+  deleteUserAccount(id: string): Promise<any> {
     return this.http.post({ controller: 'SocialMedia', action: `delete/user-accounts/${id}` }, {});
   }
 }

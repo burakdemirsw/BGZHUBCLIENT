@@ -27,19 +27,17 @@ export class RolesPage implements OnInit {
         this.loadRoles();
     }
 
-    loadRoles(): void {
+    async loadRoles(): Promise<void> {
         this.loading = true;
-        this.rolesService.getAll().subscribe({
-            next: (response: any) => {
-                console.log('Roles response:', response);
-                this.roles = this.extractArray(response);
-                this.loading = false;
-            },
-            error: (err) => {
-                console.error('Roles error:', err);
-                this.loading = false;
-            },
-        });
+        try {
+            const response = await this.rolesService.getAll();
+            console.log('Roles response:', response);
+            this.roles = this.extractArray(response);
+        } catch (err) {
+            console.error('Roles error:', err);
+        } finally {
+            this.loading = false;
+        }
     }
 
     private extractArray(response: any): any[] {
@@ -65,31 +63,30 @@ export class RolesPage implements OnInit {
         this.showModal = true;
     }
 
-    save(): void {
-        if (this.editMode && this.selectedRole) {
-            const req: UpdateRoleRequest = { roleDescription: this.form.roleDescription };
-            this.rolesService.update(this.selectedRole.id, req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadRoles();
-                },
-            });
-        } else {
-            const req: CreateRoleRequest = { roleDescription: this.form.roleDescription };
-            this.rolesService.create(req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadRoles();
-                },
-            });
+    async save(): Promise<void> {
+        try {
+            if (this.editMode && this.selectedRole) {
+                const req: UpdateRoleRequest = { roleDescription: this.form.roleDescription };
+                await this.rolesService.update(this.selectedRole.id, req);
+            } else {
+                const req: CreateRoleRequest = { roleDescription: this.form.roleDescription };
+                await this.rolesService.create(req);
+            }
+            this.showModal = false;
+            await this.loadRoles();
+        } catch (err) {
+            console.error('Save error:', err);
         }
     }
 
-    deleteRole(role: Role): void {
+    async deleteRole(role: Role): Promise<void> {
         if (confirm(`"${role.roleDescription}" rolünü silmek istediğinize emin misiniz?`)) {
-            this.rolesService.delete(role.id).subscribe({
-                next: () => this.loadRoles(),
-            });
+            try {
+                await this.rolesService.delete(role.id);
+                await this.loadRoles();
+            } catch (err) {
+                console.error('Delete error:', err);
+            }
         }
     }
 

@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { HttpClientService } from './http-client.service';
-import { Role, CreateRoleRequest, UpdateRoleRequest } from '../models/role/role.models';
-import { RoleUser, CreateRoleUserRequest, UpdateRoleUserRequest } from '../models/role/role.models';
+import { CreateRoleRequest, UpdateRoleRequest } from '../models/role/role.models';
+import { RoleUser, CreateRoleUserRequest } from '../models/role/role.models';
 
 @Injectable({
   providedIn: 'root',
@@ -11,44 +10,44 @@ export class RolesService {
   constructor(private http: HttpClientService) {}
 
   // Roles
-  getAll(): Observable<any> {
+  getAll(): Promise<any> {
     return this.http.get_new({ controller: 'Roles' });
   }
 
-  getById(id: string): Observable<any> {
+  getById(id: string): Promise<any> {
     return this.http.get_new({ controller: 'Roles' }, id);
   }
 
-  create(request: CreateRoleRequest): Observable<any> {
+  create(request: CreateRoleRequest): Promise<any> {
     return this.http.post({ controller: 'Roles' }, request);
   }
 
-  update(id: string, request: UpdateRoleRequest): Observable<any> {
+  update(id: string, request: UpdateRoleRequest): Promise<any> {
     return this.http.post({ controller: 'Roles', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Observable<any> {
+  delete(id: string): Promise<any> {
     return this.http.post({ controller: 'Roles', action: `delete/${id}` }, {});
   }
 
   // Role-Users
-  getRoleUsers(): Observable<RoleUser[]> {
-    return this.http.get<RoleUser>({ controller: 'RoleUsers' });
+  getRoleUsers(): Promise<any> {
+    return this.http.get_new({ controller: 'RoleUsers' });
   }
 
-  getUsersByRole(roleId: string): Observable<any> {
+  getUsersByRole(roleId: string): Promise<any> {
     return this.http.get_new({ controller: 'RoleUsers', action: 'by-role' }, roleId);
   }
 
-  getRolesByUser(userId: string): Observable<any> {
+  getRolesByUser(userId: string): Promise<any> {
     return this.http.get_new({ controller: 'RoleUsers', action: 'by-user' }, userId);
   }
 
-  assignRole(request: CreateRoleUserRequest): Observable<any> {
+  assignRole(request: CreateRoleUserRequest): Promise<any> {
     return this.http.post({ controller: 'RoleUsers' }, request);
   }
 
-  removeRoleUser(id: string): Observable<any> {
+  removeRoleUser(id: string): Promise<any> {
     return this.http.post({ controller: 'RoleUsers', action: `delete/${id}` }, {});
   }
 }

@@ -34,56 +34,44 @@ export class DistrictsPage implements OnInit {
         this.loadDistricts();
     }
 
-    loadCountries(): void {
-        this.addressesService.getCountries().subscribe({
-            next: (response: any) => {
-                this.countries = this.extractArray(response);
-            },
-        });
-    }
-
-    loadCitiesByCountry(): void {
-        if (this.filterCountryId) {
-            this.addressesService.getCitiesByCountry(this.filterCountryId).subscribe({
-                next: (response: any) => {
-                    this.cities = this.extractArray(response);
-                },
-            });
-        } else {
-            this.addressesService.getCities().subscribe({
-                next: (response: any) => {
-                    this.cities = this.extractArray(response);
-                },
-            });
+    async loadCountries(): Promise<void> {
+        try {
+            const response = await this.addressesService.getCountries();
+            this.countries = this.extractArray(response);
+        } catch (err) {
+            console.error('Countries error:', err);
         }
     }
 
-    loadDistricts(): void {
+    async loadCitiesByCountry(): Promise<void> {
+        try {
+            let response;
+            if (this.filterCountryId) {
+                response = await this.addressesService.getCitiesByCountry(this.filterCountryId);
+            } else {
+                response = await this.addressesService.getCities();
+            }
+            this.cities = this.extractArray(response);
+        } catch (err) {
+            console.error('Cities error:', err);
+        }
+    }
+
+    async loadDistricts(): Promise<void> {
         this.loading = true;
-        if (this.filterCityId) {
-            this.addressesService.getDistrictsByCity(this.filterCityId).subscribe({
-                next: (response: any) => {
-                    console.log('Districts response:', response);
-                    this.districts = this.extractArray(response);
-                    this.loading = false;
-                },
-                error: (err) => {
-                    console.error('Districts error:', err);
-                    this.loading = false;
-                },
-            });
-        } else {
-            this.addressesService.getDistricts().subscribe({
-                next: (response: any) => {
-                    console.log('Districts response:', response);
-                    this.districts = this.extractArray(response);
-                    this.loading = false;
-                },
-                error: (err) => {
-                    console.error('Districts error:', err);
-                    this.loading = false;
-                },
-            });
+        try {
+            let response;
+            if (this.filterCityId) {
+                response = await this.addressesService.getDistrictsByCity(this.filterCityId);
+            } else {
+                response = await this.addressesService.getDistricts();
+            }
+            console.log('Districts response:', response);
+            this.districts = this.extractArray(response);
+        } catch (err) {
+            console.error('Districts error:', err);
+        } finally {
+            this.loading = false;
         }
     }
 
@@ -128,38 +116,37 @@ export class DistrictsPage implements OnInit {
         this.showModal = true;
     }
 
-    save(): void {
-        if (this.editMode && this.selectedDistrict) {
-            const req: UpdateDistrictRequest = {
-                cityId: this.form.cityId,
-                name: this.form.name,
-                isBlocked: this.form.isBlocked ?? false,
-            };
-            this.addressesService.updateDistrict(this.selectedDistrict.id, req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadDistricts();
-                },
-            });
-        } else {
-            const req: CreateDistrictRequest = {
-                cityId: this.form.cityId,
-                name: this.form.name,
-            };
-            this.addressesService.createDistrict(req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadDistricts();
-                },
-            });
+    async save(): Promise<void> {
+        try {
+            if (this.editMode && this.selectedDistrict) {
+                const req: UpdateDistrictRequest = {
+                    cityId: this.form.cityId,
+                    name: this.form.name,
+                    isBlocked: this.form.isBlocked ?? false,
+                };
+                await this.addressesService.updateDistrict(this.selectedDistrict.id, req);
+            } else {
+                const req: CreateDistrictRequest = {
+                    cityId: this.form.cityId,
+                    name: this.form.name,
+                };
+                await this.addressesService.createDistrict(req);
+            }
+            this.showModal = false;
+            await this.loadDistricts();
+        } catch (err) {
+            console.error('Save error:', err);
         }
     }
 
-    deleteDistrict(district: District): void {
+    async deleteDistrict(district: District): Promise<void> {
         if (confirm(`"${district.name}" ilçesini silmek istediğinize emin misiniz?`)) {
-            this.addressesService.deleteDistrict(district.id).subscribe({
-                next: () => this.loadDistricts(),
-            });
+            try {
+                await this.addressesService.deleteDistrict(district.id);
+                await this.loadDistricts();
+            } catch (err) {
+                console.error('Delete error:', err);
+            }
         }
     }
 

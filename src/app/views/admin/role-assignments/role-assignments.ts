@@ -34,27 +34,22 @@ export class RoleAssignmentsPage implements OnInit {
         this.loadData();
     }
 
-    loadData(): void {
+    async loadData(): Promise<void> {
         this.loading = true;
-        this.usersService.getAll().subscribe({
-            next: (response: any) => {
-                this.users = this.extractArray(response);
-                this.rolesService.getAll().subscribe({
-                    next: (resp: any) => {
-                        this.roles = this.extractArray(resp);
-                        this.rolesService.getRoleUsers().subscribe({
-                            next: (ruResp: any) => {
-                                this.roleUsers = this.extractArray(ruResp);
-                                this.loading = false;
-                            },
-                            error: () => this.loading = false,
-                        });
-                    },
-                    error: () => this.loading = false,
-                });
-            },
-            error: () => this.loading = false,
-        });
+        try {
+            const usersResp = await this.usersService.getAll();
+            this.users = this.extractArray(usersResp);
+
+            const rolesResp = await this.rolesService.getAll();
+            this.roles = this.extractArray(rolesResp);
+
+            const ruResp = await this.rolesService.getRoleUsers();
+            this.roleUsers = this.extractArray(ruResp);
+        } catch (err) {
+            console.error('LoadData error:', err);
+        } finally {
+            this.loading = false;
+        }
     }
 
     private extractArray(response: any): any[] {
@@ -86,36 +81,41 @@ export class RoleAssignmentsPage implements OnInit {
         this.showAssignModal = true;
     }
 
-    assignRole(): void {
+    async assignRole(): Promise<void> {
         if (!this.selectedUser || !this.selectedRoleId) return;
-        this.rolesService.assignRole({
-            roleId: this.selectedRoleId,
-            userId: this.selectedUser.id,
-        }).subscribe({
-            next: () => {
-                this.selectedRoleId = '';
-                this.refreshRoleUsers();
-            },
-        });
-    }
-
-    removeRole(roleUser: RoleUser): void {
-        if (confirm(`Bu rolü kaldırmak istediğinize emin misiniz?`)) {
-            this.rolesService.removeRoleUser(roleUser.id).subscribe({
-                next: () => this.refreshRoleUsers(),
+        try {
+            await this.rolesService.assignRole({
+                roleId: this.selectedRoleId,
+                userId: this.selectedUser.id,
             });
+            this.selectedRoleId = '';
+            await this.refreshRoleUsers();
+        } catch (err) {
+            console.error('Assign error:', err);
         }
     }
 
-    private refreshRoleUsers(): void {
-        this.rolesService.getRoleUsers().subscribe({
-            next: (resp: any) => {
-                this.roleUsers = this.extractArray(resp);
-                if (this.selectedUser) {
-                    this.selectedUserRoles = this.getUserRoles(this.selectedUser.id);
-                }
-            },
-        });
+    async removeRole(roleUser: RoleUser): Promise<void> {
+        if (confirm(`Bu rolü kaldırmak istediğinize emin misiniz?`)) {
+            try {
+                await this.rolesService.removeRoleUser(roleUser.id);
+                await this.refreshRoleUsers();
+            } catch (err) {
+                console.error('Remove error:', err);
+            }
+        }
+    }
+
+    private async refreshRoleUsers(): Promise<void> {
+        try {
+            const resp = await this.rolesService.getRoleUsers();
+            this.roleUsers = this.extractArray(resp);
+            if (this.selectedUser) {
+                this.selectedUserRoles = this.getUserRoles(this.selectedUser.id);
+            }
+        } catch (err) {
+            console.error('Refresh error:', err);
+        }
     }
 
     closeModal(): void {

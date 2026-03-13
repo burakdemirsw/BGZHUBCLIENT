@@ -33,19 +33,17 @@ export class MenusPage implements OnInit {
         this.loadMenus();
     }
 
-    loadMenus(): void {
+    async loadMenus(): Promise<void> {
         this.loading = true;
-        this.menusService.getAll().subscribe({
-            next: (response: any) => {
-                console.log('Menus response:', response);
-                this.menus = this.extractArray(response);
-                this.loading = false;
-            },
-            error: (err) => {
-                console.error('Menus error:', err);
-                this.loading = false;
-            },
-        });
+        try {
+            const response = await this.menusService.getAll();
+            console.log('Menus response:', response);
+            this.menus = this.extractArray(response);
+        } catch (err) {
+            console.error('Menus error:', err);
+        } finally {
+            this.loading = false;
+        }
     }
 
     private extractArray(response: any): any[] {
@@ -79,46 +77,45 @@ export class MenusPage implements OnInit {
         this.showModal = true;
     }
 
-    save(): void {
-        if (this.editMode && this.selectedMenu) {
-            const req: UpdateMenuRequest = {
-                parentId: this.form.parentId,
-                name: this.form.name,
-                description: this.form.description,
-                url: this.form.url,
-                icon: this.form.icon,
-                orderIndex: this.form.orderIndex,
-                isBlocked: this.form.isBlocked,
-            };
-            this.menusService.update(this.selectedMenu.id, req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadMenus();
-                },
-            });
-        } else {
-            const req: CreateMenuRequest = {
-                parentId: this.form.parentId,
-                name: this.form.name,
-                description: this.form.description,
-                url: this.form.url,
-                icon: this.form.icon,
-                orderIndex: this.form.orderIndex,
-            };
-            this.menusService.create(req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadMenus();
-                },
-            });
+    async save(): Promise<void> {
+        try {
+            if (this.editMode && this.selectedMenu) {
+                const req: UpdateMenuRequest = {
+                    parentId: this.form.parentId,
+                    name: this.form.name,
+                    description: this.form.description,
+                    url: this.form.url,
+                    icon: this.form.icon,
+                    orderIndex: this.form.orderIndex,
+                    isBlocked: this.form.isBlocked,
+                };
+                await this.menusService.update(this.selectedMenu.id, req);
+            } else {
+                const req: CreateMenuRequest = {
+                    parentId: this.form.parentId,
+                    name: this.form.name,
+                    description: this.form.description,
+                    url: this.form.url,
+                    icon: this.form.icon,
+                    orderIndex: this.form.orderIndex,
+                };
+                await this.menusService.create(req);
+            }
+            this.showModal = false;
+            await this.loadMenus();
+        } catch (err) {
+            console.error('Save error:', err);
         }
     }
 
-    deleteMenu(menu: Menu): void {
+    async deleteMenu(menu: Menu): Promise<void> {
         if (confirm(`"${menu.name}" menüsünü silmek istediğinize emin misiniz?`)) {
-            this.menusService.delete(menu.id).subscribe({
-                next: () => this.loadMenus(),
-            });
+            try {
+                await this.menusService.delete(menu.id);
+                await this.loadMenus();
+            } catch (err) {
+                console.error('Delete error:', err);
+            }
         }
     }
 

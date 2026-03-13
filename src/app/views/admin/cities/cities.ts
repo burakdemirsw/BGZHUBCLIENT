@@ -33,40 +33,30 @@ export class CitiesPage implements OnInit {
         this.loadCities();
     }
 
-    loadCountries(): void {
-        this.addressesService.getCountries().subscribe({
-            next: (response: any) => {
-                this.countries = this.extractArray(response);
-            },
-        });
+    async loadCountries(): Promise<void> {
+        try {
+            const response = await this.addressesService.getCountries();
+            this.countries = this.extractArray(response);
+        } catch (err) {
+            console.error('Countries error:', err);
+        }
     }
 
-    loadCities(): void {
+    async loadCities(): Promise<void> {
         this.loading = true;
-        if (this.filterCountryId) {
-            this.addressesService.getCitiesByCountry(this.filterCountryId).subscribe({
-                next: (response: any) => {
-                    console.log('Cities response:', response);
-                    this.cities = this.extractArray(response);
-                    this.loading = false;
-                },
-                error: (err) => {
-                    console.error('Cities error:', err);
-                    this.loading = false;
-                },
-            });
-        } else {
-            this.addressesService.getCities().subscribe({
-                next: (response: any) => {
-                    console.log('Cities response:', response);
-                    this.cities = this.extractArray(response);
-                    this.loading = false;
-                },
-                error: (err) => {
-                    console.error('Cities error:', err);
-                    this.loading = false;
-                },
-            });
+        try {
+            let response;
+            if (this.filterCountryId) {
+                response = await this.addressesService.getCitiesByCountry(this.filterCountryId);
+            } else {
+                response = await this.addressesService.getCities();
+            }
+            console.log('Cities response:', response);
+            this.cities = this.extractArray(response);
+        } catch (err) {
+            console.error('Cities error:', err);
+        } finally {
+            this.loading = false;
         }
     }
 
@@ -106,40 +96,39 @@ export class CitiesPage implements OnInit {
         this.showModal = true;
     }
 
-    save(): void {
-        if (this.editMode && this.selectedCity) {
-            const req: UpdateCityRequest = {
-                countryId: this.form.countryId,
-                name: this.form.name,
-                code: this.form.code,
-                isBlocked: this.form.isBlocked ?? false,
-            };
-            this.addressesService.updateCity(this.selectedCity.id, req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadCities();
-                },
-            });
-        } else {
-            const req: CreateCityRequest = {
-                countryId: this.form.countryId,
-                name: this.form.name,
-                code: this.form.code,
-            };
-            this.addressesService.createCity(req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadCities();
-                },
-            });
+    async save(): Promise<void> {
+        try {
+            if (this.editMode && this.selectedCity) {
+                const req: UpdateCityRequest = {
+                    countryId: this.form.countryId,
+                    name: this.form.name,
+                    code: this.form.code,
+                    isBlocked: this.form.isBlocked ?? false,
+                };
+                await this.addressesService.updateCity(this.selectedCity.id, req);
+            } else {
+                const req: CreateCityRequest = {
+                    countryId: this.form.countryId,
+                    name: this.form.name,
+                    code: this.form.code,
+                };
+                await this.addressesService.createCity(req);
+            }
+            this.showModal = false;
+            await this.loadCities();
+        } catch (err) {
+            console.error('Save error:', err);
         }
     }
 
-    deleteCity(city: City): void {
+    async deleteCity(city: City): Promise<void> {
         if (confirm(`"${city.name}" ilini silmek istediğinize emin misiniz?`)) {
-            this.addressesService.deleteCity(city.id).subscribe({
-                next: () => this.loadCities(),
-            });
+            try {
+                await this.addressesService.deleteCity(city.id);
+                await this.loadCities();
+            } catch (err) {
+                console.error('Delete error:', err);
+            }
         }
     }
 

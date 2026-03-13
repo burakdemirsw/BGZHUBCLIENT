@@ -33,19 +33,17 @@ export class MailSettingsPage implements OnInit {
         this.loadSettings();
     }
 
-    loadSettings(): void {
+    async loadSettings(): Promise<void> {
         this.loading = true;
-        this.mailService.getAll().subscribe({
-            next: (response: any) => {
-                console.log('MailSettings response:', response);
-                this.settings = this.extractArray(response);
-                this.loading = false;
-            },
-            error: (err) => {
-                console.error('MailSettings error:', err);
-                this.loading = false;
-            },
-        });
+        try {
+            const response = await this.mailService.getAll();
+            console.log('MailSettings response:', response);
+            this.settings = this.extractArray(response);
+        } catch (err) {
+            console.error('MailSettings error:', err);
+        } finally {
+            this.loading = false;
+        }
     }
 
     private extractArray(response: any): any[] {
@@ -79,46 +77,45 @@ export class MailSettingsPage implements OnInit {
         this.showModal = true;
     }
 
-    save(): void {
-        if (this.editMode && this.selectedSetting) {
-            const req: UpdateMailSettingRequest = {
-                userName: this.form.userName,
-                password: this.form.password,
-                applicationPassword: this.form.applicationPassword,
-                smtpAddress: this.form.smtpAddress,
-                smtpPort: this.form.smtpPort,
-                isFirst: this.form.isFirst,
-                isBlocked: this.form.isBlocked,
-            };
-            this.mailService.update(this.selectedSetting.id, req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadSettings();
-                },
-            });
-        } else {
-            const req: CreateMailSettingRequest = {
-                userName: this.form.userName,
-                password: this.form.password,
-                applicationPassword: this.form.applicationPassword,
-                smtpAddress: this.form.smtpAddress,
-                smtpPort: this.form.smtpPort,
-                isFirst: this.form.isFirst,
-            };
-            this.mailService.create(req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadSettings();
-                },
-            });
+    async save(): Promise<void> {
+        try {
+            if (this.editMode && this.selectedSetting) {
+                const req: UpdateMailSettingRequest = {
+                    userName: this.form.userName,
+                    password: this.form.password,
+                    applicationPassword: this.form.applicationPassword,
+                    smtpAddress: this.form.smtpAddress,
+                    smtpPort: this.form.smtpPort,
+                    isFirst: this.form.isFirst,
+                    isBlocked: this.form.isBlocked,
+                };
+                await this.mailService.update(this.selectedSetting.id, req);
+            } else {
+                const req: CreateMailSettingRequest = {
+                    userName: this.form.userName,
+                    password: this.form.password,
+                    applicationPassword: this.form.applicationPassword,
+                    smtpAddress: this.form.smtpAddress,
+                    smtpPort: this.form.smtpPort,
+                    isFirst: this.form.isFirst,
+                };
+                await this.mailService.create(req);
+            }
+            this.showModal = false;
+            await this.loadSettings();
+        } catch (err) {
+            console.error('Save error:', err);
         }
     }
 
-    deleteSetting(setting: MailSetting): void {
+    async deleteSetting(setting: MailSetting): Promise<void> {
         if (confirm(`"${setting.userName}" mail ayarını silmek istediğinize emin misiniz?`)) {
-            this.mailService.delete(setting.id).subscribe({
-                next: () => this.loadSettings(),
-            });
+            try {
+                await this.mailService.delete(setting.id);
+                await this.loadSettings();
+            } catch (err) {
+                console.error('Delete error:', err);
+            }
         }
     }
 

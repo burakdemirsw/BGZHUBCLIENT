@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
 import { HttpClientService } from './http-client.service';
 import { LoginRequest, RegisterRequest, RefreshTokenRequest } from '../models/auth/auth.models';
 
@@ -16,21 +15,21 @@ export class UserService {
     this.router.navigate(['/auth/sign-in']);
   }
 
-  login(loginRequest: LoginRequest): Observable<any> {
+  login(loginRequest: LoginRequest): Promise<any> {
     return this.httpClientService.post(
       { controller: 'Auth', action: 'login' },
       loginRequest
     );
   }
 
-  register(registerRequest: RegisterRequest): Observable<any> {
+  register(registerRequest: RegisterRequest): Promise<any> {
     return this.httpClientService.post(
       { controller: 'Auth', action: 'register' },
       registerRequest
     );
   }
 
-  refreshToken(refreshTokenRequest: RefreshTokenRequest): Observable<any> {
+  refreshToken(refreshTokenRequest: RefreshTokenRequest): Promise<any> {
     return this.httpClientService.post(
       { controller: 'Auth', action: 'refresh-token' },
       refreshTokenRequest
