@@ -79,11 +79,11 @@ export const menuItems: MenuItemType[] = [
         icon: LucideMessageSquareDot,
         url: '/apps/chat',
     },
-    {
+    /*{
         label: 'Takvim',
         icon: LucideCalendar,
         url: '/apps/calendar',
-    },
+    },*/
 
     {label: 'Admin', isTitle: true},
     {
