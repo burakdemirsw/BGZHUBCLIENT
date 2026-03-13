@@ -1,4 +1,4 @@
-<div class="auth-box overflow-hidden align-items-center d-flex">
+﻿<div class="auth-box overflow-hidden align-items-center d-flex">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-xxl-4 col-md-6 col-sm-8">
@@ -13,27 +13,46 @@
                             <a routerLink="/" class="logo-light">
                                 <img src="assets/images/logo.png" alt="logo" height="28">
                             </a>
-                            <p class="text-muted w-lg-75 mt-3 mx-auto">Let’s get you started. Create your account by entering your details below.</p>
+                            <p class="text-muted w-lg-75 mt-3 mx-auto">Hesabınızı oluşturun. Bilgilerinizi aşağıya girin.</p>
                         </div>
-                    <form>
+                    @if (errorMessage) {
+                        <div class="alert alert-danger text-center" role="alert">
+                            {{ errorMessage }}
+                        </div>
+                    }
+                    @if (successMessage) {
+                        <div class="alert alert-success text-center" role="alert">
+                            {{ successMessage }}
+                        </div>
+                    }
+                    <form (ngSubmit)="onSubmit()">
                         <div class="mb-3">
-                            <label for="userName" class="form-label">Name <span class="text-danger">*</span></label>
+                            <label for="userName" class="form-label">Ad <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="userName" placeholder="Geneva K." required>
+                                <input type="text" class="form-control" id="userName" placeholder="Ad"
+                                    [(ngModel)]="name" name="name" required>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="userEmail" class="form-label">Email address <span
+                            <label for="userLastName" class="form-label">Soyad <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="userLastName" placeholder="Soyad"
+                                    [(ngModel)]="lastName" name="lastName" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="userEmail" class="form-label">E-posta Adresi <span
                                     class="text-danger">*</span></label>
                             <div class="input-group">
-                                <input type="email" class="form-control" id="userEmail" placeholder="you@example.com"
-                                    required>
+                                <input type="email" class="form-control" id="userEmail" placeholder="ornek@email.com"
+                                    [(ngModel)]="email" name="email" required>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="userPassword" class="form-label">Password <span
+                            <label for="userPassword" class="form-label">Şifre <span
                                     class="text-danger">*</span></label>
                             <div class="input-group">
                                 <input type="password" name="password" class="form-control" id="userPassword" placeholder="••••••••"
@@ -45,19 +64,21 @@
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input form-check-input-light fs-14" type="checkbox"
-                                    id="termAndPolicy">
-                                <label class="form-check-label" for="termAndPolicy">Agree the Terms & Policy</label>
+                                    id="termAndPolicy" [(ngModel)]="agreeTerms" name="agreeTerms">
+                                <label class="form-check-label" for="termAndPolicy">Şartları ve Koşulları Kabul Ediyorum</label>
                             </div>
                         </div>
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary fw-semibold py-2">Create Account</button>
+                            <button type="submit" class="btn btn-primary fw-semibold py-2" [disabled]="loading || !agreeTerms">
+                                {{ loading ? 'Hesap oluşturuluyor...' : 'Hesap Oluştur' }}
+                            </button>
                         </div>
                     </form>
 
                     <p class="text-muted text-center mt-4 mb-0">
-                        Already have an account? <a routerLink="/auth/sign-in"
-                            class="text-decoration-underline link-offset-3 fw-semibold">Login</a>
+                        Zaten hesabınız var mı? <a routerLink="/auth/sign-in"
+                            class="text-decoration-underline link-offset-3 fw-semibold">Giriş Yap</a>
                     </p>
                 </div>
 
