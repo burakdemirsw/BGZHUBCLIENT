@@ -16,12 +16,22 @@ import {FormsModule} from '@angular/forms';
                 <div class="d-flex gap-2">
                     <div class="app-search flex-grow-1">
                         <input [(ngModel)]="searchText" type="text" class="form-control bg-light-subtle border-light"
-                               placeholder="Search here..."/>
+                               placeholder="Ara..."/>
                         <ng-icon name="tablerSearch" class="app-search-icon text-muted fs-xl"/>
                     </div>
-                    <a [routerLink]="[]" class="btn btn-dark btn-icon">
-                        <ng-icon name="tablerPencilPlus" class="fs-xl"/>
-                    </a>
+                    <div class="dropdown" [class.show]="showFilterDropdown">
+                        <button type="button" class="btn btn-dark btn-icon" (click)="toggleFilterDropdown()">
+                            <ng-icon name="tablerFilter" class="fs-xl"/>
+                        </button>
+                        <div class="dropdown-menu p-3" [class.show]="showFilterDropdown" style="min-width: 200px;">
+                            <label class="form-label mb-1">Mesaj Durumu</label>
+                            <select class="form-select" [(ngModel)]="filterReadStatus">
+                                <option value="all">Tümü</option>
+                                <option value="unread">Okunmamış</option>
+                                <option value="read">Okunmuş</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
             <ngx-simplebar style="height: calc(100% - 100px);">
@@ -75,13 +85,25 @@ export class ChatSidebar {
     }
 
     searchText: string = '';
+    showFilterDropdown: boolean = false;
+    filterReadStatus: string = 'all';
 
     getFilteredUsers(): any[] {
-        if (!this.searchText) return this.chatService.getUsers();
+        let users = this.chatService.getUsers();
+        if (this.filterReadStatus === 'unread') {
+            users = users.filter(user => user.unread && user.unread > 0);
+        } else if (this.filterReadStatus === 'read') {
+            users = users.filter(user => !user.unread || user.unread === 0);
+        }
+        if (!this.searchText) return users;
         const keyword = this.searchText.toLowerCase();
-        return this.chatService.getUsers().filter(user =>
+        return users.filter(user =>
             user.name.toLowerCase().includes(keyword)
         );
+    }
+
+    toggleFilterDropdown() {
+        this.showFilterDropdown = !this.showFilterDropdown;
     }
 
     @Input() activeChatId = '';
