@@ -15,10 +15,10 @@ export class ApplicationMenu {
         { name: 'Figma', icon: 'assets/images/logos/figma.svg', type: 'img' },
         { name: 'Slack', icon: 'assets/images/logos/slack.svg', type: 'img' },
         { name: 'Dropbox', icon: 'assets/images/logos/dropbox.svg', type: 'img' },
-        { name: 'Calendar', icon: 'tablerCalendar', type: 'icon' },
-        { name: 'Chat', icon: 'tablerMessageCircle', type: 'icon' },
-        { name: 'Files', icon: 'tablerFolder', type: 'icon' },
-        { name: 'Team', icon: 'tablerUsers', type: 'icon' },
+        { name: 'Takvim', icon: 'tablerCalendar', type: 'icon' },
+        { name: 'Sohbet', icon: 'tablerMessageCircle', type: 'icon' },
+        { name: 'Dosyalar', icon: 'tablerFolder', type: 'icon' },
+        { name: 'Ekip', icon: 'tablerUsers', type: 'icon' },
     ];
     protected readonly LucideLayoutGrid = LucideLayoutGrid;
     protected readonly LayoutGrid = LayoutGrid;

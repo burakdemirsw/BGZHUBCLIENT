@@ -8,12 +8,12 @@ import {BehaviorSubject} from 'rxjs';
 const STORAGE_KEY = '__UBOLD_ANGULAR_CONFIG__';
 
 const defaultState: LayoutState = {
-    skin: 'default',
+    skin: 'minimal',
     theme: 'light',
     orientation: 'vertical',
     position: 'fixed',
     width: 'fluid',
-    topbar: {color: 'dark'},
+    topbar: {color: 'light'},
     sidenav: {
         color: 'light',
         size: 'default',
