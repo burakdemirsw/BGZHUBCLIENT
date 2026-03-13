@@ -23,7 +23,8 @@
                     @if (!item.isHeader && !item.isDivider) {
                     <a  [routerLink]="item.url"
                        class="dropdown-item"
-                       [class]="item.class">
+                       [class]="item.class"
+                       (click)="onItemClick(item, $event)">
                         <ng-icon [name]="item.icon" size="17"
                                  class="align-middle d-inline-flex align-items-center me-2"/>
                         <span class="align-middle" [innerHTML]="item.label"></span>

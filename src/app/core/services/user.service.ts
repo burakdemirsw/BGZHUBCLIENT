@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { HttpClientService } from './http-client.service';
 import { LoginRequest, RegisterRequest, RefreshTokenRequest } from '../models/auth/auth.models';
@@ -7,7 +8,13 @@ import { LoginRequest, RegisterRequest, RefreshTokenRequest } from '../models/au
   providedIn: 'root',
 })
 export class UserService {
-  constructor(private httpClientService: HttpClientService) {}
+  constructor(private httpClientService: HttpClientService, private router: Router) {}
+
+  logout(): void {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    this.router.navigate(['/auth/sign-in']);
+  }
 
   login(loginRequest: LoginRequest): Observable<any> {
     return this.httpClientService.post(

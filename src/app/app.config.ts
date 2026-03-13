@@ -5,6 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { routes } from './app.routes';
 import { DecimalPipe } from '@angular/common'
 import {provideDaterangepickerLocale} from 'ngx-daterangepicker-bootstrap';
+import { JwtHelperService, JWT_OPTIONS } from '@auth0/angular-jwt';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,6 +17,8 @@ export const appConfig: ApplicationConfig = {
       provideDaterangepickerLocale({
           separator: ' - ',
           cancelLabel: 'Cancel',
-      })
+      }),
+      { provide: JWT_OPTIONS, useValue: { tokenGetter: () => localStorage.getItem('accessToken') } },
+      JwtHelperService,
   ],
 };

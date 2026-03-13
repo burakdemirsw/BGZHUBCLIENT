@@ -16,17 +16,20 @@ import {TicketList} from '@/app/views/apps/support-center/ticket-list/ticket-lis
 import {TicketDetails} from '@/app/views/apps/support-center/ticket-details/ticket-details';
 import {TicketCreate} from '@/app/views/apps/support-center/ticket-create/ticket-create';
 import {ApiKeys} from '@/app/views/apps/api-keys/api-keys';
+import {AuthGuard} from '@/app/core/guards/auth.guard';
 
 export const APPS_ROUTES: Routes = [
     {
         path: 'apps/calendar',
         component: Calendar,
         data: {title: "Calendar"},
+        canActivate: [AuthGuard],
     },
     {
         path: 'apps/chat',
         component: Chat,
         data: {title: "Chat"},
+        canActivate: [AuthGuard],
     },
     {
         path: 'apps/file-manager',
