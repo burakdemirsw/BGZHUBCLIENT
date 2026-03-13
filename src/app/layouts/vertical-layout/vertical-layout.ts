@@ -3,12 +3,11 @@ import {RouterOutlet} from '@angular/router';
 import {LayoutStoreService} from '@core/services/layout-store.service';
 import {Sidenav} from '@layouts/components/sidenav/sidenav';
 import {Topbar} from '@layouts/components/topbar/topbar';
-import {Footer} from '@layouts/components/footer/footer';
 import {debounceTime, fromEvent, Subscription} from 'rxjs';
 
 @Component({
     selector: 'app-vertical-layout',
-    imports: [RouterOutlet, Sidenav, Topbar, Footer],
+    imports: [RouterOutlet, Sidenav, Topbar],
     templateUrl: './vertical-layout.html',
     styles: ``
 })
