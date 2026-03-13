@@ -5,10 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { UserService } from '@/app/core/services/user.service';
 import { LoginRequest } from '@/app/core/models/auth/auth.models';
 import { CommonModule } from '@angular/common';
+import { LogoComponent } from '@/app/components/logo/logo.component';
 
 @Component({
     selector: 'app-sign-in',
-    imports: [RouterLink, FormsModule, CommonModule],
+    imports: [RouterLink, FormsModule, CommonModule, LogoComponent],
     templateUrl: './sign-in.html',
     styles: ``
 })

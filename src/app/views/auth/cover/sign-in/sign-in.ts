@@ -1,13 +1,14 @@
+
 import { credits, currentYear } from '@/app/constants';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-
 import { LucideCircleUser, LucideAngularModule, LucideKeyRound } from 'lucide-angular';
+import { LogoComponent } from '@/app/components/logo/logo.component';
 
 @Component({
     selector: 'app-sign-in',
     host: { 'data-component-id': 'auth2-sign-in' },
-    imports: [RouterLink, LucideAngularModule],
+    imports: [RouterLink, LucideAngularModule, LogoComponent],
     templateUrl: './sign-in.html',
     styles: ``,
 })

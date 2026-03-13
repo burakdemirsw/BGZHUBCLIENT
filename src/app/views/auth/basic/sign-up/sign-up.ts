@@ -6,10 +6,11 @@ import { PasswordStrengthBar } from "@app/components/password-strength-bar";
 import { CommonModule } from '@angular/common';
 import { UserService } from '@/app/core/services/user.service';
 import { RegisterRequest } from '@/app/core/models/auth/auth.models';
+import { LogoComponent } from '@/app/components/logo/logo.component';
 
 @Component({
     selector: 'app-sign-up',
-    imports: [RouterLink, PasswordStrengthBar, FormsModule, CommonModule],
+    imports: [RouterLink, PasswordStrengthBar, FormsModule, CommonModule, LogoComponent],
     templateUrl: './sign-up.html',
     styles: ``
 })

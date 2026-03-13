@@ -1,25 +1,9 @@
 <header class="app-topbar">
     <div class="container-fluid topbar-menu">
         <div class="d-flex align-items-center gap-2">
-            <div class="logo-topbar">
-                <a routerLink="/" class="logo-light">
-                    <span class="logo-lg">
-                      <img src="assets/images/logos/logo.png" alt="logo">
-                    </span>
-                    <span class="logo-sm">
-                        <img src="assets/images/logo-sm.png" alt="small logo">
-                    </span>
-                </a>
-
-                <a routerLink="/" class="logo-dark">
-                    <span class="logo-lg">
-                      <img src="assets/images/logos/logo-white.webp" alt="white logo">
-                    </span>
-                    <span class="logo-sm">
-                      <img src="assets/images/logo-sm.png" alt="small logo">
-                    </span>
-                </a>
-            </div>
+                        <div class="logo-topbar">
+                                <app-logo></app-logo>
+                        </div>
 
             <button (click)="toggleSidebar()" class="sidenav-toggle-button btn btn-default btn-icon">
                 <ng-icon name="tablerMenu4" class="fs-22"/>
