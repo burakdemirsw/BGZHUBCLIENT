@@ -67,6 +67,8 @@ export const menuItems: MenuItemType[] = [
     {label: 'Menü', isTitle: true},
     {
         label: 'Ana Sayfa',
+    
+        icon: LucideCircleGauge,
         url: '/dashboard'
     },
     {
