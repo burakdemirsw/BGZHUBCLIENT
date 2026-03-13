@@ -9,8 +9,8 @@ import { NetGsmSetting, CreateNetGsmSettingRequest, UpdateNetGsmSettingRequest }
 export class NetGsmSettingsService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Observable<NetGsmSetting[]> {
-    return this.http.get<NetGsmSetting>({ controller: 'NetGsmSettings' });
+  getAll(): Observable<any> {
+    return this.http.get_new({ controller: 'NetGsmSettings' });
   }
 
   getById(id: string): Observable<any> {

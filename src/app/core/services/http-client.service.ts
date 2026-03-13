@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { RequestParameters } from '../models/parameters/requestParameters';
 
-const BASE_URL = 'https://localhost:8991/api';
+const BASE_URL = 'http://195.175.214.66:7278/api';
 
 @Injectable({
   providedIn: 'root',
