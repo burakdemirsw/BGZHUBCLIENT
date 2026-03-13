@@ -27,19 +27,17 @@ export class IntegrationsPage implements OnInit {
         this.loadIntegrations();
     }
 
-    loadIntegrations(): void {
+    async loadIntegrations(): Promise<void> {
         this.loading = true;
-        this.integrationService.getAll().subscribe({
-            next: (response: any) => {
-                console.log('Integrations response:', response);
-                this.integrations = this.extractArray(response);
-                this.loading = false;
-            },
-            error: (err) => {
-                console.error('Integrations error:', err);
-                this.loading = false;
-            },
-        });
+        try {
+            const response = await this.integrationService.getAll();
+            console.log('Integrations response:', response);
+            this.integrations = this.extractArray(response);
+        } catch (err) {
+            console.error('Integrations error:', err);
+        } finally {
+            this.loading = false;
+        }
     }
 
     private extractArray(response: any): any[] {
@@ -67,35 +65,42 @@ export class IntegrationsPage implements OnInit {
         this.showModal = true;
     }
 
-    save(): void {
-        if (this.editMode && this.selectedIntegration) {
-            const req: UpdateIntegrationRequest = {
-                integrationDescription: this.form.integrationDescription,
-            };
-            this.integrationService.update(this.selectedIntegration.id, req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadIntegrations();
-                },
-            });
-        } else {
-            const req: CreateIntegrationRequest = {
-                integrationDescription: this.form.integrationDescription,
-            };
-            this.integrationService.create(req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadIntegrations();
-                },
-            });
+    async save(): Promise<void> {
+        try {
+            if (this.editMode && this.selectedIntegration) {
+                const req: UpdateIntegrationRequest = {
+                    integrationDescription: this.form.integrationDescription,
+                };
+                console.log('Update request:', req);
+                const res = await this.integrationService.update(this.selectedIntegration.id, req);
+                console.log('Update response:', res);
+            } else {
+                const req: CreateIntegrationRequest = {
+                    integrationDescription: this.form.integrationDescription,
+                };
+                console.log('Create request:', req);
+                const res = await this.integrationService.create(req);
+                console.log('Create response:', res);
+            }
+            this.showModal = false;
+            await this.loadIntegrations();
+        } catch (err: any) {
+            console.error('Save error:', err);
+            const msg = err.status === 0
+                ? `Sunucuya bağlanılamadı (CORS veya ağ hatası).\nURL: ${err.url}\nMesaj: ${err.message}`
+                : `Hata ${err.status}: ${err.error?.message || err.error?.title || JSON.stringify(err.error)}`;
+            alert('İşlem hatası:\n' + msg);
         }
     }
 
-    deleteIntegration(integration: Integration): void {
+    async deleteIntegration(integration: Integration): Promise<void> {
         if (confirm(`"${integration.integrationDescription}" entegrasyonunu silmek istediğinize emin misiniz?`)) {
-            this.integrationService.delete(integration.id).subscribe({
-                next: () => this.loadIntegrations(),
-            });
+            try {
+                await this.integrationService.delete(integration.id);
+                await this.loadIntegrations();
+            } catch (err) {
+                console.error('Delete error:', err);
+            }
         }
     }
 

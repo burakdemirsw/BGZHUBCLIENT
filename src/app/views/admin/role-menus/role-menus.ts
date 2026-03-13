@@ -40,21 +40,19 @@ export class RoleMenusPage implements OnInit {
         this.loadInitialData();
     }
 
-    loadInitialData(): void {
+    async loadInitialData(): Promise<void> {
         this.loading = true;
-        this.rolesService.getAll().subscribe({
-            next: (resp: any) => {
-                this.roles = this.extractArray(resp);
-                this.menusService.getAll().subscribe({
-                    next: (mResp: any) => {
-                        this.menus = this.extractArray(mResp);
-                        this.loading = false;
-                    },
-                    error: () => this.loading = false,
-                });
-            },
-            error: () => this.loading = false,
-        });
+        try {
+            const rolesResp = await this.rolesService.getAll();
+            this.roles = this.extractArray(rolesResp);
+
+            const menusResp = await this.menusService.getAll();
+            this.menus = this.extractArray(menusResp);
+        } catch (err) {
+            console.error('LoadInitialData error:', err);
+        } finally {
+            this.loading = false;
+        }
     }
 
     private extractArray(response: any): any[] {
@@ -74,15 +72,16 @@ export class RoleMenusPage implements OnInit {
         this.loadRoleMenus();
     }
 
-    loadRoleMenus(): void {
+    async loadRoleMenus(): Promise<void> {
         this.loadingMenus = true;
-        this.menusService.getMenusByRole(this.selectedRoleId).subscribe({
-            next: (resp: any) => {
-                this.roleMenus = this.extractArray(resp);
-                this.loadingMenus = false;
-            },
-            error: () => this.loadingMenus = false,
-        });
+        try {
+            const resp = await this.menusService.getMenusByRole(this.selectedRoleId);
+            this.roleMenus = this.extractArray(resp);
+        } catch (err) {
+            console.error('LoadRoleMenus error:', err);
+        } finally {
+            this.loadingMenus = false;
+        }
     }
 
     getMenuName(menuId: string): string {
@@ -101,22 +100,23 @@ export class RoleMenusPage implements OnInit {
         this.showAssignModal = true;
     }
 
-    assignMenu(): void {
+    async assignMenu(): Promise<void> {
         if (!this.selectedRoleId || !this.assignMenuId) return;
-        const req: CreateRoleMenuRequest = {
-            roleId: this.selectedRoleId,
-            menuId: this.assignMenuId,
-            canView: this.assignForm.canView,
-            canCreate: this.assignForm.canCreate,
-            canUpdate: this.assignForm.canUpdate,
-            canDelete: this.assignForm.canDelete,
-        };
-        this.menusService.assignMenu(req).subscribe({
-            next: () => {
-                this.showAssignModal = false;
-                this.loadRoleMenus();
-            },
-        });
+        try {
+            const req: CreateRoleMenuRequest = {
+                roleId: this.selectedRoleId,
+                menuId: this.assignMenuId,
+                canView: this.assignForm.canView,
+                canCreate: this.assignForm.canCreate,
+                canUpdate: this.assignForm.canUpdate,
+                canDelete: this.assignForm.canDelete,
+            };
+            await this.menusService.assignMenu(req);
+            this.showAssignModal = false;
+            await this.loadRoleMenus();
+        } catch (err) {
+            console.error('Assign error:', err);
+        }
     }
 
     // İzinleri düzenle
@@ -132,29 +132,33 @@ export class RoleMenusPage implements OnInit {
         this.showEditModal = true;
     }
 
-    saveEdit(): void {
+    async saveEdit(): Promise<void> {
         if (!this.editingRoleMenu) return;
-        const req: UpdateRoleMenuRequest = {
-            canView: this.editForm.canView,
-            canCreate: this.editForm.canCreate,
-            canUpdate: this.editForm.canUpdate,
-            canDelete: this.editForm.canDelete,
-            isBlocked: this.editForm.isBlocked,
-        };
-        this.menusService.updateRoleMenu(this.editingRoleMenu.id, req).subscribe({
-            next: () => {
-                this.showEditModal = false;
-                this.loadRoleMenus();
-            },
-        });
+        try {
+            const req: UpdateRoleMenuRequest = {
+                canView: this.editForm.canView,
+                canCreate: this.editForm.canCreate,
+                canUpdate: this.editForm.canUpdate,
+                canDelete: this.editForm.canDelete,
+                isBlocked: this.editForm.isBlocked,
+            };
+            await this.menusService.updateRoleMenu(this.editingRoleMenu.id, req);
+            this.showEditModal = false;
+            await this.loadRoleMenus();
+        } catch (err) {
+            console.error('SaveEdit error:', err);
+        }
     }
 
     // Menü kaldır
-    removeMenu(rm: RoleMenu): void {
+    async removeMenu(rm: RoleMenu): Promise<void> {
         if (confirm(`"${this.getMenuName(rm.menuId)}" menüsünü bu rolden kaldırmak istediğinize emin misiniz?`)) {
-            this.menusService.removeRoleMenu(rm.id).subscribe({
-                next: () => this.loadRoleMenus(),
-            });
+            try {
+                await this.menusService.removeRoleMenu(rm.id);
+                await this.loadRoleMenus();
+            } catch (err) {
+                console.error('Remove error:', err);
+            }
         }
     }
 

@@ -39,27 +39,26 @@ export class SocialMediaAccountsPage implements OnInit {
         this.loadAccounts();
     }
 
-    loadUsers(): void {
-        this.usersService.getAll().subscribe({
-            next: (response: any) => {
-                this.users = this.extractArray(response);
-            },
-        });
+    async loadUsers(): Promise<void> {
+        try {
+            const response = await this.usersService.getAll();
+            this.users = this.extractArray(response);
+        } catch (err) {
+            console.error('Users error:', err);
+        }
     }
 
-    loadAccounts(): void {
+    async loadAccounts(): Promise<void> {
         this.loading = true;
-        this.socialMediaService.getAccounts().subscribe({
-            next: (response: any) => {
-                console.log('SocialMedia Accounts response:', response);
-                this.accounts = this.extractArray(response);
-                this.loading = false;
-            },
-            error: (err) => {
-                console.error('SocialMedia Accounts error:', err);
-                this.loading = false;
-            },
-        });
+        try {
+            const response = await this.socialMediaService.getAccounts();
+            console.log('SocialMedia Accounts response:', response);
+            this.accounts = this.extractArray(response);
+        } catch (err) {
+            console.error('SocialMedia Accounts error:', err);
+        } finally {
+            this.loading = false;
+        }
     }
 
     private extractArray(response: any): any[] {
@@ -94,38 +93,37 @@ export class SocialMediaAccountsPage implements OnInit {
         this.showModal = true;
     }
 
-    save(): void {
-        if (this.editMode && this.selectedAccount) {
-            const req: UpdateSocialMediaAccountRequest = {
-                userId: this.form.userId,
-                name: this.form.name,
-                isBlocked: this.form.isBlocked ?? false,
-            };
-            this.socialMediaService.updateAccount(this.selectedAccount.id, req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadAccounts();
-                },
-            });
-        } else {
-            const req: CreateSocialMediaAccountRequest = {
-                userId: this.form.userId,
-                name: this.form.name,
-            };
-            this.socialMediaService.createAccount(req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadAccounts();
-                },
-            });
+    async save(): Promise<void> {
+        try {
+            if (this.editMode && this.selectedAccount) {
+                const req: UpdateSocialMediaAccountRequest = {
+                    userId: this.form.userId,
+                    name: this.form.name,
+                    isBlocked: this.form.isBlocked ?? false,
+                };
+                await this.socialMediaService.updateAccount(this.selectedAccount.id, req);
+            } else {
+                const req: CreateSocialMediaAccountRequest = {
+                    userId: this.form.userId,
+                    name: this.form.name,
+                };
+                await this.socialMediaService.createAccount(req);
+            }
+            this.showModal = false;
+            await this.loadAccounts();
+        } catch (err) {
+            console.error('Save error:', err);
         }
     }
 
-    deleteAccount(account: SocialMediaAccount): void {
+    async deleteAccount(account: SocialMediaAccount): Promise<void> {
         if (confirm(`"${account.name}" hesabını silmek istediğinize emin misiniz?`)) {
-            this.socialMediaService.deleteAccount(account.id).subscribe({
-                next: () => this.loadAccounts(),
-            });
+            try {
+                await this.socialMediaService.deleteAccount(account.id);
+                await this.loadAccounts();
+            } catch (err) {
+                console.error('Delete error:', err);
+            }
         }
     }
 

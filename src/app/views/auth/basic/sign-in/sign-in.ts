@@ -34,31 +34,33 @@ export class SignIn {
             password: this.password
         };
 
-        this.userService.login(loginRequest).subscribe({
-            next: (response: any) => {
-                this.loading = false;
-                console.log('Login response:', response);
+        this.doLogin(loginRequest);
+    }
 
-                // Token'ları kaydet - farklı response yapılarını destekle
-                const accessToken = response?.accessToken ?? response?.token?.accessToken ?? response?.data?.accessToken ?? response?.token;
-                const refreshToken = response?.refreshToken ?? response?.token?.refreshToken ?? response?.data?.refreshToken;
+    async doLogin(loginRequest: LoginRequest) {
+        try {
+            const response: any = await this.userService.login(loginRequest);
+            this.loading = false;
+            console.log('Login response:', response);
 
-                if (accessToken) {
-                    localStorage.setItem('accessToken', accessToken);
-                }
-                if (refreshToken) {
-                    localStorage.setItem('refreshToken', refreshToken);
-                }
+            // Token'ları kaydet - farklı response yapılarını destekle
+            const accessToken = response?.accessToken ?? response?.token?.accessToken ?? response?.data?.accessToken ?? response?.token;
+            const refreshToken = response?.refreshToken ?? response?.token?.refreshToken ?? response?.data?.refreshToken;
 
-                // returnUrl varsa oraya, yoksa dashboard'a yönlendir
-                const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
-                this.router.navigateByUrl(returnUrl);
-            },
-            error: (err: any) => {
-                this.loading = false;
-                this.errorMessage = err?.error?.message || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.';
+            if (accessToken) {
+                localStorage.setItem('accessToken', accessToken);
             }
-        });
+            if (refreshToken) {
+                localStorage.setItem('refreshToken', refreshToken);
+            }
+
+            // returnUrl varsa oraya, yoksa dashboard'a yönlendir
+            const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+            this.router.navigateByUrl(returnUrl);
+        } catch (err: any) {
+            this.loading = false;
+            this.errorMessage = err?.error?.message || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.';
+        }
     }
 
     devLogin() {

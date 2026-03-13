@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { HttpClientService } from './http-client.service';
-import { NetGsmSetting, CreateNetGsmSettingRequest, UpdateNetGsmSettingRequest } from '../models/netgsm/netgsm.models';
+import { CreateNetGsmSettingRequest, UpdateNetGsmSettingRequest } from '../models/netgsm/netgsm.models';
 
 @Injectable({
   providedIn: 'root',
@@ -9,27 +8,27 @@ import { NetGsmSetting, CreateNetGsmSettingRequest, UpdateNetGsmSettingRequest }
 export class NetGsmSettingsService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Observable<any> {
+  getAll(): Promise<any> {
     return this.http.get_new({ controller: 'NetGsmSettings' });
   }
 
-  getById(id: string): Observable<any> {
+  getById(id: string): Promise<any> {
     return this.http.get_new({ controller: 'NetGsmSettings' }, id);
   }
 
-  getByApplication(applicationId: string): Observable<any> {
+  getByApplication(applicationId: string): Promise<any> {
     return this.http.get_new({ controller: 'NetGsmSettings', action: 'by-application' }, applicationId);
   }
 
-  create(request: CreateNetGsmSettingRequest): Observable<any> {
+  create(request: CreateNetGsmSettingRequest): Promise<any> {
     return this.http.post({ controller: 'NetGsmSettings' }, request);
   }
 
-  update(id: string, request: UpdateNetGsmSettingRequest): Observable<any> {
+  update(id: string, request: UpdateNetGsmSettingRequest): Promise<any> {
     return this.http.post({ controller: 'NetGsmSettings', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Observable<any> {
+  delete(id: string): Promise<any> {
     return this.http.post({ controller: 'NetGsmSettings', action: `delete/${id}` }, {});
   }
 }

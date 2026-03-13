@@ -38,40 +38,30 @@ export class SocialMediaPropertiesPage implements OnInit {
         this.loadProperties();
     }
 
-    loadAccounts(): void {
-        this.socialMediaService.getAccounts().subscribe({
-            next: (response: any) => {
-                this.accounts = this.extractArray(response);
-            },
-        });
+    async loadAccounts(): Promise<void> {
+        try {
+            const response = await this.socialMediaService.getAccounts();
+            this.accounts = this.extractArray(response);
+        } catch (err) {
+            console.error('Accounts error:', err);
+        }
     }
 
-    loadProperties(): void {
+    async loadProperties(): Promise<void> {
         this.loading = true;
-        if (this.filterAccountId) {
-            this.socialMediaService.getPropertiesByAccount(this.filterAccountId).subscribe({
-                next: (response: any) => {
-                    console.log('Properties response:', response);
-                    this.properties = this.extractArray(response);
-                    this.loading = false;
-                },
-                error: (err) => {
-                    console.error('Properties error:', err);
-                    this.loading = false;
-                },
-            });
-        } else {
-            this.socialMediaService.getProperties().subscribe({
-                next: (response: any) => {
-                    console.log('Properties response:', response);
-                    this.properties = this.extractArray(response);
-                    this.loading = false;
-                },
-                error: (err) => {
-                    console.error('Properties error:', err);
-                    this.loading = false;
-                },
-            });
+        try {
+            let response;
+            if (this.filterAccountId) {
+                response = await this.socialMediaService.getPropertiesByAccount(this.filterAccountId);
+            } else {
+                response = await this.socialMediaService.getProperties();
+            }
+            console.log('Properties response:', response);
+            this.properties = this.extractArray(response);
+        } catch (err) {
+            console.error('Properties error:', err);
+        } finally {
+            this.loading = false;
         }
     }
 
@@ -116,40 +106,39 @@ export class SocialMediaPropertiesPage implements OnInit {
         this.showModal = true;
     }
 
-    save(): void {
-        if (this.editMode && this.selectedProperty) {
-            const req: UpdateSocialMediaAccountPropertyRequest = {
-                socialMediaAccountId: this.form.socialMediaAccountId,
-                key: this.form.key,
-                value: this.form.value,
-                isBlocked: this.form.isBlocked ?? false,
-            };
-            this.socialMediaService.updateProperty(this.selectedProperty.id, req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadProperties();
-                },
-            });
-        } else {
-            const req: CreateSocialMediaAccountPropertyRequest = {
-                socialMediaAccountId: this.form.socialMediaAccountId,
-                key: this.form.key,
-                value: this.form.value,
-            };
-            this.socialMediaService.createProperty(req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadProperties();
-                },
-            });
+    async save(): Promise<void> {
+        try {
+            if (this.editMode && this.selectedProperty) {
+                const req: UpdateSocialMediaAccountPropertyRequest = {
+                    socialMediaAccountId: this.form.socialMediaAccountId,
+                    key: this.form.key,
+                    value: this.form.value,
+                    isBlocked: this.form.isBlocked ?? false,
+                };
+                await this.socialMediaService.updateProperty(this.selectedProperty.id, req);
+            } else {
+                const req: CreateSocialMediaAccountPropertyRequest = {
+                    socialMediaAccountId: this.form.socialMediaAccountId,
+                    key: this.form.key,
+                    value: this.form.value,
+                };
+                await this.socialMediaService.createProperty(req);
+            }
+            this.showModal = false;
+            await this.loadProperties();
+        } catch (err) {
+            console.error('Save error:', err);
         }
     }
 
-    deleteProperty(prop: SocialMediaAccountProperty): void {
+    async deleteProperty(prop: SocialMediaAccountProperty): Promise<void> {
         if (confirm(`"${prop.key}" özelliğini silmek istediğinize emin misiniz?`)) {
-            this.socialMediaService.deleteProperty(prop.id).subscribe({
-                next: () => this.loadProperties(),
-            });
+            try {
+                await this.socialMediaService.deleteProperty(prop.id);
+                await this.loadProperties();
+            } catch (err) {
+                console.error('Delete error:', err);
+            }
         }
     }
 

@@ -31,19 +31,17 @@ export class UsersPage implements OnInit {
         this.loadUsers();
     }
 
-    loadUsers(): void {
+    async loadUsers(): Promise<void> {
         this.loading = true;
-        this.usersService.getAll().subscribe({
-            next: (response: any) => {
-                console.log('Users response:', response);
-                this.users = this.extractArray(response);
-                this.loading = false;
-            },
-            error: (err) => {
-                console.error('Users error:', err);
-                this.loading = false;
-            },
-        });
+        try {
+            const response = await this.usersService.getAll();
+            console.log('Users response:', response);
+            this.users = this.extractArray(response);
+        } catch (err) {
+            console.error('Users error:', err);
+        } finally {
+            this.loading = false;
+        }
     }
 
     private extractArray(response: any): any[] {
@@ -75,43 +73,42 @@ export class UsersPage implements OnInit {
         this.showModal = true;
     }
 
-    save(): void {
-        if (this.editMode && this.selectedUser) {
-            const req: UpdateUserRequest = {
-                name: this.form.name,
-                lastName: this.form.lastName,
-                email: this.form.email,
-                gender: this.form.gender,
-                isBlocked: this.form.isBlocked ?? false,
-            };
-            this.usersService.update(this.selectedUser.id, req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadUsers();
-                },
-            });
-        } else {
-            const req: CreateUserRequest = {
-                name: this.form.name,
-                lastName: this.form.lastName,
-                email: this.form.email,
-                password: this.form.password,
-                gender: this.form.gender,
-            };
-            this.usersService.create(req).subscribe({
-                next: () => {
-                    this.showModal = false;
-                    this.loadUsers();
-                },
-            });
+    async save(): Promise<void> {
+        try {
+            if (this.editMode && this.selectedUser) {
+                const req: UpdateUserRequest = {
+                    name: this.form.name,
+                    lastName: this.form.lastName,
+                    email: this.form.email,
+                    gender: this.form.gender,
+                    isBlocked: this.form.isBlocked ?? false,
+                };
+                await this.usersService.update(this.selectedUser.id, req);
+            } else {
+                const req: CreateUserRequest = {
+                    name: this.form.name,
+                    lastName: this.form.lastName,
+                    email: this.form.email,
+                    password: this.form.password,
+                    gender: this.form.gender,
+                };
+                await this.usersService.create(req);
+            }
+            this.showModal = false;
+            await this.loadUsers();
+        } catch (err) {
+            console.error('Save error:', err);
         }
     }
 
-    deleteUser(user: User): void {
+    async deleteUser(user: User): Promise<void> {
         if (confirm(`"${user.name} ${user.lastName}" kullanıcısını silmek istediğinize emin misiniz?`)) {
-            this.usersService.delete(user.id).subscribe({
-                next: () => this.loadUsers(),
-            });
+            try {
+                await this.usersService.delete(user.id);
+                await this.loadUsers();
+            } catch (err) {
+                console.error('Delete error:', err);
+            }
         }
     }
 

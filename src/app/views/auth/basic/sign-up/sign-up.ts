@@ -41,18 +41,20 @@ export class SignUp {
             password: this.password
         };
 
-        this.userService.register(registerRequest).subscribe({
-            next: (response: any) => {
-                this.loading = false;
-                this.successMessage = 'Hesabınız başarıyla oluşturuldu! Giriş sayfasına yönlendiriliyorsunuz...';
-                setTimeout(() => {
-                    this.router.navigate(['/auth/sign-in']);
-                }, 2000);
-            },
-            error: (err: any) => {
-                this.loading = false;
-                this.errorMessage = err?.error?.message || 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.';
-            }
-        });
+        this.doRegister(registerRequest);
+    }
+
+    async doRegister(registerRequest: RegisterRequest) {
+        try {
+            const response: any = await this.userService.register(registerRequest);
+            this.loading = false;
+            this.successMessage = 'Hesabınız başarıyla oluşturuldu! Giriş sayfasına yönlendiriliyorsunuz...';
+            setTimeout(() => {
+                this.router.navigate(['/auth/sign-in']);
+            }, 2000);
+        } catch (err: any) {
+            this.loading = false;
+            this.errorMessage = err?.error?.message || 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.';
+        }
     }
 }

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { HttpClientService } from './http-client.service';
-import { MailSetting, CreateMailSettingRequest, UpdateMailSettingRequest, SendMailRequest } from '../models/mail/mail.models';
+import { CreateMailSettingRequest, UpdateMailSettingRequest, SendMailRequest } from '../models/mail/mail.models';
 
 @Injectable({
   providedIn: 'root',
@@ -9,27 +8,27 @@ import { MailSetting, CreateMailSettingRequest, UpdateMailSettingRequest, SendMa
 export class MailSettingsService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Observable<any> {
+  getAll(): Promise<any> {
     return this.http.get_new({ controller: 'MailSettings' });
   }
 
-  getById(id: string): Observable<any> {
+  getById(id: string): Promise<any> {
     return this.http.get_new({ controller: 'MailSettings' }, id);
   }
 
-  create(request: CreateMailSettingRequest): Observable<any> {
+  create(request: CreateMailSettingRequest): Promise<any> {
     return this.http.post({ controller: 'MailSettings' }, request);
   }
 
-  update(id: string, request: UpdateMailSettingRequest): Observable<any> {
+  update(id: string, request: UpdateMailSettingRequest): Promise<any> {
     return this.http.post({ controller: 'MailSettings', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Observable<any> {
+  delete(id: string): Promise<any> {
     return this.http.post({ controller: 'MailSettings', action: `delete/${id}` }, {});
   }
 
-  sendMail(request: SendMailRequest): Observable<any> {
+  sendMail(request: SendMailRequest): Promise<any> {
     return this.http.post({ controller: 'MailSettings', action: 'send' }, request);
   }
 }
