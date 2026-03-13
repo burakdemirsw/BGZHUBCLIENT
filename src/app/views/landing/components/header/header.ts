@@ -1,4 +1,5 @@
 import {Component, HostListener, inject} from '@angular/core';
+import { LOGO_WHITE, LOGO_COLOR } from '@/app/constants/logo-paths';
 import {RouterLink} from '@angular/router';
 import {LayoutStoreService} from '@core/services/layout-store.service';
 import {ScrollService} from '@core/services/scroll.service';
@@ -18,6 +19,9 @@ export class Header {
     public layout = inject(LayoutStoreService)
 
     navItems = ['Home', 'Services', 'Features', 'Plans', 'Reviews', 'Contact'];
+
+    logoWhite = LOGO_WHITE;
+    logoColor = LOGO_COLOR;
 
     @HostListener('window:scroll', [])
     onWindowScroll() {

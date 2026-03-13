@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import { LOGO_BLACK } from '@/app/constants/logo-paths';
 import {PageTitle} from '@app/components/page-title';
 import {NgIcon} from '@ng-icons/core';
 import {RouterLink} from '@angular/router';
@@ -11,7 +12,7 @@ import {FlatpickrDirective} from 'angularx-flatpickr';
   styles: ``
 })
 export class NewInvoice {
-    previewSrc: string = 'assets/images/logo-black.png';
+    previewSrc: string = LOGO_BLACK;
 
     onLogoSelected(event: Event): void {
         const input = event.target as HTMLInputElement;
