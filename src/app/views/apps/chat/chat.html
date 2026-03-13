@@ -1,6 +1,4 @@
-<div class="container-fluid">
-    <app-page-title title="Chat" subTitle="Apps"/>
-
+<div class="container-fluid mt-3">
     <div class="outlook-box gap-1">
         <ng-template #content>
             <app-chat-sidebar (select)="activeChatId = $event" [activeChatId]="activeChatId"/>
@@ -22,7 +20,7 @@
                     <p class="mb-0 lh-sm text-muted">
                         <small>
                             <ng-icon name="tablerCircleFill" class="text-success me-1"/>
-                        </small> Active
+                        </small> Aktif
                     </p>
                 </div>
                 <div class="d-flex align-items-center gap-2">
@@ -43,16 +41,13 @@
                         <ul class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
                             <li><a ngbDropdownItem [routerLink]="[]">
                                 <ng-icon name="tablerUser" class="me-2"/>
-                                View
-                                Profile</a></li>
+                                Profili Görüntüle</a></li>
                             <li><a ngbDropdownItem [routerLink]="[]">
                                 <ng-icon name="tablerBellOff" class="me-2"/>
-                                Mute
-                                Notifications</a></li>
+                                Bildirimleri Kapat</a></li>
                             <li><a ngbDropdownItem [routerLink]="[]">
                                 <ng-icon name="tablerTrash" class="me-2"/>
-                                Delete
-                                Chat</a></li>
+                                Sohbeti Sil</a></li>
                         </ul>
                     </div>
                 </div>

@@ -9,12 +9,11 @@ export const currentYear = new Date().getFullYear()
 
 export const credits = {
   website: 'https://plexorin.com/',
-  name: 'Plexorin V2',
-  buyLink: '',
+  name: 'Plexorin',
 }
 
-export const appName = 'Yanıt Sende'
-export const appTitle = 'Yanıt Sende - Responsive Bootstrap 5 Admin Dashboard'
-export const appDescription: string = 'Yanıt Sende is a modern, responsive admin dashboard available on ThemeForest. Ideal for building CRM, CMS, project management tools, and custom web applications with a clean UI, flexible layouts, and rich features.'
+export const appName = 'Plexorin'
+export const appTitle = 'Plexorin'
+export const appDescription: string = 'Plexorin'
 
 export const basePath: string = ''
