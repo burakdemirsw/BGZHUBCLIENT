@@ -143,18 +143,6 @@ export const menuItems: MenuItemType[] = [
         ]
     },
 
-    {label: 'Hesap', isTitle: true},
-    {
-        label: 'Giriş Yap',
-        icon: LucideLogIn,
-        url: '/auth/sign-in',
-    },
-    {
-        label: 'Kayıt Ol',
-        icon: LucideUserPlus,
-        url: '/auth/sign-up',
-    },
-
     // {
     //     label: 'Landing Page',
     //     icon: LucideEarth,
