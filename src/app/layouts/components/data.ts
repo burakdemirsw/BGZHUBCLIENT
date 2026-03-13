@@ -10,7 +10,7 @@ import {
     LucideShieldAlert, LucideShieldUser, LucideShoppingBag, LucideSparkles, LucideTable, LucideTable2,
     LucideTableConfig, LucideUsers, LucideLogIn, LucideUserPlus,
     LucideSettings, LucideMail, LucideSmartphone, LucideMenu, LucideShield,
-    LucideMapPin
+    LucideMapPin, LucideAppWindow, LucideUserCheck
 } from 'lucide-angular';
 
 type UserDropdownItemType = {
@@ -85,7 +85,7 @@ export const menuItems: MenuItemType[] = [
         url: '/apps/calendar',
     },
 
-    {label: 'Yönetim', isTitle: true},
+    {label: 'Admin', isTitle: true},
     {
         label: 'Kullanıcılar',
         icon: LucideUsers,
@@ -95,6 +95,11 @@ export const menuItems: MenuItemType[] = [
         label: 'Roller',
         icon: LucideShield,
         url: '/admin/roles',
+    },
+    {
+        label: 'Rol Atamaları',
+        icon: LucideUserCheck,
+        url: '/admin/role-assignments',
     },
     {
         label: 'Menüler',
@@ -110,6 +115,11 @@ export const menuItems: MenuItemType[] = [
         label: 'NetGsm Ayarları',
         icon: LucideSmartphone,
         url: '/admin/netgsm-settings',
+    },
+    {
+        label: 'Uygulamalar',
+        icon: LucideAppWindow,
+        url: '/admin/applications',
     },
 
     {label: 'Adres Yönetimi', isTitle: true},

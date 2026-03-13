@@ -7,6 +7,8 @@ import { NetGsmSettingsPage } from './netgsm-settings/netgsm-settings';
 import { CountriesPage } from './countries/countries';
 import { CitiesPage } from './cities/cities';
 import { DistrictsPage } from './districts/districts';
+import { ApplicationsPage } from './applications/applications';
+import { RoleAssignmentsPage } from './role-assignments/role-assignments';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -56,6 +58,18 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/districts',
         component: DistrictsPage,
         data: { title: 'İlçeler' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/applications',
+        component: ApplicationsPage,
+        data: { title: 'Uygulamalar' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/role-assignments',
+        component: RoleAssignmentsPage,
+        data: { title: 'Rol Atamaları' },
         canActivate: [AuthGuard],
     },
 ];
