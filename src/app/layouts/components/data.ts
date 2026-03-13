@@ -51,11 +51,6 @@ export const userDropdownItems: UserDropdownItemType[] = [
         isDivider: true
     },
     {
-        label: 'Ekranı Kilitle',
-        icon: 'tablerLock',
-        url: '/auth/lock-screen'
-    },
-    {
         label: 'Çıkış Yap',
         icon: 'tablerLogout2',
         url: '',
@@ -66,24 +61,21 @@ export const userDropdownItems: UserDropdownItemType[] = [
 export const menuItems: MenuItemType[] = [
     {label: 'Menü', isTitle: true},
     {
-        label: 'Gösterge Paneli',
+        label: 'Ana Sayfa',
+    
         icon: LucideCircleGauge,
-        isCollapsed: true,
-        children: [
-            {label: 'Gösterge Paneli 1', url: '/dashboard'},
-            {label: 'Gösterge Paneli 2', url: '/dashboard2'},
-        ]
+        url: '/dashboard'
     },
     {
         label: 'Sohbet',
         icon: LucideMessageSquareDot,
         url: '/apps/chat',
     },
-    {
+    /*{
         label: 'Takvim',
         icon: LucideCalendar,
         url: '/apps/calendar',
-    },
+    },*/
 
     {label: 'Admin', isTitle: true},
     {
@@ -149,18 +141,6 @@ export const menuItems: MenuItemType[] = [
             {label: 'Açıklamalar', url: '/admin/social-media/descriptions'},
             {label: 'Özellikler', url: '/admin/social-media/properties'},
         ]
-    },
-
-    {label: 'Hesap', isTitle: true},
-    {
-        label: 'Giriş Yap',
-        icon: LucideLogIn,
-        url: '/auth/sign-in',
-    },
-    {
-        label: 'Kayıt Ol',
-        icon: LucideUserPlus,
-        url: '/auth/sign-up',
     },
 
     // {
