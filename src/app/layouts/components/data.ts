@@ -66,13 +66,8 @@ export const userDropdownItems: UserDropdownItemType[] = [
 export const menuItems: MenuItemType[] = [
     {label: 'Menü', isTitle: true},
     {
-        label: 'Gösterge Paneli',
-        icon: LucideCircleGauge,
-        isCollapsed: true,
-        children: [
-            {label: 'Gösterge Paneli 1', url: '/dashboard'},
-            {label: 'Gösterge Paneli 2', url: '/dashboard2'},
-        ]
+        label: 'Ana Sayfa',
+        url: '/dashboard'
     },
     {
         label: 'Sohbet',
