@@ -2,7 +2,6 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 
 import {Topbar} from '@layouts/components/topbar/topbar';
-import {Footer} from '@layouts/components/footer/footer';
 import {Navbar} from '@layouts/components/navbar/navbar';
 import {LayoutStoreService} from '@core/services/layout-store.service';
 import {debounceTime, fromEvent, Subscription} from 'rxjs';
@@ -11,7 +10,6 @@ import {Sidenav} from '@layouts/components/sidenav/sidenav';
 @Component({
     selector: 'app-horizontal-layout',
     imports: [
-        Footer,
         RouterOutlet,
         Topbar,
         Navbar,

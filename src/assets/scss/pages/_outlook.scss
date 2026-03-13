@@ -4,7 +4,7 @@
 
 .outlook-box {
     display: flex;
-    height: calc(100vh - 40px - 42px - calc($spacer * 2.75));
+    height: calc(100vh - 40px - 12px - calc($spacer * 2.75));
 
     .outlook-list {
         .nav-link.active {
