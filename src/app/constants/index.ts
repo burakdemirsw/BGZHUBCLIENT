@@ -8,13 +8,13 @@ export const currency: CurrencyType = '$'
 export const currentYear = new Date().getFullYear()
 
 export const credits = {
-  website: 'https://coderthemes.com/',
-  name: 'Coderthemes',
+  website: 'https://plexorin.com/',
+  name: 'Plexorin V2',
   buyLink: '',
 }
 
-export const appName = 'UBold'
-export const appTitle = 'UBold - Responsive Bootstrap 5 Admin Dashboard'
-export const appDescription: string = 'UBold is a modern, responsive admin dashboard available on ThemeForest. Ideal for building CRM, CMS, project management tools, and custom web applications with a clean UI, flexible layouts, and rich features.'
+export const appName = 'Yanıt Sende'
+export const appTitle = 'Yanıt Sende - Responsive Bootstrap 5 Admin Dashboard'
+export const appDescription: string = 'Yanıt Sende is a modern, responsive admin dashboard available on ThemeForest. Ideal for building CRM, CMS, project management tools, and custom web applications with a clean UI, flexible layouts, and rich features.'
 
 export const basePath: string = ''

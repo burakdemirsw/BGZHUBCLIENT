@@ -22,12 +22,16 @@ export class AuthGuard {
       return false;
     }
 
-    const isExpired = this.jwtHelper.isTokenExpired(token);
-
-    if (isExpired) {
-      localStorage.clear();
-      this.router.navigate(['/auth/sign-in'], { queryParams: { returnUrl: state.url } });
-      return false;
+    try {
+      const isExpired = this.jwtHelper.isTokenExpired(token);
+      if (isExpired) {
+        localStorage.clear();
+        this.router.navigate(['/auth/sign-in'], { queryParams: { returnUrl: state.url } });
+        return false;
+      }
+    } catch (e) {
+      // Token JWT formatında değilse (ör: dev-token), sadece varlığını kontrol et
+      return true;
     }
 
     return true;

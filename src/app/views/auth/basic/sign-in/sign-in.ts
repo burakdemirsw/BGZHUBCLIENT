@@ -59,4 +59,11 @@ export class SignIn {
             }
         });
     }
+
+    devLogin() {
+        localStorage.setItem('accessToken', 'dev-token');
+        localStorage.setItem('refreshToken', 'dev-refresh-token');
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+        this.router.navigateByUrl(returnUrl);
+    }
 }
