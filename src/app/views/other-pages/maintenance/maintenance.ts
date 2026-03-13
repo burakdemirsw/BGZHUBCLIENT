@@ -1,10 +1,10 @@
 import { credits, currentYear } from '@/app/constants';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { LogoComponent } from '@/app/components/logo/logo.component';
 
 @Component({
   selector: 'app-maintenance',
-  imports: [RouterLink],
+  imports: [LogoComponent],
   templateUrl: './maintenance.html',
   styles: ``
 })

@@ -4,7 +4,7 @@ import {AppMenu} from '@layouts/components/sidenav/components/app-menu/app-menu'
 import {SimplebarAngularModule} from 'simplebar-angular';
 import {LayoutStoreService} from '@core/services/layout-store.service';
 import {NgIcon} from '@ng-icons/core';
-import {RouterLink} from '@angular/router';
+import {LogoComponent} from '@/app/components/logo/logo.component';
 
 @Component({
   selector: 'app-sidenav',
@@ -13,7 +13,7 @@ import {RouterLink} from '@angular/router';
         AppMenu,
         SimplebarAngularModule,
         NgIcon,
-        RouterLink
+        LogoComponent
     ],
   templateUrl: './sidenav.html',
 })

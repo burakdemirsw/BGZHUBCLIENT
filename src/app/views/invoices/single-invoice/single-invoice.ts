@@ -6,6 +6,7 @@ import {DecimalPipe} from '@angular/common';
 import {currency} from '@/app/constants';
 import {invoices} from '@/app/views/invoices/data';
 import {InvoiceType} from '@/app/views/invoices/types';
+import { LogoComponent } from '@/app/components/logo/logo.component';
 
 type InvoiceItem = {
     id: number;
@@ -18,7 +19,7 @@ type InvoiceItem = {
 
 @Component({
     selector: 'app-single-invoice',
-    imports: [PageTitle, NgIcon, RouterLink, DecimalPipe],
+    imports: [PageTitle, NgIcon, RouterLink, DecimalPipe, LogoComponent],
     templateUrl: './single-invoice.html',
     styles: ``
 })

@@ -1,10 +1,11 @@
 import { credits, currentYear } from '@/app/constants';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+
+import { LogoComponent } from '@/app/components/logo/logo.component';
 
 @Component({
   selector: 'app-delete-account',
-  imports: [RouterLink],
+  imports: [LogoComponent],
   templateUrl: './delete-account.html',
   styles: ``
 })

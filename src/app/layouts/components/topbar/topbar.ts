@@ -1,40 +1,21 @@
 import {Component} from '@angular/core';
-import {RouterLink} from '@angular/router';
 import {NgIcon} from '@ng-icons/core';
 import {LayoutStoreService} from '@core/services/layout-store.service';
 import {LucideAngularModule, LucidePalette, Search} from 'lucide-angular';
-
-import {MegaMenu} from '@layouts/components/topbar/components/mega-menu/mega-menu';
-import {
-    LanguageDropdown
-} from '@layouts/components/topbar/components/language-dropdown/language-dropdown';
-import {
-    MessagesDropdown
-} from '@layouts/components/topbar/components/messages-dropdown/messages-dropdown';
+import {LogoComponent} from '@/app/components/logo/logo.component';
+import {MessagesDropdown} from '@layouts/components/topbar/components/messages-dropdown/messages-dropdown';
 import {ThemeToggler} from '@layouts/components/topbar/components/theme-toggler/theme-toggler';
-import {
-    CustomizerToggler
-} from '@layouts/components/topbar/components/customizer-toggler/customizer-toggler';
 import {UserProfile} from '@layouts/components/topbar/components/user-profile/user-profile';
-import {ApplicationMenu} from '@layouts/components/topbar/components/application-menu/application-menu';
-import {ToggleFullscreen} from '@layouts/components/topbar/components/toggle-fullscreen';
-
 
 @Component({
     selector: 'app-topbar',
     imports: [
         NgIcon,
-        RouterLink,
         LucideAngularModule,
-        MegaMenu,
-        LanguageDropdown,
-        MessagesDropdown,
-        CustomizerToggler,
+        LogoComponent,
         ThemeToggler,
         UserProfile,
-        ApplicationMenu,
-        ToggleFullscreen,
-
+        MessagesDropdown,
     ],
     templateUrl: './topbar.html'
 })

@@ -2,15 +2,13 @@ import { Component } from '@angular/core';
 import {interval,Subscription} from 'rxjs';
 import {calculateTimeToEvent} from '@/app/utils/calculate-time';
 import {LucideAngularModule, LucideMail} from 'lucide-angular';
-import { RouterLink } from '@angular/router';
+import { LogoComponent } from '@/app/components/logo/logo.component';
 
 @Component({
-  selector: 'app-coming-soon',
-    imports: [
-        LucideAngularModule ,RouterLink
-    ],
-  templateUrl: './coming-soon.html',
-  styles: ``
+    selector: 'app-coming-soon',
+    imports: [LucideAngularModule, LogoComponent],
+    templateUrl: './coming-soon.html',
+    styles: ``
 })
 export class ComingSoon{
 currentYear: number = new Date().getFullYear();   

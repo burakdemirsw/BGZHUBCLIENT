@@ -3,6 +3,7 @@ import {PageTitle} from "@app/components/page-title";
 import {NgIcon} from '@ng-icons/core';
 import {ShepherdService} from 'angular-shepherd';
 import {RouterLink} from '@angular/router';
+import { LogoComponent } from '@/app/components/logo/logo.component';
 
 type featureType = {
     icon: string;
@@ -11,10 +12,10 @@ type featureType = {
 }
 
 @Component({
-  selector: 'app-tour',
-  imports: [PageTitle, NgIcon, RouterLink],
-  templateUrl: './tour.html',
-  styles: ``
+    selector: 'app-tour',
+    imports: [PageTitle, NgIcon, RouterLink, LogoComponent],
+    templateUrl: './tour.html',
+    styles: ``
 })
 export class Tour {
  private shepherdService = inject(ShepherdService)
