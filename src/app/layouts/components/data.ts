@@ -9,7 +9,8 @@ import {
     LucidePanelTop, LucidePencilRuler, LucideProportions, LucideReceiptText, LucideRss,
     LucideShieldAlert, LucideShieldUser, LucideShoppingBag, LucideSparkles, LucideTable, LucideTable2,
     LucideTableConfig, LucideUsers, LucideLogIn, LucideUserPlus,
-    LucideSettings, LucideMail, LucideSmartphone, LucideMenu, LucideShield
+    LucideSettings, LucideMail, LucideSmartphone, LucideMenu, LucideShield,
+    LucideMapPin
 } from 'lucide-angular';
 
 type UserDropdownItemType = {
@@ -109,6 +110,18 @@ export const menuItems: MenuItemType[] = [
         label: 'NetGsm Ayarları',
         icon: LucideSmartphone,
         url: '/admin/netgsm-settings',
+    },
+
+    {label: 'Adres Yönetimi', isTitle: true},
+    {
+        label: 'Adresler',
+        icon: LucideMapPin,
+        isCollapsed: true,
+        children: [
+            {label: 'Ülkeler', url: '/admin/countries'},
+            {label: 'İller', url: '/admin/cities'},
+            {label: 'İlçeler', url: '/admin/districts'},
+        ]
     },
 
     {label: 'Hesap', isTitle: true},

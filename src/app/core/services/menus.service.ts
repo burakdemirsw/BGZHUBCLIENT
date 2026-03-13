@@ -11,8 +11,8 @@ export class MenusService {
   constructor(private http: HttpClientService) {}
 
   // Menus
-  getAll(): Observable<Menu[]> {
-    return this.http.get<Menu>({ controller: 'Menus' });
+  getAll(): Observable<any> {
+    return this.http.get_new({ controller: 'Menus' });
   }
 
   getById(id: string): Observable<any> {

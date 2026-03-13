@@ -9,8 +9,8 @@ import { MailSetting, CreateMailSettingRequest, UpdateMailSettingRequest, SendMa
 export class MailSettingsService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Observable<MailSetting[]> {
-    return this.http.get<MailSetting>({ controller: 'MailSettings' });
+  getAll(): Observable<any> {
+    return this.http.get_new({ controller: 'MailSettings' });
   }
 
   getById(id: string): Observable<any> {

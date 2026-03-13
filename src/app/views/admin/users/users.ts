@@ -34,14 +34,25 @@ export class UsersPage implements OnInit {
     loadUsers(): void {
         this.loading = true;
         this.usersService.getAll().subscribe({
-            next: (data) => {
-                this.users = data;
+            next: (response: any) => {
+                console.log('Users response:', response);
+                this.users = this.extractArray(response);
                 this.loading = false;
             },
-            error: () => {
+            error: (err) => {
+                console.error('Users error:', err);
                 this.loading = false;
             },
         });
+    }
+
+    private extractArray(response: any): any[] {
+        if (Array.isArray(response)) return response;
+        if (response?.$values) return response.$values;
+        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
+        if (response?.items) return response.items;
+        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
+        return [];
     }
 
     openCreate(): void {

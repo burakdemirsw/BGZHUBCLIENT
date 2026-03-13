@@ -36,14 +36,25 @@ export class MailSettingsPage implements OnInit {
     loadSettings(): void {
         this.loading = true;
         this.mailService.getAll().subscribe({
-            next: (data) => {
-                this.settings = data;
+            next: (response: any) => {
+                console.log('MailSettings response:', response);
+                this.settings = this.extractArray(response);
                 this.loading = false;
             },
-            error: () => {
+            error: (err) => {
+                console.error('MailSettings error:', err);
                 this.loading = false;
             },
         });
+    }
+
+    private extractArray(response: any): any[] {
+        if (Array.isArray(response)) return response;
+        if (response?.$values) return response.$values;
+        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
+        if (response?.items) return response.items;
+        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
+        return [];
     }
 
     openCreate(): void {

@@ -9,8 +9,8 @@ import { User, CreateUserRequest, UpdateUserRequest } from '../models/user/user.
 export class UsersService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Observable<User[]> {
-    return this.http.get<User>({ controller: 'Users' });
+  getAll(): Observable<any> {
+    return this.http.get_new({ controller: 'Users' });
   }
 
   getById(id: string): Observable<any> {

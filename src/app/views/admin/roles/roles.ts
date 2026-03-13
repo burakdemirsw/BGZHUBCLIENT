@@ -30,14 +30,25 @@ export class RolesPage implements OnInit {
     loadRoles(): void {
         this.loading = true;
         this.rolesService.getAll().subscribe({
-            next: (data) => {
-                this.roles = data;
+            next: (response: any) => {
+                console.log('Roles response:', response);
+                this.roles = this.extractArray(response);
                 this.loading = false;
             },
-            error: () => {
+            error: (err) => {
+                console.error('Roles error:', err);
                 this.loading = false;
             },
         });
+    }
+
+    private extractArray(response: any): any[] {
+        if (Array.isArray(response)) return response;
+        if (response?.$values) return response.$values;
+        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
+        if (response?.items) return response.items;
+        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
+        return [];
     }
 
     openCreate(): void {

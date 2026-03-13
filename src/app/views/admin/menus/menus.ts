@@ -36,14 +36,25 @@ export class MenusPage implements OnInit {
     loadMenus(): void {
         this.loading = true;
         this.menusService.getAll().subscribe({
-            next: (data) => {
-                this.menus = data;
+            next: (response: any) => {
+                console.log('Menus response:', response);
+                this.menus = this.extractArray(response);
                 this.loading = false;
             },
-            error: () => {
+            error: (err) => {
+                console.error('Menus error:', err);
                 this.loading = false;
             },
         });
+    }
+
+    private extractArray(response: any): any[] {
+        if (Array.isArray(response)) return response;
+        if (response?.$values) return response.$values;
+        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
+        if (response?.items) return response.items;
+        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
+        return [];
     }
 
     openCreate(): void {
