@@ -25,31 +25,13 @@
                 </div>
                 <div class="d-flex align-items-center gap-2">
 
-                    <button type="button" class="btn btn-default btn-icon" ngbTooltip="Video Call">
-                        <ng-icon name="tablerVideo" class="fs-lg"/>
+                    <button type="button" class="btn btn-default btn-icon" ngbTooltip="Profili Görüntüle" [routerLink]="[]">
+                        <ng-icon name="tablerUser" class="fs-lg"/>
                     </button>
-
-                    <button type="button" class="btn btn-default btn-icon" ngbTooltip="Audio Call">
-                        <ng-icon name="tablerPhone" class="fs-lg"/>
+                    
+                    <button type="button" class="btn btn-default btn-icon" ngbTooltip="Sohbeti Sil" [routerLink]="[]">
+                        <ng-icon name="tablerTrash" class="fs-lg"/>
                     </button>
-
-                    <div ngbDropdown>
-                        <button type="button" class="btn btn-default btn-icon drop-arrow-none" ngbDropdownToggle
-                                aria-expanded="false" title="More">
-                            <ng-icon name="tablerDotsVertical" class="fs-lg"/>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
-                            <li><a ngbDropdownItem [routerLink]="[]">
-                                <ng-icon name="tablerUser" class="me-2"/>
-                                Profili Görüntüle</a></li>
-                            <li><a ngbDropdownItem [routerLink]="[]">
-                                <ng-icon name="tablerBellOff" class="me-2"/>
-                                Bildirimleri Kapat</a></li>
-                            <li><a ngbDropdownItem [routerLink]="[]">
-                                <ng-icon name="tablerTrash" class="me-2"/>
-                                Sohbeti Sil</a></li>
-                        </ul>
-                    </div>
                 </div>
             </div>
 
