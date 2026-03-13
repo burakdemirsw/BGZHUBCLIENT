@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://195.175.214.66:7278/"
+      "url": "https://localhost:8991/"
     }
   ],
   "paths": {
@@ -7880,7 +7880,7 @@
       "name": "SocialMedia"
     },
     {
-      "name": "Teams"  
+      "name": "Teams"
     },
     {
       "name": "UserCompanies"

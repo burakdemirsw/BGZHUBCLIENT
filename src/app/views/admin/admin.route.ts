@@ -9,6 +9,10 @@ import { CitiesPage } from './cities/cities';
 import { DistrictsPage } from './districts/districts';
 import { ApplicationsPage } from './applications/applications';
 import { RoleAssignmentsPage } from './role-assignments/role-assignments';
+import { RoleMenusPage } from './role-menus/role-menus';
+import { SocialMediaAccountsPage } from './social-media/accounts/accounts';
+import { SocialMediaDescriptionsPage } from './social-media/descriptions/descriptions';
+import { SocialMediaPropertiesPage } from './social-media/properties/properties';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -70,6 +74,30 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/role-assignments',
         component: RoleAssignmentsPage,
         data: { title: 'Rol Atamaları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/role-menus',
+        component: RoleMenusPage,
+        data: { title: 'Menü Atamaları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/social-media/accounts',
+        component: SocialMediaAccountsPage,
+        data: { title: 'Sosyal Medya Hesapları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/social-media/descriptions',
+        component: SocialMediaDescriptionsPage,
+        data: { title: 'Hesap Açıklamaları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/social-media/properties',
+        component: SocialMediaPropertiesPage,
+        data: { title: 'Hesap Özellikleri' },
         canActivate: [AuthGuard],
     },
 ];

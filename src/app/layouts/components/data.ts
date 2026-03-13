@@ -10,7 +10,7 @@ import {
     LucideShieldAlert, LucideShieldUser, LucideShoppingBag, LucideSparkles, LucideTable, LucideTable2,
     LucideTableConfig, LucideUsers, LucideLogIn, LucideUserPlus,
     LucideSettings, LucideMail, LucideSmartphone, LucideMenu, LucideShield,
-    LucideMapPin, LucideAppWindow, LucideUserCheck
+    LucideMapPin, LucideAppWindow, LucideUserCheck, LucideShieldCheck, LucideShare2
 } from 'lucide-angular';
 
 type UserDropdownItemType = {
@@ -107,6 +107,11 @@ export const menuItems: MenuItemType[] = [
         url: '/admin/menus',
     },
     {
+        label: 'Menü Atamaları',
+        icon: LucideShieldCheck,
+        url: '/admin/role-menus',
+    },
+    {
         label: 'Mail Ayarları',
         icon: LucideMail,
         url: '/admin/mail-settings',
@@ -131,6 +136,18 @@ export const menuItems: MenuItemType[] = [
             {label: 'Ülkeler', url: '/admin/countries'},
             {label: 'İller', url: '/admin/cities'},
             {label: 'İlçeler', url: '/admin/districts'},
+        ]
+    },
+
+    {label: 'Sosyal Medya', isTitle: true},
+    {
+        label: 'Sosyal Medya',
+        icon: LucideShare2,
+        isCollapsed: true,
+        children: [
+            {label: 'Hesaplar', url: '/admin/social-media/accounts'},
+            {label: 'Açıklamalar', url: '/admin/social-media/descriptions'},
+            {label: 'Özellikler', url: '/admin/social-media/properties'},
         ]
     },
 

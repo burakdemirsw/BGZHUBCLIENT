@@ -1,0 +1,109 @@
+<app-page-title title="Hesap Açıklamaları" subtitle="Sosyal Medya" />
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">Açıklama Listesi</h4>
+                <div class="d-flex gap-2 align-items-center">
+                    <select class="form-select form-select-sm" style="width: 220px;" [(ngModel)]="filterAccountId" (ngModelChange)="onFilterChange()">
+                        <option value="">Tüm Hesaplar</option>
+                        @for (account of accounts; track account.id) {
+                            <option [value]="account.id">{{ account.name }}</option>
+                        }
+                    </select>
+                    <button class="btn btn-primary btn-sm" (click)="openCreate()">
+                        + Yeni Açıklama
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (loading) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Hesap</th>
+                                    <th>Dil Kodu</th>
+                                    <th>Açıklama</th>
+                                    <th>Durum</th>
+                                    <th class="text-end">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (desc of descriptions; track desc.id) {
+                                    <tr>
+                                        <td>{{ getAccountName(desc.socialMediaAccountId) }}</td>
+                                        <td>{{ desc.langCode }}</td>
+                                        <td>{{ desc.description }}</td>
+                                        <td>
+                                            <span class="badge" [class]="desc.isBlocked ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'">
+                                                {{ desc.isBlocked ? 'Engelli' : 'Aktif' }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(desc)">Düzenle</button>
+                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteDescription(desc)">Sil</button>
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="5" class="text-center text-muted">Açıklama bulunamadı.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+@if (showModal) {
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ editMode ? 'Açıklama Düzenle' : 'Yeni Açıklama' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Hesap</label>
+                            <select class="form-select" [(ngModel)]="form.socialMediaAccountId" name="socialMediaAccountId" required>
+                                <option value="">Seçiniz...</option>
+                                @for (account of accounts; track account.id) {
+                                    <option [value]="account.id">{{ account.name }}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Dil Kodu</label>
+                            <input type="text" class="form-control" [(ngModel)]="form.langCode" name="langCode" placeholder="ör: tr, en, de" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Açıklama</label>
+                            <textarea class="form-control" [(ngModel)]="form.description" name="description" rows="3" required></textarea>
+                        </div>
+                        @if (editMode) {
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" [(ngModel)]="form.isBlocked" name="isBlocked" id="isBlocked">
+                                <label class="form-check-label" for="isBlocked">Engelli</label>
+                            </div>
+                        }
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" (click)="save()">{{ editMode ? 'Güncelle' : 'Kaydet' }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
