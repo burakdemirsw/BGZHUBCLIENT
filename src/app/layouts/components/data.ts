@@ -122,9 +122,9 @@ export const menuItems: MenuItemType[] = [
         url: '/admin/netgsm-settings',
     },
     {
-        label: 'Uygulamalar',
+        label: 'Entegrasyonlar',
         icon: LucideAppWindow,
-        url: '/admin/applications',
+        url: '/admin/integrations',
     },
 
     {label: 'Adres Yönetimi', isTitle: true},

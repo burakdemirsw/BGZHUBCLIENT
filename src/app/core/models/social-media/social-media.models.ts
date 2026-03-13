@@ -60,3 +60,22 @@ export interface UpdateSocialMediaAccountPropertyRequest {
   value: string;
   isBlocked: boolean;
 }
+
+// === User Accounts ===
+export interface UserSocialMediaAccount {
+  id: string;
+  userId: string;
+  socialMediaAccountId: string;
+  isBlocked?: boolean;
+}
+
+export interface CreateUserSocialMediaAccountRequest {
+  userId: string;
+  socialMediaAccountId: string;
+}
+
+export interface UpdateUserSocialMediaAccountRequest {
+  userId: string;
+  socialMediaAccountId: string;
+  isBlocked: boolean;
+}

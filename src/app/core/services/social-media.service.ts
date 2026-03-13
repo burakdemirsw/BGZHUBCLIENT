@@ -8,6 +8,8 @@ import {
   UpdateSocialMediaAccountDescriptionRequest,
   CreateSocialMediaAccountPropertyRequest,
   UpdateSocialMediaAccountPropertyRequest,
+  CreateUserSocialMediaAccountRequest,
+  UpdateUserSocialMediaAccountRequest,
 } from '../models/social-media/social-media.models';
 
 @Injectable({
@@ -89,5 +91,34 @@ export class SocialMediaService {
 
   deleteProperty(id: string): Observable<any> {
     return this.http.post({ controller: 'SocialMedia', action: `delete/properties/${id}` }, {});
+  }
+
+  // === User Accounts ===
+  getUserAccounts(): Observable<any> {
+    return this.http.get_new({ controller: 'SocialMedia', action: 'user-accounts' });
+  }
+
+  getUserAccountById(id: string): Observable<any> {
+    return this.http.get_new({ controller: 'SocialMedia', action: `user-accounts/${id}` });
+  }
+
+  getUserAccountsByUser(userId: string): Observable<any> {
+    return this.http.get_new({ controller: 'SocialMedia', action: `user-accounts/by-user/${userId}` });
+  }
+
+  getUserAccountsByAccount(accountId: string): Observable<any> {
+    return this.http.get_new({ controller: 'SocialMedia', action: `user-accounts/by-account/${accountId}` });
+  }
+
+  createUserAccount(request: CreateUserSocialMediaAccountRequest): Observable<any> {
+    return this.http.post({ controller: 'SocialMedia', action: 'user-accounts' }, request);
+  }
+
+  updateUserAccount(id: string, request: UpdateUserSocialMediaAccountRequest): Observable<any> {
+    return this.http.post({ controller: 'SocialMedia', action: `update/user-accounts/${id}` }, request);
+  }
+
+  deleteUserAccount(id: string): Observable<any> {
+    return this.http.post({ controller: 'SocialMedia', action: `delete/user-accounts/${id}` }, {});
   }
 }

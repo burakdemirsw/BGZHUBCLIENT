@@ -7,7 +7,7 @@ import { NetGsmSettingsPage } from './netgsm-settings/netgsm-settings';
 import { CountriesPage } from './countries/countries';
 import { CitiesPage } from './cities/cities';
 import { DistrictsPage } from './districts/districts';
-import { ApplicationsPage } from './applications/applications';
+import { IntegrationsPage } from './integrations/integrations';
 import { RoleAssignmentsPage } from './role-assignments/role-assignments';
 import { RoleMenusPage } from './role-menus/role-menus';
 import { SocialMediaAccountsPage } from './social-media/accounts/accounts';
@@ -65,9 +65,9 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [AuthGuard],
     },
     {
-        path: 'admin/applications',
-        component: ApplicationsPage,
-        data: { title: 'Uygulamalar' },
+        path: 'admin/integrations',
+        component: IntegrationsPage,
+        data: { title: 'Entegrasyonlar' },
         canActivate: [AuthGuard],
     },
     {
