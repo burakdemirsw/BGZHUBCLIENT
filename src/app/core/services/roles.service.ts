@@ -24,11 +24,11 @@ export class RolesService {
   }
 
   update(id: string, request: UpdateRoleRequest): Observable<any> {
-    return this.http.put({ controller: 'Roles', action: id }, request);
+    return this.http.post({ controller: 'Roles', action: `update/${id}` }, request);
   }
 
   delete(id: string): Observable<any> {
-    return this.http.delete({ controller: 'Roles' }, id);
+    return this.http.post({ controller: 'Roles', action: `delete/${id}` }, {});
   }
 
   // Role-Users
@@ -49,6 +49,6 @@ export class RolesService {
   }
 
   removeRoleUser(id: string): Observable<any> {
-    return this.http.delete({ controller: 'RoleUsers' }, id);
+    return this.http.post({ controller: 'RoleUsers', action: `delete/${id}` }, {});
   }
 }

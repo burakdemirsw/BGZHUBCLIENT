@@ -22,11 +22,11 @@ export class AddressesService {
   }
 
   updateCountry(id: string, request: any): Observable<any> {
-    return this.http.put({ controller: 'Addresses', action: `countries/${id}` }, request);
+    return this.http.post({ controller: 'Addresses', action: `update/countries/${id}` }, request);
   }
 
   deleteCountry(id: string): Observable<any> {
-    return this.http.delete({ controller: 'Addresses', action: 'countries' }, id);
+    return this.http.post({ controller: 'Addresses', action: `delete/countries/${id}` }, {});
   }
 
   // Cities
@@ -47,11 +47,11 @@ export class AddressesService {
   }
 
   updateCity(id: string, request: any): Observable<any> {
-    return this.http.put({ controller: 'Addresses', action: `cities/${id}` }, request);
+    return this.http.post({ controller: 'Addresses', action: `update/cities/${id}` }, request);
   }
 
   deleteCity(id: string): Observable<any> {
-    return this.http.delete({ controller: 'Addresses', action: 'cities' }, id);
+    return this.http.post({ controller: 'Addresses', action: `delete/cities/${id}` }, {});
   }
 
   // Districts
@@ -72,10 +72,10 @@ export class AddressesService {
   }
 
   updateDistrict(id: string, request: any): Observable<any> {
-    return this.http.put({ controller: 'Addresses', action: `districts/${id}` }, request);
+    return this.http.post({ controller: 'Addresses', action: `update/districts/${id}` }, request);
   }
 
   deleteDistrict(id: string): Observable<any> {
-    return this.http.delete({ controller: 'Addresses', action: 'districts' }, id);
+    return this.http.post({ controller: 'Addresses', action: `delete/districts/${id}` }, {});
   }
 }

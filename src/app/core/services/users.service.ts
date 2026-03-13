@@ -22,10 +22,10 @@ export class UsersService {
   }
 
   update(id: string, request: UpdateUserRequest): Observable<any> {
-    return this.http.put({ controller: 'Users', action: id }, request);
+    return this.http.post({ controller: 'Users', action: `update/${id}` }, request);
   }
 
   delete(id: string): Observable<any> {
-    return this.http.delete({ controller: 'Users' }, id);
+    return this.http.post({ controller: 'Users', action: `delete/${id}` }, {});
   }
 }

@@ -24,11 +24,11 @@ export class MenusService {
   }
 
   update(id: string, request: UpdateMenuRequest): Observable<any> {
-    return this.http.put({ controller: 'Menus', action: id }, request);
+    return this.http.post({ controller: 'Menus', action: `update/${id}` }, request);
   }
 
   delete(id: string): Observable<any> {
-    return this.http.delete({ controller: 'Menus' }, id);
+    return this.http.post({ controller: 'Menus', action: `delete/${id}` }, {});
   }
 
   // Role-Menus
@@ -45,10 +45,10 @@ export class MenusService {
   }
 
   updateRoleMenu(id: string, request: UpdateRoleMenuRequest): Observable<any> {
-    return this.http.put({ controller: 'RoleMenus', action: id }, request);
+    return this.http.post({ controller: 'RoleMenus', action: `update/${id}` }, request);
   }
 
   removeRoleMenu(id: string): Observable<any> {
-    return this.http.delete({ controller: 'RoleMenus' }, id);
+    return this.http.post({ controller: 'RoleMenus', action: `delete/${id}` }, {});
   }
 }
