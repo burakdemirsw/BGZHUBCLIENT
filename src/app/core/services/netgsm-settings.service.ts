@@ -26,10 +26,10 @@ export class NetGsmSettingsService {
   }
 
   update(id: string, request: UpdateNetGsmSettingRequest): Observable<any> {
-    return this.http.put({ controller: 'NetGsmSettings', action: id }, request);
+    return this.http.post({ controller: 'NetGsmSettings', action: `update/${id}` }, request);
   }
 
   delete(id: string): Observable<any> {
-    return this.http.delete({ controller: 'NetGsmSettings' }, id);
+    return this.http.post({ controller: 'NetGsmSettings', action: `delete/${id}` }, {});
   }
 }

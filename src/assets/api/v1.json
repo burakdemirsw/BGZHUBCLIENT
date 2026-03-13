@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://localhost:8991/"
+      "url": "http://195.175.214.66:7278/"
     }
   ],
   "paths": {
@@ -88,8 +88,10 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/Addresses/update/countries/{id}": {
+      "post": {
         "tags": [
           "Addresses"
         ],
@@ -134,8 +136,10 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/Addresses/delete/countries/{id}": {
+      "post": {
         "tags": [
           "Addresses"
         ],
@@ -240,8 +244,38 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/Addresses/countries/{countryId}/cities": {
+      "get": {
+        "tags": [
+          "Addresses"
+        ],
+        "parameters": [
+          {
+            "name": "countryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Addresses/update/cities/{id}": {
+      "post": {
         "tags": [
           "Addresses"
         ],
@@ -286,42 +320,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/Addresses/delete/cities/{id}": {
+      "post": {
         "tags": [
           "Addresses"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/Addresses/countries/{countryId}/cities": {
-      "get": {
-        "tags": [
-          "Addresses"
-        ],
-        "parameters": [
-          {
-            "name": "countryId",
             "in": "path",
             "required": true,
             "schema": {
@@ -420,8 +428,38 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/Addresses/cities/{cityId}/districts": {
+      "get": {
+        "tags": [
+          "Addresses"
+        ],
+        "parameters": [
+          {
+            "name": "cityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Addresses/update/districts/{id}": {
+      "post": {
         "tags": [
           "Addresses"
         ],
@@ -466,42 +504,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/Addresses/delete/districts/{id}": {
+      "post": {
         "tags": [
           "Addresses"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/Addresses/cities/{cityId}/districts": {
-      "get": {
-        "tags": [
-          "Addresses"
-        ],
-        "parameters": [
-          {
-            "name": "cityId",
             "in": "path",
             "required": true,
             "schema": {
@@ -576,78 +588,6 @@
     },
     "/api/AiAssistants/{id}": {
       "get": {
-        "tags": [
-          "AiAssistants"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "AiAssistants"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateAiAssistantRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateAiAssistantRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateAiAssistantRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      },
-      "delete": {
         "tags": [
           "AiAssistants"
         ],
@@ -766,8 +706,84 @@
         ]
       }
     },
+    "/api/AiAssistants/update/{id}": {
+      "post": {
+        "tags": [
+          "AiAssistants"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAiAssistantRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAiAssistantRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAiAssistantRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/AiAssistants/delete/{id}": {
+      "post": {
+        "tags": [
+          "AiAssistants"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/AiAssistants/{id}/toggle-active": {
-      "patch": {
+      "post": {
         "tags": [
           "AiAssistants"
         ],
@@ -872,8 +888,38 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/Ai/knowledge/by-assistant/{assistantId}": {
+      "get": {
+        "tags": [
+          "Ai"
+        ],
+        "parameters": [
+          {
+            "name": "assistantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Ai/update/knowledge/{id}": {
+      "post": {
         "tags": [
           "Ai"
         ],
@@ -918,42 +964,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/Ai/delete/knowledge/{id}": {
+      "post": {
         "tags": [
           "Ai"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/Ai/knowledge/by-assistant/{assistantId}": {
-      "get": {
-        "tags": [
-          "Ai"
-        ],
-        "parameters": [
-          {
-            "name": "assistantId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1052,78 +1072,6 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
-        "tags": [
-          "Ai"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateAiMessageRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateAiMessageRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateAiMessageRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "Ai"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
       }
     },
     "/api/Ai/messages/by-user/{userId}": {
@@ -1182,8 +1130,84 @@
         ]
       }
     },
+    "/api/Ai/update/messages/{id}": {
+      "post": {
+        "tags": [
+          "Ai"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAiMessageRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAiMessageRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAiMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Ai/delete/messages/{id}": {
+      "post": {
+        "tags": [
+          "Ai"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/Ai/messages/{id}/mark-read": {
-      "patch": {
+      "post": {
         "tags": [
           "Ai"
         ],
@@ -1288,8 +1312,10 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/Apps/update/applications/{id}": {
+      "post": {
         "tags": [
           "Apps"
         ],
@@ -1334,8 +1360,10 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/Apps/delete/applications/{id}": {
+      "post": {
         "tags": [
           "Apps"
         ],
@@ -1440,8 +1468,66 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/Apps/applications/{applicationId}/users": {
+      "get": {
+        "tags": [
+          "Apps"
+        ],
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Apps/users/by-user/{userId}": {
+      "get": {
+        "tags": [
+          "Apps"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Apps/update/users/{id}": {
+      "post": {
         "tags": [
           "Apps"
         ],
@@ -1486,70 +1572,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/Apps/delete/users/{id}": {
+      "post": {
         "tags": [
           "Apps"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/Apps/applications/{applicationId}/users": {
-      "get": {
-        "tags": [
-          "Apps"
-        ],
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/Apps/users/by-user/{userId}": {
-      "get": {
-        "tags": [
-          "Apps"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1648,8 +1680,66 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/Apps/applications/{applicationId}/properties": {
+      "get": {
+        "tags": [
+          "Apps"
+        ],
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Apps/properties/by-user/{userId}": {
+      "get": {
+        "tags": [
+          "Apps"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Apps/update/properties/{id}": {
+      "post": {
         "tags": [
           "Apps"
         ],
@@ -1694,70 +1784,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/Apps/delete/properties/{id}": {
+      "post": {
         "tags": [
           "Apps"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/Apps/applications/{applicationId}/properties": {
-      "get": {
-        "tags": [
-          "Apps"
-        ],
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/Apps/properties/by-user/{userId}": {
-      "get": {
-        "tags": [
-          "Apps"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1889,6 +1925,458 @@
         ]
       }
     },
+    "/api/Conversations": {
+      "get": {
+        "tags": [
+          "Conversations"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Conversations"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConversationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConversationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConversationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Conversations/{id}": {
+      "get": {
+        "tags": [
+          "Conversations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Conversations/by-user/{userId}": {
+      "get": {
+        "tags": [
+          "Conversations"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Conversations/unread/by-user/{userId}": {
+      "get": {
+        "tags": [
+          "Conversations"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Conversations/update/{id}": {
+      "post": {
+        "tags": [
+          "Conversations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConversationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConversationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConversationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Conversations/delete/{id}": {
+      "post": {
+        "tags": [
+          "Conversations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Conversations/{id}/mark-read": {
+      "post": {
+        "tags": [
+          "Conversations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Customers": {
+      "get": {
+        "tags": [
+          "Customers"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Customers"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomerRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomerRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Customers/{id}": {
+      "get": {
+        "tags": [
+          "Customers"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Customers/by-user/{userId}": {
+      "get": {
+        "tags": [
+          "Customers"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Customers/by-account/{accountId}": {
+      "get": {
+        "tags": [
+          "Customers"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Customers/update/{id}": {
+      "post": {
+        "tags": [
+          "Customers"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCustomerRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCustomerRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCustomerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Customers/delete/{id}": {
+      "post": {
+        "tags": [
+          "Customers"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/Items": {
       "get": {
         "tags": [
@@ -1967,8 +2455,38 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/Items/by-application/{applicationId}": {
+      "get": {
+        "tags": [
+          "Items"
+        ],
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Items/update/{id}": {
+      "post": {
         "tags": [
           "Items"
         ],
@@ -2013,42 +2531,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/Items/delete/{id}": {
+      "post": {
         "tags": [
           "Items"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/Items/by-application/{applicationId}": {
-      "get": {
-        "tags": [
-          "Items"
-        ],
-        "parameters": [
-          {
-            "name": "applicationId",
             "in": "path",
             "required": true,
             "schema": {
@@ -2147,8 +2639,10 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/MailSettings/update/{id}": {
+      "post": {
         "tags": [
           "MailSettings"
         ],
@@ -2193,8 +2687,10 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/MailSettings/delete/{id}": {
+      "post": {
         "tags": [
           "MailSettings"
         ],
@@ -2336,8 +2832,10 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/Menus/update/{id}": {
+      "post": {
         "tags": [
           "Menus"
         ],
@@ -2382,8 +2880,10 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/Menus/delete/{id}": {
+      "post": {
         "tags": [
           "Menus"
         ],
@@ -2464,78 +2964,6 @@
     },
     "/api/Messages/{id}": {
       "get": {
-        "tags": [
-          "Messages"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "Messages"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateMessageRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateMessageRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateMessageRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      },
-      "delete": {
         "tags": [
           "Messages"
         ],
@@ -2672,8 +3100,84 @@
         ]
       }
     },
+    "/api/Messages/update/{id}": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMessageRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMessageRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Messages/delete/{id}": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/Messages/{id}/mark-read": {
-      "patch": {
+      "post": {
         "tags": [
           "Messages"
         ],
@@ -2778,8 +3282,38 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/NetGsmSettings/by-application/{applicationId}": {
+      "get": {
+        "tags": [
+          "NetGsmSettings"
+        ],
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/NetGsmSettings/update/{id}": {
+      "post": {
         "tags": [
           "NetGsmSettings"
         ],
@@ -2824,42 +3358,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/NetGsmSettings/delete/{id}": {
+      "post": {
         "tags": [
           "NetGsmSettings"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/NetGsmSettings/by-application/{applicationId}": {
-      "get": {
-        "tags": [
-          "NetGsmSettings"
-        ],
-        "parameters": [
-          {
-            "name": "applicationId",
             "in": "path",
             "required": true,
             "schema": {
@@ -2958,8 +3466,38 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/RoleMenus/by-role/{roleId}": {
+      "get": {
+        "tags": [
+          "RoleMenus"
+        ],
+        "parameters": [
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/RoleMenus/update/{id}": {
+      "post": {
         "tags": [
           "RoleMenus"
         ],
@@ -3004,42 +3542,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/RoleMenus/delete/{id}": {
+      "post": {
         "tags": [
           "RoleMenus"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/RoleMenus/by-role/{roleId}": {
-      "get": {
-        "tags": [
-          "RoleMenus"
-        ],
-        "parameters": [
-          {
-            "name": "roleId",
             "in": "path",
             "required": true,
             "schema": {
@@ -3138,8 +3650,10 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/Roles/update/{id}": {
+      "post": {
         "tags": [
           "Roles"
         ],
@@ -3184,8 +3698,10 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/Roles/delete/{id}": {
+      "post": {
         "tags": [
           "Roles"
         ],
@@ -3290,8 +3806,66 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/RoleUsers/by-role/{roleId}": {
+      "get": {
+        "tags": [
+          "RoleUsers"
+        ],
+        "parameters": [
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/RoleUsers/by-user/{userId}": {
+      "get": {
+        "tags": [
+          "RoleUsers"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/RoleUsers/update/{id}": {
+      "post": {
         "tags": [
           "RoleUsers"
         ],
@@ -3336,70 +3910,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/RoleUsers/delete/{id}": {
+      "post": {
         "tags": [
           "RoleUsers"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/RoleUsers/by-role/{roleId}": {
-      "get": {
-        "tags": [
-          "RoleUsers"
-        ],
-        "parameters": [
-          {
-            "name": "roleId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/RoleUsers/by-user/{userId}": {
-      "get": {
-        "tags": [
-          "RoleUsers"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
@@ -3498,8 +4018,38 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/SocialMedia/accounts/by-user/{userId}": {
+      "get": {
+        "tags": [
+          "SocialMedia"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/SocialMedia/update/accounts/{id}": {
+      "post": {
         "tags": [
           "SocialMedia"
         ],
@@ -3544,42 +4094,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/SocialMedia/delete/accounts/{id}": {
+      "post": {
         "tags": [
           "SocialMedia"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/SocialMedia/accounts/by-user/{userId}": {
-      "get": {
-        "tags": [
-          "SocialMedia"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
@@ -3678,8 +4202,38 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/SocialMedia/accounts/{accountId}/descriptions": {
+      "get": {
+        "tags": [
+          "SocialMedia"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/SocialMedia/update/descriptions/{id}": {
+      "post": {
         "tags": [
           "SocialMedia"
         ],
@@ -3724,42 +4278,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/SocialMedia/delete/descriptions/{id}": {
+      "post": {
         "tags": [
           "SocialMedia"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/SocialMedia/accounts/{accountId}/descriptions": {
-      "get": {
-        "tags": [
-          "SocialMedia"
-        ],
-        "parameters": [
-          {
-            "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
@@ -3858,8 +4386,38 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/SocialMedia/accounts/{accountId}/properties": {
+      "get": {
+        "tags": [
+          "SocialMedia"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/SocialMedia/update/properties/{id}": {
+      "post": {
         "tags": [
           "SocialMedia"
         ],
@@ -3904,42 +4462,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/SocialMedia/delete/properties/{id}": {
+      "post": {
         "tags": [
           "SocialMedia"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/SocialMedia/accounts/{accountId}/properties": {
-      "get": {
-        "tags": [
-          "SocialMedia"
-        ],
-        "parameters": [
-          {
-            "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
@@ -4038,8 +4570,38 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/Teams/by-creator/{creatorId}": {
+      "get": {
+        "tags": [
+          "Teams"
+        ],
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Teams/update/{id}": {
+      "post": {
         "tags": [
           "Teams"
         ],
@@ -4084,42 +4646,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/Teams/delete/{id}": {
+      "post": {
         "tags": [
           "Teams"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/Teams/by-creator/{creatorId}": {
-      "get": {
-        "tags": [
-          "Teams"
-        ],
-        "parameters": [
-          {
-            "name": "creatorId",
             "in": "path",
             "required": true,
             "schema": {
@@ -4218,8 +4754,66 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/Teams/{teamId}/invitations": {
+      "get": {
+        "tags": [
+          "Teams"
+        ],
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Teams/invitations/by-invited-user/{invitedUserId}": {
+      "get": {
+        "tags": [
+          "Teams"
+        ],
+        "parameters": [
+          {
+            "name": "invitedUserId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Teams/update/invitations/{id}": {
+      "post": {
         "tags": [
           "Teams"
         ],
@@ -4264,70 +4858,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/Teams/delete/invitations/{id}": {
+      "post": {
         "tags": [
           "Teams"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/Teams/{teamId}/invitations": {
-      "get": {
-        "tags": [
-          "Teams"
-        ],
-        "parameters": [
-          {
-            "name": "teamId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/Teams/invitations/by-invited-user/{invitedUserId}": {
-      "get": {
-        "tags": [
-          "Teams"
-        ],
-        "parameters": [
-          {
-            "name": "invitedUserId",
             "in": "path",
             "required": true,
             "schema": {
@@ -4426,8 +4966,38 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/Teams/{teamId}/settings": {
+      "get": {
+        "tags": [
+          "Teams"
+        ],
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Teams/update/settings/{id}": {
+      "post": {
         "tags": [
           "Teams"
         ],
@@ -4472,42 +5042,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/Teams/delete/settings/{id}": {
+      "post": {
         "tags": [
           "Teams"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/Teams/{teamId}/settings": {
-      "get": {
-        "tags": [
-          "Teams"
-        ],
-        "parameters": [
-          {
-            "name": "teamId",
             "in": "path",
             "required": true,
             "schema": {
@@ -4606,8 +5150,38 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/UserCompanies/user/{userId}": {
+      "get": {
+        "tags": [
+          "UserCompanies"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/UserCompanies/update/{id}": {
+      "post": {
         "tags": [
           "UserCompanies"
         ],
@@ -4652,42 +5226,16 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/UserCompanies/delete/{id}": {
+      "post": {
         "tags": [
           "UserCompanies"
         ],
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/UserCompanies/user/{userId}": {
-      "get": {
-        "tags": [
-          "UserCompanies"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
@@ -4786,8 +5334,10 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "put": {
+      }
+    },
+    "/api/Users/update/{id}": {
+      "post": {
         "tags": [
           "Users"
         ],
@@ -4832,8 +5382,10 @@
             "Bearer": [ ]
           }
         ]
-      },
-      "delete": {
+      }
+    },
+    "/api/Users/delete/{id}": {
+      "post": {
         "tags": [
           "Users"
         ],
@@ -5190,6 +5742,48 @@
           }
         }
       },
+      "CreateConversationRequest": {
+        "required": [
+          "socialMediaAccountId",
+          "customerId",
+          "userId",
+          "platformAccountId",
+          "customerAccountId"
+        ],
+        "type": "object",
+        "properties": {
+          "socialMediaAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "userId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "platformAccountId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "customerAccountId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "CreateCountryRequest": {
         "required": [
           "name",
@@ -5211,6 +5805,30 @@
             ]
           },
           "phoneCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "CreateCustomerRequest": {
+        "required": [
+          "userId",
+          "socialMediaAccountId",
+          "platformAccountId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "socialMediaAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformAccountId": {
             "type": [
               "null",
               "string"
@@ -6340,6 +6958,69 @@
           }
         }
       },
+      "UpdateConversationRequest": {
+        "required": [
+          "socialMediaAccountId",
+          "customerId",
+          "userId",
+          "platformAccountId",
+          "customerAccountId",
+          "lastMessageId",
+          "lastMessageDate",
+          "isRead",
+          "isBlocked"
+        ],
+        "type": "object",
+        "properties": {
+          "socialMediaAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "userId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "platformAccountId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "customerAccountId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "lastMessageId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "lastMessageDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isRead": {
+            "type": "boolean"
+          },
+          "isBlocked": {
+            "type": "boolean"
+          }
+        }
+      },
       "UpdateCountryRequest": {
         "required": [
           "name",
@@ -6366,6 +7047,43 @@
               "null",
               "string"
             ]
+          },
+          "isBlocked": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateCustomerRequest": {
+        "required": [
+          "userId",
+          "socialMediaAccountId",
+          "platformAccountId",
+          "status",
+          "isBlocked"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "socialMediaAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformAccountId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "uint8"
           },
           "isBlocked": {
             "type": "boolean"
@@ -7129,6 +7847,12 @@
       "name": "Auth"
     },
     {
+      "name": "Conversations"
+    },
+    {
+      "name": "Customers"
+    },
+    {
       "name": "Items"
     },
     {
@@ -7156,7 +7880,7 @@
       "name": "SocialMedia"
     },
     {
-      "name": "Teams"
+      "name": "Teams"  
     },
     {
       "name": "UserCompanies"

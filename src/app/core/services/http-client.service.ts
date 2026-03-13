@@ -67,38 +67,4 @@ export class HttpClientService {
       responseType: requestParameter.responseType as 'json',
     });
   }
-
-  put<T>(
-    requestParameter: Partial<RequestParameters>,
-    body: Partial<T>
-  ): Observable<T> {
-    let url: string = '';
-    if (requestParameter.fullEndPoint) url = requestParameter.fullEndPoint;
-    else
-      url = `${this.url(requestParameter)}${
-        requestParameter.queryString ? `?${requestParameter.queryString}` : ''
-      }`;
-
-    return this.httpClient.put<T>(url, body, {
-      headers: requestParameter.headers,
-      responseType: requestParameter.responseType as 'json',
-    });
-  }
-
-  delete<T>(
-    requestParameter: Partial<RequestParameters>,
-    id: number | string
-  ): Observable<T> {
-    let url: string = '';
-    if (requestParameter.fullEndPoint) url = requestParameter.fullEndPoint;
-    else
-      url = `${this.url(requestParameter)}/${id}${
-        requestParameter.queryString ? `?${requestParameter.queryString}` : ''
-      }`;
-
-    return this.httpClient.delete<T>(url, {
-      headers: requestParameter.headers,
-      responseType: requestParameter.responseType as 'json',
-    });
-  }
 }

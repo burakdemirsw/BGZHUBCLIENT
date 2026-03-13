@@ -22,11 +22,11 @@ export class MailSettingsService {
   }
 
   update(id: string, request: UpdateMailSettingRequest): Observable<any> {
-    return this.http.put({ controller: 'MailSettings', action: id }, request);
+    return this.http.post({ controller: 'MailSettings', action: `update/${id}` }, request);
   }
 
   delete(id: string): Observable<any> {
-    return this.http.delete({ controller: 'MailSettings' }, id);
+    return this.http.post({ controller: 'MailSettings', action: `delete/${id}` }, {});
   }
 
   sendMail(request: SendMailRequest): Observable<any> {
