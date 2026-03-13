@@ -51,11 +51,6 @@ export const userDropdownItems: UserDropdownItemType[] = [
         isDivider: true
     },
     {
-        label: 'Ekranı Kilitle',
-        icon: 'tablerLock',
-        url: '/auth/lock-screen'
-    },
-    {
         label: 'Çıkış Yap',
         icon: 'tablerLogout2',
         url: '',
