@@ -1,0 +1,73 @@
+<app-page-title title="Roller" subtitle="Yönetim" />
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">Rol Listesi</h4>
+                <button class="btn btn-primary btn-sm" (click)="openCreate()">
+                    + Yeni Rol
+                </button>
+            </div>
+            <div class="card-body">
+                @if (loading) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Rol Açıklaması</th>
+                                    <th>Oluşturma Tarihi</th>
+                                    <th class="text-end">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (role of roles; track role.id) {
+                                    <tr>
+                                        <td>{{ role.roleDescription }}</td>
+                                        <td>{{ role.createdDate }}</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(role)">Düzenle</button>
+                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteRole(role)">Sil</button>
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="3" class="text-center text-muted">Rol bulunamadı.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (showModal) {
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ editMode ? 'Rol Düzenle' : 'Yeni Rol' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Rol Açıklaması</label>
+                            <input type="text" class="form-control" [(ngModel)]="form.roleDescription" name="roleDescription" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" (click)="save()">{{ editMode ? 'Güncelle' : 'Kaydet' }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

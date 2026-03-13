@@ -64,4 +64,8 @@ export const VIEWS_ROUTES: Routes = [
         path: '',
         loadChildren: () => import('./charts/charts.route').then((mod) => mod.CHARTS_ROUTES)
     },
+    {
+        path: '',
+        loadChildren: () => import('./admin/admin.route').then((mod) => mod.ADMIN_ROUTES)
+    },
 ];

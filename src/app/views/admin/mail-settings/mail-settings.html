@@ -1,0 +1,113 @@
+<app-page-title title="Mail Ayarları" subtitle="Yönetim" />
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">Mail Ayarları Listesi</h4>
+                <button class="btn btn-primary btn-sm" (click)="openCreate()">
+                    + Yeni Mail Ayarı
+                </button>
+            </div>
+            <div class="card-body">
+                @if (loading) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Kullanıcı Adı</th>
+                                    <th>SMTP Adresi</th>
+                                    <th>SMTP Port</th>
+                                    <th>Varsayılan</th>
+                                    <th>Durum</th>
+                                    <th class="text-end">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (setting of settings; track setting.id) {
+                                    <tr>
+                                        <td>{{ setting.userName }}</td>
+                                        <td>{{ setting.smtpAddress }}</td>
+                                        <td>{{ setting.smtpPort }}</td>
+                                        <td>
+                                            <span class="badge" [class]="setting.isFirst ? 'bg-primary-subtle text-primary' : 'bg-light text-muted'">
+                                                {{ setting.isFirst ? 'Evet' : 'Hayır' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge" [class]="setting.isBlocked ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'">
+                                                {{ setting.isBlocked ? 'Engelli' : 'Aktif' }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(setting)">Düzenle</button>
+                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteSetting(setting)">Sil</button>
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="6" class="text-center text-muted">Mail ayarı bulunamadı.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (showModal) {
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ editMode ? 'Mail Ayarı Düzenle' : 'Yeni Mail Ayarı' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Kullanıcı Adı (E-posta)</label>
+                            <input type="email" class="form-control" [(ngModel)]="form.userName" name="userName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Şifre</label>
+                            <input type="password" class="form-control" [(ngModel)]="form.password" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Uygulama Şifresi</label>
+                            <input type="password" class="form-control" [(ngModel)]="form.applicationPassword" name="applicationPassword">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">SMTP Adresi</label>
+                            <input type="text" class="form-control" [(ngModel)]="form.smtpAddress" name="smtpAddress" placeholder="smtp.gmail.com" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">SMTP Port</label>
+                            <input type="number" class="form-control" [(ngModel)]="form.smtpPort" name="smtpPort" required>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" [(ngModel)]="form.isFirst" name="isFirst" id="mailIsFirst">
+                            <label class="form-check-label" for="mailIsFirst">Varsayılan Ayar</label>
+                        </div>
+                        @if (editMode) {
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" [(ngModel)]="form.isBlocked" name="isBlocked" id="mailBlocked">
+                                <label class="form-check-label" for="mailBlocked">Engelli</label>
+                            </div>
+                        }
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" (click)="save()">{{ editMode ? 'Güncelle' : 'Kaydet' }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

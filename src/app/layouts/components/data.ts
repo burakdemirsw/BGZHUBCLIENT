@@ -8,7 +8,8 @@ import {
     LucideMessageSquareDot, LucideNotebookText, LucidePanelRightClose,
     LucidePanelTop, LucidePencilRuler, LucideProportions, LucideReceiptText, LucideRss,
     LucideShieldAlert, LucideShieldUser, LucideShoppingBag, LucideSparkles, LucideTable, LucideTable2,
-    LucideTableConfig, LucideUsers, LucideLogIn, LucideUserPlus
+    LucideTableConfig, LucideUsers, LucideLogIn, LucideUserPlus,
+    LucideSettings, LucideMail, LucideSmartphone, LucideMenu, LucideShield
 } from 'lucide-angular';
 
 type UserDropdownItemType = {
@@ -81,6 +82,33 @@ export const menuItems: MenuItemType[] = [
         label: 'Takvim',
         icon: LucideCalendar,
         url: '/apps/calendar',
+    },
+
+    {label: 'Yönetim', isTitle: true},
+    {
+        label: 'Kullanıcılar',
+        icon: LucideUsers,
+        url: '/admin/users',
+    },
+    {
+        label: 'Roller',
+        icon: LucideShield,
+        url: '/admin/roles',
+    },
+    {
+        label: 'Menüler',
+        icon: LucideMenu,
+        url: '/admin/menus',
+    },
+    {
+        label: 'Mail Ayarları',
+        icon: LucideMail,
+        url: '/admin/mail-settings',
+    },
+    {
+        label: 'NetGsm Ayarları',
+        icon: LucideSmartphone,
+        url: '/admin/netgsm-settings',
     },
 
     {label: 'Hesap', isTitle: true},

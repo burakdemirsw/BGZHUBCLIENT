@@ -1,0 +1,123 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { PageTitle } from '@app/components/page-title';
+import { MenusService } from '@/app/core/services/menus.service';
+import { Menu, CreateMenuRequest, UpdateMenuRequest } from '@/app/core/models/menu/menu.models';
+
+@Component({
+    selector: 'app-menus-page',
+    imports: [CommonModule, FormsModule, PageTitle],
+    templateUrl: './menus.html',
+})
+export class MenusPage implements OnInit {
+    menus: Menu[] = [];
+    loading = false;
+    showModal = false;
+    editMode = false;
+    selectedMenu: Menu | null = null;
+
+    form: any = {
+        parentId: null,
+        name: '',
+        description: '',
+        url: '',
+        icon: '',
+        orderIndex: 0,
+        isBlocked: false,
+    };
+
+    constructor(private menusService: MenusService) {}
+
+    ngOnInit(): void {
+        this.loadMenus();
+    }
+
+    loadMenus(): void {
+        this.loading = true;
+        this.menusService.getAll().subscribe({
+            next: (data) => {
+                this.menus = data;
+                this.loading = false;
+            },
+            error: () => {
+                this.loading = false;
+            },
+        });
+    }
+
+    openCreate(): void {
+        this.editMode = false;
+        this.selectedMenu = null;
+        this.form = { parentId: null, name: '', description: '', url: '', icon: '', orderIndex: 0, isBlocked: false };
+        this.showModal = true;
+    }
+
+    openEdit(menu: Menu): void {
+        this.editMode = true;
+        this.selectedMenu = menu;
+        this.form = {
+            parentId: menu.parentId,
+            name: menu.name,
+            description: menu.description,
+            url: menu.url,
+            icon: menu.icon,
+            orderIndex: menu.orderIndex,
+            isBlocked: menu.isBlocked,
+        };
+        this.showModal = true;
+    }
+
+    save(): void {
+        if (this.editMode && this.selectedMenu) {
+            const req: UpdateMenuRequest = {
+                parentId: this.form.parentId,
+                name: this.form.name,
+                description: this.form.description,
+                url: this.form.url,
+                icon: this.form.icon,
+                orderIndex: this.form.orderIndex,
+                isBlocked: this.form.isBlocked,
+            };
+            this.menusService.update(this.selectedMenu.id, req).subscribe({
+                next: () => {
+                    this.showModal = false;
+                    this.loadMenus();
+                },
+            });
+        } else {
+            const req: CreateMenuRequest = {
+                parentId: this.form.parentId,
+                name: this.form.name,
+                description: this.form.description,
+                url: this.form.url,
+                icon: this.form.icon,
+                orderIndex: this.form.orderIndex,
+            };
+            this.menusService.create(req).subscribe({
+                next: () => {
+                    this.showModal = false;
+                    this.loadMenus();
+                },
+            });
+        }
+    }
+
+    deleteMenu(menu: Menu): void {
+        if (confirm(`"${menu.name}" menüsünü silmek istediğinize emin misiniz?`)) {
+            this.menusService.delete(menu.id).subscribe({
+                next: () => this.loadMenus(),
+            });
+        }
+    }
+
+    getParentName(parentId: string | null): string {
+        if (!parentId) return '—';
+        const parent = this.menus.find((m) => m.id === parentId);
+        return parent ? parent.name : '—';
+    }
+
+    closeModal(): void {
+        this.showModal = false;
+    }
+}
