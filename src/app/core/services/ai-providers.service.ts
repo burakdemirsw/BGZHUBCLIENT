@@ -136,4 +136,29 @@ export class AiProvidersService {
   deleteAssistant(id: string): Promise<any> {
     return this.http.delete({ controller: 'AiAssistants', action: id });
   }
+
+  // ── AiKnowledge ──
+  getKnowledge(): Promise<any> {
+    return this.http.get_new({ controller: 'Ai', action: 'knowledge' });
+  }
+
+  getKnowledgeById(id: string): Promise<any> {
+    return this.http.get_new({ controller: 'Ai', action: `knowledge/${id}` });
+  }
+
+  getKnowledgeByAssistant(assistantId: string): Promise<any> {
+    return this.http.get_new({ controller: 'Ai', action: `knowledge/by-assistant/${assistantId}` });
+  }
+
+  createKnowledge(request: any): Promise<any> {
+    return this.http.post({ controller: 'Ai', action: 'knowledge' }, request);
+  }
+
+  updateKnowledge(id: string, request: any): Promise<any> {
+    return this.http.post({ controller: 'Ai', action: `update/knowledge/${id}` }, request);
+  }
+
+  deleteKnowledge(id: string): Promise<any> {
+    return this.http.post({ controller: 'Ai', action: `delete/knowledge/${id}` }, {});
+  }
 }

@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://195.175.214.66:7278/"
+      "url": "https://localhost:8991/"
     }
   ],
   "paths": {
@@ -7277,8 +7277,7 @@
           "userId",
           "name",
           "aiProviderId",
-          "aiModelId",
-          "meta"
+          "aiModelId"
         ],
         "type": "object",
         "properties": {
@@ -7299,12 +7298,6 @@
           "aiModelId": {
             "type": "string",
             "format": "uuid"
-          },
-          "meta": {
-            "type": [
-              "null",
-              "string"
-            ]
           }
         }
       },
@@ -8706,7 +8699,6 @@
           "name",
           "aiProviderId",
           "aiModelId",
-          "meta",
           "isBlocked"
         ],
         "type": "object",
@@ -8728,12 +8720,6 @@
           "aiModelId": {
             "type": "string",
             "format": "uuid"
-          },
-          "meta": {
-            "type": [
-              "null",
-              "string"
-            ]
           },
           "isBlocked": {
             "type": "boolean"

@@ -91,10 +91,8 @@ export class UserMenuService {
     }
   }
 
-  /** Düz menü listesinden ağaç yapısı oluştur */
+  /** Düz menü listesinden ağaç yapısı oluştur (recursive) */
   private buildMenuTree(menus: Menu[]): MenuItemType[] {
-    const result: MenuItemType[] = [];
-    const topLevel = menus.filter(m => !m.parentId);
     const childMap = new Map<string, Menu[]>();
 
     for (const m of menus) {
@@ -104,51 +102,36 @@ export class UserMenuService {
       }
     }
 
-    for (const parent of topLevel) {
-      const children = childMap.get(parent.id);
+    const topLevel = menus.filter(m => !m.parentId);
+    return this.buildMenuLevel(topLevel, childMap);
+  }
 
-      if (children && children.length > 0) {
-        // Alt menüleri olan eleman → başlık + children
-        // Eğer parent'ın URL'i yoksa → isTitle olarak ekle + collapse group
-        if (!parent.url) {
-          // Collapsible grup (başlık olarak parent adı zaten görünür)
-          result.push({
-            label: parent.name,
-            faIcon: parent.icon || undefined,
-            isCollapsed: true,
-            children: children
-              .sort((a, b) => a.orderIndex - b.orderIndex)
-              .map(c => ({
-                label: c.name,
-                url: c.url || undefined,
-                faIcon: c.icon || undefined,
-              })),
-          });
-        } else {
-          // URL'i olan parent → normal menu item with children
-          result.push({
-            label: parent.name,
-            url: parent.url,
-            faIcon: parent.icon || undefined,
-            isCollapsed: true,
-            children: children
-              .sort((a, b) => a.orderIndex - b.orderIndex)
-              .map(c => ({
-                label: c.name,
-                url: c.url || undefined,
-                faIcon: c.icon || undefined,
-              })),
-          });
-        }
+  /** Belirli seviyedeki menüleri recursive olarak oluştur */
+  private buildMenuLevel(items: Menu[], childMap: Map<string, Menu[]>): MenuItemType[] {
+    const result: MenuItemType[] = [];
+
+    for (const item of items.sort((a, b) => a.orderIndex - b.orderIndex)) {
+      const children = childMap.get(item.id);
+      const hasChildren = children && children.length > 0;
+      const hasUrl = !!item.url; // boş string "" → false
+
+      if (hasChildren) {
+        // Alt menüleri olan eleman → collapsible grup
+        const childItems = this.buildMenuLevel(children, childMap);
+        result.push({
+          label: item.name,
+          url: hasUrl ? item.url : undefined,
+          faIcon: item.icon || undefined,
+          isCollapsed: true,
+          children: childItems,
+        });
       } else {
-        // Alt menüsü yok → tek menu item (URL'i varsa göster)
-        if (parent.url) {
-          result.push({
-            label: parent.name,
-            url: parent.url,
-            faIcon: parent.icon || undefined,
-          });
-        }
+        // Alt menüsü yok → tek menü öğesi (URL'i olmasa bile göster)
+        result.push({
+          label: item.name,
+          url: hasUrl ? item.url : undefined,
+          faIcon: item.icon || undefined,
+        });
       }
     }
 

@@ -76,6 +76,15 @@
                           [innerHTML]="item.badge.text"></span>
                 }
             </a>
+        } @else {
+            <span class="side-nav-link disabled">
+                @if (item.faIcon) {
+                    <i [class]="item.faIcon + ' menu-icon'"></i>
+                } @else if (item.icon) {
+                    <lucide-angular class="menu-icon" [img]="item.icon"/>
+                }
+                <span class="menu-text">{{ item.label }}</span>
+            </span>
         }
     </li>
 </ng-template>

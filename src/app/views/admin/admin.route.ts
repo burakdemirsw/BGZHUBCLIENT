@@ -20,6 +20,11 @@ import { AiSettingsPage } from './ai-assistants/ai-settings/ai-settings';
 import { AiModelsPage } from './ai-assistants/ai-models/ai-models';
 import { AiProviderSettingsPage } from './ai-assistants/ai-provider-settings/ai-provider-settings';
 import { AiAssistantsPage } from './ai-assistants/ai-assistants-list/ai-assistants';
+import { RequestCategoriesPage } from './request-categories/request-categories';
+import { RequestPrioritiesPage } from './request-priorities/request-priorities';
+import { RequestStatusesPage } from './request-statuses/request-statuses';
+import { UserRequestsPage } from './user-requests/user-requests';
+import { UserRequestDetailPage } from './user-requests/user-request-detail';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -147,6 +152,36 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/ai-assistants',
         component: AiAssistantsPage,
         data: { title: 'AI Asistanlar' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/request-categories',
+        component: RequestCategoriesPage,
+        data: { title: 'Talep Kategorileri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/request-priorities',
+        component: RequestPrioritiesPage,
+        data: { title: 'Talep Öncelikleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/request-statuses',
+        component: RequestStatusesPage,
+        data: { title: 'Talep Durumları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/user-requests',
+        component: UserRequestsPage,
+        data: { title: 'Kullanıcı Talepleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/user-requests/:id',
+        component: UserRequestDetailPage,
+        data: { title: 'Talep Detayı' },
         canActivate: [AuthGuard],
     },
 ];

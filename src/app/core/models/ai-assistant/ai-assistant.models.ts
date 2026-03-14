@@ -4,7 +4,6 @@ export interface AiAssistant {
   name: string;
   aiProviderId: string;
   aiModelId: string;
-  meta: string;
   isBlocked?: boolean;
   createdDate?: string;
   updatedDate?: string;
@@ -21,7 +20,6 @@ export interface CreateAiAssistantRequest {
   name: string;
   aiProviderId: string;
   aiModelId: string;
-  meta: string;
 }
 
 export interface UpdateAiAssistantRequest {
@@ -29,6 +27,28 @@ export interface UpdateAiAssistantRequest {
   name: string;
   aiProviderId: string;
   aiModelId: string;
-  meta: string;
   isBlocked: boolean;
+}
+
+// ── AiKnowledge ──
+export interface AiKnowledge {
+  id: string;
+  assistantId: string;
+  prop: string;
+  value: string;
+  isBlocked?: boolean;
+  createdDate?: string;
+  updatedDate?: string;
+}
+
+export interface CreateAiKnowledgeRequest {
+  assistantId: string;
+  prop: string;
+  value: string;
+}
+
+export interface UpdateAiKnowledgeRequest {
+  assistantId: string;
+  prop: string;
+  value: string;
 }

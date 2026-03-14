@@ -1,0 +1,175 @@
+<app-page-title title="Talep Detayı" subtitle="Yönetim" />
+
+<div class="row">
+    <div class="col-12 mb-3">
+        <button class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+            <i class="ti ti-arrow-left me-1"></i> Geri Dön
+        </button>
+    </div>
+</div>
+
+@if (loading) {
+    <div class="text-center py-4">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Yükleniyor...</p>
+    </div>
+} @else if (request) {
+    <div class="row">
+        <!-- Talep Bilgileri -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">{{ request.subject }}</h5>
+                    <div>
+                        @if (!request.isBlocked) {
+                            <button class="btn btn-soft-warning btn-sm" (click)="closeRequest()">
+                                <i class="ti ti-lock me-1"></i> Talebi Kapat
+                            </button>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <p class="text-muted mb-1"><strong>Açıklama:</strong></p>
+                        <p style="white-space: pre-wrap;">{{ request.description }}</p>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <small class="text-muted">Oluşturan:</small><br>
+                            <strong>{{ request.userName ? (request.userName + ' ' + (request.userLastName || '')) : getUserFullName(request.userId) }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <small class="text-muted">Atanan Kişi:</small><br>
+                            @if (request.assignedUserId) {
+                                <strong>{{ request.assignedUserName ? (request.assignedUserName + ' ' + (request.assignedUserLastName || '')) : getUserFullName(request.assignedUserId) }}</strong>
+                            } @else {
+                                <span class="text-muted fst-italic">Atanmadı</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-4 mb-2">
+                            <small class="text-muted">Oluşturma Tarihi:</small><br>
+                            <strong>{{ formatDate(request.createdDate) }}</strong>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <small class="text-muted">Güncelleme Tarihi:</small><br>
+                            <strong>{{ formatDate(request.updatedDate) }}</strong>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <small class="text-muted">Kapanma Tarihi:</small><br>
+                            <strong>{{ formatDate(request.closedDate) }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mesajlar -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="ti ti-messages me-1"></i> Mesajlar
+                        @if (messages.length > 0) {
+                            <span class="badge bg-primary ms-1">{{ messages.length }}</span>
+                        }
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (messagesLoading) {
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                            <span class="ms-2 text-muted">Mesajlar yükleniyor...</span>
+                        </div>
+                    } @else {
+                        @if (messages.length > 0) {
+                            <div class="messages-list" style="max-height: 400px; overflow-y: auto;">
+                                @for (msg of messages; track msg.id) {
+                                    <div class="d-flex mb-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="avatar-sm bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                                <span class="fw-bold">{{ (msg.senderUserName || getUserFullName(msg.senderUserId)).charAt(0).toUpperCase() }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <strong class="small">{{ msg.senderUserName ? (msg.senderUserName + ' ' + (msg.senderUserLastName || '')) : getUserFullName(msg.senderUserId) }}</strong>
+                                                <small class="text-muted">{{ formatDate(msg.createdDate) }}</small>
+                                            </div>
+                                            <p class="mb-0 bg-light rounded p-2" style="white-space: pre-wrap;">{{ msg.message }}</p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        } @else {
+                            <p class="text-muted text-center mb-0">Henüz mesaj yok.</p>
+                        }
+
+                        <!-- Yeni Mesaj -->
+                        <hr class="my-3">
+                        <div class="d-flex gap-2">
+                            <textarea class="form-control" [(ngModel)]="newMessage" name="newMessage"
+                                rows="2" placeholder="Mesajınızı yazın..." (keydown.enter)="$event.ctrlKey && sendMessage()"></textarea>
+                            <button class="btn btn-primary align-self-end" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+                                <i class="ti ti-send me-1"></i> Gönder
+                            </button>
+                        </div>
+                        <small class="text-muted mt-1 d-block">Ctrl+Enter ile hızlı gönderim yapabilirsiniz.</small>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Panel -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Talep Bilgileri</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tbody>
+                            <tr>
+                                <td class="text-muted">Durum</td>
+                                <td class="text-end">
+                                    <span class="badge bg-info-subtle text-info">
+                                        {{ request.statusName || getStatusName(request.statusId) }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Öncelik</td>
+                                <td class="text-end">
+                                    <span class="badge" [style.background-color]="request.priorityColorCode || getPriorityColor(request.priorityId)" style="color: #fff;">
+                                        {{ request.priorityName || getPriorityName(request.priorityId) }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Kategori</td>
+                                <td class="text-end">
+                                    <strong>{{ request.categoryName || getCategoryName(request.categoryId) }}</strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Aktiflik</td>
+                                <td class="text-end">
+                                    @if (request.isBlocked) {
+                                        <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                    } @else {
+                                        <span class="badge bg-success-subtle text-success">Aktif</span>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+} @else {
+    <div class="text-center py-5">
+        <h5 class="text-muted">Talep bulunamadı.</h5>
+        <button class="btn btn-primary btn-sm mt-2" (click)="goBack()">Listeye Dön</button>
+    </div>
+}
