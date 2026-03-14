@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -6,7 +6,10 @@ import { routes } from './app.routes';
 import { DecimalPipe } from '@angular/common'
 import {provideDaterangepickerLocale} from 'ngx-daterangepicker-bootstrap';
 import { JwtHelperService, JWT_OPTIONS } from '@auth0/angular-jwt';
+import { NgxSpinnerModule } from 'ngx-spinner';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { httpErrorInterceptor } from './core/interceptors/http-error.interceptor';
+import { spinnerInterceptor } from './core/interceptors/spinner.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,7 +17,8 @@ export const appConfig: ApplicationConfig = {
       provideZoneChangeDetection({ eventCoalescing: true }),
       provideRouter(routes),
       provideAnimations(),
-      provideHttpClient(withInterceptors([authInterceptor])),
+      importProvidersFrom(NgxSpinnerModule.forRoot({ type: 'line-scale-pulse-out' })),
+      provideHttpClient(withInterceptors([spinnerInterceptor, authInterceptor, httpErrorInterceptor])),
       provideDaterangepickerLocale({
           separator: ' - ',
           cancelLabel: 'Cancel',

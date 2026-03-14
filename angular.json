@@ -49,7 +49,8 @@
                         ],
                         "styles": [
                             "src/styles.scss",
-                            "quill/dist/quill.bubble.css"
+                            "quill/dist/quill.bubble.css",
+                            "ngx-spinner/animations/line-scale-pulse-out.css"
                         ],
                         "allowedCommonJsDependencies": [
                             "dayjs",

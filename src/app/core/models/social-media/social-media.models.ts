@@ -17,20 +17,20 @@ export interface UpdateSocialMediaAccountRequest {
 // === Properties ===
 export interface SocialMediaAccountProperty {
   id: string;
-  socialMediaAccountId: string;
+  userSocialMediaAccountId: string;
   key: string;
   value: string;
   isBlocked?: boolean;
 }
 
 export interface CreateSocialMediaAccountPropertyRequest {
-  socialMediaAccountId: string;
+  userSocialMediaAccountId: string;
   key: string;
   value: string;
 }
 
 export interface UpdateSocialMediaAccountPropertyRequest {
-  socialMediaAccountId: string;
+  userSocialMediaAccountId: string;
   key: string;
   value: string;
   isBlocked: boolean;

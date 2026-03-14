@@ -6,10 +6,11 @@ import {provideIcons} from '@ng-icons/core';
 import {Title} from '@angular/platform-browser';
 import {filter, map, mergeMap} from 'rxjs/operators';
 import {provideFlatpickrDefaults} from 'angularx-flatpickr';
+import { NgxSpinnerComponent } from 'ngx-spinner';
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet],
+    imports: [RouterOutlet, NgxSpinnerComponent],
     templateUrl: './app.html',
     styleUrl: './app.scss',
     providers: [provideFlatpickrDefaults()],

@@ -17,7 +17,7 @@ export class HttpClientService {
       requestParameter.action ? `/${requestParameter.action}` : ''
     }`;
   }
-
+    
   async get<T>(
     requestParameter: Partial<RequestParameters>,
     id?: string
@@ -75,41 +75,5 @@ export class HttpClientService {
     );
   }
 
-  async put<T>(
-    requestParameter: Partial<RequestParameters>,
-    body: Partial<any>
-  ): Promise<any> {
-    let url: string = '';
-    if (requestParameter.fullEndPoint) url = requestParameter.fullEndPoint;
-    else
-      url = `${this.url(requestParameter)}${
-        requestParameter.queryString ? `?${requestParameter.queryString}` : ''
-      }`;
-
-    return await firstValueFrom(
-      this.httpClient.put<T>(url, body, {
-        headers: requestParameter.headers,
-        responseType: requestParameter.responseType as 'json',
-      })
-    );
-  }
-
-  async delete<T>(
-    requestParameter: Partial<RequestParameters>
-  ): Promise<any> {
-    let url: string = '';
-    if (requestParameter.fullEndPoint) url = requestParameter.fullEndPoint;
-    else
-      url = `${this.url(requestParameter)}${
-        requestParameter.queryString ? `?${requestParameter.queryString}` : ''
-      }`;
-
-    return await firstValueFrom(
-      this.httpClient.delete<T>(url, {
-        headers: requestParameter.headers,
-        responseType: requestParameter.responseType as 'json',
-      })
-    );
-  }
 }
   

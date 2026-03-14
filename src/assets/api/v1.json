@@ -5512,7 +5512,7 @@
         ]
       }
     },
-    "/api/SocialMedia/update/accounts/{id}": {
+    "/api/SocialMedia/accounts/update/{id}": {
       "post": {
         "tags": [
           "SocialMedia"
@@ -5560,191 +5560,7 @@
         ]
       }
     },
-    "/api/SocialMedia/delete/accounts/{id}": {
-      "post": {
-        "tags": [
-          "SocialMedia"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/SocialMedia/descriptions": {
-      "get": {
-        "tags": [
-          "SocialMedia"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      },
-      "post": {
-        "tags": [
-          "SocialMedia"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSocialMediaAccountDescriptionRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSocialMediaAccountDescriptionRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSocialMediaAccountDescriptionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/SocialMedia/descriptions/{id}": {
-      "get": {
-        "tags": [
-          "SocialMedia"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/SocialMedia/accounts/{accountId}/descriptions": {
-      "get": {
-        "tags": [
-          "SocialMedia"
-        ],
-        "parameters": [
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/SocialMedia/update/descriptions/{id}": {
-      "post": {
-        "tags": [
-          "SocialMedia"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateSocialMediaAccountDescriptionRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateSocialMediaAccountDescriptionRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateSocialMediaAccountDescriptionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/SocialMedia/delete/descriptions/{id}": {
+    "/api/SocialMedia/accounts/delete/{id}": {
       "post": {
         "tags": [
           "SocialMedia"
@@ -5880,7 +5696,7 @@
         ]
       }
     },
-    "/api/SocialMedia/update/properties/{id}": {
+    "/api/SocialMedia/properties/update/{id}": {
       "post": {
         "tags": [
           "SocialMedia"
@@ -5928,7 +5744,7 @@
         ]
       }
     },
-    "/api/SocialMedia/delete/properties/{id}": {
+    "/api/SocialMedia/properties/delete/{id}": {
       "post": {
         "tags": [
           "SocialMedia"
@@ -6092,7 +5908,7 @@
         ]
       }
     },
-    "/api/SocialMedia/update/user-accounts/{id}": {
+    "/api/SocialMedia/user-accounts/update/{id}": {
       "post": {
         "tags": [
           "SocialMedia"
@@ -6140,7 +5956,7 @@
         ]
       }
     },
-    "/api/SocialMedia/delete/user-accounts/{id}": {
+    "/api/SocialMedia/user-accounts/delete/{id}": {
       "post": {
         "tags": [
           "SocialMedia"
@@ -8382,46 +8198,15 @@
           }
         }
       },
-      "CreateSocialMediaAccountDescriptionRequest": {
-        "required": [
-          "socialMediaAccountId",
-          "langCode",
-          "description"
-        ],
-        "type": "object",
-        "properties": {
-          "socialMediaAccountId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "langCode": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        }
-      },
       "CreateSocialMediaAccountPropertyRequest": {
         "required": [
-          "userId",
-          "socialMediaAccountId",
+          "userSocialMediaAccountId",
           "key",
           "value"
         ],
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "socialMediaAccountId": {
+          "userSocialMediaAccountId": {
             "type": "string",
             "format": "uuid"
           },
@@ -9914,51 +9699,16 @@
           }
         }
       },
-      "UpdateSocialMediaAccountDescriptionRequest": {
-        "required": [
-          "socialMediaAccountId",
-          "langCode",
-          "description",
-          "isBlocked"
-        ],
-        "type": "object",
-        "properties": {
-          "socialMediaAccountId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "langCode": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "isBlocked": {
-            "type": "boolean"
-          }
-        }
-      },
       "UpdateSocialMediaAccountPropertyRequest": {
         "required": [
-          "userId",
-          "socialMediaAccountId",
+          "userSocialMediaAccountId",
           "key",
           "value",
           "isBlocked"
         ],
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "socialMediaAccountId": {
+          "userSocialMediaAccountId": {
             "type": "string",
             "format": "uuid"
           },

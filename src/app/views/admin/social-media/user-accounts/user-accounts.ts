@@ -174,10 +174,17 @@ export class UserSocialMediaAccountsPage implements OnInit {
         const accountName = this.getAccountName(userAccount.socialMediaAccountId);
         if (confirm(`"${userName}" kullanıcısının "${accountName}" hesap atamasını silmek istediğinize emin misiniz?`)) {
             try {
+                console.log('Deleting user account with ID:', userAccount.id);
+                console.log('API URL will be: /api/SocialMedia/delete/user-accounts/' + userAccount.id);
                 await this.socialMediaService.deleteUserAccount(userAccount.id);
+                console.log('Delete successful');
                 await this.loadUserAccounts();
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Delete error:', err);
+                console.error('Error status:', err.status);
+                console.error('Error message:', err.message);
+                console.error('Error details:', err.error);
+                alert(`Silme işlemi başarısız: ${err.status} - ${err.message || 'Bilinmeyen hata'}`);
             }
         }
     }
