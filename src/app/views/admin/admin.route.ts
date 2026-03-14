@@ -26,6 +26,9 @@ import { RequestPrioritiesPage } from './request-priorities/request-priorities';
 import { RequestStatusesPage } from './request-statuses/request-statuses';
 import { UserRequestsPage } from './user-requests/user-requests';
 import { UserRequestDetailPage } from './user-requests/user-request-detail';
+import { TeamsPage } from './teams/teams';
+import { TeamInvitationsPage } from './teams/team-invitations/team-invitations';
+import { TeamSettingsPage } from './teams/team-settings/team-settings';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -189,6 +192,24 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/user-requests/:id',
         component: UserRequestDetailPage,
         data: { title: 'Talep Detayı' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/teams',
+        component: TeamsPage,
+        data: { title: 'Takımlar' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/team-invitations',
+        component: TeamInvitationsPage,
+        data: { title: 'Takım Davetleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/team-settings',
+        component: TeamSettingsPage,
+        data: { title: 'Takım Ayarları' },
         canActivate: [AuthGuard],
     },
 ];
