@@ -109,7 +109,7 @@
                         <hr class="my-3">
                         <div class="d-flex gap-2">
                             <textarea class="form-control" [(ngModel)]="newMessage" name="newMessage"
-                                rows="2" placeholder="Mesajınızı yazın..." (keydown.enter)="$event.ctrlKey && sendMessage()"></textarea>
+                                rows="2" placeholder="Mesajınızı yazın..." (keydown.enter)="onMessageKeydown($event)"></textarea>
                             <button class="btn btn-primary align-self-end" (click)="sendMessage()" [disabled]="!newMessage.trim()">
                                 <i class="ti ti-send me-1"></i> Gönder
                             </button>

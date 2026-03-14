@@ -198,6 +198,13 @@ export class UserRequestDetailPage implements OnInit {
         }
     }
 
+    onMessageKeydown(event: Event): void {
+        const keyboardEvent = event as KeyboardEvent;
+        if (keyboardEvent.ctrlKey) {
+            this.sendMessage();
+        }
+    }
+
     // ── Talebi Kapat ──
     async closeRequest(): Promise<void> {
         if (!this.request) return;

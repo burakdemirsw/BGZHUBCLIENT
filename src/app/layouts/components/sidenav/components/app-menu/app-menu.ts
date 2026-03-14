@@ -94,13 +94,18 @@ export class AppMenu implements OnInit {
     }
 
     isChildActive(item: MenuItemType): boolean {
-        if (item.url && this.router.url === item.url) return true;
+        if (this.isRouteActive(item.url)) return true;
         if (!item.children) return false;
         return item.children.some((child: MenuItemType) => this.isChildActive(child));
     }
 
     isActive(item: MenuItemType): boolean {
-        return this.router.url === item.url;
+        return this.isRouteActive(item.url);
+    }
+
+    private isRouteActive(url?: string): boolean {
+        if (!url) return false;
+        return this.router.isActive(url, false);
     }
 
     scrollToActiveLink(): void {
