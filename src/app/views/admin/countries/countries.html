@@ -26,7 +26,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (country of countries; track country.id) {
+                                @for (country of countries; track $index) {
                                     <tr>
                                         <td>{{ country.name }}</td>
                                         <td><span class="badge bg-info-subtle text-info">{{ country.code }}</span></td>

@@ -6,7 +6,7 @@
                     <h4 class="card-title mb-0">İl Listesi</h4>
                     <select class="form-select form-select-sm" style="width: 200px" [(ngModel)]="filterCountryId" (ngModelChange)="onFilterChange()">
                         <option value="">Tüm Ülkeler</option>
-                        @for (country of countries; track country.id) {
+                        @for (country of countries; track $index) {
                             <option [value]="country.id">{{ country.name }}</option>
                         }
                     </select>
@@ -34,7 +34,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (city of cities; track city.id) {
+                                @for (city of cities; track $index) {
                                     <tr>
                                         <td>{{ city.name }}</td>
                                         <td><span class="badge bg-info-subtle text-info">{{ city.code }}</span></td>
@@ -76,7 +76,7 @@
                             <label class="form-label">Ülke</label>
                             <select class="form-select" [(ngModel)]="form.countryId" name="countryId" required>
                                 <option value="" disabled>Ülke seçin</option>
-                                @for (country of countries; track country.id) {
+                                @for (country of countries; track $index) {
                                     <option [value]="country.id">{{ country.name }}</option>
                                 }
                             </select>

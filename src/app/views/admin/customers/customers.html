@@ -26,7 +26,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (customer of customers; track customer.id) {
+                                @for (customer of customers; track $index) {
                                     <tr>
                                         <td>{{ getDisplayName(customer) }}</td>
                                         <td>{{ customer.companyName ?? '-' }}</td>

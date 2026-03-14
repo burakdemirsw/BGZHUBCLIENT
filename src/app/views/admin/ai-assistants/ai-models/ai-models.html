@@ -30,7 +30,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (item of models; track item.id) {
+                                @for (item of models; track $index) {
                                     <tr>
                                         <td>{{ item.aiProvider?.firmDescription || getProviderName(item.aiProviderId) }}</td>
                                         <td>{{ item.name }}</td>
@@ -79,7 +79,7 @@
                                 <label class="form-label">Sağlayıcı</label>
                                 <select class="form-select" [(ngModel)]="form.aiProviderId" name="aiProviderId" required>
                                     <option value="">Seçiniz...</option>
-                                    @for (provider of providers; track provider.id) {
+                                    @for (provider of providers; track $index) {
                                         <option [value]="provider.id">{{ provider.firmDescription }}</option>
                                     }
                                 </select>

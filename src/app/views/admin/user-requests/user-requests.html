@@ -19,7 +19,7 @@
                     <div class="col-md-2">
                         <select class="form-select form-select-sm" [(ngModel)]="filterStatus" (ngModelChange)="applyFilters()" name="filterStatus">
                             <option value="">Tüm Durumlar</option>
-                            @for (status of statuses; track status.id) {
+                            @for (status of statuses; track $index) {
                                 <option [value]="status.id">{{ status.name }}</option>
                             }
                         </select>
@@ -27,7 +27,7 @@
                     <div class="col-md-2">
                         <select class="form-select form-select-sm" [(ngModel)]="filterPriority" (ngModelChange)="applyFilters()" name="filterPriority">
                             <option value="">Tüm Öncelikler</option>
-                            @for (priority of priorities; track priority.id) {
+                            @for (priority of priorities; track $index) {
                                 <option [value]="priority.id">{{ priority.name }}</option>
                             }
                         </select>
@@ -35,7 +35,7 @@
                     <div class="col-md-2">
                         <select class="form-select form-select-sm" [(ngModel)]="filterCategory" (ngModelChange)="applyFilters()" name="filterCategory">
                             <option value="">Tüm Kategoriler</option>
-                            @for (category of categories; track category.id) {
+                            @for (category of categories; track $index) {
                                 <option [value]="category.id">{{ category.name }}</option>
                             }
                         </select>
@@ -71,7 +71,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (item of filteredRequests; track item.id) {
+                                @for (item of filteredRequests; track $index) {
                                     <tr>
                                         <td>
                                             <span class="text-truncate d-inline-block" style="max-width: 200px;" title="{{ item.subject }}">
@@ -152,22 +152,11 @@
                             </div>
                         </div>
                         <div class="row">
-                            @if (!editMode) {
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Entegrasyon</label>
-                                    <select class="form-select" [(ngModel)]="form.integrationId" name="integrationId" required>
-                                        <option value="">Seçiniz...</option>
-                                        @for (integration of integrations; track integration.id) {
-                                            <option [value]="integration.id">{{ integration.name }}</option>
-                                        }
-                                    </select>
-                                </div>
-                            }
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Kategori</label>
                                 <select class="form-select" [(ngModel)]="form.categoryId" name="categoryId" required>
                                     <option value="">Seçiniz...</option>
-                                    @for (category of categories; track category.id) {
+                                    @for (category of categories; track $index) {
                                         <option [value]="category.id">{{ category.name }}</option>
                                     }
                                 </select>
@@ -178,7 +167,7 @@
                                 <label class="form-label">Öncelik</label>
                                 <select class="form-select" [(ngModel)]="form.priorityId" name="priorityId" required>
                                     <option value="">Seçiniz...</option>
-                                    @for (priority of priorities; track priority.id) {
+                                    @for (priority of priorities; track $index) {
                                         <option [value]="priority.id">{{ priority.name }}</option>
                                     }
                                 </select>
@@ -188,7 +177,7 @@
                                     <label class="form-label">Durum</label>
                                     <select class="form-select" [(ngModel)]="form.statusId" name="statusId" required>
                                         <option value="">Seçiniz...</option>
-                                        @for (status of statuses; track status.id) {
+                                        @for (status of statuses; track $index) {
                                             <option [value]="status.id">{{ status.name }}</option>
                                         }
                                     </select>
@@ -201,7 +190,7 @@
                                     <label class="form-label">Atanan Kişi</label>
                                     <select class="form-select" [(ngModel)]="form.assignedUserId" name="assignedUserId">
                                         <option value="">Atanmadı</option>
-                                        @for (user of users; track user.id) {
+                                        @for (user of users; track $index) {
                                             <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
                                         }
                                     </select>

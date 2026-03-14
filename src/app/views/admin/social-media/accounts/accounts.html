@@ -25,7 +25,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (account of accounts; track account.id) {
+                                @for (account of accounts; track $index) {
                                     <tr>
                                         <td>{{ account.name }}</td>
                                         <td>{{ getUserName(account.userId) }}</td>
@@ -66,7 +66,7 @@
                             <label class="form-label">Kullanıcı</label>
                             <select class="form-select" [(ngModel)]="form.userId" name="userId" required>
                                 <option value="">Seçiniz...</option>
-                                @for (user of users; track user.id) {
+                                @for (user of users; track $index) {
                                     <option [value]="user.id">{{ user.userName ?? user.email ?? user.name }}</option>
                                 }
                             </select>

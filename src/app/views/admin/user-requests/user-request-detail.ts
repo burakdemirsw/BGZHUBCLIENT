@@ -198,9 +198,8 @@ export class UserRequestDetailPage implements OnInit {
         }
     }
 
-    onMessageKeydown(event: Event): void {
-        const keyboardEvent = event as KeyboardEvent;
-        if (keyboardEvent.ctrlKey) {
+    onMessageKeydown(event: KeyboardEvent): void {
+        if (event.ctrlKey) {
             this.sendMessage();
         }
     }

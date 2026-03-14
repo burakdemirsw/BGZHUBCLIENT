@@ -29,7 +29,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (item of priorities; track item.id) {
+                                @for (item of priorities; track $index) {
                                     <tr>
                                         <td>
                                             <span class="d-flex align-items-center gap-2">

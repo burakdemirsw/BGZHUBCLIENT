@@ -54,7 +54,7 @@
                              [cdkDropListData]="leads">
                             <ngx-simplebar style="height: 100%;">
                                 <ul>
-                                    @for (task of leads; track task.id; ) {
+                                    @for (task of leads; track $index; ) {
                                         <li class="kanban-item">
                                             <app-task-item [item]="task" cdkDrag/>
                                         </li>
@@ -77,7 +77,7 @@
                              [cdkDropListData]="negotiations">
                             <ngx-simplebar style="height: 100%;">
                                 <ul>
-                                    @for (task of negotiations; track task.id) {
+                                    @for (task of negotiations; track $index) {
                                         <li class="kanban-item">
                                             <app-task-item [item]="task" cdkDrag/>
                                         </li>
@@ -101,7 +101,7 @@
                              [cdkDropListData]="won">
                             <ngx-simplebar style="height: 100%;">
                                 <ul>
-                                    @for (task of won; track task.id) {
+                                    @for (task of won; track $index) {
                                         <li class="kanban-item">
                                             <app-task-item [item]="task" cdkDrag/>
                                         </li>
@@ -124,7 +124,7 @@
                              [cdkDropListData]="lost">
                             <ngx-simplebar style="height: 100%;">
                                 <ul>
-                                    @for (task of lost; track task.id) {
+                                    @for (task of lost; track $index) {
                                         <li class="kanban-item">
                                             <app-task-item [item]="task" cdkDrag/>
                                         </li>

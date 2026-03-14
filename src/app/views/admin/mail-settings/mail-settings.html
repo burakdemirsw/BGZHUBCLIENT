@@ -27,7 +27,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (setting of settings; track setting.id) {
+                                @for (setting of settings; track $index) {
                                     <tr>
                                         <td>{{ setting.userName }}</td>
                                         <td>{{ setting.smtpAddress }}</td>

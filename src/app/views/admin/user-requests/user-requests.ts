@@ -8,7 +8,6 @@ import { RequestCategoriesService } from '@/app/core/services/request-categories
 import { RequestPrioritiesService } from '@/app/core/services/request-priorities.service';
 import { RequestStatusesService } from '@/app/core/services/request-statuses.service';
 import { UsersService } from '@/app/core/services/users.service';
-import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { UserMenuService } from '@/app/core/services/user-menu.service';
 import {
     UserRequest,
@@ -32,7 +31,6 @@ export class UserRequestsPage implements OnInit {
     priorities: RequestPriority[] = [];
     statuses: RequestStatus[] = [];
     users: User[] = [];
-    integrations: any[] = [];
     loading = false;
     showModal = false;
     editMode = false;
@@ -45,7 +43,6 @@ export class UserRequestsPage implements OnInit {
     searchText = '';
 
     form: any = {
-        integrationId: '',
         userId: '',
         assignedUserId: '',
         categoryId: '',
@@ -62,7 +59,6 @@ export class UserRequestsPage implements OnInit {
         private priorityService: RequestPrioritiesService,
         private statusService: RequestStatusesService,
         private usersService: UsersService,
-        private integrationService: IntegrationsService,
         private userMenuService: UserMenuService,
     ) {}
 
@@ -72,7 +68,6 @@ export class UserRequestsPage implements OnInit {
         this.loadPriorities();
         this.loadStatuses();
         this.loadUsers();
-        this.loadIntegrations();
     }
 
     // ── Veri Yükleme ──
@@ -125,15 +120,6 @@ export class UserRequestsPage implements OnInit {
         }
     }
 
-    async loadIntegrations(): Promise<void> {
-        try {
-            const response = await this.integrationService.getAll();
-            this.integrations = this.extractArray(response);
-        } catch (err) {
-            console.error('Integrations load error:', err);
-        }
-    }
-
     private extractArray(response: any): any[] {
         if (Array.isArray(response)) return response;
         if (response?.$values) return response.$values;
@@ -163,11 +149,6 @@ export class UserRequestsPage implements OnInit {
     getUserFullName(id: string): string {
         const user = this.users.find(u => u.id === id);
         return user ? `${user.name} ${user.lastName}` : '-';
-    }
-
-    getIntegrationName(id: string): string {
-        const integration = this.integrations.find((i: any) => i.id === id);
-        return integration?.name ?? '-';
     }
 
     // ── Filtreleme ──
@@ -209,7 +190,6 @@ export class UserRequestsPage implements OnInit {
         this.selectedRequest = null;
         const userId = this.userMenuService.getUserIdFromToken();
         this.form = {
-            integrationId: '',
             userId: userId ?? '',
             assignedUserId: '',
             categoryId: '',
@@ -226,7 +206,6 @@ export class UserRequestsPage implements OnInit {
         this.editMode = true;
         this.selectedRequest = request;
         this.form = {
-            integrationId: request.integrationId ?? '',
             userId: request.userId ?? '',
             assignedUserId: request.assignedUserId ?? '',
             categoryId: request.categoryId ?? '',
@@ -254,7 +233,6 @@ export class UserRequestsPage implements OnInit {
                 await this.requestService.update(this.selectedRequest.id, req);
             } else {
                 const req: CreateUserRequestRequest = {
-                    integrationId: this.form.integrationId,
                     userId: this.form.userId,
                     categoryId: this.form.categoryId,
                     priorityId: this.form.priorityId,

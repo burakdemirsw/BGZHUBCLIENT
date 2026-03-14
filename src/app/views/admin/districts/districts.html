@@ -6,13 +6,13 @@
                     <h4 class="card-title mb-0">İlçe Listesi</h4>
                     <select class="form-select form-select-sm" style="width: 180px" [(ngModel)]="filterCountryId" (ngModelChange)="onCountryFilterChange()">
                         <option value="">Tüm Ülkeler</option>
-                        @for (country of countries; track country.id) {
+                        @for (country of countries; track $index) {
                             <option [value]="country.id">{{ country.name }}</option>
                         }
                     </select>
                     <select class="form-select form-select-sm" style="width: 180px" [(ngModel)]="filterCityId" (ngModelChange)="onCityFilterChange()">
                         <option value="">Tüm İller</option>
-                        @for (city of cities; track city.id) {
+                        @for (city of cities; track $index) {
                             <option [value]="city.id">{{ city.name }}</option>
                         }
                     </select>
@@ -39,7 +39,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (district of districts; track district.id) {
+                                @for (district of districts; track $index) {
                                     <tr>
                                         <td>{{ district.name }}</td>
                                         <td>{{ getCityName(district.cityId) }}</td>
@@ -80,7 +80,7 @@
                             <label class="form-label">İl</label>
                             <select class="form-select" [(ngModel)]="form.cityId" name="cityId" required>
                                 <option value="" disabled>İl seçin</option>
-                                @for (city of cities; track city.id) {
+                                @for (city of cities; track $index) {
                                     <option [value]="city.id">{{ city.name }}</option>
                                 }
                             </select>

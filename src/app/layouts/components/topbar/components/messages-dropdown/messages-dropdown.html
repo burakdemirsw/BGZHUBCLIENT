@@ -36,7 +36,7 @@
                     </div>
                 }
 
-                @for (item of notifications; track item.id) {
+                @for (item of notifications; track $index) {
                     <button
                         ngbDropdownItem
                         class="notification-item py-2 text-wrap"

@@ -12,7 +12,7 @@
                         <label class="form-label small text-muted">Entegrasyon</label>
                         <select class="form-select form-select-sm" [(ngModel)]="filterIntegrationId">
                             <option value="">Tümü</option>
-                            @for (int of integrations; track int.id) {
+                            @for (int of integrations; track $index) {
                                 <option [value]="int.id">{{ int.integrationDescription }}</option>
                             }
                         </select>
@@ -21,7 +21,7 @@
                         <label class="form-label small text-muted">Kullanıcı</label>
                         <select class="form-select form-select-sm" [(ngModel)]="filterUserId">
                             <option value="">Tümü</option>
-                            @for (user of users; track user.id) {
+                            @for (user of users; track $index) {
                                 <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
                             }
                         </select>
@@ -47,7 +47,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (prop of filteredProperties; track prop.id) {
+                                @for (prop of filteredProperties; track $index) {
                                     <tr>
                                         <td>
                                             <span class="badge bg-info-subtle text-info">
@@ -108,7 +108,7 @@
                         <label class="form-label">Entegrasyon</label>
                         <select class="form-select" [(ngModel)]="form.integrationId" [disabled]="editMode">
                             <option value="" disabled>Seçin</option>
-                            @for (int of integrations; track int.id) {
+                            @for (int of integrations; track $index) {
                                 <option [value]="int.id">{{ int.integrationDescription }}</option>
                             }
                         </select>
@@ -117,7 +117,7 @@
                         <label class="form-label">Kullanıcı</label>
                         <select class="form-select" [(ngModel)]="form.userId" [disabled]="editMode">
                             <option value="" disabled>Seçin</option>
-                            @for (user of users; track user.id) {
+                            @for (user of users; track $index) {
                                 <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
                             }
                         </select>

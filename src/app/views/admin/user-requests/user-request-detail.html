@@ -84,7 +84,7 @@
                     } @else {
                         @if (messages.length > 0) {
                             <div class="messages-list" style="max-height: 400px; overflow-y: auto;">
-                                @for (msg of messages; track msg.id) {
+                                @for (msg of messages; track $index) {
                                     <div class="d-flex mb-3">
                                         <div class="flex-shrink-0">
                                             <div class="avatar-sm bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
@@ -109,7 +109,7 @@
                         <hr class="my-3">
                         <div class="d-flex gap-2">
                             <textarea class="form-control" [(ngModel)]="newMessage" name="newMessage"
-                                rows="2" placeholder="Mesajınızı yazın..." (keydown.enter)="onMessageKeydown($event)"></textarea>
+                                rows="2" placeholder="Mesajınızı yazın..." (keydown.enter)="onMessageKeydown($any($event))"></textarea>
                             <button class="btn btn-primary align-self-end" (click)="sendMessage()" [disabled]="!newMessage.trim()">
                                 <i class="ti ti-send me-1"></i> Gönder
                             </button>

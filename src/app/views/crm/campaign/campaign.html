@@ -93,7 +93,7 @@
 
                         <tbody class="text-nowrap">
                             @if ((total$ | async)! > 0) {
-                                @for (campaign of campaigns$ | async; track campaign.id) {
+                                @for (campaign of campaigns$ | async; track $index) {
                                     <tr>
                                         <td class="ps-3">
                                             <input [(ngModel)]="campaign.selected"

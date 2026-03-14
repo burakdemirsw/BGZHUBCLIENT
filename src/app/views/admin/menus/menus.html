@@ -28,7 +28,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (menu of menus; track menu.id) {
+                                @for (menu of menus; track $index) {
                                     <tr>
                                         <td><i [class]="menu.icon" class="me-1"></i> {{ menu.name }}</td>
                                         <td>{{ menu.description }}</td>
@@ -87,7 +87,7 @@
                             <label class="form-label">Üst Menü</label>
                             <select class="form-select" [(ngModel)]="form.parentId" name="parentId">
                                 <option [ngValue]="null">— Ana Menü —</option>
-                                @for (m of menus; track m.id) {
+                                @for (m of menus; track $index) {
                                     <option [ngValue]="m.id">{{ m.name }}</option>
                                 }
                             </select>

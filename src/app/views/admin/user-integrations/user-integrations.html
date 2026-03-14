@@ -6,7 +6,7 @@
                 <div style="min-width: 250px">
                     <select class="form-select form-select-sm" [(ngModel)]="filterIntegrationId">
                         <option value="">Tüm Entegrasyonlar</option>
-                        @for (int of integrations; track int.id) {
+                        @for (int of integrations; track $index) {
                             <option [value]="int.id">{{ int.integrationDescription }}</option>
                         }
                     </select>
@@ -30,12 +30,12 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (user of filteredUsers; track user.id) {
+                                @for (user of filteredUsers; track $index) {
                                     <tr>
                                         <td>{{ user.name }} {{ user.lastName }}</td>
                                         <td>{{ user.email }}</td>
                                         <td>
-                                            @for (iu of getUserIntegrations(user.id); track iu.id) {
+                                            @for (iu of getUserIntegrations(user.id); track $index) {
                                                 <span class="badge me-1"
                                                       [class]="iu.isBlocked ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'">
                                                     {{ getIntegrationName(iu.integrationId) }}
@@ -88,7 +88,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @for (iu of selectedUserIntegrations; track iu.id) {
+                                    @for (iu of selectedUserIntegrations; track $index) {
                                         <tr>
                                             <td>
                                                 <span class="badge" [class]="iu.isBlocked ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'">
@@ -128,7 +128,7 @@
                             <div class="flex-grow-1">
                                 <select class="form-select" [(ngModel)]="selectedIntegrationId">
                                     <option value="" disabled>Entegrasyon seçin</option>
-                                    @for (int of getAvailableIntegrations(selectedUser.id); track int.id) {
+                                    @for (int of getAvailableIntegrations(selectedUser.id); track $index) {
                                         <option [value]="int.id">{{ int.integrationDescription }}</option>
                                     }
                                 </select>

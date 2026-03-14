@@ -1,6 +1,5 @@
 export interface UserRequest {
     id: string;
-    integrationId: string;
     userId: string;
     assignedUserId?: string;
     categoryId: string;
@@ -22,11 +21,9 @@ export interface UserRequest {
     statusName?: string;
     priorityName?: string;
     priorityColorCode?: string;
-    integrationName?: string;
 }
 
 export interface CreateUserRequestRequest {
-    integrationId: string;
     userId: string;
     categoryId: string;
     priorityId: string;

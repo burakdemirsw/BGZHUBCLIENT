@@ -23,7 +23,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (item of integrations; track item.id) {
+                                @for (item of integrations; track $index) {
                                     <tr>
                                         <td>{{ item.integrationDescription }}</td>
                                         <td class="text-end">

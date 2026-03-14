@@ -245,7 +245,7 @@
                                 </thead>
                                 <tbody>
                                     @if ((total$ | async)! > 0) {
-                                    @for (user of users$ | async; track user.id) {
+                                    @for (user of users$ | async; track $index) {
                                     <tr>
                                         <td class="ps-3"><input
                                                 class="form-check-input form-check-input-light fs-14 file-item-check mt-0"

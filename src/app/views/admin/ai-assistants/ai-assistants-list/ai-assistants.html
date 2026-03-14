@@ -26,7 +26,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (item of assistants; track item.id) {
+                                @for (item of assistants; track $index) {
                                     <tr>
                                         <td>{{ item.name }}</td>
                                         <td>{{ item.providerFirmDescription || getProviderName(item.aiProviderId) }}</td>
@@ -78,7 +78,7 @@
                                 <label class="form-label">Sağlayıcı</label>
                                 <select class="form-select" [(ngModel)]="form.aiProviderId" name="aiProviderId" (ngModelChange)="onProviderChange()" required>
                                     <option value="">Seçiniz...</option>
-                                    @for (provider of providers; track provider.id) {
+                                    @for (provider of providers; track $index) {
                                         <option [value]="provider.id">{{ provider.firmDescription }}</option>
                                     }
                                 </select>
@@ -87,7 +87,7 @@
                                 <label class="form-label">Model</label>
                                 <select class="form-select" [(ngModel)]="form.aiModelId" name="aiModelId" required>
                                     <option value="">Seçiniz...</option>
-                                    @for (model of filteredModels; track model.id) {
+                                    @for (model of filteredModels; track $index) {
                                         <option [value]="model.id">{{ model.name }} ({{ model.modelCode }})</option>
                                     }
                                 </select>
@@ -118,7 +118,7 @@
                         @if (editMode && knowledgeList.length > 0) {
                             <div class="mb-3">
                                 <label class="form-label text-muted small">Mevcut Bilgiler</label>
-                                @for (kItem of knowledgeList; track kItem.id) {
+                                @for (kItem of knowledgeList; track $index) {
                                     <div class="row g-2 mb-2 align-items-center">
                                         <div class="col-md-4">
                                             <input type="text" class="form-control form-control-sm" [value]="kItem.prop" disabled placeholder="Özellik">

@@ -18,7 +18,7 @@
                 [isTogglable]="true"
             >
                 <div card-body>
-                    @for (alert of alertData1; track alert.id) {
+                    @for (alert of alertData1; track $index) {
                     <ngb-alert
                         [type]="alert.type"
                         [dismissible]="false"

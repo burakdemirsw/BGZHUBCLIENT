@@ -27,7 +27,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (item of settings; track item.id) {
+                                @for (item of settings; track $index) {
                                     <tr>
                                         <td>{{ item.settingDescription }}</td>
                                         <td>{{ item.definition }}</td>

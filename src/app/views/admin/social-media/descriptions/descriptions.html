@@ -6,7 +6,7 @@
                 <div class="d-flex gap-2 align-items-center">
                     <select class="form-select form-select-sm" style="width: 220px;" [(ngModel)]="filterAccountId" (ngModelChange)="onFilterChange()">
                         <option value="">Tüm Hesaplar</option>
-                        @for (account of accounts; track account.id) {
+                        @for (account of accounts; track $index) {
                             <option [value]="account.id">{{ account.name }}</option>
                         }
                     </select>
@@ -34,7 +34,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (desc of descriptions; track desc.id) {
+                                @for (desc of descriptions; track $index) {
                                     <tr>
                                         <td>{{ getAccountName(desc.socialMediaAccountId) }}</td>
                                         <td>{{ desc.langCode }}</td>
@@ -76,7 +76,7 @@
                             <label class="form-label">Hesap</label>
                             <select class="form-select" [(ngModel)]="form.socialMediaAccountId" name="socialMediaAccountId" required>
                                 <option value="">Seçiniz...</option>
-                                @for (account of accounts; track account.id) {
+                                @for (account of accounts; track $index) {
                                     <option [value]="account.id">{{ account.name }}</option>
                                 }
                             </select>

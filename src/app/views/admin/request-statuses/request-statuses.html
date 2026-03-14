@@ -27,7 +27,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (item of statuses; track item.id) {
+                                @for (item of statuses; track $index) {
                                     <tr>
                                         <td>{{ item.name }}</td>
                                         <td>

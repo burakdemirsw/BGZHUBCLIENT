@@ -110,7 +110,7 @@
 
                             <tbody class="text-nowrap">
                                 @if ((total$ | async)! > 0) {
-                                    @for (lead of tableService.items$ | async; track lead.id) {
+                                    @for (lead of tableService.items$ | async; track $index) {
                                         <tr>
                                             <td class="ps-3">
                                                 <input [(ngModel)]="lead.selected"
