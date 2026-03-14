@@ -1,11 +1,11 @@
-export type StatCardType = {
-    id: number
+export type DashboardMetric = {
+    id: string
     title: string
     value: number
-    suffix?: string
-    prefix?: string
+    helper?: string
     icon: string
     iconBg?: string
+    gradient: string
 }
 
 export type ProductType = {

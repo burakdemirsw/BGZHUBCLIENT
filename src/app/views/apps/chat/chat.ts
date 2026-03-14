@@ -1,5 +1,4 @@
 import {AfterViewInit, Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {ChatSidebar} from '@/app/views/apps/chat/components/chat-sidebar';
 import {NgbDropdownModule, NgbOffcanvas, NgbOffcanvasModule, NgbTooltipModule} from '@ng-bootstrap/ng-bootstrap';
 import {ChatService} from '@/app/views/apps/chat/chat.service';
@@ -13,7 +12,6 @@ import {RouterLink} from '@angular/router';
 @Component({
     selector: 'app-chat',
     imports: [
-        PageTitle,
         NgbOffcanvasModule,
         FormsModule,
         ReactiveFormsModule,

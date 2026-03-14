@@ -4,12 +4,11 @@ import {ChatService} from '@/app/views/apps/chat/chat.service';
 import {generateInitials} from '@/app/utils/string-utils';
 import {SimplebarAngularModule} from 'simplebar-angular';
 import {NgIcon} from '@ng-icons/core';
-import {RouterLink} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 
 @Component({
     selector: 'app-chat-sidebar',
-    imports: [ NgbOffcanvasModule, SimplebarAngularModule, NgIcon, RouterLink,FormsModule],
+    imports: [ NgbOffcanvasModule, SimplebarAngularModule, NgIcon, FormsModule],
     template: `
         <div class="card h-100 mb-0 border-end-0 rounded-end-0">
             <div class="card-header p-3 border-light card-bg d-block">
