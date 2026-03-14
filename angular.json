@@ -17,7 +17,10 @@
                 "build": {
                     "builder": "@angular-devkit/build-angular:application",
                     "options": {
-                        "outputPath": "dist/ubold-ng",
+                        "outputPath": {
+                            "base": "dist/ubold-ng",
+                            "browser": ""
+                        },
                         "index": "src/index.html",
                         "browser": "src/main.ts",
                         "polyfills": [

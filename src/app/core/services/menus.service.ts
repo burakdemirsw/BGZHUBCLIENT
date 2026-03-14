@@ -56,8 +56,8 @@ export class MenusService {
   }
 
   // Authorization
-  isUserAuthorized(userId: string, url: string): Promise<any> {
-    return this.http.get_new({
+  async   isUserAuthorized(userId: string, url: string): Promise<any> {
+    return await this.http.get_new({
       controller: 'RoleMenus',
       action: `is-authorized/${userId}`,
       queryString: `url=${encodeURIComponent(url)}`

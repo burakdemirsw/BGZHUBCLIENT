@@ -15,6 +15,11 @@ import { SocialMediaDescriptionsPage } from './social-media/descriptions/descrip
 import { SocialMediaPropertiesPage } from './social-media/properties/properties';
 import { UserIntegrationsPage } from './user-integrations/user-integrations';
 import { IntegrationPropertiesPage } from './integration-properties/integration-properties';
+import { AiProvidersPage } from './ai-assistants/ai-providers/ai-providers';
+import { AiSettingsPage } from './ai-assistants/ai-settings/ai-settings';
+import { AiModelsPage } from './ai-assistants/ai-models/ai-models';
+import { AiProviderSettingsPage } from './ai-assistants/ai-provider-settings/ai-provider-settings';
+import { AiAssistantsPage } from './ai-assistants/ai-assistants-list/ai-assistants';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -112,6 +117,36 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/social-media/properties',
         component: SocialMediaPropertiesPage,
         data: { title: 'Hesap Özellikleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/ai-provider-settings',
+        component: AiProviderSettingsPage,
+        data: { title: 'AI Sağlayıcı Ayarları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/ai-models',
+        component: AiModelsPage,
+        data: { title: 'AI Modelleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/ai-providers',
+        component: AiProvidersPage,
+        data: { title: 'AI Sağlayıcılar' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/ai-settings',
+        component: AiSettingsPage,
+        data: { title: 'AI Ayarlar' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/ai-assistants',
+        component: AiAssistantsPage,
+        data: { title: 'AI Asistanlar' },
         canActivate: [AuthGuard],
     },
 ];
