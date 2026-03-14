@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {Component, inject, Input, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {MenuItemType} from '@/app/types/layout';
 import {CommonModule} from '@angular/common';
 import {NgIcon} from '@ng-icons/core';
@@ -21,6 +21,8 @@ export class AppMenu implements OnInit {
     layout = inject(LayoutStoreService)
     userMenuService = inject(UserMenuService)
 
+    @Input() searchQuery = '';
+
     @ViewChild('MenuItemWithChildren', {static: true})
     menuItemWithChildren!: TemplateRef<{ item: MenuItemType }>;
 
@@ -28,7 +30,26 @@ export class AppMenu implements OnInit {
     menuItem!: TemplateRef<{ item: MenuItemType }>;
 
     get menuItems(): MenuItemType[] {
-        return this.userMenuService.userMenuItems;
+        const items = this.userMenuService.userMenuItems;
+        if (!this.searchQuery?.trim()) return items;
+        return this.filterMenuItems(items, this.searchQuery.trim().toLowerCase());
+    }
+
+    private filterMenuItems(items: MenuItemType[], query: string): MenuItemType[] {
+        const result: MenuItemType[] = [];
+        for (const item of items) {
+            if (item.isTitle) continue;
+            const labelMatch = item.label?.toLowerCase().includes(query);
+            if (item.children) {
+                const filteredChildren = this.filterMenuItems(item.children, query);
+                if (labelMatch || filteredChildren.length > 0) {
+                    result.push({...item, children: filteredChildren.length > 0 ? filteredChildren : item.children, isCollapsed: false});
+                }
+            } else if (labelMatch) {
+                result.push(item);
+            }
+        }
+        return result;
     }
 
     async ngOnInit(): Promise<void> {

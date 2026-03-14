@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {FormsModule} from '@angular/forms';
 import {UserProfile} from '@layouts/components/sidenav/components/user-profile/user-profile';
 import {AppMenu} from '@layouts/components/sidenav/components/app-menu/app-menu';
 import {SimplebarAngularModule} from 'simplebar-angular';
@@ -13,11 +14,14 @@ import {LogoComponent} from '@/app/components/logo/logo.component';
         AppMenu,
         SimplebarAngularModule,
         NgIcon,
-        LogoComponent
+        LogoComponent,
+        FormsModule
     ],
   templateUrl: './sidenav.html',
 })
 export class Sidenav {
+  searchQuery = '';
+
   constructor(public layout: LayoutStoreService) {
   }
 

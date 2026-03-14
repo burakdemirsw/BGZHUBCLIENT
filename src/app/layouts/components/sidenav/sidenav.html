@@ -12,9 +12,22 @@
         <ng-icon name="tablerX" class="align-middle"/>
     </button>
 
+    <!-- Sidebar Search -->
+    <div class="sidenav-search">
+        <div class="sidenav-search-box">
+            <i class="fa-solid fa-magnifying-glass sidenav-search-icon"></i>
+            <input type="text" class="sidenav-search-input" placeholder="Ara..." [(ngModel)]="searchQuery">
+            @if (searchQuery) {
+                <button class="sidenav-search-clear" (click)="searchQuery = ''">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            }
+        </div>
+    </div>
+
     <ngx-simplebar id="sidenav" class="scrollbar sidenav-scrollbar">
         <!--- Sidenav Menu -->
-        <app-menu/>
+        <app-menu [searchQuery]="searchQuery"/>
     </ngx-simplebar>
 
     <!-- User Profile (fixed at bottom) -->
