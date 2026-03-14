@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {OrderStatisticsType, OrderType} from '@/app/views/ecommerce/orders/types';
 import {StatisticsWidget} from '@/app/views/ecommerce/orders/components/statistics-widget';
 import {toTitleCase} from '@/app/utils/string-utils';
@@ -27,7 +26,7 @@ import {CustomPagination} from '@app/components/custom-pagination';
 @Component({
     selector: 'app-orders',
     imports: [
-        PageTitle,
+        
         StatisticsWidget,
         NgIcon,
         LucideAngularModule,

@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {TableService} from '@core/services/table.service';
 import {Observable} from 'rxjs';
 import {FormsModule} from '@angular/forms';
@@ -49,7 +48,7 @@ export type OpportunitiesType = {
 @Component({
     selector: 'app-opportunities',
     imports: [
-        PageTitle,
+        
         LucideAngularModule,
         AsyncPipe,
         CustomPagination,

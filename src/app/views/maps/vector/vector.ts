@@ -1,6 +1,5 @@
 import { getColor } from '@/app/utils/color-utils';
 import { Component } from '@angular/core';
-import { PageTitle} from "@app/components/page-title";
 import { VectorMap } from "@app/components/vector-map";
 
 import 'jsvectormap/dist/maps/world-merc.js';
@@ -14,7 +13,7 @@ import '@/assets/js/in-mill-en.js';
 
 @Component({
     selector: 'app-vector',
-    imports: [VectorMap, PageTitle],
+    imports: [VectorMap],
     templateUrl: './vector.html',
     styles: ``
 })

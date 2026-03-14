@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PageTitle } from '@app/components/page-title';
 import { RolesService } from '@/app/core/services/roles.service';
 import { UsersService } from '@/app/core/services/users.service';
 import { User } from '@/app/core/models/user/user.models';
@@ -10,7 +9,7 @@ import { RoleUser } from '@/app/core/models/role/role.models';
 
 @Component({
     selector: 'app-role-assignments-page',
-    imports: [CommonModule, FormsModule, PageTitle],
+    imports: [CommonModule, FormsModule],
     templateUrl: './role-assignments.html',
 })
 export class RoleAssignmentsPage implements OnInit {

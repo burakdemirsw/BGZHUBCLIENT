@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {Observable} from 'rxjs';
 import {TableService} from '@core/services/table.service';
 import {countries, CountryType} from '@/app/views/icons/flags/data';
@@ -12,7 +11,7 @@ import {CustomPagination} from '@app/components/custom-pagination';
 @Component({
     selector: 'app-flags',
     imports: [
-        PageTitle,
+        
         AsyncPipe,
         LucideAngularModule,
         FormsModule,

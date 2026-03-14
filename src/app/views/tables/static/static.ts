@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { PageTitle } from "@app/components/page-title";
 import { UiCard } from "@app/components/ui-card";
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgIcon } from '@ng-icons/core';
@@ -22,7 +21,7 @@ export type ProductType = {
 
 @Component({
     selector: 'app-static',
-    imports: [PageTitle, UiCard, NgIcon, NgbDropdownModule],
+    imports: [ UiCard, NgIcon, NgbDropdownModule],
     templateUrl: './static.html',
     styles: ``
 })

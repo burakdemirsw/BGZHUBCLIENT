@@ -1,5 +1,4 @@
 import {Component, inject, TemplateRef} from '@angular/core';
-import { PageTitle } from "@app/components/page-title";
 import {LucideAngularModule, LucideShieldUser, ShieldUser} from 'lucide-angular';
 import {UiCard} from '@app/components/ui-card';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
@@ -7,7 +6,7 @@ import {RouterLink} from '@angular/router';
 
 @Component({
     selector: 'app-layouts',
-    imports: [PageTitle, LucideAngularModule, UiCard, RouterLink],
+    imports: [ LucideAngularModule, UiCard, RouterLink],
     templateUrl: './layouts.html',
     styles: ``
 })

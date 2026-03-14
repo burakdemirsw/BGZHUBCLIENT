@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {Rating} from '@app/components/rating';
 import {RouterLink} from '@angular/router';
 import {currency} from '@/app/constants';
@@ -17,7 +16,7 @@ import {CustomPagination} from '@app/components/custom-pagination';
 @Component({
     selector: 'app-sellers',
     imports: [
-        PageTitle,
+        
         Rating,
         RouterLink,
         LucideAngularModule,

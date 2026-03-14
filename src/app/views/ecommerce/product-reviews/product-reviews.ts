@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {NgIcon} from '@ng-icons/core';
 import {AsyncPipe} from '@angular/common';
 import {
@@ -40,7 +39,7 @@ type ProductReviewType = {
 @Component({
     selector: 'app-product-reviews',
     imports: [
-        PageTitle,
+        
         NgIcon,
         NgbProgressbarModule,
         NgbDropdownModule,

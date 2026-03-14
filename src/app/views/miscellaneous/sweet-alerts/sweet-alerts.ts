@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
-import { PageTitle } from '@app/components/page-title';
 import { UiCard } from '@app/components/ui-card';
 import Swal, { type SweetAlertOptions } from 'sweetalert2';
 
 @Component({
     selector: 'app-sweet-alerts',
-    imports: [PageTitle, UiCard],
+    imports: [ UiCard],
     templateUrl: './sweet-alerts.html',
     styles: ``,
 })

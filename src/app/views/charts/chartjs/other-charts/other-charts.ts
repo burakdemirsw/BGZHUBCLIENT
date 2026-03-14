@@ -11,14 +11,11 @@ import {
   scatterChartOptions,
   stackedBarAndLineChartOptions,
 } from '@/app/views/charts/chartjs/other-charts/data'
-import {PageTitle} from '@app/components/page-title';
-
 @Component({
   selector: 'app-other-charts',
-  imports: [UiCard, Chartjs, PageTitle],
+  imports: [UiCard, Chartjs],
   template: `
-    <div class="container-fluid">
-      <app-page-title title="Other Charts" subTitle="Charts"/>
+    <div class="container-fluid mt-3">
       <div class="row">
         <div class="col-xl-6">
           <app-ui-card title="Bubble">

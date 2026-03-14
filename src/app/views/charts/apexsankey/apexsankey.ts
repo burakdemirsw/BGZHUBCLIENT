@@ -1,6 +1,5 @@
 import {getColor} from '@/app/utils/color-utils';
 import {AfterViewInit, Component, ElementRef, NgZone, Renderer2, ViewChild} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {UiCard} from '@app/components/ui-card';
 
 declare var ApexSankey: any;
@@ -12,7 +11,7 @@ declare global {
 
 @Component({
     selector: 'app-apexsankey',
-    imports: [UiCard, PageTitle],
+    imports: [UiCard],
     templateUrl: './apexsankey.html',
     styles: ``
 })

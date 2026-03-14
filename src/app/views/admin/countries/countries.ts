@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PageTitle } from '@app/components/page-title';
 import { AddressesService } from '@/app/core/services/addresses.service';
 import { Country, CreateCountryRequest, UpdateCountryRequest } from '@/app/core/models/address/address.models';
 
 @Component({
     selector: 'app-countries-page',
-    imports: [CommonModule, FormsModule, PageTitle],
+    imports: [CommonModule, FormsModule],
     templateUrl: './countries.html',
 })
 export class CountriesPage implements OnInit {

@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {NgbCarouselModule} from '@ng-bootstrap/ng-bootstrap';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {NgIcon} from '@ng-icons/core';
@@ -13,7 +12,7 @@ import {toTitleCase} from '@/app/utils/string-utils';
 @Component({
     selector: 'app-details',
     imports: [
-        PageTitle,
+        
         NgbCarouselModule,
         RouterLink,
         NgIcon,

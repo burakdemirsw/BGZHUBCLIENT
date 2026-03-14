@@ -1,12 +1,11 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {FormsModule, ReactiveFormsModule, UntypedFormBuilder, type UntypedFormGroup, Validators} from '@angular/forms';
-import {PageTitle} from "@app/components/page-title";
 import {NgIcon} from '@ng-icons/core';
 import {UiCard} from '@app/components/ui-card';
 
 @Component({
     selector: 'app-validation',
-    imports: [PageTitle, NgIcon, FormsModule, ReactiveFormsModule, UiCard],
+    imports: [ NgIcon, FormsModule, ReactiveFormsModule, UiCard],
     templateUrl: './validation.html',
     styles: ``
 })

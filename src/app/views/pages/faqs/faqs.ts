@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {PageTitle} from "@app/components/page-title";
 import {General} from "./components/general";
 import {LucideAngularModule, LucideSearch} from 'lucide-angular';
 import {Payments} from "./components/payments";
@@ -9,7 +8,7 @@ import { NgIcon } from "@ng-icons/core";
 
 @Component({
     selector: 'app-faqs',
-    imports: [PageTitle,  General, LucideAngularModule, Payments, Refunds, Customization, NgIcon],
+    imports: [  General, LucideAngularModule, Payments, Refunds, Customization, NgIcon],
     templateUrl: './faqs.html',
     styles: ``
 })

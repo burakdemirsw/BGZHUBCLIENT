@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
-import { PageTitle } from '@app/components/page-title';
 import type { PricingType } from './types';
 import { PricingCard } from './components/pricing-card';
 
 @Component({
     selector: 'app-pricing',
-    imports: [PageTitle, PricingCard],
+    imports: [ PricingCard],
     templateUrl: './pricing.html',
     styles: ``,
 })

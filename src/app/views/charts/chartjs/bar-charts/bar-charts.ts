@@ -9,14 +9,11 @@ import {
   stackedGroupsChartOptions,
   verticalChartOptions,
 } from '@/app/views/charts/chartjs/bar-charts/data'
-import {PageTitle} from '@app/components/page-title';
-
 @Component({
   selector: 'app-bar-charts',
-  imports: [UiCard, Chartjs, PageTitle],
+  imports: [UiCard, Chartjs],
   template: `
-    <div class="container-fluid">
-      <app-page-title title="Bar Charts" subTitle="Charts"/>
+    <div class="container-fluid mt-3">
       <div class="row">
         <div class="col-xl-6">
           <app-ui-card title="Basic Bar">

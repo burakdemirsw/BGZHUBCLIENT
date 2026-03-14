@@ -1,5 +1,4 @@
 import {Component, inject, TemplateRef} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {EmailSidebar} from '@/app/views/apps/email/components/email-sidebar';
 import {SimplebarAngularModule} from 'simplebar-angular';
 import {NgIcon} from '@ng-icons/core';
@@ -11,7 +10,7 @@ import {LucideAngularModule, LucideSearch} from 'lucide-angular';
 @Component({
     selector: 'app-details',
     imports: [
-        PageTitle,
+        
         EmailSidebar,
         SimplebarAngularModule,
         NgIcon,

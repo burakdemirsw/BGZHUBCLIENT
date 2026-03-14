@@ -1,5 +1,4 @@
 import {Component, ViewChild} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {UiCard} from '@app/components/ui-card';
 import {NgxMaskDirective, provideNgxMask} from 'ngx-mask'
 import {NgIcon} from '@ng-icons/core';
@@ -13,7 +12,7 @@ import {states, statesWithFlags} from '@/app/views/forms/other-plugins/data';
 @Component({
     selector: 'app-other-plugins',
     imports: [
-        PageTitle,
+        
         UiCard,
         NgxMaskDirective,
         NgIcon,

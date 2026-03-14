@@ -1,6 +1,4 @@
 import { Component } from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
-
 type EmailTemplate = {
     title: string;
     image: string;
@@ -9,7 +7,7 @@ type EmailTemplate = {
 @Component({
   selector: 'app-email-templates',
     imports: [
-        PageTitle
+        
     ],
   templateUrl: './email-templates.html',
   styles: ``

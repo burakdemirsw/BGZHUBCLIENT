@@ -9,14 +9,11 @@ import {
   pointStyleChartOptions,
   steppedChartOptions,
 } from '@/app/views/charts/chartjs/line-charts/data'
-import {PageTitle} from '@app/components/page-title';
-
 @Component({
   selector: 'app-line-charts',
-  imports: [UiCard, Chartjs, PageTitle],
+  imports: [UiCard, Chartjs],
   template: `
-    <div class="container-fluid">
-      <app-page-title title="Line Charts" subTitle="Charts"/>
+    <div class="container-fluid mt-3">
       <div class="row">
         <div class="col-xl-6">
           <app-ui-card title="Basic Line">

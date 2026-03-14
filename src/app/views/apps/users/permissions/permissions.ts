@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {Observable} from 'rxjs';
 import {TableService} from '@core/services/table.service';
 import {NgIcon} from '@ng-icons/core';
@@ -24,7 +23,7 @@ type ManagementType = {
 @Component({
     selector: 'app-permissions',
     imports: [
-        PageTitle,
+        
         NgIcon,
         FormsModule,
         NgbdSortableHeader,

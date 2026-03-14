@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {
     LucideAngularModule,
     LucideBox,
@@ -28,7 +27,7 @@ import {CustomPagination} from '@app/components/custom-pagination';
 @Component({
     selector: 'app-products',
     imports: [
-        PageTitle,
+        
         LucideAngularModule,
         RouterLink,
         NgIcon,

@@ -1,6 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {PageTitle} from "@app/components/page-title";
 import {ChoiceSelectInputDirective} from '@core/directive/choices-select.directive';
 import {TagifyModule, TagifyService, type TagifySettings} from 'ngx-tagify';
 import {Select2Data, Select2} from 'ng-select2-component';
@@ -8,7 +7,7 @@ import {Select2Data, Select2} from 'ng-select2-component';
 
 @Component({
     selector: 'app-selects',
-    imports: [PageTitle, ChoiceSelectInputDirective, TagifyModule, FormsModule, Select2],
+    imports: [ ChoiceSelectInputDirective, TagifyModule, FormsModule, Select2],
     templateUrl: './selects.html',
     styles: ``
 })

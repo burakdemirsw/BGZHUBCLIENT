@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PageTitle } from '@app/components/page-title';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
 import { AiProvider, CreateAiProviderRequest, UpdateAiProviderRequest } from '@/app/core/models/ai-assistant/ai-provider.models';
 
 @Component({
     selector: 'app-ai-providers-page',
-    imports: [CommonModule, FormsModule, PageTitle],
+    imports: [CommonModule, FormsModule],
     templateUrl: './ai-providers.html',
 })
 export class AiProvidersPage implements OnInit {

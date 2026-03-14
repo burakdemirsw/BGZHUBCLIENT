@@ -1,5 +1,4 @@
 import {Component, inject, OnInit, QueryList, TemplateRef, ViewChildren} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {NgbdSortableHeader} from '@core/directive/sortable.directive';
 import {TableService} from '@core/services/table.service';
 import {AsyncPipe, DecimalPipe} from '@angular/common';
@@ -33,7 +32,7 @@ type ClientType = {
 @Component({
     selector: 'app-customers',
     imports: [
-        PageTitle,
+        
         FormsModule,
         NgIcon,
         RouterLink,

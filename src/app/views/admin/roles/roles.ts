@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PageTitle } from '@app/components/page-title';
 import { RolesService } from '@/app/core/services/roles.service';
 import { Role, CreateRoleRequest, UpdateRoleRequest } from '@/app/core/models/role/role.models';
 
 @Component({
     selector: 'app-roles-page',
-    imports: [CommonModule, FormsModule, PageTitle],
+    imports: [CommonModule, FormsModule],
     templateUrl: './roles.html',
 })
 export class RolesPage implements OnInit {

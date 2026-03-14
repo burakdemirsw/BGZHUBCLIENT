@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {CompleteTable} from '@/app/views/tables/custom/components/complete-table';
 import {TableWithSearch} from '@/app/views/tables/custom/components/table-with-search';
 import {TableWithCheckbox} from '@/app/views/tables/custom/components/table-with-checkbox';
@@ -14,7 +13,7 @@ import {TableWithSort} from '@/app/views/tables/custom/components/table-with-sor
 @Component({
   selector: 'app-custom',
     imports: [
-        PageTitle,
+        
         CompleteTable,
         TableWithSearch,
         TableWithCheckbox,

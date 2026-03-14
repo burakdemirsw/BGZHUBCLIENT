@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PageTitle } from '@app/components/page-title';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
 import { AiAssistant, AiKnowledge, CreateAiAssistantRequest, UpdateAiAssistantRequest, CreateAiKnowledgeRequest } from '@/app/core/models/ai-assistant/ai-assistant.models';
 import { AiProvider } from '@/app/core/models/ai-assistant/ai-provider.models';
@@ -10,7 +9,7 @@ import { UserMenuService } from '@/app/core/services/user-menu.service';
 
 @Component({
     selector: 'app-ai-assistants-page',
-    imports: [CommonModule, FormsModule, PageTitle],
+    imports: [CommonModule, FormsModule],
     templateUrl: './ai-assistants.html',
 })
 export class AiAssistantsPage implements OnInit {

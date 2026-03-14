@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PageTitle } from '@app/components/page-title';
 import { NetGsmSettingsService } from '@/app/core/services/netgsm-settings.service';
 import { NetGsmSetting, CreateNetGsmSettingRequest, UpdateNetGsmSettingRequest } from '@/app/core/models/netgsm/netgsm.models';
 
 @Component({
     selector: 'app-netgsm-settings-page',
-    imports: [CommonModule, FormsModule, PageTitle],
+    imports: [CommonModule, FormsModule],
     templateUrl: './netgsm-settings.html',
 })
 export class NetGsmSettingsPage implements OnInit {

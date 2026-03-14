@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PageTitle } from '@app/components/page-title';
 import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { Integration, CreateIntegrationRequest, UpdateIntegrationRequest } from '@/app/core/models/integration/integration.models';
 
 @Component({
     selector: 'app-integrations-page',
-    imports: [CommonModule, FormsModule, PageTitle],
+    imports: [CommonModule, FormsModule],
     templateUrl: './integrations.html',
 })
 export class IntegrationsPage implements OnInit {

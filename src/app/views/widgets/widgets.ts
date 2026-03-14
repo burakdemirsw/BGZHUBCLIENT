@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
-import { PageTitle } from "@app/components/page-title";
 import { StatisticCard1 } from './components/statistic-card1';
 import { StatisticCard2 } from "./components/statistic-card2";
 import { StatisticCard3 } from "./components/statistic-card3";
@@ -17,7 +16,7 @@ import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-widgets',
-    imports: [PageTitle, RouterLink, NgIcon, StatisticCard1, StatisticCard2, StatisticCard3, StatisticCard4, StatisticCard5, StatisticCard6, StatisticCard7, Chatcard, TrafficSources, TopCountries, NgbTooltip],
+    imports: [ RouterLink, NgIcon, StatisticCard1, StatisticCard2, StatisticCard3, StatisticCard4, StatisticCard5, StatisticCard6, StatisticCard7, Chatcard, TrafficSources, TopCountries, NgbTooltip],
   templateUrl: './widgets.html',
   styles: ``
 })

@@ -1,14 +1,13 @@
 
 import {splitArray, toTitleCase} from '@/app/utils/string-utils';
 import {Component} from '@angular/core';
-import {PageTitle} from "@app/components/page-title";
 import {NgIcon} from '@ng-icons/core';
 import {LucideAngularModule, LucideSearch, Percent} from 'lucide-angular';
 import {NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'app-basic-elements',
-    imports: [PageTitle, NgIcon, LucideAngularModule, NgbDropdownModule],
+    imports: [ NgIcon, LucideAngularModule, NgbDropdownModule],
     templateUrl: './basic-elements.html',
     styles: ``
 })

@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { PageTitle } from '@app/components/page-title';
 import { NgIcon } from '@ng-icons/core';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { LucideAngularModule, LucideSquareChevronDown } from 'lucide-angular';
@@ -8,7 +7,7 @@ import { UiCard } from '@app/components/ui-card';
 @Component({
     selector: 'app-dropdowns',
     imports: [
-        PageTitle,
+        
         UiCard,
         NgIcon,
         NgbDropdownModule,

@@ -1,12 +1,11 @@
 import { FormsModule } from '@angular/forms';
-import { PageTitle } from "@app/components/page-title";
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { NgIcon } from '@ng-icons/core';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-pdf-viewer',
-  imports: [PageTitle, FormsModule, PdfViewerModule,NgIcon],
+  imports: [ FormsModule, PdfViewerModule,NgIcon],
   templateUrl: './pdf-viewer.html',
   styles: ``
 })

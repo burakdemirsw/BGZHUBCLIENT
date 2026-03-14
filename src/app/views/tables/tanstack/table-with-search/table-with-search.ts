@@ -8,7 +8,6 @@ import {
     getPaginationRowModel,
     getSortedRowModel
 } from '@tanstack/angular-table';
-import {PageTitle} from '@app/components/page-title';
 import {UiCard} from '@app/components/ui-card';
 import {LucideAngularModule, LucideSearch} from 'lucide-angular';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -17,7 +16,7 @@ import {CompanyType, tableData} from '@/app/views/tables/tanstack/data';
 
 @Component({
     selector: 'app-table-with-search',
-    imports: [TanstackTable, PageTitle, UiCard, LucideAngularModule, ReactiveFormsModule, FormsModule],
+    imports: [TanstackTable, UiCard, LucideAngularModule, ReactiveFormsModule, FormsModule],
     templateUrl: './table-with-search.html',
     styles: ``
 })

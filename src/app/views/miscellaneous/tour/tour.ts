@@ -1,5 +1,4 @@
 import {Component, inject} from '@angular/core';
-import {PageTitle} from "@app/components/page-title";
 import {NgIcon} from '@ng-icons/core';
 import {ShepherdService} from 'angular-shepherd';
 import {RouterLink} from '@angular/router';
@@ -13,7 +12,7 @@ type featureType = {
 
 @Component({
     selector: 'app-tour',
-    imports: [PageTitle, NgIcon, RouterLink, LogoComponent],
+    imports: [ NgIcon, RouterLink, LogoComponent],
     templateUrl: './tour.html',
     styles: ``
 })

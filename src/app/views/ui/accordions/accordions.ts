@@ -2,11 +2,10 @@ import { Component } from '@angular/core';
 import { UiCard } from '@app/components/ui-card';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgIcon } from "@ng-icons/core";
-import {PageTitle} from '@app/components/page-title';
 import {LucideAngularModule, LucideMinusCircle, LucidePlusCircle} from 'lucide-angular';
 @Component({
   selector: 'app-accordions',
-  imports: [UiCard, NgbAccordionModule, NgIcon, PageTitle, LucideAngularModule],
+  imports: [UiCard, NgbAccordionModule, NgIcon, LucideAngularModule],
   templateUrl: './accordions.html',
   styles: ``
 })

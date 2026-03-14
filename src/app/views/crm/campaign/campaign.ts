@@ -1,5 +1,4 @@
 import {Component, inject, TemplateRef} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {TableService} from '@core/services/table.service';
 import {LucideAngularModule, LucideSearch, LucideShuffle} from 'lucide-angular';
 import {AsyncPipe, NgClass} from '@angular/common';
@@ -16,7 +15,7 @@ import {CrmStatisticWidget} from '@app/components/widgets/crm-statistic-widget';
 @Component({
     selector: 'app-campaign',
     imports: [
-        PageTitle,
+        
         AsyncPipe,
         FormsModule,
         LucideAngularModule,

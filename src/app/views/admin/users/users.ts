@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PageTitle } from '@app/components/page-title';
 import { UsersService } from '@/app/core/services/users.service';
 import { User, CreateUserRequest, UpdateUserRequest } from '@/app/core/models/user/user.models';
 
 @Component({
     selector: 'app-users-page',
-    imports: [CommonModule, FormsModule, PageTitle],
+    imports: [CommonModule, FormsModule],
     templateUrl: './users.html',
 })
 export class UsersPage implements OnInit {

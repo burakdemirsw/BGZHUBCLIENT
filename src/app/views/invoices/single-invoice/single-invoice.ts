@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {NgIcon} from '@ng-icons/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {DecimalPipe} from '@angular/common';
@@ -19,7 +18,7 @@ type InvoiceItem = {
 
 @Component({
     selector: 'app-single-invoice',
-    imports: [PageTitle, NgIcon, RouterLink, DecimalPipe, LogoComponent],
+    imports: [ NgIcon, RouterLink, DecimalPipe, LogoComponent],
     templateUrl: './single-invoice.html',
     styles: ``
 })

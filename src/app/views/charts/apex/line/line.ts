@@ -1,6 +1,5 @@
 import {Component} from '@angular/core';
 import {Apexchart} from '@app/components/apexchart';
-import {PageTitle} from '@app/components/page-title';
 import {UiCard} from '@app/components/ui-card';
 import {
     brushChartMain,
@@ -19,7 +18,7 @@ import {
 
 @Component({
     selector: 'app-apex-line',
-    imports: [UiCard, PageTitle, Apexchart],
+    imports: [UiCard, Apexchart],
     templateUrl: './line.html',
     styles: ``
 })
