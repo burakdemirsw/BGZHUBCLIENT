@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {StatisticWidget} from '@/app/views/dashboards/dashboard-2/components/statistic-widget';
 import {stats} from '@/app/views/dashboards/dashboard-2/data';
 import {ProjectOverview} from '@/app/views/dashboards/dashboard-2/components/project-overview';
@@ -11,7 +10,6 @@ import {ProjectByCountry} from '@/app/views/dashboards/dashboard-2/components/pr
 @Component({
     selector: 'app-dashboard-2',
     imports: [
-        PageTitle,
         StatisticWidget,
         ProjectOverview,
         TaskProgress,

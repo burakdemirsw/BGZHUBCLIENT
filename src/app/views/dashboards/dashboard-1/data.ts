@@ -1,4 +1,4 @@
-import {OrderType, ProductType, StatCardType} from '@/app/views/dashboards/dashboard-1/types';
+import {DashboardMetric, OrderType, ProductType} from '@/app/views/dashboards/dashboard-1/types';
 import {ChartConfiguration} from 'chart.js';
 import {getColor} from '@/app/utils/color-utils';
 
@@ -23,38 +23,44 @@ const user8 = '/assets/images/users/user-8.jpg'
 const user9 = '/assets/images/users/user-9.jpg'
 const user10 = '/assets/images/users/user-10.jpg'
 
-export const statisticCards: StatCardType[] = [
+export const dashboardMetricPlaceholders: DashboardMetric[] = [
     {
-        id: 1,
-        title: 'Total Sales',
-        value: 124.7,
-        suffix: 'K',
-        prefix: '$',
-        icon: "tablerCreditCard",
-        iconBg: 'primary',
+        id: 'ai',
+        title: 'AI Asistan Sayısı',
+        value: 12,
+        helper: 'Toplam tanımlı asistan',
+        icon: 'tablerBrain',
+        iconBg: 'rgba(255, 255, 255, 0.25)',
+        gradient: 'linear-gradient(135deg, rgba(99, 102, 241, 0.95), rgba(79, 70, 229, 0.9))',
     },
     {
-        id: 2,
-        title: 'Orders Placed',
-        value: 2358,
-        icon: "tablerShoppingCart",
-        iconBg: 'success',
+        id: 'conversations',
+        title: 'Sohbet Sayısı',
+        value: 48,
+        helper: 'Tüm sohbetler',
+        icon: 'tablerMessages',
+        iconBg: 'rgba(255, 255, 255, 0.25)',
+        gradient: 'linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(34, 197, 94, 0.9))',
     },
     {
-        id: 3,
-        title: 'Active Customers',
-        value: 839,
-        icon: "tablerUsers",
-        iconBg: 'info',
+        id: 'messages',
+        title: 'Mesaj Sayısı',
+        value: 389,
+        helper: 'Toplam gönderilen',
+        icon: 'tablerMessageCircle',
+        iconBg: 'rgba(255, 255, 255, 0.25)',
+        gradient: 'linear-gradient(135deg, rgba(249, 115, 22, 0.95), rgba(251, 146, 60, 0.9))',
     },
     {
-        id: 4,
-        title: 'Refund Requests',
-        value: 41,
-        icon: "tablerRotateClockwise2",
-        iconBg: 'warning',
+        id: 'customers',
+        title: 'Müşteri Sayısı',
+        value: 74,
+        helper: 'Aktif müşteri',
+        icon: 'tablerUsers',
+        iconBg: 'rgba(255, 255, 255, 0.25)',
+        gradient: 'linear-gradient(135deg, rgba(14, 165, 233, 0.95), rgba(59, 130, 246, 0.9))',
     },
-]
+];
 
 export const totalSalesChart: () => ChartConfiguration = () => ({
     type: 'doughnut',
