@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-import { PageTitle } from '@app/components/page-title';
 import { UiCard } from '@app/components/ui-card';
 @Component({
     selector: 'app-typography',
-    imports: [PageTitle, UiCard],
+    imports: [ UiCard],
     templateUrl: './typography.html',
     styles: ``,
 })

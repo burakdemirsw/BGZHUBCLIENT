@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { PageTitle } from '@app/components/page-title';
 import { NgIcon } from '@ng-icons/core';
 import { SitemapItem } from './types';
 
 @Component({
     selector: 'app-sitemap',
-    imports: [PageTitle, NgIcon, RouterLink],
+    imports: [ NgIcon, RouterLink],
     templateUrl: './sitemap.html',
     styles: ``,
 })

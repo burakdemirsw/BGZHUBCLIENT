@@ -1,6 +1,5 @@
 import {Component} from '@angular/core';
 import {NgbAlertModule} from '@ng-bootstrap/ng-bootstrap';
-import {PageTitle} from '@app/components/page-title';
 import {NgIcon} from '@ng-icons/core';
 import { UiCard } from '@app/components/ui-card';
 
@@ -12,7 +11,7 @@ interface Alert {
 
 @Component({
   selector: 'app-alerts',
-  imports: [NgbAlertModule, PageTitle, UiCard, NgIcon],
+  imports: [NgbAlertModule, UiCard, NgIcon],
   templateUrl: './alerts.html',
   styles: ``
 })

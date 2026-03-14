@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {
     LucideAngularModule, LucideArrowDown, LucideArrowLeft, LucideArrowRight, LucideArrowUp,
     LucideBadgeDollarSign,
@@ -36,7 +35,7 @@ import {
 @Component({
     selector: 'app-lucide',
     imports: [
-        PageTitle,
+        
         LucideAngularModule
     ],
     templateUrl: './lucide.html',

@@ -1,6 +1,5 @@
 import {Component} from '@angular/core';
 import {Apexchart} from '@app/components/apexchart';
-import {PageTitle} from '@app/components/page-title';
 import {UiCard} from '@app/components/ui-card';
 import {basicRadarChart, polygonRadarChart} from './data';
 import {ApexOptions} from 'ng-apexcharts';
@@ -9,7 +8,7 @@ import {UpdatableRadarChart} from '@/app/views/charts/apex/radar/components/upda
 
 @Component({
     selector: 'app-apex-radar',
-    imports: [PageTitle, UiCard, Apexchart, UpdatableRadarChart],
+    imports: [ UiCard, Apexchart, UpdatableRadarChart],
     templateUrl: './radar.html',
     styles: ``
 })

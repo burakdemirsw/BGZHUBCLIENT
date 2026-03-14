@@ -1,5 +1,4 @@
 import {Component, inject, TemplateRef} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {NgbOffcanvas, NgbOffcanvasModule, NgbTooltipModule} from '@ng-bootstrap/ng-bootstrap';
 import {EmailSidebar} from '@/app/views/apps/email/components/email-sidebar';
 import {SimplebarAngularModule} from 'simplebar-angular';
@@ -13,7 +12,7 @@ import {FormsModule} from '@angular/forms';
 @Component({
     selector: 'app-inbox',
     imports: [
-        PageTitle,
+        
         NgbOffcanvasModule,
         EmailSidebar,
         SimplebarAngularModule,

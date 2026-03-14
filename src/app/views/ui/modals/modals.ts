@@ -1,6 +1,4 @@
 import { Component, inject, TemplateRef } from '@angular/core';
-import { PageTitle } from '@app/components/page-title';
-
 import {
     NgbModal,
     NgbModalModule,
@@ -11,7 +9,7 @@ import { UiCard } from '@app/components/ui-card';
 
 @Component({
     selector: 'app-modals',
-    imports: [PageTitle, UiCard, NgbModalModule, FormsModule],
+    imports: [ UiCard, NgbModalModule, FormsModule],
     templateUrl: './modals.html',
     styles: ``,
 })

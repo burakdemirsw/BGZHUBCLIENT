@@ -1,5 +1,4 @@
 import {Component, inject, OnInit, TemplateRef} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {AsyncPipe} from '@angular/common';
 import {Observable} from 'rxjs';
 import {LucideAngularModule, LucideSearch, LucideShuffle} from 'lucide-angular';
@@ -53,7 +52,7 @@ type LeadType = {
 @Component({
     selector: 'app-leads',
     imports: [
-        PageTitle,
+        
         AsyncPipe,
         FormsModule,
         LucideAngularModule,

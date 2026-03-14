@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {ProductInformationForm} from '@/app/views/ecommerce/products/add/components/product-information-form';
 import {ProductImage} from '@/app/views/ecommerce/products/add/components/product-image';
 import {ProductPricingForm} from '@/app/views/ecommerce/products/add/components/product-pricing-form';
@@ -9,7 +8,7 @@ import {LucideAngularModule, LucideClipboardX, LucidePlus, LucideSave} from 'luc
 @Component({
   selector: 'app-add',
     imports: [
-        PageTitle,
+        
         ProductInformationForm,
         ProductImage,
         ProductPricingForm,

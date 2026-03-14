@@ -1,6 +1,5 @@
 import {Component} from '@angular/core';
 import {Apexchart} from '@app/components/apexchart';
-import {PageTitle} from '@app/components/page-title';
 import {UiCard} from '@app/components/ui-card';
 import {
     gradientDonutChart,
@@ -14,7 +13,7 @@ import {UpdatableDonutChart} from '@/app/views/charts/apex/pie/components/updata
 
 @Component({
     selector: 'app-apex-pie',
-    imports: [UiCard, PageTitle, Apexchart, UpdatableDonutChart],
+    imports: [UiCard, Apexchart, UpdatableDonutChart],
     templateUrl: './pie.html',
     styles: ``
 })

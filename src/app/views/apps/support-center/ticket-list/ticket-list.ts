@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {TicketStatisticWidget} from '@/app/views/apps/support-center/ticket-list/components/ticket-statistic-widget';
 import {TicketStatisticType, TicketType} from '@/app/views/apps/support-center/ticket-list/types';
 import { LucideAngularModule, LucideSearch, LucideShuffle, LucideAlertTriangle } from 'lucide-angular';
@@ -15,7 +14,7 @@ import {NgIcon} from '@ng-icons/core';
 @Component({
   selector: 'app-ticket-list',
     imports: [
-        PageTitle,
+        
         TicketStatisticWidget,
         FormsModule,
         LucideAngularModule,

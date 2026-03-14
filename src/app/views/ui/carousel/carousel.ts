@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 
-import { PageTitle } from '@app/components/page-title';
 import { UiCard } from '@app/components/ui-card';
 import {
     NgbCarouselConfig,
@@ -8,7 +7,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 @Component({
     selector: 'app-carousel',
-    imports: [PageTitle, UiCard, NgbCarouselModule],
+    imports: [ UiCard, NgbCarouselModule],
     templateUrl: './carousel.html',
     styles: ``,
 })

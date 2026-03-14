@@ -1,5 +1,4 @@
 import {Component, inject, OnInit, TemplateRef} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {FileSidebar} from '@/app/views/apps/file-manager/components/file-sidebar';
 import {NgIcon} from '@ng-icons/core';
 import {NgbDropdownModule, NgbOffcanvas} from '@ng-bootstrap/ng-bootstrap';
@@ -19,7 +18,7 @@ import {FormsModule} from '@angular/forms';
 @Component({
     selector: 'app-file-manager',
     imports: [
-        PageTitle,
+        
         FileSidebar,
         NgIcon,
         LucideAngularModule,

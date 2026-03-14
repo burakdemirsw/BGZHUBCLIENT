@@ -1,5 +1,4 @@
 import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {FullCalendarComponent, FullCalendarModule} from '@fullcalendar/angular';
 import {CalendarOptions, EventApi, EventClickArg} from '@fullcalendar/core';
 import interactionPlugin, {Draggable} from '@fullcalendar/interaction';
@@ -14,7 +13,7 @@ import {SimplebarAngularModule} from 'simplebar-angular';
 @Component({
     selector: 'app-calendar',
     imports: [
-        PageTitle,
+        
         FullCalendarModule,
         FormsModule,
 

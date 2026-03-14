@@ -1,5 +1,4 @@
 import {Component, inject, OnInit, TemplateRef} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {TableService} from '@core/services/table.service';
 import {LucideAngularModule, LucideSearch, LucideShuffle} from 'lucide-angular';
 import {AsyncPipe, NgClass} from '@angular/common';
@@ -17,7 +16,7 @@ import {RouterLink} from '@angular/router';
 @Component({
     selector: 'app-proposals',
     imports: [
-        PageTitle,
+        
         AsyncPipe,
         FormsModule,
         LucideAngularModule,

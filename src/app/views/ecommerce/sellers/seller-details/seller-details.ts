@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {
     SellerContacts
 } from '@/app/views/ecommerce/sellers/seller-details/components/seller-contacts';
@@ -19,7 +18,7 @@ import {
 @Component({
     selector: 'app-seller-details',
     imports: [
-        PageTitle,
+        
         SellerContacts,
         SellerOverview,
         SellerProducts,

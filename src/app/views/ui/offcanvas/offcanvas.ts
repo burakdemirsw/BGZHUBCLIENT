@@ -1,11 +1,10 @@
 import { Component, inject, TemplateRef } from '@angular/core';
-import { PageTitle } from '@app/components/page-title';
 import { UiCard } from '@app/components/ui-card';
 import { NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'app-offcanvas',
-    imports: [PageTitle,  UiCard],
+    imports: [  UiCard],
     templateUrl: './offcanvas.html',
     styles: ``,
 })

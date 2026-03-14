@@ -1,13 +1,12 @@
 import {getColor} from '@/app/utils/color-utils';
 import {AfterViewInit, Component} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {TitleCasePipe} from '@angular/common';
 
 import ApexTree from 'apextree';
 
 @Component({
     selector: 'app-apextree',
-    imports: [PageTitle, TitleCasePipe],
+    imports: [ TitleCasePipe],
     templateUrl: './apextree.html',
     styles: ``
 })

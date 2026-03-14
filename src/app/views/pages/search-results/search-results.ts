@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { PageTitle } from '@app/components/page-title';
 import {
     LucideAngularModule,
     LucideCircleDollarSign,
@@ -17,7 +16,7 @@ import {
 @Component({
     selector: 'app-search-results',
     imports: [
-        PageTitle,
+        
         LucideAngularModule,
         RouterLink,
         NgIcon,

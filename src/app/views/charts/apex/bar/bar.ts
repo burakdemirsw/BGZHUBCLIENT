@@ -1,6 +1,5 @@
 import {Component} from '@angular/core';
 import {Apexchart} from '@app/components/apexchart';
-import {PageTitle} from '@app/components/page-title';
 import {UiCard} from '@app/components/ui-card';
 import {
     barWithMarkersChart,
@@ -18,7 +17,7 @@ import {
 
 @Component({
     selector: 'app-apex-bar',
-    imports: [UiCard, PageTitle, Apexchart],
+    imports: [UiCard, Apexchart],
     templateUrl: './bar.html',
     styles: ``
 })

@@ -1,11 +1,10 @@
 import { statesData } from '@/assets/data/Leaflet';
 import { Component } from '@angular/core';
-import { PageTitle } from "@app/components/page-title";
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import { circle, geoJSON, icon, latLng, layerGroup, marker, polygon, tileLayer, type Icon, type Map, type MapOptions } from 'leaflet';
 @Component({
     selector: 'app-leaflet',
-    imports: [PageTitle, LeafletModule],
+    imports: [ LeafletModule],
     templateUrl: './leaflet.html',
     styles: ``
 })

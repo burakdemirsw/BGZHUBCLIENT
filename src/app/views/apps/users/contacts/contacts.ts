@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {
     LucideAngularModule,
     LucideLayers,
@@ -16,7 +15,7 @@ import {NgbPagination} from '@ng-bootstrap/ng-bootstrap';
 @Component({
     selector: 'app-contacts',
     imports: [
-        PageTitle,
+        
         LucideAngularModule,
         ContactCard,
         NgbPagination,

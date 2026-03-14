@@ -7,7 +7,6 @@ import {
     getFilteredRowModel,
     getPaginationRowModel
 } from '@tanstack/angular-table';
-import {PageTitle} from '@app/components/page-title';
 import {UiCard} from '@app/components/ui-card';
 import {LucideAngularModule, LucideDollarSign, LucideSearch, LucideTag} from 'lucide-angular';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -17,7 +16,7 @@ import {CompanyType, tableData} from '@/app/views/tables/tanstack/data';
 
 @Component({
     selector: 'app-table-with-filters',
-    imports: [TanstackTable, PageTitle, UiCard, LucideAngularModule, ReactiveFormsModule, FormsModule, TablePagination],
+    imports: [TanstackTable, UiCard, LucideAngularModule, ReactiveFormsModule, FormsModule, TablePagination],
     templateUrl: './table-with-filters.html',
     styles: ``
 })

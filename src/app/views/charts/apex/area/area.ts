@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {UiCard} from '@app/components/ui-card';
 import {Apexchart} from '@app/components/apexchart';
 import {
@@ -17,7 +16,7 @@ import {DatetimeChart} from '@/app/views/charts/apex/area/components/datetime-ch
 
 @Component({
     selector: 'app-apex-area',
-    imports: [UiCard, PageTitle, Apexchart, DatetimeChart],
+    imports: [UiCard, Apexchart, DatetimeChart],
     templateUrl: './area.html',
     styles: ``
 })

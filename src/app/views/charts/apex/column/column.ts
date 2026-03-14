@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {Apexchart} from '@app/components/apexchart';
-import {PageTitle} from '@app/components/page-title';
 import {UiCard} from '@app/components/ui-card';
 import {
     basicColumnChart,
@@ -22,7 +21,7 @@ import { DynamicLoadedChart } from "./components/dynamic-loaded-chart";
 
 @Component({
     selector: 'app-apex-column',
-    imports: [PageTitle, UiCard, FormsModule, Apexchart, DynamicLoadedChart],
+    imports: [ UiCard, FormsModule, Apexchart, DynamicLoadedChart],
     templateUrl: './column.html',
     styles: ``
 })

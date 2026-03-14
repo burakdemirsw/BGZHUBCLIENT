@@ -1,6 +1,4 @@
-<div class="container-fluid">
-    <app-page-title title="Deals" subtitle="CRM"/>
-
+<div class="container-fluid mt-3">
     <div class="row row-cols-xxl-5 row-cols-md-3 row-cols-1 g-2">
         @for (item of dealStatisticWidgets; track $index; let last = $last) {
             <div class="{{last ? 'col-lg' : 'col'}}">

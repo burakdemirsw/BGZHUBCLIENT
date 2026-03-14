@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { PageTitle } from '@app/components/page-title';
 import { UiCard } from '@app/components/ui-card';
 
 import {
@@ -9,7 +8,7 @@ import {
 @Component({
     selector: 'app-scrollspy',
     imports: [
-        PageTitle,
+        
         UiCard,
         NgbScrollSpyModule,
         NgbDropdownModule,

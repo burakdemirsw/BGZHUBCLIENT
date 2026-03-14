@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {OrderSummary} from '@/app/views/ecommerce/orders/order-details/components/order-summary';
 import {ActivatedRoute, Router} from '@angular/router';
 import {OrderType} from '@/app/views/ecommerce/orders/types';
@@ -16,7 +15,7 @@ import {BillingDetails} from '@/app/views/ecommerce/orders/order-details/compone
 @Component({
   selector: 'app-order-details',
     imports: [
-        PageTitle,
+        
         OrderSummary,
         ShippingActivity,
         CustomerDetail,

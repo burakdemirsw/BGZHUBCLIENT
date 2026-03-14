@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {NgIcon} from '@ng-icons/core';
 import {LucideAngularModule, LucideBriefcase, LucideCalendarClock, LucideSearch} from 'lucide-angular';
 import {
@@ -18,7 +17,7 @@ import {TaskItem} from '@/app/views/crm/pipeline/components/task-item';
 @Component({
     selector: 'app-pipeline',
     imports: [
-        PageTitle,
+        
         NgIcon,
         LucideAngularModule,
         CdkDropListGroup, CdkDropList, CdkDrag, SimplebarAngularModule, RouterLink, TaskItem

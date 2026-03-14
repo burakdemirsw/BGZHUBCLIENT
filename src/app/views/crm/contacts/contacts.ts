@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {ContactCard} from '@/app/views/crm/contacts/components/contact-card';
 import {NgbPagination} from '@ng-bootstrap/ng-bootstrap';
 
@@ -41,7 +40,7 @@ type ContactType = {
 @Component({
   selector: 'app-contacts',
     imports: [
-        PageTitle,
+        
         ContactCard,
         NgbPagination
     ],

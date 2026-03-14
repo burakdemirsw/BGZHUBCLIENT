@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PageTitle } from '@app/components/page-title';
 import { SocialMediaService } from '@/app/core/services/social-media.service';
 import {
     SocialMediaAccount,
@@ -12,7 +11,7 @@ import {
 
 @Component({
     selector: 'app-social-media-properties-page',
-    imports: [CommonModule, FormsModule, PageTitle],
+    imports: [CommonModule, FormsModule],
     templateUrl: './properties.html',
 })
 export class SocialMediaPropertiesPage implements OnInit {

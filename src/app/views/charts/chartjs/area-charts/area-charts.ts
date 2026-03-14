@@ -9,14 +9,11 @@ import {
   stackedChartOptions,
 } from '@/app/views/charts/chartjs/area-charts/data'
 import { UiCard } from '@app/components/ui-card'
-import {PageTitle} from '@app/components/page-title';
-
 @Component({
   selector: 'app-basic-charts',
-  imports: [Chartjs, UiCard, PageTitle],
+  imports: [Chartjs, UiCard],
   template: `
-    <div class="container-fluid">
-      <app-page-title title="Area Charts" subTitle="Charts"/>
+    <div class="container-fluid mt-3">
       <div class="row">
         <div class="col-xl-6">
           <app-ui-card title="Basic Area">

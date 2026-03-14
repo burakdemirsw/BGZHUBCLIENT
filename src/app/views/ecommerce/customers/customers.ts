@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {RouterLink} from '@angular/router';
 import {LucideAngularModule, LucideDownload, LucidePlus, LucideSearch} from 'lucide-angular';
 import {AsyncPipe} from '@angular/common';
@@ -30,7 +29,7 @@ type CustomerType = {
 @Component({
     selector: 'app-customers',
     imports: [
-        PageTitle,
+        
         RouterLink,
         LucideAngularModule,
         NgIcon,

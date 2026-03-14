@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PageTitle } from '@app/components/page-title';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
 import { AiProviderSetting, CreateAiProviderSettingRequest, UpdateAiProviderSettingRequest } from '@/app/core/models/ai-assistant/ai-provider-setting.models';
 import { AiProvider } from '@/app/core/models/ai-assistant/ai-provider.models';
@@ -9,7 +8,7 @@ import { AiSetting } from '@/app/core/models/ai-assistant/ai-setting.models';
 
 @Component({
     selector: 'app-ai-provider-settings-page',
-    imports: [CommonModule, FormsModule, PageTitle],
+    imports: [CommonModule, FormsModule],
     templateUrl: './ai-provider-settings.html',
 })
 export class AiProviderSettingsPage implements OnInit {

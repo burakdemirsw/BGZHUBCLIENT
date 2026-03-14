@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {Observable} from 'rxjs';
 import {TableService} from '@core/services/table.service';
 import {FormsModule} from '@angular/forms';
@@ -16,7 +15,7 @@ import {CustomPagination} from '@app/components/custom-pagination';
 
 @Component({
     selector: 'app-invoices',
-    imports: [PageTitle, FormsModule, RouterLink, NgIcon, LucideAngularModule, NgbdSortableHeader, AsyncPipe, CustomPagination],
+    imports: [ FormsModule, RouterLink, NgIcon, LucideAngularModule, NgbdSortableHeader, AsyncPipe, CustomPagination],
     templateUrl: './invoices.html',
     providers:[TableService],
     styles: ``

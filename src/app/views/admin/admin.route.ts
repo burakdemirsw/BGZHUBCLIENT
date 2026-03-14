@@ -13,6 +13,7 @@ import { RoleMenusPage } from './role-menus/role-menus';
 import { SocialMediaAccountsPage } from './social-media/accounts/accounts';
 import { SocialMediaDescriptionsPage } from './social-media/descriptions/descriptions';
 import { SocialMediaPropertiesPage } from './social-media/properties/properties';
+import { CustomersPage } from './customers/customers';
 import { UserIntegrationsPage } from './user-integrations/user-integrations';
 import { IntegrationPropertiesPage } from './integration-properties/integration-properties';
 import { AiProvidersPage } from './ai-assistants/ai-providers/ai-providers';
@@ -39,6 +40,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/menus',
         component: MenusPage,
         data: { title: 'Menüler' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/customers',
+        component: CustomersPage,
+        data: { title: 'Musteriler' },
         canActivate: [AuthGuard],
     },
     {

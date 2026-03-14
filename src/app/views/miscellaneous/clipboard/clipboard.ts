@@ -1,12 +1,11 @@
 import { Component, inject } from '@angular/core';
-import { PageTitle } from "@app/components/page-title";
 import { UiCard } from "@app/components/ui-card";
 import { ClipboardService } from '@core/services/clipboard.service';
 import { NgIcon } from '@ng-icons/core';
 
 @Component({
   selector: 'app-clipboard',
-  imports: [PageTitle, UiCard, NgIcon ],
+  imports: [ UiCard, NgIcon ],
   templateUrl: './clipboard.html',
   styles: ``
 })

@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PageTitle } from '@app/components/page-title';
 import { MenusService } from '@/app/core/services/menus.service';
 import { RolesService } from '@/app/core/services/roles.service';
 import { Role } from '@/app/core/models/role/role.models';
@@ -9,7 +8,7 @@ import { Menu, RoleMenu, CreateRoleMenuRequest, UpdateRoleMenuRequest } from '@/
 
 @Component({
     selector: 'app-role-menus-page',
-    imports: [CommonModule, FormsModule, PageTitle],
+    imports: [CommonModule, FormsModule],
     templateUrl: './role-menus.html',
 })
 export class RoleMenusPage implements OnInit {

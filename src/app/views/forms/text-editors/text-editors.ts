@@ -1,11 +1,10 @@
 import {Component} from '@angular/core';
-import {PageTitle} from "@app/components/page-title";
 import {QuillEditorComponent} from 'ngx-quill';
 import {FormsModule} from '@angular/forms';
 
 @Component({
     selector: 'app-text-editors',
-    imports: [PageTitle, QuillEditorComponent, FormsModule],
+    imports: [ QuillEditorComponent, FormsModule],
     templateUrl: './text-editors.html',
     styles: ``
 })

@@ -1,6 +1,5 @@
 import {Component, signal} from '@angular/core';
 import {LucideAngularModule, LucideSearch} from 'lucide-angular';
-import {PageTitle} from '@app/components/page-title';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TanstackTable} from '@app/components/Table/tanstack-table';
 import {UiCard} from '@app/components/ui-card';
@@ -17,7 +16,6 @@ import {
     selector: 'app-table-with-delete-button',
     imports: [
         LucideAngularModule,
-        PageTitle,
         ReactiveFormsModule,
         FormsModule,
         TanstackTable,

@@ -6,7 +6,6 @@ import {NgIcon} from '@ng-icons/core';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {TableService} from '@core/services/table.service';
 import {Observable} from 'rxjs';
-import {PageTitle} from '@app/components/page-title';
 import {DealType, DealWidgetType} from '@/app/views/crm/deals/types';
 import {DealStatisticWidget} from '@/app/views/crm/deals/components/deal-statistic-widget';
 import {CustomPagination} from '@app/components/custom-pagination';
@@ -29,7 +28,7 @@ const asanaLogo = '/assets/images/logos/asana.svg'
 @Component({
     selector: 'app-deals',
     imports: [
-        PageTitle,
+        
         DealStatisticWidget,
         FormsModule,
         LucideAngularModule,

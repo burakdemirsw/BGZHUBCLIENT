@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { PageTitle } from "@app/components/page-title";
 import type { FilePondBaseProps } from 'filepond';
 import { FilePondModule, registerPlugin } from 'ngx-filepond';
 import { FileUploader } from "@app/components/file-uploader";
@@ -15,7 +14,7 @@ registerPlugin(
 )
 @Component({
     selector: 'app-file-uploads',
-    imports: [PageTitle, FileUploader, FilePondModule],
+    imports: [ FileUploader, FilePondModule],
     templateUrl: './file-uploads.html',
     styles: ``
 })

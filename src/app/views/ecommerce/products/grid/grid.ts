@@ -1,5 +1,4 @@
 import {Component, inject, TemplateRef} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {RouterLink} from '@angular/router';
 import {NgIcon} from '@ng-icons/core';
 import {LucideAngularModule, LucideLayoutGrid, LucideList, LucidePlus} from 'lucide-angular';
@@ -14,7 +13,7 @@ import {products} from '@/app/views/ecommerce/products/data';
 @Component({
     selector: 'app-grid',
     imports: [
-        PageTitle,
+        
         RouterLink,
         NgIcon,
         LucideAngularModule,

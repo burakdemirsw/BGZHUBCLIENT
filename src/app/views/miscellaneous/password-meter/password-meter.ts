@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {PageTitle} from "@app/components/page-title";
 import {UiCard} from "@app/components/ui-card";
 import {PasswordStrengthBar} from "@app/components/password-strength-bar";
 import {FormsModule} from '@angular/forms';
@@ -7,7 +6,7 @@ import {NgbCollapseModule} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-password-meter',
-  imports: [PageTitle, UiCard, PasswordStrengthBar,FormsModule,NgbCollapseModule],
+  imports: [ UiCard, PasswordStrengthBar,FormsModule,NgbCollapseModule],
   templateUrl: './password-meter.html',
   styles: ``
 })

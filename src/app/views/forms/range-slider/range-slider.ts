@@ -1,12 +1,11 @@
 import {Component} from '@angular/core';
-import {PageTitle} from "@app/components/page-title";
 import {NgIcon} from '@ng-icons/core';
 import {NouisliderModule} from 'ng2-nouislider'
 import {FormsModule} from '@angular/forms';
 
 @Component({
     selector: 'app-range-slider',
-    imports: [PageTitle, NgIcon, NouisliderModule, FormsModule],
+    imports: [ NgIcon, NouisliderModule, FormsModule],
     templateUrl: './range-slider.html',
     styles: ``
 })

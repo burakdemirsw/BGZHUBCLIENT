@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {PageTitle} from '@app/components/page-title';
 import {LucideAngularModule, LucideCircle, LucidePlus, LucideSearch} from 'lucide-angular';
 import {RouterLink} from '@angular/router';
 import {currency} from '@/app/constants';
@@ -29,7 +28,7 @@ type categoryType = {
 @Component({
     selector: 'app-categories',
     imports: [
-        PageTitle,
+        
         LucideAngularModule,
         RouterLink,
         NgIcon,

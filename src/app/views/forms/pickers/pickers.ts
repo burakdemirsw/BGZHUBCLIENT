@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PageTitle } from '@app/components/page-title';
 import {
     FlatpickrDirective,
     provideFlatpickrDefaults,
@@ -16,7 +15,7 @@ import {NgIcon} from '@ng-icons/core';
 @Component({
     selector: 'app-pickers',
     imports: [
-        PageTitle,
+        
         FlatpickrDirective,
         FormsModule,
         ColorSketchModule,
