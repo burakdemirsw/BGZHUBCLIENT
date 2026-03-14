@@ -25,32 +25,32 @@ type UserDropdownItemType = {
 export const userDropdownItems: UserDropdownItemType[] = [
     {
         label: 'Tekrar hoş geldiniz!',
-        isHeader: true
+        isHeader: true,
     },
     {
         label: 'Profil',
         icon: 'tablerUserCircle',
-        url: '/apps/users/profile'
+        url: 'users/profile',
     },
     {
         label: 'Bildirimler',
         icon: 'tablerBellRinging',
-        url: ''
+        url: '',
     },
     {
         label: 'Destek Merkezi',
         icon: 'tablerHeadset',
-        url: ''
+        url: '',
     },
     {
-        isDivider: true
+        isDivider: true,
     },
     {
         label: 'Çıkış Yap',
         icon: 'tablerLogout2',
         url: '',
-        class: 'text-danger fw-semibold'
-    }
+        class: 'text-danger fw-semibold',
+    },
 ];
 
 export const menuItems: MenuItemType[] = [

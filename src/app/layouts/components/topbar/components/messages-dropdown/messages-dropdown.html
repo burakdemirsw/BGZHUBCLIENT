@@ -60,7 +60,7 @@
                                     {{ getMessage(item) }}
                                 </span>
                                 <span class="fs-xs opacity-75">
-                                    {{ getTimeAgo(item.createdDate) }}
+                                    {{ getTimeAgo(item.sentDate || item.createdDate) }}
                                 </span>
                             </span>
 
