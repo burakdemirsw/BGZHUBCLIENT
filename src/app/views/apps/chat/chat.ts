@@ -57,7 +57,8 @@ export class Chat implements OnInit, AfterViewInit {
     }
 
 
-    ngOnInit(): void {
+    async ngOnInit(): Promise<void> {
+        await this.chatService.loadConversations();
         this.activeChatId = this.chatService.getUsers()[0]?.id || '';
     }
 
