@@ -19,7 +19,6 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Hesap Adı</th>
-                                    <th>Kullanıcı</th>
                                     <th>Durum</th>
                                     <th class="text-end">İşlemler</th>
                                 </tr>
@@ -28,7 +27,6 @@
                                 @for (account of accounts; track $index) {
                                     <tr>
                                         <td>{{ account.name }}</td>
-                                        <td>{{ getUserName(account.userId) }}</td>
                                         <td>
                                             <span class="badge" [class]="account.isBlocked ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'">
                                                 {{ account.isBlocked ? 'Engelli' : 'Aktif' }}
@@ -40,7 +38,7 @@
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="4" class="text-center text-muted">Hesap bulunamadı.</td></tr>
+                                    <tr><td colspan="3" class="text-center text-muted">Hesap bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -62,15 +60,6 @@
                 </div>
                 <div class="modal-body">
                     <form>
-                        <div class="mb-3">
-                            <label class="form-label">Kullanıcı</label>
-                            <select class="form-select" [(ngModel)]="form.userId" name="userId" required>
-                                <option value="">Seçiniz...</option>
-                                @for (user of users; track $index) {
-                                    <option [value]="user.id">{{ user.userName ?? user.email ?? user.name }}</option>
-                                }
-                            </select>
-                        </div>
                         <div class="mb-3">
                             <label class="form-label">Hesap Adı</label>
                             <input type="text" class="form-control" [(ngModel)]="form.name" name="name" required>

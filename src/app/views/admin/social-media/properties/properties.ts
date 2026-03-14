@@ -4,9 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { SocialMediaService } from '@/app/core/services/social-media.service';
 import {
     SocialMediaAccount,
-    SocialMediaAccountProperty,
-    CreateSocialMediaAccountPropertyRequest,
-    UpdateSocialMediaAccountPropertyRequest,
+    UserSocialMediaAccount,
+    UserSocialMediaAccountProperty,
+    CreateUserSocialMediaAccountPropertyRequest,
+    UpdateUserSocialMediaAccountPropertyRequest,
 } from '@/app/core/models/social-media/social-media.models';
 
 @Component({
@@ -15,25 +16,30 @@ import {
     templateUrl: './properties.html',
 })
 export class SocialMediaPropertiesPage implements OnInit {
-    properties: SocialMediaAccountProperty[] = [];
+    properties: UserSocialMediaAccountProperty[] = [];
     accounts: SocialMediaAccount[] = [];
+    userAccounts: UserSocialMediaAccount[] = [];
     loading = false;
     showModal = false;
     editMode = false;
-    selectedProperty: SocialMediaAccountProperty | null = null;
+    selectedProperty: UserSocialMediaAccountProperty | null = null;
     filterAccountId: string = '';
+    filterUserAccountId: string = '';
 
     form: any = {
-        socialMediaAccountId: '',
+        userSocialMediaAccountId: '',
         key: '',
         value: '',
         isBlocked: false,
     };
 
-    constructor(private socialMediaService: SocialMediaService) {}
+    constructor(
+        private socialMediaService: SocialMediaService
+    ) {}
 
     ngOnInit(): void {
         this.loadAccounts();
+        this.loadUserAccounts();
         this.loadProperties();
     }
 
@@ -46,17 +52,31 @@ export class SocialMediaPropertiesPage implements OnInit {
         }
     }
 
+    async loadUserAccounts(): Promise<void> {
+        try {
+            const response = await this.socialMediaService.getUserAccounts();
+            this.userAccounts = this.extractArray(response);
+        } catch (err) {
+            console.error('User Accounts error:', err);
+        }
+    }
+
     async loadProperties(): Promise<void> {
         this.loading = true;
         try {
             let response;
-            if (this.filterAccountId) {
-                response = await this.socialMediaService.getPropertiesByAccount(this.filterAccountId);
+            if (this.filterUserAccountId) {
+                // Filter will be applied manually since we don't have a specific endpoint
+                response = await this.socialMediaService.getUserProperties();
             } else {
-                response = await this.socialMediaService.getProperties();
+                response = await this.socialMediaService.getUserProperties();
             }
-            console.log('Properties response:', response);
+            console.log('User Properties response:', response);
             this.properties = this.extractArray(response);
+            // Apply local filtering if needed
+            if (this.filterUserAccountId) {
+                this.properties = this.properties.filter(p => p.userSocialMediaAccountId === this.filterUserAccountId);
+            }
         } catch (err) {
             console.error('Properties error:', err);
         } finally {
@@ -81,11 +101,18 @@ export class SocialMediaPropertiesPage implements OnInit {
         return this.accounts.find(a => a.id === accountId)?.name ?? '-';
     }
 
+    getUserAccountName(userAccountId: string): string {
+        const userAccount = this.userAccounts.find(ua => ua.id === userAccountId);
+        if (!userAccount) return '-';
+        const account = this.accounts.find(a => a.id === userAccount.socialMediaAccountId);
+        return account?.name ?? '-';
+    }
+
     openCreate(): void {
         this.editMode = false;
         this.selectedProperty = null;
         this.form = {
-            socialMediaAccountId: this.filterAccountId || '',
+            userSocialMediaAccountId: this.filterUserAccountId || '',
             key: '',
             value: '',
             isBlocked: false,
@@ -93,11 +120,11 @@ export class SocialMediaPropertiesPage implements OnInit {
         this.showModal = true;
     }
 
-    openEdit(prop: SocialMediaAccountProperty): void {
+    openEdit(prop: UserSocialMediaAccountProperty): void {
         this.editMode = true;
         this.selectedProperty = prop;
         this.form = {
-            socialMediaAccountId: prop.socialMediaAccountId,
+            userSocialMediaAccountId: prop.userSocialMediaAccountId,
             key: prop.key,
             value: prop.value,
             isBlocked: prop.isBlocked ?? false,
@@ -108,20 +135,20 @@ export class SocialMediaPropertiesPage implements OnInit {
     async save(): Promise<void> {
         try {
             if (this.editMode && this.selectedProperty) {
-                const req: UpdateSocialMediaAccountPropertyRequest = {
-                    socialMediaAccountId: this.form.socialMediaAccountId,
+                const req: UpdateUserSocialMediaAccountPropertyRequest = {
+                    userSocialMediaAccountId: this.form.userSocialMediaAccountId,
                     key: this.form.key,
                     value: this.form.value,
                     isBlocked: this.form.isBlocked ?? false,
                 };
-                await this.socialMediaService.updateProperty(this.selectedProperty.id, req);
+                await this.socialMediaService.updateUserProperty(this.selectedProperty.id, req);
             } else {
-                const req: CreateSocialMediaAccountPropertyRequest = {
-                    socialMediaAccountId: this.form.socialMediaAccountId,
+                const req: CreateUserSocialMediaAccountPropertyRequest = {
+                    userSocialMediaAccountId: this.form.userSocialMediaAccountId,
                     key: this.form.key,
                     value: this.form.value,
                 };
-                await this.socialMediaService.createProperty(req);
+                await this.socialMediaService.createUserProperty(req);
             }
             this.showModal = false;
             await this.loadProperties();
@@ -130,10 +157,10 @@ export class SocialMediaPropertiesPage implements OnInit {
         }
     }
 
-    async deleteProperty(prop: SocialMediaAccountProperty): Promise<void> {
+    async deleteProperty(prop: UserSocialMediaAccountProperty): Promise<void> {
         if (confirm(`"${prop.key}" özelliğini silmek istediğinize emin misiniz?`)) {
             try {
-                await this.socialMediaService.deleteProperty(prop.id);
+                await this.socialMediaService.deleteUserProperty(prop.id);
                 await this.loadProperties();
             } catch (err) {
                 console.error('Delete error:', err);

@@ -4444,6 +4444,158 @@
         ]
       }
     },
+    "/api/RequestPriorities": {
+      "get": {
+        "tags": [
+          "RequestPriorities"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "RequestPriorities"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRequestPriorityRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRequestPriorityRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRequestPriorityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/RequestPriorities/{id}": {
+      "get": {
+        "tags": [
+          "RequestPriorities"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "RequestPriorities"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRequestPriorityRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRequestPriorityRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRequestPriorityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "RequestPriorities"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/RequestStatuses": {
       "get": {
         "tags": [
@@ -8124,6 +8276,27 @@
           }
         }
       },
+      "CreateRequestPriorityRequest": {
+        "required": [
+          "name",
+          "description"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "CreateRequestStatusRequest": {
         "required": [
           "name",
@@ -8237,12 +8410,17 @@
       },
       "CreateSocialMediaAccountPropertyRequest": {
         "required": [
+          "userId",
           "socialMediaAccountId",
           "key",
           "value"
         ],
         "type": "object",
         "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
           "socialMediaAccountId": {
             "type": "string",
             "format": "uuid"
@@ -8528,7 +8706,6 @@
       },
       "CreateUserRequestRequest": {
         "required": [
-          "integrationId",
           "userId",
           "categoryId",
           "priorityId",
@@ -8537,10 +8714,6 @@
         ],
         "type": "object",
         "properties": {
-          "integrationId": {
-            "type": "string",
-            "format": "uuid"
-          },
           "userId": {
             "type": "string",
             "format": "uuid"
@@ -9633,6 +9806,31 @@
           }
         }
       },
+      "UpdateRequestPriorityRequest": {
+        "required": [
+          "name",
+          "description",
+          "isBlocked"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isBlocked": {
+            "type": "boolean"
+          }
+        }
+      },
       "UpdateRequestStatusRequest": {
         "required": [
           "name",
@@ -9748,6 +9946,7 @@
       },
       "UpdateSocialMediaAccountPropertyRequest": {
         "required": [
+          "userId",
           "socialMediaAccountId",
           "key",
           "value",
@@ -9755,6 +9954,10 @@
         ],
         "type": "object",
         "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
           "socialMediaAccountId": {
             "type": "string",
             "format": "uuid"
@@ -10178,6 +10381,9 @@
     },
     {
       "name": "RequestCategories"
+    },
+    {
+      "name": "RequestPriorities"
     },
     {
       "name": "RequestStatuses"

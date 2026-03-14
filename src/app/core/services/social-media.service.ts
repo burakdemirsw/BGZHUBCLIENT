@@ -3,12 +3,12 @@ import { HttpClientService } from './http-client.service';
 import {
   CreateSocialMediaAccountRequest,
   UpdateSocialMediaAccountRequest,
-  CreateSocialMediaAccountDescriptionRequest,
-  UpdateSocialMediaAccountDescriptionRequest,
   CreateSocialMediaAccountPropertyRequest,
   UpdateSocialMediaAccountPropertyRequest,
   CreateUserSocialMediaAccountRequest,
   UpdateUserSocialMediaAccountRequest,
+  CreateUserSocialMediaAccountPropertyRequest,
+  UpdateUserSocialMediaAccountPropertyRequest,
 } from '../models/social-media/social-media.models';
 
 @Injectable({
@@ -40,31 +40,6 @@ export class SocialMediaService {
 
   deleteAccount(id: string): Promise<any> {
     return this.http.post({ controller: 'SocialMedia', action: `delete/accounts/${id}` }, {});
-  }
-
-  // === Descriptions ===
-  getDescriptions(): Promise<any> {
-    return this.http.get_new({ controller: 'SocialMedia', action: 'descriptions' });
-  }
-
-  getDescriptionById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'SocialMedia', action: `descriptions/${id}` });
-  }
-
-  getDescriptionsByAccount(accountId: string): Promise<any> {
-    return this.http.get_new({ controller: 'SocialMedia', action: `accounts/${accountId}/descriptions` });
-  }
-
-  createDescription(request: CreateSocialMediaAccountDescriptionRequest): Promise<any> {
-    return this.http.post({ controller: 'SocialMedia', action: 'descriptions' }, request);
-  }
-
-  updateDescription(id: string, request: UpdateSocialMediaAccountDescriptionRequest): Promise<any> {
-    return this.http.post({ controller: 'SocialMedia', action: `update/descriptions/${id}` }, request);
-  }
-
-  deleteDescription(id: string): Promise<any> {
-    return this.http.post({ controller: 'SocialMedia', action: `delete/descriptions/${id}` }, {});
   }
 
   // === Properties ===
@@ -119,5 +94,34 @@ export class SocialMediaService {
 
   deleteUserAccount(id: string): Promise<any> {
     return this.http.post({ controller: 'SocialMedia', action: `delete/user-accounts/${id}` }, {});
+  }
+
+  // === User Properties ===
+  getUserProperties(): Promise<any> {
+    return this.http.get_new({ controller: 'SocialMedia', action: 'user-properties' });
+  }
+
+  getUserPropertyById(id: string): Promise<any> {
+    return this.http.get_new({ controller: 'SocialMedia', action: `user-properties/${id}` });
+  }
+
+  getUserPropertiesByUser(userId: string): Promise<any> {
+    return this.http.get_new({ controller: 'SocialMedia', action: `user-properties/by-user/${userId}` });
+  }
+
+  getUserPropertiesByAccount(accountId: string): Promise<any> {
+    return this.http.get_new({ controller: 'SocialMedia', action: `user-properties/by-account/${accountId}` });
+  }
+
+  createUserProperty(request: CreateUserSocialMediaAccountPropertyRequest): Promise<any> {
+    return this.http.post({ controller: 'SocialMedia', action: 'user-properties' }, request);
+  }
+
+  updateUserProperty(id: string, request: UpdateUserSocialMediaAccountPropertyRequest): Promise<any> {
+    return this.http.post({ controller: 'SocialMedia', action: `update/user-properties/${id}` }, request);
+  }
+
+  deleteUserProperty(id: string): Promise<any> {
+    return this.http.post({ controller: 'SocialMedia', action: `delete/user-properties/${id}` }, {});
   }
 }

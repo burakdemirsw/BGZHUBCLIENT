@@ -96,7 +96,9 @@ export class UserRequestsPage implements OnInit {
     async loadPriorities(): Promise<void> {
         try {
             const response = await this.priorityService.getAll();
+            console.log('RequestPriorities API response:', response);
             this.priorities = this.extractArray(response);
+            console.log('Extracted priorities:', this.priorities);
         } catch (err) {
             console.error('Priorities load error:', err);
         }

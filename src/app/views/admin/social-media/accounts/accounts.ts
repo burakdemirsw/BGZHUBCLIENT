@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SocialMediaService } from '@/app/core/services/social-media.service';
-import { UsersService } from '@/app/core/services/users.service';
 import {
     SocialMediaAccount,
     CreateSocialMediaAccountRequest,
@@ -16,35 +15,22 @@ import {
 })
 export class SocialMediaAccountsPage implements OnInit {
     accounts: SocialMediaAccount[] = [];
-    users: any[] = [];
     loading = false;
     showModal = false;
     editMode = false;
     selectedAccount: SocialMediaAccount | null = null;
 
     form: any = {
-        userId: '',
         name: '',
         isBlocked: false,
     };
 
     constructor(
         private socialMediaService: SocialMediaService,
-        private usersService: UsersService,
     ) {}
 
     ngOnInit(): void {
-        this.loadUsers();
         this.loadAccounts();
-    }
-
-    async loadUsers(): Promise<void> {
-        try {
-            const response = await this.usersService.getAll();
-            this.users = this.extractArray(response);
-        } catch (err) {
-            console.error('Users error:', err);
-        }
     }
 
     async loadAccounts(): Promise<void> {
@@ -69,15 +55,10 @@ export class SocialMediaAccountsPage implements OnInit {
         return [];
     }
 
-    getUserName(userId: string): string {
-        const user = this.users.find(u => u.id === userId);
-        return user ? (user.userName ?? user.email ?? user.name ?? '-') : '-';
-    }
-
     openCreate(): void {
         this.editMode = false;
         this.selectedAccount = null;
-        this.form = { userId: '', name: '', isBlocked: false };
+        this.form = { name: '', isBlocked: false };
         this.showModal = true;
     }
 
@@ -85,7 +66,6 @@ export class SocialMediaAccountsPage implements OnInit {
         this.editMode = true;
         this.selectedAccount = account;
         this.form = {
-            userId: account.userId,
             name: account.name,
             isBlocked: account.isBlocked ?? false,
         };
@@ -96,14 +76,12 @@ export class SocialMediaAccountsPage implements OnInit {
         try {
             if (this.editMode && this.selectedAccount) {
                 const req: UpdateSocialMediaAccountRequest = {
-                    userId: this.form.userId,
                     name: this.form.name,
                     isBlocked: this.form.isBlocked ?? false,
                 };
                 await this.socialMediaService.updateAccount(this.selectedAccount.id, req);
             } else {
                 const req: CreateSocialMediaAccountRequest = {
-                    userId: this.form.userId,
                     name: this.form.name,
                 };
                 await this.socialMediaService.createAccount(req);

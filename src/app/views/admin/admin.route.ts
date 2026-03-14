@@ -11,8 +11,8 @@ import { IntegrationsPage } from './integrations/integrations';
 import { RoleAssignmentsPage } from './role-assignments/role-assignments';
 import { RoleMenusPage } from './role-menus/role-menus';
 import { SocialMediaAccountsPage } from './social-media/accounts/accounts';
-import { SocialMediaDescriptionsPage } from './social-media/descriptions/descriptions';
 import { SocialMediaPropertiesPage } from './social-media/properties/properties';
+import { UserSocialMediaAccountsPage } from './social-media/user-accounts/user-accounts';
 import { CustomersPage } from './customers/customers';
 import { UserIntegrationsPage } from './user-integrations/user-integrations';
 import { IntegrationPropertiesPage } from './integration-properties/integration-properties';
@@ -120,15 +120,15 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [AuthGuard],
     },
     {
-        path: 'admin/social-media/descriptions',
-        component: SocialMediaDescriptionsPage,
-        data: { title: 'Hesap Açıklamaları' },
-        canActivate: [AuthGuard],
-    },
-    {
         path: 'admin/social-media/properties',
         component: SocialMediaPropertiesPage,
         data: { title: 'Hesap Özellikleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/social-media/user-accounts',
+        component: UserSocialMediaAccountsPage,
+        data: { title: 'Kullanıcı Sosyal Medya Hesapları' },
         canActivate: [AuthGuard],
     },
     {
