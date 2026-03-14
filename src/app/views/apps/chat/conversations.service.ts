@@ -13,14 +13,15 @@ export class ConversationsService {
       const payload = await this.httpClientService.get<any>({
         controller: 'Conversations',
       });
-      return this.normalize(payload);
+      const items = this.extractArray(payload);
+      return this.normalize(items);
     } catch {
       return [];
     }
   }
 
-  private normalize(payload: unknown): ChatUserType[] {
-    const list = Array.isArray(payload) ? payload : [];
+  private normalize(items: any[]): ChatUserType[] {
+    const list = Array.isArray(items) ? items : [];
 
     return list
       .map((item: any) => {
@@ -91,5 +92,23 @@ export class ConversationsService {
       if (!Number.isNaN(parsed)) return parsed;
     }
     return null;
+  }
+
+  private extractArray(payload: unknown): any[] {
+    if (Array.isArray(payload)) return payload;
+    const value = payload as any;
+    if (value?.data) {
+      return Array.isArray(value.data) ? value.data : [value.data];
+    }
+    if (value?.items) {
+      return Array.isArray(value.items) ? value.items : [value.items];
+    }
+    if (value?.result) {
+      return Array.isArray(value.result) ? value.result : [value.result];
+    }
+    if (value?.$values) {
+      return Array.isArray(value.$values) ? value.$values : [value.$values];
+    }
+    return [];
   }
 }

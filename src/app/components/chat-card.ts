@@ -1,15 +1,26 @@
-import {AfterViewInit, Component, ViewChild} from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    Input,
+    OnChanges,
+    OnInit,
+    SimpleChanges,
+    ViewChild,
+} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {SimplebarAngularComponent, SimplebarAngularModule} from 'simplebar-angular';
 import {NgIcon} from '@ng-icons/core';
 import {LucideAngularModule, LucideMessageSquare} from 'lucide-angular';
+import {ConversationsService} from '@/app/views/apps/chat/conversations.service';
+import {AiMessageDto, MessagesService} from '@/app/core/services/messages.service';
 
 type ChatMessageType = {
+    id: string;
     message: string;
     time: string;
     fromUser: boolean;
     avatar: string;
-}
+};
 
 @Component({
     selector: 'app-chat-card',
@@ -21,28 +32,45 @@ type ChatMessageType = {
             </div>
             <ngx-simplebar style="height: 380px;" #scrollRef>
                 <div class="card-body py-0">
-                    @for (msg of messages; track $index) {
-                        <div class="d-flex align-items-start gap-2 my-3 chat-item"
-                             [class]="msg.fromUser ? 'text-end justify-content-end' : ''">
+                    @if (loading) {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2 text-muted">Yükleniyor...</p>
+                        </div>
+                    } @else if (!messages.length && !errorMessage) {
+                        <div class="text-center py-4 text-muted">
+                            Henüz mesaj bulunamadı.
+                        </div>
+                    } @else {
+                        @for (msg of messages; track msg.id) {
+                            <div class="d-flex align-items-start gap-2 my-3 chat-item"
+                                 [class]="msg.fromUser ? 'text-end justify-content-end' : ''">
 
-                            @if (!msg.fromUser) {
-                                <img [src]="msg.avatar" class="avatar-md rounded-circle" alt="User">
-                            }
+                                @if (!msg.fromUser) {
+                                    <img [src]="msg.avatar" class="avatar-md rounded-circle" alt="User">
+                                }
 
-                            <div>
-                                <div class="chat-message py-2 px-3 rounded"
-                                     [class]="msg.fromUser ? 'bg-info-subtle' : 'bg-warning-subtle'">
-                                    {{ msg.message }}
+                                <div>
+                                    <div class="chat-message py-2 px-3 rounded"
+                                         [class]="msg.fromUser ? 'bg-info-subtle' : 'bg-warning-subtle'">
+                                        {{ msg.message }}
+                                    </div>
+                                    <div class="text-muted fs-xs mt-1">
+                                        <ng-icon name="tablerClock"/>
+                                        {{ msg.time }}
+                                    </div>
                                 </div>
-                                <div class="text-muted fs-xs mt-1">
-                                    <ng-icon name="tablerClock"/>
-                                    {{ msg.time }}
-                                </div>
+
+                                @if (msg.fromUser) {
+                                    <img [src]="msg.avatar" class="avatar-md rounded-circle" alt="User">
+                                }
                             </div>
+                        }
+                    }
 
-                            @if (msg.fromUser) {
-                                <img [src]="msg.avatar" class="avatar-md rounded-circle" alt="User">
-                            }
+                    @if (errorMessage) {
+                        <div class="text-danger text-center small mt-3">
+                            {{ errorMessage }}
                         </div>
                     }
                 </div>
@@ -53,108 +81,148 @@ type ChatMessageType = {
                     <div class="app-search flex-grow-1">
                         <input type="text" class="form-control bg-light-subtle border-light"
                                placeholder="Enter message..."
-                               [(ngModel)]="inputMessage" (keyup.enter)="sendMessage()">
+                               [(ngModel)]="inputMessage"
+                               (keyup.enter)="sendMessage()"
+                               [disabled]="loading || !currentConversationId">
                         <lucide-angular [img]="LucideMessageSquare" class="app-search-icon text-muted"/>
                     </div>
-                    <button type="button" class="btn btn-primary btn-icon" (click)="sendMessage()">
+                    <button type="button"
+                            class="btn btn-primary btn-icon"
+                            (click)="sendMessage()"
+                            [disabled]="loading || !currentConversationId">
                         <ng-icon name="tablerSend2" class="fs-xl"/>
                     </button>
                 </div>
             </div>
         </div>
     `,
-    styles: ``
+    styles: ``,
 })
-export class ChatCard implements AfterViewInit {
+export class ChatCard implements AfterViewInit, OnInit, OnChanges {
+    @Input() chatId: string | null = null;
     inputMessage = '';
-    @ViewChild('scrollRef', {static: false})
-    scrollRef!: SimplebarAngularComponent
+    messages: ChatMessageType[] = [];
+    loading = false;
+    errorMessage = '';
+    currentConversationId: string | null = null;
+    private scrollReady = false;
 
-    ngAfterViewInit() {
-        this.scrollRef.SimpleBar.getScrollElement().scrollTop = 300
-        this.onListScroll()
+    @ViewChild('scrollRef', {static: false})
+    scrollRef!: SimplebarAngularComponent;
+
+    constructor(
+        private messagesService: MessagesService,
+        private conversationsService: ConversationsService
+    ) {}
+
+    ngOnInit() {
+        this.loadMessages();
     }
 
-    onListScroll() {
-        if (this.scrollRef !== undefined) {
-            setTimeout(() => {
-                this.scrollRef.SimpleBar.getScrollElement().scrollTop =
-                    this.scrollRef.SimpleBar.getScrollElement().scrollHeight
-            }, 100)
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['chatId'] && !changes['chatId'].firstChange) {
+            this.loadMessages();
         }
+    }
+
+    ngAfterViewInit() {
+        this.scrollReady = true;
+        this.scrollToBottom(300);
     }
 
     sendMessage() {
         const messageText = this.inputMessage.trim();
-        if (!messageText) return;
+        if (!messageText || !this.currentConversationId) return;
 
         const currentTime = new Date();
         const formattedTime = currentTime.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
 
         this.messages.push({
+            id: `outgoing-${Date.now()}`,
             message: this.inputMessage,
             time: formattedTime,
             fromUser: true,
-            avatar: 'assets/images/users/user-2.jpg'
+            avatar: 'assets/images/users/user-2.jpg',
         });
         this.inputMessage = '';
+
         setTimeout(() => {
             this.messages.push({
+                id: `auto-${Date.now()}`,
                 message: messageText,
                 time: formattedTime,
                 fromUser: false,
-                avatar: 'assets/images/users/user-5.jpg'
+                avatar: 'assets/images/users/user-5.jpg',
             });
-            this.onListScroll()
+            this.scrollToBottom();
         }, 1000);
-        this.onListScroll()
 
+        this.scrollToBottom();
     }
 
-    messages: ChatMessageType[] = [
-        {
-            message: 'Hey! Are you available for a quick call? 📞',
-            time: '08:55 am',
-            fromUser: false,
-            avatar: 'assets/images/users/user-5.jpg'
-        },
-        {
-            message: 'Sure, give me 5 minutes. Just wrapping something up.',
-            time: '08:57 am',
-            fromUser: true,
-            avatar: 'assets/images/users/user-2.jpg'
-        },
-        {
-            message: "Perfect. Let me know when you're ready 👍",
-            time: '08:58 am',
-            fromUser: false,
-            avatar: 'assets/images/users/user-5.jpg'
-        },
-        {
-            message: 'Ready now. Calling you!',
-            time: '09:00 am',
-            fromUser: true,
-            avatar: 'assets/images/users/user-2.jpg'
-        },
-        {
-            message: 'Thanks for your time earlier!',
-            time: '09:45 am',
-            fromUser: false,
-            avatar: 'assets/images/users/user-5.jpg'
-        },
-        {
-            message: 'Of course! It was a productive discussion.',
-            time: '09:46 am',
-            fromUser: true,
-            avatar: 'assets/images/users/user-2.jpg'
-        },
-        {
-            message: 'I’ll send over the updated files by noon.',
-            time: '09:50 am',
-            fromUser: false,
-            avatar: 'assets/images/users/user-5.jpg'
-        }
-    ];
     protected readonly LucideMessageSquare = LucideMessageSquare;
-}
 
+    private async loadMessages(): Promise<void> {
+        this.loading = true;
+        this.errorMessage = '';
+        try {
+            const conversationId = await this.resolveConversationId();
+            if (!conversationId) {
+                this.messages = [];
+                this.currentConversationId = null;
+                return;
+            }
+
+            this.currentConversationId = conversationId;
+            const payload = await this.messagesService.getMessagesByConversation(conversationId);
+            this.messages = payload.map((message) => this.mapMessage(message));
+        } catch (error) {
+            console.error('Messages error:', error);
+            this.errorMessage = 'Mesajlar yüklenemedi.';
+            this.messages = [];
+        } finally {
+            this.loading = false;
+            this.scrollToBottom();
+        }
+    }
+
+    private mapMessage(message: AiMessageDto): ChatMessageType {
+        const role = message.role?.toLowerCase?.() ?? '';
+        const fromUser = role === 'user' || role === 'customer';
+        const parsedDate = message.createdDate ? new Date(message.createdDate) : null;
+        const formattedTime =
+            parsedDate && !Number.isNaN(parsedDate.getTime())
+                ? parsedDate.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
+                : '';
+
+        const baseAvatar = fromUser ? 'assets/images/users/user-2.jpg' : 'assets/images/users/user-5.jpg';
+        const id =
+            message.id ??
+            `${message.conversationId ?? 'msg'}-${message.createdDate ?? ''}-${Math.random().toString(36).slice(2)}`;
+
+        return {
+            id,
+            message: message.messageContent ?? '',
+            time: formattedTime,
+            fromUser,
+            avatar: baseAvatar,
+        };
+    }
+
+    private async resolveConversationId(): Promise<string | null> {
+        if (this.chatId?.trim()) {
+            return this.chatId;
+        }
+
+        const conversations = await this.conversationsService.getConversations();
+        return conversations[0]?.id ?? null;
+    }
+
+    private scrollToBottom(delay = 100) {
+        if (!this.scrollReady || !this.scrollRef) return;
+        setTimeout(() => {
+            const scrollElement = this.scrollRef.SimpleBar.getScrollElement();
+            scrollElement.scrollTop = scrollElement.scrollHeight;
+        }, delay);
+    }
+}
