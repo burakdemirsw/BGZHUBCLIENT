@@ -14,6 +14,13 @@
                         <p class="mt-2 text-muted">Yükleniyor...</p>
                     </div>
                 } @else {
+                    <!-- Arama Filtresi -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="text-muted">Toplam: <strong>{{ totalCount }}</strong> kayıt</div>
+                        <div style="max-width:300px">
+                            <input type="text" class="form-control form-control-sm" placeholder="Ad, soyad veya e-posta ara..." [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-centered table-hover mb-0">
                             <thead class="table-light">
@@ -27,7 +34,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (user of users; track $index) {
+                                @for (user of pagedItems; track $index) {
                                     <tr>
                                         <td>{{ user.name }}</td>
                                         <td>{{ user.lastName }}</td>
@@ -48,6 +55,36 @@
                                 }
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Sayfalama -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="small text-muted">Sayfa {{ currentPage }} / {{ totalPages }}</span>
+                            <select class="form-select form-select-sm" style="width:auto" [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange()">
+                                @for (opt of pageSizeOptions; track opt) {
+                                    <option [ngValue]="opt">{{ opt }}</option>
+                                }
+                            </select>
+                            <span class="small text-muted">kayıt/sayfa</span>
+                        </div>
+                        @if (totalPages > 1) {
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item" [class.disabled]="currentPage === 1">
+                                        <button class="page-link" (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1">&laquo;</button>
+                                    </li>
+                                    @for (p of totalPagesArray; track p) {
+                                        <li class="page-item" [class.active]="p === currentPage">
+                                            <button class="page-link" (click)="setPage(p)">{{ p }}</button>
+                                        </li>
+                                    }
+                                    <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                        <button class="page-link" (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages">&raquo;</button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        }
                     </div>
                 }
             </div>

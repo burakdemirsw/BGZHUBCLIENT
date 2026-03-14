@@ -14,10 +14,20 @@
                         <p class="mt-2 text-muted">Yükleniyor...</p>
                     </div>
                 } @else {
+                    <!-- Arama Filtresi -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted">Toplam: <strong>{{ filteredItems.length }}</strong> kayıt</span>
+                        </div>
+                        <div style="max-width:300px">
+                            <input type="text" class="form-control form-control-sm" placeholder="Ara..." [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-centered table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th style="width:60px">Logo</th>
                                     <th>Firma Açıklaması</th>
                                     <th>Durum</th>
                                     <th>Oluşturma Tarihi</th>
@@ -25,8 +35,17 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (item of providers; track $index) {
+                                @for (item of pagedItems; track $index) {
                                     <tr>
+                                        <td>
+                                            @if (item.photoUrl) {
+                                                <img [src]="item.photoUrl" alt="logo" class="rounded" width="36" height="36" style="object-fit:contain">
+                                            } @else {
+                                                <span class="avatar-sm bg-light rounded d-inline-flex align-items-center justify-content-center" style="width:36px;height:36px">
+                                                    <i class="fa-solid fa-robot text-muted"></i>
+                                                </span>
+                                            }
+                                        </td>
                                         <td>{{ item.firmDescription }}</td>
                                         <td>
                                             @if (item.isBlocked) {
@@ -42,11 +61,30 @@
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="4" class="text-center text-muted">Sağlayıcı bulunamadı.</td></tr>
+                                    <tr><td colspan="5" class="text-center text-muted">Sağlayıcı bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Sayfalama -->
+                    @if (totalPages > 1) {
+                        <nav class="d-flex justify-content-end mt-3">
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <a class="page-link" href="javascript:void(0)" (click)="setPage(currentPage - 1)">‹</a>
+                                </li>
+                                @for (p of totalPagesArray; track p) {
+                                    <li class="page-item" [class.active]="p === currentPage">
+                                        <a class="page-link" href="javascript:void(0)" (click)="setPage(p)">{{ p }}</a>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <a class="page-link" href="javascript:void(0)" (click)="setPage(currentPage + 1)">›</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
                 }
             </div>
         </div>
@@ -67,6 +105,15 @@
                         <div class="mb-3">
                             <label class="form-label">Firma Açıklaması</label>
                             <input type="text" class="form-control" [(ngModel)]="form.firmDescription" name="firmDescription" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Logo URL</label>
+                            <input type="url" class="form-control" [(ngModel)]="form.photoUrl" name="photoUrl" placeholder="https://example.com/logo.png">
+                            @if (form.photoUrl) {
+                                <div class="mt-2">
+                                    <img [src]="form.photoUrl" alt="Önizleme" class="rounded border" style="max-height:48px;object-fit:contain">
+                                </div>
+                            }
                         </div>
                         @if (editMode) {
                             <div class="mb-3">

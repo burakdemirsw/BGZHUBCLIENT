@@ -20,7 +20,7 @@ export const BASIC_ROUTES: Routes = [
         path: 'auth/sign-up',
         component: SignUp,
         data: { title: "Create New Account" },
-    },
+    }, 
     {
         path: 'auth/reset-pw',
         component: ResetPw,

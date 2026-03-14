@@ -2,15 +2,18 @@
 export interface SocialMediaAccount {
   id: string;
   name: string;
+  photoUrl?: string;
   isBlocked?: boolean;
 }
 
 export interface CreateSocialMediaAccountRequest {
   name: string;
+  photoUrl?: string;
 }
 
 export interface UpdateSocialMediaAccountRequest {
   name: string;
+  photoUrl?: string;
   isBlocked: boolean;
 }
 

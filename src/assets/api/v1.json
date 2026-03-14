@@ -613,7 +613,7 @@
           }
         ]
       },
-      "put": {
+      "post": {
         "tags": [
           "AiAssistants"
         ],
@@ -648,32 +648,6 @@
           },
           "required": true
         },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "AiAssistants"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1217,7 +1191,7 @@
           }
         ]
       },
-      "put": {
+      "post": {
         "tags": [
           "AiModels"
         ],
@@ -1252,32 +1226,6 @@
           },
           "required": true
         },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "AiModels"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1424,7 +1372,7 @@
           }
         ]
       },
-      "put": {
+      "post": {
         "tags": [
           "AiProviders"
         ],
@@ -1459,32 +1407,6 @@
           },
           "required": true
         },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "AiProviders"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1576,7 +1498,7 @@
           }
         ]
       },
-      "put": {
+      "post": {
         "tags": [
           "AiProviderSettings"
         ],
@@ -1611,32 +1533,6 @@
           },
           "required": true
         },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "AiProviderSettings"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1784,7 +1680,7 @@
           }
         ]
       },
-      "put": {
+      "post": {
         "tags": [
           "AiSettings"
         ],
@@ -1819,32 +1715,6 @@
           },
           "required": true
         },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "AiSettings"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -4523,7 +4393,7 @@
           }
         ]
       },
-      "put": {
+      "post": {
         "tags": [
           "RequestPriorities"
         ],
@@ -4558,32 +4428,6 @@
           },
           "required": true
         },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "RequestPriorities"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -7086,6 +6930,44 @@
         "tags": [
           "Users"
         ],
+        "parameters": [
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Skip",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -7494,11 +7376,18 @@
       },
       "CreateAiProviderRequest": {
         "required": [
-          "firmDescription"
+          "firmDescription",
+          "photoUrl"
         ],
         "type": "object",
         "properties": {
           "firmDescription": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "photoUrl": {
             "type": [
               "null",
               "string"
@@ -7740,11 +7629,18 @@
       },
       "CreateIntegrationRequest": {
         "required": [
-          "integrationDescription"
+          "integrationDescription",
+          "photoUrl"
         ],
         "type": "object",
         "properties": {
           "integrationDescription": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "photoUrl": {
             "type": [
               "null",
               "string"
@@ -7845,6 +7741,7 @@
           "description",
           "url",
           "icon",
+          "colorCode",
           "orderIndex"
         ],
         "type": "object",
@@ -7875,6 +7772,12 @@
             ]
           },
           "icon": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "colorCode": {
             "type": [
               "null",
               "string"
@@ -8226,11 +8129,18 @@
       },
       "CreateSocialMediaAccountRequest": {
         "required": [
-          "name"
+          "name",
+          "photoUrl"
         ],
         "type": "object",
         "properties": {
           "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "photoUrl": {
             "type": [
               "null",
               "string"
@@ -8922,11 +8832,18 @@
       "UpdateAiProviderRequest": {
         "required": [
           "firmDescription",
+          "photoUrl",
           "isBlocked"
         ],
         "type": "object",
         "properties": {
           "firmDescription": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "photoUrl": {
             "type": [
               "null",
               "string"
@@ -9208,11 +9125,18 @@
       },
       "UpdateIntegrationRequest": {
         "required": [
-          "integrationDescription"
+          "integrationDescription",
+          "photoUrl"
         ],
         "type": "object",
         "properties": {
           "integrationDescription": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "photoUrl": {
             "type": [
               "null",
               "string"
@@ -9325,6 +9249,7 @@
           "description",
           "url",
           "icon",
+          "colorCode",
           "orderIndex",
           "isBlocked"
         ],
@@ -9356,6 +9281,12 @@
             ]
           },
           "icon": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "colorCode": {
             "type": [
               "null",
               "string"
@@ -9732,11 +9663,18 @@
       "UpdateSocialMediaAccountRequest": {
         "required": [
           "name",
+          "photoUrl",
           "isBlocked"
         ],
         "type": "object",
         "properties": {
           "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "photoUrl": {
             "type": [
               "null",
               "string"

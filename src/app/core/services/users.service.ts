@@ -8,8 +8,8 @@ import { CreateUserRequest, UpdateUserRequest } from '../models/user/user.models
 export class UsersService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Promise<any> {
-    return this.http.get_new({ controller: 'Users' });
+  getAll(page: number = 1, pageSize: number = 10): Promise<any> {
+    return this.http.get_new({ controller: 'Users', queryString: `Page=${page}&PageSize=${pageSize}` });
   }
 
   getById(id: string): Promise<any> {

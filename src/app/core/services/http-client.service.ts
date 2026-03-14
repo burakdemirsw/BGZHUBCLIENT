@@ -3,15 +3,15 @@ import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { RequestParameters } from '../models/parameters/requestParameters';
 
- // const BASE_URL = 'http://195.175.214.66:7278/api';
-const BASE_URL = 'https://localhost:8991/api';
+ //const BASE_URL = 'http://195.175.214.66:7278/api';
+ const BASE_URL = 'https://localhost:8991/api';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HttpClientService {
   constructor(private httpClient: HttpClient) {}
-
+     
   private url(requestParameter: Partial<RequestParameters>): string {
     return `${requestParameter.baseUrl ?? BASE_URL}/${requestParameter.controller}${
       requestParameter.action ? `/${requestParameter.action}` : ''
@@ -69,6 +69,24 @@ export class HttpClientService {
 
     return await firstValueFrom(
       this.httpClient.post<T>(url, body, {
+        headers: requestParameter.headers,
+        responseType: requestParameter.responseType as 'json',
+      })
+    );
+  }
+
+  async delete<T>(
+    requestParameter: Partial<RequestParameters>
+  ): Promise<any> {
+    let url: string = '';
+    if (requestParameter.fullEndPoint) url = requestParameter.fullEndPoint;
+    else
+      url = `${this.url(requestParameter)}${
+        requestParameter.queryString ? `?${requestParameter.queryString}` : ''
+      }`;
+
+    return await firstValueFrom(
+      this.httpClient.delete<T>(url, {
         headers: requestParameter.headers,
         responseType: requestParameter.responseType as 'json',
       })

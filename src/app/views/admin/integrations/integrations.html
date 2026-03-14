@@ -8,6 +8,9 @@
                 </button>
             </div>
             <div class="card-body">
+                <div class="d-flex mb-3 gap-2">
+                    <input type="text" class="form-control form-control-sm w-auto" placeholder="Entegrasyon ara..." [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+                </div>
                 @if (loading) {
                     <div class="text-center py-4">
                         <div class="spinner-border text-primary" role="status"></div>
@@ -18,13 +21,21 @@
                         <table class="table table-centered table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th style="width:48px">Foto</th>
                                     <th>Entegrasyon Açıklaması</th>
                                     <th class="text-end">İşlemler</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (item of integrations; track $index) {
+                                @for (item of pagedItems; track $index) {
                                     <tr>
+                                        <td>
+                                            @if (item.photoUrl) {
+                                                <img [src]="item.photoUrl" alt="" class="rounded-circle" width="32" height="32">
+                                            } @else {
+                                                <span class="avatar-sm bg-light rounded-circle d-inline-flex align-items-center justify-content-center"><i class="fa-solid fa-plug text-muted"></i></span>
+                                            }
+                                        </td>
                                         <td>{{ item.integrationDescription }}</td>
                                         <td class="text-end">
                                             <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(item)">Düzenle</button>
@@ -32,10 +43,28 @@
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="2" class="text-center text-muted">Entegrasyon bulunamadı.</td></tr>
+                                    <tr><td colspan="3" class="text-center text-muted">Entegrasyon bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="small text-muted">Toplam: {{ filteredItems.length }} kayıt</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track $index) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                 }
             </div>
@@ -57,6 +86,10 @@
                         <div class="mb-3">
                             <label class="form-label">Entegrasyon Açıklaması</label>
                             <input type="text" class="form-control" [(ngModel)]="form.integrationDescription" name="integrationDescription" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fotoğraf URL</label>
+                            <input type="text" class="form-control" [(ngModel)]="form.photoUrl" name="photoUrl" placeholder="https://...">
                         </div>
                     </form>
                 </div>

@@ -26,11 +26,11 @@ export class AiProvidersService {
   }
 
   updateProvider(id: string, request: UpdateAiProviderRequest): Promise<any> {
-    return this.http.post({ controller: 'AiProviders', action: `update/${id}` }, request);
+    return this.http.post({ controller: 'AiProviders', action: id }, request);
   }
 
   deleteProvider(id: string): Promise<any> {
-    return this.http.post({ controller: 'AiProviders', action: `delete/${id}` }, {});
+    return this.http.delete({ controller: 'AiProviders', action: id });
   }
 
   // ── AiSettings ──
@@ -47,11 +47,11 @@ export class AiProvidersService {
   }
 
   updateSetting(id: string, request: UpdateAiSettingRequest): Promise<any> {
-    return this.http.post({ controller: 'AiSettings', action: `update/${id}` }, request);
+    return this.http.post({ controller: 'AiSettings', action: id }, request);
   }
 
   deleteSetting(id: string): Promise<any> {
-    return this.http.post({ controller: 'AiSettings', action: `delete/${id}` }, {});
+    return this.http.delete({ controller: 'AiSettings', action: id });
   }
 
   // ── AiProviderSettings ──
@@ -76,11 +76,11 @@ export class AiProvidersService {
   }
 
   updateProviderSetting(id: string, request: UpdateAiProviderSettingRequest): Promise<any> {
-    return this.http.post({ controller: 'AiProviderSettings', action: `update/${id}` }, request);
+    return this.http.post({ controller: 'AiProviderSettings', action: id }, request);
   }
 
   deleteProviderSetting(id: string): Promise<any> {
-    return this.http.post({ controller: 'AiProviderSettings', action: `delete/${id}` }, {});
+    return this.http.delete({ controller: 'AiProviderSettings', action: id });
   }
 
   // ── AiModels ──
@@ -105,11 +105,11 @@ export class AiProvidersService {
   }
 
   updateModel(id: string, request: UpdateAiModelRequest): Promise<any> {
-    return this.http.post({ controller: 'AiModels', action: `update/${id}` }, request);
+    return this.http.post({ controller: 'AiModels', action: id }, request);
   }
 
   deleteModel(id: string): Promise<any> {
-    return this.http.post({ controller: 'AiModels', action: `delete/${id}` }, {});
+    return this.http.delete({ controller: 'AiModels', action: id });
   }
 
   // ── AiAssistants ──
@@ -130,11 +130,11 @@ export class AiProvidersService {
   }
 
   updateAssistant(id: string, request: UpdateAiAssistantRequest): Promise<any> {
-    return this.http.post({ controller: 'AiAssistants', action: `update/${id}` }, request);
+    return this.http.post({ controller: 'AiAssistants', action: id }, request);
   }
 
   deleteAssistant(id: string): Promise<any> {
-    return this.http.post({ controller: 'AiAssistants', action: `delete/${id}` }, {});
+    return this.http.delete({ controller: 'AiAssistants', action: id });
   }
 
   // ── AiKnowledge ──

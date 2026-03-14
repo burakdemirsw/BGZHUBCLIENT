@@ -16,8 +16,18 @@ export class AiProvidersPage implements OnInit {
     editMode = false;
     selectedProvider: AiProvider | null = null;
 
+    // Datatable
+    filterText = '';
+    filteredItems: AiProvider[] = [];
+    pagedItems: AiProvider[] = [];
+    currentPage = 1;
+    pageSize = 10;
+    totalPages = 1;
+    totalPagesArray: number[] = [];
+
     form: any = {
         firmDescription: '',
+        photoUrl: '',
         isBlocked: false,
     };
 
@@ -27,11 +37,34 @@ export class AiProvidersPage implements OnInit {
         this.loadProviders();
     }
 
+    onFilterChange(): void {
+        this.currentPage = 1;
+        this.applyFilterAndPaging();
+    }
+
+    setPage(page: number): void {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.applyFilterAndPaging();
+    }
+
+    applyFilterAndPaging(): void {
+        const q = (this.filterText || '').toLowerCase();
+        this.filteredItems = this.providers.filter(p =>
+            p.firmDescription.toLowerCase().includes(q)
+        );
+        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
+        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        const start = (this.currentPage - 1) * this.pageSize;
+        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+    }
+
     async loadProviders(): Promise<void> {
         this.loading = true;
         try {
             const response = await this.aiService.getProviders();
             this.providers = this.extractArray(response);
+            this.applyFilterAndPaging();
         } catch (err) {
             console.error('AiProviders load error:', err);
         } finally {
@@ -51,7 +84,7 @@ export class AiProvidersPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedProvider = null;
-        this.form = { firmDescription: '', isBlocked: false };
+        this.form = { firmDescription: '', photoUrl: '', isBlocked: false };
         this.showModal = true;
     }
 
@@ -60,6 +93,7 @@ export class AiProvidersPage implements OnInit {
         this.selectedProvider = provider;
         this.form = {
             firmDescription: provider.firmDescription,
+            photoUrl: provider.photoUrl || '',
             isBlocked: provider.isBlocked ?? false,
         };
         this.showModal = true;
@@ -70,12 +104,14 @@ export class AiProvidersPage implements OnInit {
             if (this.editMode && this.selectedProvider) {
                 const req: UpdateAiProviderRequest = {
                     firmDescription: this.form.firmDescription,
+                    photoUrl: this.form.photoUrl,
                     isBlocked: this.form.isBlocked,
                 };
                 await this.aiService.updateProvider(this.selectedProvider.id, req);
             } else {
                 const req: CreateAiProviderRequest = {
                     firmDescription: this.form.firmDescription,
+                    photoUrl: this.form.photoUrl,
                 };
                 await this.aiService.createProvider(req);
             }

@@ -20,8 +20,18 @@ export class SocialMediaAccountsPage implements OnInit {
     editMode = false;
     selectedAccount: SocialMediaAccount | null = null;
 
+    // Datatable
+    filterText = '';
+    filteredItems: SocialMediaAccount[] = [];
+    pagedItems: SocialMediaAccount[] = [];
+    currentPage = 1;
+    pageSize = 10;
+    totalPages = 1;
+    totalPagesArray: number[] = [];
+
     form: any = {
         name: '',
+        photoUrl: '',
         isBlocked: false,
     };
 
@@ -33,12 +43,35 @@ export class SocialMediaAccountsPage implements OnInit {
         this.loadAccounts();
     }
 
+    onFilterChange(): void {
+        this.currentPage = 1;
+        this.applyFilterAndPaging();
+    }
+
+    setPage(page: number): void {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.applyFilterAndPaging();
+    }
+
+    applyFilterAndPaging(): void {
+        const q = (this.filterText || '').toLowerCase();
+        this.filteredItems = this.accounts.filter(a =>
+            a.name.toLowerCase().includes(q)
+        );
+        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
+        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        const start = (this.currentPage - 1) * this.pageSize;
+        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+    }
+
     async loadAccounts(): Promise<void> {
         this.loading = true;
         try {
             const response = await this.socialMediaService.getAccounts();
             console.log('SocialMedia Accounts response:', response);
             this.accounts = this.extractArray(response);
+            this.applyFilterAndPaging();
         } catch (err) {
             console.error('SocialMedia Accounts error:', err);
         } finally {
@@ -58,7 +91,7 @@ export class SocialMediaAccountsPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedAccount = null;
-        this.form = { name: '', isBlocked: false };
+        this.form = { name: '', photoUrl: '', isBlocked: false };
         this.showModal = true;
     }
 
@@ -67,6 +100,7 @@ export class SocialMediaAccountsPage implements OnInit {
         this.selectedAccount = account;
         this.form = {
             name: account.name,
+            photoUrl: account.photoUrl || '',
             isBlocked: account.isBlocked ?? false,
         };
         this.showModal = true;
@@ -77,12 +111,14 @@ export class SocialMediaAccountsPage implements OnInit {
             if (this.editMode && this.selectedAccount) {
                 const req: UpdateSocialMediaAccountRequest = {
                     name: this.form.name,
+                    photoUrl: this.form.photoUrl,
                     isBlocked: this.form.isBlocked ?? false,
                 };
                 await this.socialMediaService.updateAccount(this.selectedAccount.id, req);
             } else {
                 const req: CreateSocialMediaAccountRequest = {
                     name: this.form.name,
+                    photoUrl: this.form.photoUrl,
                 };
                 await this.socialMediaService.createAccount(req);
             }

@@ -4,6 +4,7 @@ export interface CreateMenuRequest {
   description: string;
   url: string;
   icon: string;
+  colorCode: string;
   orderIndex: number;
 }
 
@@ -13,6 +14,7 @@ export interface UpdateMenuRequest {
   description: string;
   url: string;
   icon: string;
+  colorCode: string;
   orderIndex: number;
   isBlocked: boolean;
 }
@@ -24,6 +26,7 @@ export interface Menu {
   description: string;
   url: string;
   icon: string;
+  colorCode: string;
   orderIndex: number;
   isBlocked: boolean;
   createdDate?: string;

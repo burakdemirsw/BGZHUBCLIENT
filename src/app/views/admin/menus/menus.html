@@ -8,6 +8,9 @@
                 </button>
             </div>
             <div class="card-body">
+                <div class="d-flex mb-3 gap-2">
+                    <input type="text" class="form-control form-control-sm w-auto" placeholder="Menü adı veya açıklama ara" [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+                </div>
                 @if (loading) {
                     <div class="text-center py-4">
                         <div class="spinner-border text-primary" role="status"></div>
@@ -21,6 +24,7 @@
                                     <th>Ad</th>
                                     <th>Açıklama</th>
                                     <th>URL</th>
+                                    <th>Renk Kodu</th>
                                     <th>Üst Menü</th>
                                     <th>Sıra</th>
                                     <th>Durum</th>
@@ -28,11 +32,19 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (menu of menus; track $index) {
+                                @for (menu of pagedMenus; track $index) {
                                     <tr>
-                                        <td><i [class]="menu.icon" class="me-1"></i> {{ menu.name }}</td>
+                                        <td><i [class]="menu.icon" class="me-1" [style.color]="menu.colorCode"></i> {{ menu.name }}</td>
                                         <td>{{ menu.description }}</td>
                                         <td><code>{{ menu.url }}</code></td>
+                                        <td>
+                                            @if (menu.colorCode) {
+                                                <span class="d-inline-block rounded-circle me-1" [style.background]="menu.colorCode" style="width:14px;height:14px;vertical-align:middle"></span>
+                                                <code>{{ menu.colorCode }}</code>
+                                            } @else {
+                                                <span class="text-muted">—</span>
+                                            }
+                                        </td>
                                         <td>{{ getParentName(menu.parentId) }}</td>
                                         <td>{{ menu.orderIndex }}</td>
                                         <td>
@@ -46,10 +58,30 @@
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="7" class="text-center text-muted">Menü bulunamadı.</td></tr>
+                                    <tr><td colspan="8" class="text-center text-muted">Menü bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="small text-muted">
+                            Toplam: {{ filteredMenus.length }} kayıt
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track $index) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                 }
             </div>
@@ -82,6 +114,13 @@
                         <div class="mb-3">
                             <label class="form-label">İkon</label>
                             <input type="text" class="form-control" [(ngModel)]="form.icon" name="icon" placeholder="örn: bi bi-house">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Renk Kodu</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" [(ngModel)]="form.colorCode" name="colorCode" title="Renk seçin">
+                                <input type="text" class="form-control" [(ngModel)]="form.colorCode" name="colorCodeText" placeholder="#000000">
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Üst Menü</label>

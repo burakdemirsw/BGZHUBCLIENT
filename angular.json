@@ -45,7 +45,12 @@
                                 "glob": "**/*",
                                 "input": "public"
                             },
-                            "src/assets"
+                            "src/assets",
+                            {
+                                "glob": "Web.config",
+                                "input": "src/app",
+                                "output": "/"
+                            }
                         ],
                         "styles": [
                             "src/styles.scss",

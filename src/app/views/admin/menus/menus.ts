@@ -16,12 +16,22 @@ export class MenusPage implements OnInit {
     editMode = false;
     selectedMenu: Menu | null = null;
 
+    // Datatable filter & pagination
+    filterText: string = '';
+    filteredMenus: Menu[] = [];
+    pagedMenus: Menu[] = [];
+    currentPage: number = 1;
+    pageSize: number = 10;
+    totalPages: number = 1;
+    totalPagesArray: number[] = [];
+
     form: any = {
         parentId: null,
         name: '',
         description: '',
         url: '',
         icon: '',
+        colorCode: '',
         orderIndex: 0,
         isBlocked: false,
     };
@@ -32,12 +42,39 @@ export class MenusPage implements OnInit {
         this.loadMenus();
     }
 
+    onFilterChange(): void {
+        this.currentPage = 1;
+        this.applyFilterAndPaging();
+    }
+
+    setPage(page: number): void {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.applyFilterAndPaging();
+    }
+
+    applyFilterAndPaging(): void {
+        // Filter
+        const filter = (this.filterText || '').toLowerCase();
+        this.filteredMenus = this.menus.filter(menu =>
+            menu.name.toLowerCase().includes(filter) ||
+            (menu.description || '').toLowerCase().includes(filter)
+        );
+        // Pagination
+        this.totalPages = Math.max(1, Math.ceil(this.filteredMenus.length / this.pageSize));
+        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        const start = (this.currentPage - 1) * this.pageSize;
+        const end = start + this.pageSize;
+        this.pagedMenus = this.filteredMenus.slice(start, end);
+    }
+
     async loadMenus(): Promise<void> {
         this.loading = true;
         try {
             const response = await this.menusService.getAll();
             console.log('Menus response:', response);
             this.menus = this.extractArray(response);
+            this.applyFilterAndPaging();
         } catch (err) {
             console.error('Menus error:', err);
         } finally {
@@ -57,7 +94,7 @@ export class MenusPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedMenu = null;
-        this.form = { parentId: null, name: '', description: '', url: '', icon: '', orderIndex: 0, isBlocked: false };
+        this.form = { parentId: null, name: '', description: '', url: '', icon: '', colorCode: '', orderIndex: 0, isBlocked: false };
         this.showModal = true;
     }
 
@@ -70,6 +107,7 @@ export class MenusPage implements OnInit {
             description: menu.description,
             url: menu.url,
             icon: menu.icon,
+            colorCode: menu.colorCode || '',
             orderIndex: menu.orderIndex,
             isBlocked: menu.isBlocked,
         };
@@ -85,6 +123,7 @@ export class MenusPage implements OnInit {
                     description: this.form.description,
                     url: this.form.url,
                     icon: this.form.icon,
+                    colorCode: this.form.colorCode,
                     orderIndex: this.form.orderIndex,
                     isBlocked: this.form.isBlocked,
                 };
@@ -96,6 +135,7 @@ export class MenusPage implements OnInit {
                     description: this.form.description,
                     url: this.form.url,
                     icon: this.form.icon,
+                    colorCode: this.form.colorCode,
                     orderIndex: this.form.orderIndex,
                 };
                 await this.menusService.create(req);

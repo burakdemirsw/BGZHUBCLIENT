@@ -17,3 +17,7 @@ export const appTitle = 'Plexorin'
 export const appDescription: string = 'Plexorin'
 
 export const basePath: string = ''
+
+// Datatable pagination
+export const PAGE_SIZE_OPTIONS: number[] = [5, 10, 25, 50];
+export const DEFAULT_PAGE_SIZE: number = 10;
