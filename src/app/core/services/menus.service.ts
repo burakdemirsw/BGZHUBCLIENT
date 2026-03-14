@@ -39,6 +39,10 @@ export class MenusService {
     return this.http.get_new({ controller: 'RoleMenus', action: 'by-role' }, roleId);
   }
 
+  getMenusByUser(userId: string): Promise<any> {
+    return this.http.get_new({ controller: 'RoleMenus', action: `by-user/${userId}` });
+  }
+
   assignMenu(request: CreateRoleMenuRequest): Promise<any> {
     return this.http.post({ controller: 'RoleMenus' }, request);
   }
@@ -49,5 +53,14 @@ export class MenusService {
 
   removeRoleMenu(id: string): Promise<any> {
     return this.http.post({ controller: 'RoleMenus', action: `delete/${id}` }, {});
+  }
+
+  // Authorization
+  isUserAuthorized(userId: string, url: string): Promise<any> {
+    return this.http.get_new({
+      controller: 'RoleMenus',
+      action: `is-authorized/${userId}`,
+      queryString: `url=${encodeURIComponent(url)}`
+    });
   }
 }

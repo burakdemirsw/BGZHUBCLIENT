@@ -36,6 +36,7 @@ export type MenuItemType = {
     label: string
     isTitle?: boolean
     icon?: LucideIconData
+    faIcon?: string
     url?: string
     badge?: {
         variant: string

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateRoleRequest, UpdateRoleRequest } from '../models/role/role.models';
-import { RoleUser, CreateRoleUserRequest } from '../models/role/role.models';
+import { RoleUser, CreateRoleUserRequest, CreateBulkRoleUserRequest } from '../models/role/role.models';
 
 @Injectable({
   providedIn: 'root',
@@ -45,6 +45,10 @@ export class RolesService {
 
   assignRole(request: CreateRoleUserRequest): Promise<any> {
     return this.http.post({ controller: 'RoleUsers' }, request);
+  }
+
+  bulkAssignRoles(request: CreateBulkRoleUserRequest): Promise<any> {
+    return this.http.post({ controller: 'RoleUsers', action: 'bulk' }, request);
   }
 
   removeRoleUser(id: string): Promise<any> {

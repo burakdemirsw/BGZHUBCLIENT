@@ -13,3 +13,12 @@ export interface RegisterRequest {
 export interface RefreshTokenRequest {
   refreshToken: string;
 }
+
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiration: string;
+  name: string;
+  surname: string;
+  lastLoginDate: string;
+}

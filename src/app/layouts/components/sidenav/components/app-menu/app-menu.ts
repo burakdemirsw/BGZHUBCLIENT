@@ -6,8 +6,8 @@ import {NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import {filter} from 'rxjs';
 import {scrollToElement} from '@/app/utils/layout-utils';
-import {menuItems} from '@layouts/components/data';
 import {LayoutStoreService} from '@core/services/layout-store.service';
+import {UserMenuService} from '@core/services/user-menu.service';
 import {LucideAngularModule} from 'lucide-angular';
 
 @Component({
@@ -19,6 +19,7 @@ export class AppMenu implements OnInit {
 
     router = inject(Router)
     layout = inject(LayoutStoreService)
+    userMenuService = inject(UserMenuService)
 
     @ViewChild('MenuItemWithChildren', {static: true})
     menuItemWithChildren!: TemplateRef<{ item: MenuItemType }>;
@@ -26,9 +27,19 @@ export class AppMenu implements OnInit {
     @ViewChild('MenuItem', {static: true})
     menuItem!: TemplateRef<{ item: MenuItemType }>;
 
-    menuItems = menuItems;
+    get menuItems(): MenuItemType[] {
+        return this.userMenuService.userMenuItems;
+    }
 
-    ngOnInit(): void {
+    async ngOnInit(): Promise<void> {
+        // Sayfa yenilemede token varsa ve menüler yüklenmemişse yükle
+        if (!this.userMenuService.loaded) {
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                await this.userMenuService.loadUserMenus();
+            }
+        }
+
         this.router.events
             .pipe(filter(event => event instanceof NavigationEnd))
             .subscribe(() => {

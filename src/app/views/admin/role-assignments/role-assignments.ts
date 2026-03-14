@@ -23,7 +23,7 @@ export class RoleAssignmentsPage implements OnInit {
     showAssignModal = false;
     selectedUser: User | null = null;
     selectedUserRoles: RoleUser[] = [];
-    selectedRoleId: string = '';
+    selectedRoleIds: string[] = [];
 
     constructor(
         private rolesService: RolesService,
@@ -77,18 +77,43 @@ export class RoleAssignmentsPage implements OnInit {
     openAssignModal(user: User): void {
         this.selectedUser = user;
         this.selectedUserRoles = this.getUserRoles(user.id);
-        this.selectedRoleId = '';
+        this.selectedRoleIds = [];
         this.showAssignModal = true;
     }
 
-    async assignRole(): Promise<void> {
-        if (!this.selectedUser || !this.selectedRoleId) return;
+    toggleRoleSelection(roleId: string): void {
+        const idx = this.selectedRoleIds.indexOf(roleId);
+        if (idx > -1) {
+            this.selectedRoleIds.splice(idx, 1);
+        } else {
+            this.selectedRoleIds.push(roleId);
+        }
+    }
+
+    isRoleSelected(roleId: string): boolean {
+        return this.selectedRoleIds.includes(roleId);
+    }
+
+    selectAllRoles(): void {
+        if (!this.selectedUser) return;
+        const available = this.getAvailableRoles(this.selectedUser.id);
+        if (this.selectedRoleIds.length === available.length) {
+            this.selectedRoleIds = [];
+        } else {
+            this.selectedRoleIds = available.map(r => r.id);
+        }
+    }
+
+    async assignRoles(): Promise<void> {
+        if (!this.selectedUser || this.selectedRoleIds.length === 0) return;
         try {
-            await this.rolesService.assignRole({
-                roleId: this.selectedRoleId,
-                userId: this.selectedUser.id,
+            await this.rolesService.bulkAssignRoles({
+                roleUsers: this.selectedRoleIds.map(roleId => ({
+                    roleId,
+                    userId: this.selectedUser!.id,
+                })),
             });
-            this.selectedRoleId = '';
+            this.selectedRoleIds = [];
             await this.refreshRoleUsers();
         } catch (err) {
             console.error('Assign error:', err);

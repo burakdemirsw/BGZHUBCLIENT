@@ -13,6 +13,8 @@ import { RoleMenusPage } from './role-menus/role-menus';
 import { SocialMediaAccountsPage } from './social-media/accounts/accounts';
 import { SocialMediaDescriptionsPage } from './social-media/descriptions/descriptions';
 import { SocialMediaPropertiesPage } from './social-media/properties/properties';
+import { UserIntegrationsPage } from './user-integrations/user-integrations';
+import { IntegrationPropertiesPage } from './integration-properties/integration-properties';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -68,6 +70,18 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/integrations',
         component: IntegrationsPage,
         data: { title: 'Entegrasyonlar' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/user-integrations',
+        component: UserIntegrationsPage,
+        data: { title: 'Kullanıcı Entegrasyonları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/integration-properties',
+        component: IntegrationPropertiesPage,
+        data: { title: 'Entegrasyon Özellikleri' },
         canActivate: [AuthGuard],
     },
     {

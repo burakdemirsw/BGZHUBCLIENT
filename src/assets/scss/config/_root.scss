@@ -3,13 +3,13 @@
 //
 
 // Google fonts
-@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root {
 
     // Font Family Secondary
 
-    --#{$prefix}font-family-secondary:    "Public Sans", sans-serif;
+    --#{$prefix}font-family-secondary:    "Montserrat", sans-serif;
     // Logo
     --#{$prefix}logo-lg-height:                 22px;
     --#{$prefix}logo-sm-height:                 22px;
@@ -23,19 +23,19 @@
     --#{$prefix}topbar-height:                           70px;
 
     // Menu items
-    --#{$prefix}sidenav-item-icon-size:                  1rem;
+    --#{$prefix}sidenav-item-icon-size:                  1.25rem;
     --#{$prefix}sidenav-item-gap:                        12px;
-    --#{$prefix}sidenav-item-padding-x:                  12px;
-    --#{$prefix}sidenav-item-padding-y:                  8px;
+    --#{$prefix}sidenav-item-padding-x:                  16px;
+    --#{$prefix}sidenav-item-padding-y:                  10px;
     --#{$prefix}sidenav-item-font-size:                  0.875rem;
-    --#{$prefix}sidenav-item-font-weight:                400;
+    --#{$prefix}sidenav-item-font-weight:                500;
 
     // Sub Menu Items
-    --#{$prefix}sidenav-sub-item-font-size:              0.875rem;
+    --#{$prefix}sidenav-sub-item-font-size:              0.8125rem;
     --#{$prefix}sidenav-sub-item-font-weight:            400;
-    --#{$prefix}sidenav-sub-item-gap:                    4px;
+    --#{$prefix}sidenav-sub-item-gap:                    2px;
     --#{$prefix}sidenav-sub-item-padding-x:              10px;
-    --#{$prefix}sidenav-sub-item-padding-y:              7px;
+    --#{$prefix}sidenav-sub-item-padding-y:              8px;
 
     --#{$prefix}theme-card-border-width:                 0;
     --#{$prefix}theme-card-box-shadow:                   var(--#{$prefix}box-shadow-sm);

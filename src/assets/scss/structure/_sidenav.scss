@@ -24,8 +24,9 @@
     list-style-type: none;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    padding-bottom: 50px;
+    gap: 2px;
+    padding-bottom: 20px;
+    padding-top: 8px;
 
     .side-nav-item {
 
@@ -56,6 +57,11 @@
             .menu-icon {
                 font-size: $sidenav-item-icon-size;
                 line-height: $sidenav-item-icon-size;
+                min-width: $sidenav-item-icon-size;
+                text-align: center;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
 
                 i {
                     font-size: $sidenav-item-icon-size;
@@ -66,6 +72,13 @@
                     height: $sidenav-item-icon-size;
                     width: $sidenav-item-icon-size;
                 }
+            }
+
+            i.menu-icon {
+                font-size: $sidenav-item-icon-size;
+                line-height: $sidenav-item-icon-size;
+                min-width: $sidenav-item-icon-size;
+                color: inherit;
             }
 
             .menu-text {
@@ -91,7 +104,7 @@
     }
 
     >.side-nav-item {
-        padding: 0 10px;
+        padding: 0 12px;
     }
 
     // Multi Level Menu
@@ -105,9 +118,15 @@
         .side-nav-item {
             .side-nav-link {
                 font-size: $sidenav-sub-item-font-size;
-                padding: $sidenav-sub-item-padding-y $sidenav-item-padding-x $sidenav-sub-item-padding-y calc($sidenav-item-icon-size + $sidenav-item-padding-x + $sidenav-item-gap);
+                padding: $sidenav-sub-item-padding-y $sidenav-item-padding-x $sidenav-sub-item-padding-y calc($sidenav-item-icon-size + $sidenav-item-padding-x + $sidenav-item-gap + 8px);
                 font-weight: $sidenav-sub-item-font-weight;
                 font-family: $font-family-base;
+                color: $sidenav-item-color;
+                opacity: 0.85;
+
+                &:hover {
+                    opacity: 1;
+                }
             }
         }
 
@@ -171,27 +190,28 @@
     }
 }
 
-// sidenav user
-.sidenav-user {
-    padding: 20px;
+// sidenav user (bottom fixed)
+.sidenav-user-bottom {
     display: none;
+    padding: 16px 20px;
+    border-top: 1px solid $sidenav-border-color;
     color: $sidenav-item-color;
-    background: url(../../images/user-bg-pattern.svg);
-    background-size: cover !important;
-    margin-bottom: 10px;
-    border-radius: 5px;
-
-    .sidenav-user-name {
-        white-space: nowrap;
-        display: block;
-        color: $sidenav-item-active-color;
-    }
+    background: $sidenav-bg;
 }
 
 html[data-sidenav-user="true"] {
-    .sidenav-user {
+    .sidenav-user-bottom {
         display: block;
     }
+
+    .sidenav-scrollbar {
+        height: calc(100% - $topbar-height - 75px) !important;
+    }
+}
+
+// Legacy (hidden by default)
+.sidenav-user {
+    display: none;
 }
 
 
@@ -379,6 +399,7 @@ html[data-sidenav-size="condensed"] {
 
     .side-nav-link::before,
     .sidenav-user,
+    .sidenav-user-bottom,
     .side-nav-title {
         display: none;
     }
@@ -484,6 +505,7 @@ html[data-sidenav-size="on-hover"] {
 
         .button-on-hover,
         .sidenav-user,
+        .sidenav-user-bottom,
         .menu-text {
             display: none;
         }

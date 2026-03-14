@@ -113,10 +113,17 @@ export const menuItems: MenuItemType[] = [
         icon: LucideSmartphone,
         url: '/admin/netgsm-settings',
     },
+
+    {label: 'Entegrasyonlar', isTitle: true},
     {
         label: 'Entegrasyonlar',
         icon: LucideAppWindow,
-        url: '/admin/integrations',
+        isCollapsed: true,
+        children: [
+            {label: 'Entegrasyonlar', url: '/admin/integrations'},
+            {label: 'Kullanıcı Entegrasyonları', url: '/admin/user-integrations'},
+            {label: 'Entegrasyon Özellikleri', url: '/admin/integration-properties'},
+        ]
     },
 
     {label: 'Adres Yönetimi', isTitle: true},

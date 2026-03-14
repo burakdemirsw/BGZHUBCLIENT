@@ -97,19 +97,27 @@
                     @if (getAvailableRoles(selectedUser.id).length === 0) {
                         <p class="text-muted fst-italic">Tüm roller zaten atanmış.</p>
                     } @else {
-                        <div class="d-flex gap-2 align-items-end">
-                            <div class="flex-grow-1">
-                                <select class="form-select" [(ngModel)]="selectedRoleId">
-                                    <option value="" disabled>Rol seçin</option>
-                                    @for (role of getAvailableRoles(selectedUser.id); track role.id) {
-                                        <option [value]="role.id">{{ role.roleDescription }}</option>
-                                    }
-                                </select>
-                            </div>
-                            <button class="btn btn-primary" [disabled]="!selectedRoleId" (click)="assignRole()">
-                                Ata
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small">{{ selectedRoleIds.length }} / {{ getAvailableRoles(selectedUser.id).length }} seçili</span>
+                            <button class="btn btn-outline-secondary btn-sm" (click)="selectAllRoles()">
+                                {{ selectedRoleIds.length === getAvailableRoles(selectedUser.id).length ? 'Tümünü Kaldır' : 'Tümünü Seç' }}
                             </button>
                         </div>
+                        <div class="list-group mb-3" style="max-height: 250px; overflow-y: auto">
+                            @for (role of getAvailableRoles(selectedUser.id); track role.id) {
+                                <label class="list-group-item list-group-item-action d-flex align-items-center gap-2 mb-0"
+                                       [class.active]="isRoleSelected(role.id)"
+                                       style="cursor: pointer">
+                                    <input class="form-check-input mt-0" type="checkbox"
+                                           [checked]="isRoleSelected(role.id)"
+                                           (change)="toggleRoleSelection(role.id)">
+                                    <span>{{ role.roleDescription }}</span>
+                                </label>
+                            }
+                        </div>
+                        <button class="btn btn-primary w-100" [disabled]="selectedRoleIds.length === 0" (click)="assignRoles()">
+                            {{ selectedRoleIds.length }} Rol Ata
+                        </button>
                     }
                 </div>
                 <div class="modal-footer">

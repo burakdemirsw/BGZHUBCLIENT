@@ -3,7 +3,9 @@ import { Component } from '@angular/core';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '@/app/core/services/user.service';
-import { LoginRequest } from '@/app/core/models/auth/auth.models';
+import { UserMenuService } from '@/app/core/services/user-menu.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
+import { LoginRequest, AuthResponse } from '@/app/core/models/auth/auth.models';
 import { CommonModule } from '@angular/common';
 import { LogoComponent } from '@/app/components/logo/logo.component';
 
@@ -23,7 +25,7 @@ export class SignIn {
     loading = false;
     errorMessage = '';
 
-    constructor(private userService: UserService, private router: Router, private route: ActivatedRoute) {}
+    constructor(private userService: UserService, private userMenuService: UserMenuService, private authState: AuthStateService, private router: Router, private route: ActivatedRoute) {}
 
     onSubmit() {
         this.loading = true;
@@ -53,6 +55,15 @@ export class SignIn {
             if (refreshToken) {
                 localStorage.setItem('refreshToken', refreshToken);
             }
+
+            // Kullanıcı profil bilgilerini kaydet
+            const name = response?.name ?? response?.data?.name ?? '';
+            const surname = response?.surname ?? response?.data?.surname ?? '';
+            const lastLoginDate = response?.lastLoginDate ?? response?.data?.lastLoginDate ?? '';
+            this.authState.setProfile({ name, surname, lastLoginDate });
+
+            // Kullanıcı menülerini yükle
+            await this.userMenuService.loadUserMenus();
 
             // returnUrl varsa oraya, yoksa dashboard'a yönlendir
             const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';

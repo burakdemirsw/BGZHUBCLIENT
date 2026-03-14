@@ -19,6 +19,10 @@ export interface CreateRoleUserRequest {
   userId: string;
 }
 
+export interface CreateBulkRoleUserRequest {
+  roleUsers: CreateRoleUserRequest[];
+}
+
 export interface UpdateRoleUserRequest {
   roleId: string;
   userId: string;

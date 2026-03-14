@@ -23,13 +23,11 @@ export class RoleMenusPage implements OnInit {
 
     // Atama modalı
     showAssignModal = false;
-    assignMenuId: string = '';
-    assignForm: any = { canView: true, canCreate: false, canUpdate: false, canDelete: false };
-
+    assignMenuIds: string[] = [];
     // Düzenleme modalı
     showEditModal = false;
     editingRoleMenu: RoleMenu | null = null;
-    editForm: any = { canView: true, canCreate: false, canUpdate: false, canDelete: false, isBlocked: false };
+    editForm: any = { isBlocked: false };
 
     constructor(
         private menusService: MenusService,
@@ -95,23 +93,42 @@ export class RoleMenusPage implements OnInit {
 
     // Yeni menü atama
     openAssignModal(): void {
-        this.assignMenuId = '';
-        this.assignForm = { canView: true, canCreate: false, canUpdate: false, canDelete: false };
+        this.assignMenuIds = [];
         this.showAssignModal = true;
     }
 
-    async assignMenu(): Promise<void> {
-        if (!this.selectedRoleId || !this.assignMenuId) return;
+    toggleMenuSelection(menuId: string): void {
+        const idx = this.assignMenuIds.indexOf(menuId);
+        if (idx > -1) {
+            this.assignMenuIds.splice(idx, 1);
+        } else {
+            this.assignMenuIds.push(menuId);
+        }
+    }
+
+    isMenuSelected(menuId: string): boolean {
+        return this.assignMenuIds.includes(menuId);
+    }
+
+    selectAllMenus(): void {
+        const available = this.getAvailableMenus();
+        if (this.assignMenuIds.length === available.length) {
+            this.assignMenuIds = [];
+        } else {
+            this.assignMenuIds = available.map(m => m.id);
+        }
+    }
+
+    async assignMenus(): Promise<void> {
+        if (!this.selectedRoleId || this.assignMenuIds.length === 0) return;
         try {
-            const req: CreateRoleMenuRequest = {
-                roleId: this.selectedRoleId,
-                menuId: this.assignMenuId,
-                canView: this.assignForm.canView,
-                canCreate: this.assignForm.canCreate,
-                canUpdate: this.assignForm.canUpdate,
-                canDelete: this.assignForm.canDelete,
-            };
-            await this.menusService.assignMenu(req);
+            for (const menuId of this.assignMenuIds) {
+                const req: CreateRoleMenuRequest = {
+                    roleId: this.selectedRoleId,
+                    menuId: menuId,
+                };
+                await this.menusService.assignMenu(req);
+            }
             this.showAssignModal = false;
             await this.loadRoleMenus();
         } catch (err) {
@@ -123,10 +140,6 @@ export class RoleMenusPage implements OnInit {
     openEditModal(rm: RoleMenu): void {
         this.editingRoleMenu = rm;
         this.editForm = {
-            canView: rm.canView,
-            canCreate: rm.canCreate,
-            canUpdate: rm.canUpdate,
-            canDelete: rm.canDelete,
             isBlocked: rm.isBlocked,
         };
         this.showEditModal = true;
@@ -136,10 +149,6 @@ export class RoleMenusPage implements OnInit {
         if (!this.editingRoleMenu) return;
         try {
             const req: UpdateRoleMenuRequest = {
-                canView: this.editForm.canView,
-                canCreate: this.editForm.canCreate,
-                canUpdate: this.editForm.canUpdate,
-                canDelete: this.editForm.canDelete,
                 isBlocked: this.editForm.isBlocked,
             };
             await this.menusService.updateRoleMenu(this.editingRoleMenu.id, req);

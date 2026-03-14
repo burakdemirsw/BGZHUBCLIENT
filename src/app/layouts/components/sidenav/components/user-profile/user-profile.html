@@ -1,22 +1,19 @@
-<div class="sidenav-user">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <a routerLink="/pages/profile" class="link-reset">
-                <img src="assets/images/users/user-3.jpg" alt="user-image"
-                     class="rounded-circle mb-2 avatar-md">
-                <span class="sidenav-user-name fw-bold">Geneva K.</span>
-                <span class="fs-12 fw-semibold" data-lang="user-role">Art Director</span>
-            </a>
+<div class="sidenav-user-bottom">
+    <div class="d-flex align-items-center">
+        <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary text-white fw-bold flex-shrink-0"
+             style="width: 40px; height: 40px; font-size: 15px;">
+            {{ authState.initials || '?' }}
         </div>
-        <div ngbDropdown [placement]="'bottom-end'">
+        <div class="ms-3 overflow-hidden">
+            <div class="fw-semibold text-truncate" style="font-size: 14px;">{{ authState.fullName || 'Kullanıcı' }}</div>
+            <div class="text-muted text-truncate" style="font-size: 12px;">{{ authState.profile?.lastLoginDate ? 'admin' : 'kullanıcı' }}</div>
+        </div>
+        <div class="ms-auto" ngbDropdown [placement]="'top-end'">
             <button ngbDropdownToggle
-                    class="btn btn-link p-0 dropdown-toggle drop-arrow-none link-reset sidenav-user-set-icon"
-                    data-bs-toggle="dropdown" data-bs-offset="0,12">
-                <ng-icon name="tablerSettings" size="24" class="align-middle ms-1"/>
+                    class="btn btn-link p-0 dropdown-toggle drop-arrow-none link-reset text-muted">
+                <ng-icon name="tablerDotsVertical" size="20" class="align-middle"/>
             </button>
-
-            <div ngbDropdownMenu class="dropdown-menu dropdown-menu-end mt-1">
-
+            <div ngbDropdownMenu class="dropdown-menu dropdown-menu-end mb-1">
                 @for (item of menuItems; track $index) {
                     <div>
                         @if (item.isHeader) {
@@ -24,14 +21,13 @@
                                 <h6 class="text-overflow m-0">{{ item.label }}</h6>
                             </div>
                         }
-
                         @if (item.isDivider) {
                             <div class="dropdown-divider"></div>
                         }
-
                         @if (!item.isHeader && !item.isDivider) {
-                            <a  [routerLink]="item.url" class="dropdown-item"
-                               [class]="item.class">
+                            <a [routerLink]="item.url" class="dropdown-item"
+                               [class]="item.class"
+                               (click)="onItemClick(item, $event)">
                                 <ng-icon [name]="item.icon" size="17"
                                          class="align-middle d-inline-flex align-items-center me-2"/>
                                 <span class="align-middle" [innerHTML]="item.label"></span>
@@ -39,7 +35,6 @@
                         }
                     </div>
                 }
-
             </div>
         </div>
     </div>

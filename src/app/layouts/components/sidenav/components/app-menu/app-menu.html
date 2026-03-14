@@ -25,7 +25,9 @@
     <li class="side-nav-item" [class.active]="isChildActive(item)">
         <button (click)="toggleMenu(item, siblings)" class="side-nav-link"
                 [attr.aria-expanded]="!item.isCollapsed">
-            @if (item.icon) {
+            @if (item.faIcon) {
+                <i [class]="item.faIcon + ' menu-icon'"></i>
+            } @else if (item.icon) {
                 <lucide-angular class="menu-icon" [img]="item.icon"/>
             }
             <span class="menu-text">{{ item.label }}</span>
@@ -63,7 +65,9 @@
                [class.active]="isActive(item)"
                [attr.data-active-link]="isActive(item)"
             >
-                @if (item.icon) {
+                @if (item.faIcon) {
+                    <i [class]="item.faIcon + ' menu-icon'"></i>
+                } @else if (item.icon) {
                     <lucide-angular class="menu-icon" [img]="item.icon"/>
                 }
                 <span class="menu-text">{{ item.label }}</span>

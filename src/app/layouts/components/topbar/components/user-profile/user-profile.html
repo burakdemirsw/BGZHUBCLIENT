@@ -1,10 +1,12 @@
 <div class="topbar-item nav-user">
     <div ngbDropdown [placement]="'bottom-end'" class="dropdown">
         <button ngbDropdownToggle class="btn btn-link p-0 topbar-link dropdown-toggle drop-arrow-none px-2">
-            <img src="assets/images/users/user-3.jpg" width="32" class="rounded-circle me-lg-2 d-flex"
-                 alt="user-image">
+            <div class="rounded-circle me-lg-2 d-flex align-items-center justify-content-center bg-primary text-white fw-bold"
+                 style="width: 32px; height: 32px; font-size: 14px;">
+                {{ authState.initials || '?' }}
+            </div>
             <div class="d-lg-flex align-items-center gap-1 d-none">
-                <h5 class="my-0">Geneva</h5>
+                <h5 class="my-0">{{ authState.fullName || 'Kullanıcı' }}</h5>
                 <span class="d-flex align-middle"><ng-icon name="tablerChevronDown"/></span>
             </div>
         </button>

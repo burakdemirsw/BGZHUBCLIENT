@@ -12,13 +12,13 @@
         <ng-icon name="tablerX" class="align-middle"/>
     </button>
 
-    <ngx-simplebar id="sidenav" class="scrollbar">
-        <!-- User -->
-        @if (layout.sidenavUser) {
-            <app-user-profile/>
-        }
-
+    <ngx-simplebar id="sidenav" class="scrollbar sidenav-scrollbar">
         <!--- Sidenav Menu -->
         <app-menu/>
     </ngx-simplebar>
+
+    <!-- User Profile (fixed at bottom) -->
+    @if (layout.sidenavUser) {
+        <app-user-profile/>
+    }
 </div>

@@ -1,17 +1,30 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClientService } from './http-client.service';
+import { AuthStateService } from './auth-state.service';
 import { LoginRequest, RegisterRequest, RefreshTokenRequest } from '../models/auth/auth.models';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
-  constructor(private httpClientService: HttpClientService, private router: Router) {}
+  constructor(
+    private httpClientService: HttpClientService,
+    private router: Router,
+    private injector: Injector,
+    private authState: AuthStateService
+  ) {}
 
   logout(): void {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    this.authState.clearProfile();
+    // Lazy import ile circular dependency'den kaçın
+    try {
+      const mod = require('./user-menu.service');
+      const userMenuService = this.injector.get<any>(mod.UserMenuService);
+      userMenuService.clearMenus();
+    } catch { /* ignore */ }
     this.router.navigate(['/auth/sign-in']);
   }
 

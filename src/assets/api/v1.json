@@ -3440,6 +3440,34 @@
         ]
       }
     },
+    "/api/RoleMenus/by-user/{userId}": {
+      "get": {
+        "tags": [
+          "RoleMenus"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/RoleMenus/update/{id}": {
       "post": {
         "tags": [
@@ -3796,6 +3824,43 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/RoleUsers/bulk": {
+      "post": {
+        "tags": [
+          "RoleUsers"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBulkRoleUserRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBulkRoleUserRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBulkRoleUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -5797,6 +5862,23 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "CreateBulkRoleUserRequest": {
+        "required": [
+          "roleUsers"
+        ],
+        "type": "object",
+        "properties": {
+          "roleUsers": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/CreateRoleUserRequest"
+            }
           }
         }
       },

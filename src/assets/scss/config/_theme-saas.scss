@@ -14,12 +14,12 @@ $theme-saas-colors: (
 
 @if $theme-saas ==true {
 
-    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
     html[data-skin="saas"] {
 
-        --#{$prefix}font-sans-serif:        "Inter", sans-serif;
-        --#{$prefix}font-family-secondary:  "Inter", sans-serif;
+        --#{$prefix}font-sans-serif:        "Montserrat", sans-serif;
+        --#{$prefix}font-family-secondary:  "Montserrat", sans-serif;
 
         --#{$prefix}body-font-size:               13px;
         --#{$prefix}body-bg:               #f9fbfd;
