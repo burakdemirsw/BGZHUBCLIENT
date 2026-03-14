@@ -30,16 +30,11 @@ export const userDropdownItems: UserDropdownItemType[] = [
     {
         label: 'Profil',
         icon: 'tablerUserCircle',
-        url: '/pages/profile'
+        url: '/apps/users/profile'
     },
     {
         label: 'Bildirimler',
         icon: 'tablerBellRinging',
-        url: ''
-    },
-    {
-        label: 'Hesap Ayarları',
-        icon: 'tablerSettings2',
         url: ''
     },
     {

@@ -2,7 +2,9 @@
     <div ngbDropdown class="d-inline-block" placement="bottom-end">
         <button ngbDropdownToggle class="topbar-link dropdown-toggle drop-arrow-none">
             <lucide-angular [img]="LucideBell" class="fs-xxl" />
-            <span class="badge text-bg-danger badge-circle topbar-badge">7</span>
+            @if (unreadCount > 0) {
+                <span class="badge text-bg-danger badge-circle topbar-badge">{{ unreadCount }}</span>
+            }
         </button>
 
         <div ngbDropdownMenu class="p-0 dropdown-menu-end dropdown-menu-lg">
@@ -12,71 +14,65 @@
                         <h6 class="m-0 fs-md fw-semibold">Bildirimler</h6>
                     </div>
                     <div class="col text-end">
-                        <a href="javascript:void(0)" class="badge badge-soft-success badge-label py-1">07 Bildirim</a>
+                        @if (unreadCount > 0) {
+                            <a href="javascript:void(0)" (click)="markAllAsRead()"
+                               class="badge badge-soft-success badge-label py-1">
+                                Tümünü Okundu İşaretle
+                            </a>
+                        } @else if (notifications.length > 0) {
+                            <span class="badge badge-soft-secondary badge-label py-1">Tümü Okundu</span>
+                        } @else {
+                            <span class="badge badge-soft-secondary badge-label py-1">Bildirim Yok</span>
+                        }
                     </div>
                 </div>
             </div>
 
             <ngx-simplebar style="max-height: 300px; overflow-y: auto;">
-                @for (message of messages; track message.id) {
+                @if (notifications.length === 0) {
+                    <div class="text-center py-4 text-muted">
+                        <i class="fa-regular fa-bell-slash fs-1 mb-2 d-block opacity-50"></i>
+                        <span class="fs-sm">Henüz bildiriminiz yok</span>
+                    </div>
+                }
+
+                @for (item of notifications; track item.id) {
                     <button
                         ngbDropdownItem
-                        [id]="message.id"
                         class="notification-item py-2 text-wrap"
-                        [ngClass]="{ 'active': message.active }">
+                        [ngClass]="{ 'active': !item.isRead }"
+                        (click)="markAsRead(item)">
 
-            <span class="d-flex gap-3 align-items-center">
+                        <span class="d-flex gap-3 align-items-center">
+                            <span class="avatar-md flex-shrink-0 position-relative">
+                                <span class="avatar-title rounded-circle fs-22"
+                                      [ngClass]="item.isRead ? 'bg-light' : 'bg-soft-primary'">
+                                    <i [class]="getNotificationIcon(item) + ' fs-5'"
+                                       [ngClass]="'text-' + getNotificationVariant(item)"></i>
+                                </span>
+                            </span>
 
-                @if (message.user.icon) {
-                    <span class="avatar-md flex-shrink-0 position-relative">
-                  <span class="avatar-title rounded-circle fs-22" [ngClass]="message.user.bgClass">
-                    <ng-icon [name]="message.user.icon" class="fs-4" [ngClass]="'text-' + message.badge.variant"></ng-icon>
-                  </span>
-                  <span class="position-absolute rounded-pill" [ngClass]="'bg-' + message.badge.variant + ' notification-badge'">
-                    <ng-icon [name]="message.badge.icon" class="align-middle d-inline-flex"></ng-icon>
-                    <span class="visually-hidden">unread notification</span>
-                  </span>
-                </span>
-                }
+                            <span class="flex-grow-1 text-muted">
+                                <span class="fw-medium text-body d-block">
+                                    {{ getTitle(item) }}
+                                </span>
+                                <span class="fs-xs d-block text-truncate" style="max-width: 220px;">
+                                    {{ getMessage(item) }}
+                                </span>
+                                <span class="fs-xs opacity-75">
+                                    {{ getTimeAgo(item.createdDate) }}
+                                </span>
+                            </span>
 
-                @if (message.user.avatar) {
-                    <span class="flex-shrink-0 position-relative">
-                  <img
-                      [src]="message.user.avatar"
-                      height="36"
-                      width="36"
-                      class="avatar-md rounded-circle"
-                      alt="User Avatar" />
-                  <span class="position-absolute rounded-pill" [ngClass]="'bg-' + message.badge.variant + ' notification-badge'">
-                    <ng-icon [name]="message.badge.icon" class="d-inline-flex align-middle"></ng-icon>
-                    <span class="visually-hidden">unread notification</span>
-                  </span>
-                </span>
-                }
-
-              <span class="flex-grow-1 text-muted">
-                <span class="fw-medium text-body">{{ message.user.name }}</span>
-                  {{ message.action }}
-                  <span class="fw-medium text-body">{{ message.context }}</span>
-                <br />
-                <span class="fs-xs">{{ message.timestamp }}</span>
-              </span>
-
-              <button
-                  type="button"
-                  class="btn btn-link flex-shrink-0 text-muted p-0 position-absolute end-0 me-2 d-none noti-close-btn">
-                <ng-icon name="tablerXboxXFill" class="fs-xxl"></ng-icon>
-              </button>
-            </span>
+                            @if (!item.isRead) {
+                                <span class="flex-shrink-0">
+                                    <span class="badge bg-primary rounded-pill" style="width: 8px; height: 8px;">&nbsp;</span>
+                                </span>
+                            }
+                        </span>
                     </button>
                 }
             </ngx-simplebar>
-
-            <a
-                routerLink=""
-                class="dropdown-item text-center text-reset text-decoration-underline link-offset-2 fw-bold notify-item border-top border-light py-2">
-                Tüm Bildirimleri Oku
-            </a>
         </div>
     </div>
 </div>

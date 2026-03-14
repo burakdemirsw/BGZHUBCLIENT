@@ -319,6 +319,15 @@ html[data-sidenav-size="condensed"] {
             }
         }
 
+        .logo-brand {
+            justify-content: center;
+            padding: 0;
+
+            .logo-brand-text {
+                display: none;
+            }
+        }
+
         .side-nav {
             gap: 0;
 
@@ -543,6 +552,15 @@ html[data-sidenav-size="on-hover"] {
             }
 
             .logo-lg {
+                display: none;
+            }
+        }
+
+        .logo-brand {
+            justify-content: center;
+            padding: 0;
+
+            .logo-brand-text {
                 display: none;
             }
         }
