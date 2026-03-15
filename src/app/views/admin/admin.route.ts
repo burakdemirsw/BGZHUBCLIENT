@@ -30,6 +30,9 @@ import { TeamsPage } from './teams/teams';
 import { TeamInvitationsPage } from './teams/team-invitations/team-invitations';
 import { TeamSettingsPage } from './teams/team-settings/team-settings';
 import { ImageSearchPage } from './image-search/image-search';
+import { IntegrationTypesPage } from './integration-types/integration-types';
+import { PromptsPage } from './prompts/prompts';
+import { PromptAiAssistantsPage } from './prompt-ai-assistants/prompt-ai-assistants';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -217,6 +220,24 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/image-search',
         component: ImageSearchPage,
         data: { title: 'Görsel Arama' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/integration-types',
+        component: IntegrationTypesPage,
+        data: { title: 'Entegrasyon Tipleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/prompts',
+        component: PromptsPage,
+        data: { title: 'Promptlar' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/prompt-ai-assistants',
+        component: PromptAiAssistantsPage,
+        data: { title: 'Prompt Asistan Atamaları' },
         canActivate: [AuthGuard],
     },
 ];

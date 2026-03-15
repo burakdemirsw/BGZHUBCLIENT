@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IntegrationsService } from '@/app/core/services/integrations.service';
+import { IntegrationTypesService } from '@/app/core/services/integration-types.service';
 import { Integration, CreateIntegrationRequest, UpdateIntegrationRequest } from '@/app/core/models/integration/integration.models';
+import { IntegrationType } from '@/app/core/models/integration/integration-type.models';
 
 @Component({
     selector: 'app-integrations-page',
@@ -25,15 +27,32 @@ export class IntegrationsPage implements OnInit {
     totalPages = 1;
     totalPagesArray: number[] = [];
 
+    // Entegrasyon tipleri
+    integrationTypes: IntegrationType[] = [];
+
     form: any = {
         integrationDescription: '',
+        integrationTypeId: '',
         photoUrl: '',
     };
 
-    constructor(private integrationService: IntegrationsService) {}
+    constructor(
+        private integrationService: IntegrationsService,
+        private integrationTypesService: IntegrationTypesService,
+    ) {}
 
     ngOnInit(): void {
+        this.loadIntegrationTypes();
         this.loadIntegrations();
+    }
+
+    async loadIntegrationTypes(): Promise<void> {
+        try {
+            const response = await this.integrationTypesService.getAll();
+            this.integrationTypes = this.extractArray(response);
+        } catch (err) {
+            console.error('IntegrationTypes load error:', err);
+        }
     }
 
     onFilterChange(): void {
@@ -84,7 +103,7 @@ export class IntegrationsPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedIntegration = null;
-        this.form = { integrationDescription: '', photoUrl: '' };
+        this.form = { integrationDescription: '', integrationTypeId: '', photoUrl: '' };
         this.showModal = true;
     }
 
@@ -93,6 +112,7 @@ export class IntegrationsPage implements OnInit {
         this.selectedIntegration = integration;
         this.form = {
             integrationDescription: integration.integrationDescription,
+            integrationTypeId: integration.integrationTypeId || '',
             photoUrl: integration.photoUrl || '',
         };
         this.showModal = true;
@@ -103,6 +123,7 @@ export class IntegrationsPage implements OnInit {
             if (this.editMode && this.selectedIntegration) {
                 const req: UpdateIntegrationRequest = {
                     integrationDescription: this.form.integrationDescription,
+                    integrationTypeId: this.form.integrationTypeId || undefined,
                     photoUrl: this.form.photoUrl,
                 };
                 console.log('Update request:', req);
@@ -111,6 +132,7 @@ export class IntegrationsPage implements OnInit {
             } else {
                 const req: CreateIntegrationRequest = {
                     integrationDescription: this.form.integrationDescription,
+                    integrationTypeId: this.form.integrationTypeId || undefined,
                     photoUrl: this.form.photoUrl,
                 };
                 console.log('Create request:', req);
