@@ -29,6 +29,7 @@ import { UserRequestDetailPage } from './user-requests/user-request-detail';
 import { TeamsPage } from './teams/teams';
 import { TeamInvitationsPage } from './teams/team-invitations/team-invitations';
 import { TeamSettingsPage } from './teams/team-settings/team-settings';
+import { ImageSearchPage } from './image-search/image-search';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -210,6 +211,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/team-settings',
         component: TeamSettingsPage,
         data: { title: 'Takım Ayarları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/image-search',
+        component: ImageSearchPage,
+        data: { title: 'Görsel Arama' },
         canActivate: [AuthGuard],
     },
 ];

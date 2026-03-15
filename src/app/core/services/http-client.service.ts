@@ -4,11 +4,11 @@ import { firstValueFrom } from 'rxjs';
 import { RequestParameters } from '../models/parameters/requestParameters';
 
  //const BASE_URL = 'http://195.175.214.66:7278/api';
- const BASE_URL = 'https://localhost:8991/api';
-
+const BASE_URL = 'https://localhost:8991/api';
+  //const BASE_URL = 'https://investment-merchant-api.com/api';
 @Injectable({
   providedIn: 'root',
-})
+})  
 export class HttpClientService {
   constructor(private httpClient: HttpClient) {}
      
@@ -17,8 +17,8 @@ export class HttpClientService {
       requestParameter.action ? `/${requestParameter.action}` : ''
     }`;
   }
-    
-  async get<T>(
+      
+  async get<T>(  
     requestParameter: Partial<RequestParameters>,
     id?: string
   ): Promise<T[]> {
