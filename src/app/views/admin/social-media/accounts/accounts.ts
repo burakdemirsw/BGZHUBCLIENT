@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SocialMediaService } from '@/app/core/services/social-media.service';
+import { FacebookLoginService, FacebookConfig } from '@/app/core/services/facebook-login.service';
 import {
     SocialMediaAccount,
     CreateSocialMediaAccountRequest,
@@ -35,12 +36,31 @@ export class SocialMediaAccountsPage implements OnInit {
         isBlocked: false,
     };
 
+    // Facebook Graph API config — kendi değerlerinizi girin
+    fbConfig: FacebookConfig = {
+        appId: 'YOUR_APP_ID',
+        configId: 'YOUR_CONFIG_ID',
+        version: 'v21.0',
+    };
+
     constructor(
         private socialMediaService: SocialMediaService,
+        private facebookLoginService: FacebookLoginService,
     ) {}
 
     ngOnInit(): void {
+        this.facebookLoginService.initFacebookSdk(this.fbConfig);
         this.loadAccounts();
+    }
+
+    async connectFacebook(): Promise<void> {
+        try {
+            const result = await this.facebookLoginService.fbLogin(this.fbConfig.configId);
+            console.log('Facebook connect response:', result);
+            await this.loadAccounts();
+        } catch (err) {
+            console.error('Facebook connect error:', err);
+        }
     }
 
     onFilterChange(): void {
