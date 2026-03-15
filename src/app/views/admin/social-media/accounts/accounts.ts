@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SocialMediaService } from '@/app/core/services/social-media.service';
@@ -14,7 +14,7 @@ import {
     imports: [CommonModule, FormsModule],
     templateUrl: './accounts.html',
 })
-export class SocialMediaAccountsPage implements OnInit {
+export class SocialMediaAccountsPage implements OnInit, OnDestroy {
     accounts: SocialMediaAccount[] = [];
     loading = false;
     showModal = false;
@@ -36,11 +36,22 @@ export class SocialMediaAccountsPage implements OnInit {
         isBlocked: false,
     };
 
-    // Facebook Graph API config — kendi değerlerinizi girin
+    // Facebook Graph API config
     fbConfig: FacebookConfig = {
         appId: '2082246998779710',
         configId: '500411992500266',
         version: 'v25.0',
+    };
+
+    // WhatsApp Embedded Signup config (aynı Meta App, farklı config_id)
+    waConfigId = '1639903583536990';
+
+    private messageListener = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+        if (event.data?.type === 'facebook-callback' && event.data?.success) {
+            console.log('Facebook callback data received via postMessage:', event.data.data);
+            this.loadAccounts();
+        }
     };
 
     constructor(
@@ -49,17 +60,36 @@ export class SocialMediaAccountsPage implements OnInit {
     ) {}
 
     async ngOnInit(): Promise<void> {
+        window.addEventListener('message', this.messageListener);
         await this.facebookLoginService.initFacebookSdk(this.fbConfig);
         this.loadAccounts();
     }
 
+    ngOnDestroy(): void {
+        window.removeEventListener('message', this.messageListener);
+    }
+
     async connectFacebook(): Promise<void> {
         try {
-            const result = await this.facebookLoginService.fbLogin(this.fbConfig.configId);
-            console.log('Facebook connect response:', result);
+            const code = await this.facebookLoginService.fbLogin(this.fbConfig.configId);
+            console.log('Facebook code:', code);
+            const result = await this.facebookLoginService.sendFacebookCode(code);
+            console.log('Facebook backend response:', result);
             await this.loadAccounts();
         } catch (err) {
             console.error('Facebook connect error:', err);
+        }
+    }
+
+    async connectWhatsapp(): Promise<void> {
+        try {
+            const code = await this.facebookLoginService.fbLogin(this.waConfigId);
+            console.log('WhatsApp code:', code);
+            const result = await this.facebookLoginService.sendWhatsappCode(code);
+            console.log('WhatsApp backend response:', result);
+            await this.loadAccounts();
+        } catch (err) {
+            console.error('WhatsApp connect error:', err);
         }
     }
 

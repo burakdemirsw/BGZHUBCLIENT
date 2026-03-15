@@ -8,6 +8,7 @@ import { LockScreen } from './lock-screen/lock-screen';
 import { SuccessMail } from './success-mail/success-mail';
 import { LoginPin } from './login-pin/login-pin';
 import { DeleteAccount } from './delete-account/delete-account';
+import { FacebookCallbackPage } from './facebook-callback/facebook-callback';
 
 
 export const BASIC_ROUTES: Routes = [
@@ -55,5 +56,10 @@ export const BASIC_ROUTES: Routes = [
         path: 'auth/delete-account',
         component: DeleteAccount,
         data: { title: "Delete Account" },
+    },
+    {
+        path: 'auth/facebook/callback',
+        component: FacebookCallbackPage,
+        data: { title: 'Facebook Callback' },
     },
 ];

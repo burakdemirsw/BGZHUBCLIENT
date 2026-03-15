@@ -70,10 +70,15 @@ export class FacebookLoginService {
     return new Promise((resolve, reject) => {
       FB.login(
         (response: any) => {
-          if (response.status === 'connected') {
+          console.log('FB.login full response:', response);
+
+          if (response.status === 'connected' && response.authResponse) {
             const code = response.authResponse.code;
-            this.sendCodeToBackend(code).then(resolve).catch(reject);
+            console.log('FB.login code:', code);
+            console.log('FB.login authResponse:', response.authResponse);
+            resolve(code);
           } else {
+            console.warn('FB.login failed or cancelled:', response);
             reject(new Error('Facebook login cancelled or not authorized.'));
           }
         },
@@ -86,10 +91,17 @@ export class FacebookLoginService {
     });
   }
 
-  private sendCodeToBackend(code: string): Promise<any> {
+  sendFacebookCode(code: string): Promise<any> {
     return this.http.post(
       { controller: 'Auth', action: 'meta-login' },
-      { code, redirectUri: 'https://sellenticai.com/admin/social-media/accounts' }
+      { code }
+    );
+  }
+
+  sendWhatsappCode(code: string): Promise<any> {
+    return this.http.post(
+      { controller: 'Auth', action: 'whatsapp-login' },
+      { code }
     );
   }
 }
