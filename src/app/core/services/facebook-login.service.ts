@@ -13,13 +13,24 @@ export interface FacebookConfig {
   providedIn: 'root',
 })
 export class FacebookLoginService {
-  private sdkLoaded = false;
+  private sdkReady: Promise<void> | null = null;
 
   constructor(private http: HttpClientService) {}
 
   initFacebookSdk(config: FacebookConfig): Promise<void> {
-    return new Promise((resolve) => {
-      if (this.sdkLoaded) {
+    if (this.sdkReady) {
+      return this.sdkReady;
+    }
+
+    this.sdkReady = new Promise<void>((resolve) => {
+      // SDK zaten yüklü ve init edilmişse
+      if (typeof FB !== 'undefined' && FB.init) {
+        FB.init({
+          appId: config.appId,
+          cookie: true,
+          xfbml: true,
+          version: config.version,
+        });
         resolve();
         return;
       }
@@ -31,12 +42,11 @@ export class FacebookLoginService {
           xfbml: true,
           version: config.version,
         });
-        this.sdkLoaded = true;
         resolve();
       };
 
+      // Script zaten eklenmişse tekrar ekleme, ama yine callback'i bekle
       if (document.getElementById('facebook-jssdk')) {
-        resolve();
         return;
       }
 
@@ -47,9 +57,16 @@ export class FacebookLoginService {
       script.defer = true;
       document.head.appendChild(script);
     });
+
+    return this.sdkReady;
   }
 
-  fbLogin(configId: string): Promise<any> {
+  async fbLogin(configId: string): Promise<any> {
+    // SDK hazır olana kadar bekle
+    if (this.sdkReady) {
+      await this.sdkReady;
+    }
+
     return new Promise((resolve, reject) => {
       FB.login(
         (response: any) => {
@@ -72,7 +89,7 @@ export class FacebookLoginService {
   private sendCodeToBackend(code: string): Promise<any> {
     return this.http.post(
       { controller: 'Auth', action: 'meta-login' },
-      { code }
+      { code, redirectUri: 'https://sellenticai.com/admin/social-media/accounts' }
     );
   }
 }

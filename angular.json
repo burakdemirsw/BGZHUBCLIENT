@@ -47,7 +47,7 @@
                             },
                             "src/assets",
                             {
-                                "glob": "Web.config",
+                                "glob": "web.config",
                                 "input": "src/app",
                                 "output": "/"
                             }

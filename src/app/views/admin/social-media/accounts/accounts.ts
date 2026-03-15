@@ -38,9 +38,9 @@ export class SocialMediaAccountsPage implements OnInit {
 
     // Facebook Graph API config — kendi değerlerinizi girin
     fbConfig: FacebookConfig = {
-        appId: 'YOUR_APP_ID',
-        configId: 'YOUR_CONFIG_ID',
-        version: 'v21.0',
+        appId: '2082246998779710',
+        configId: '500411992500266',
+        version: 'v25.0',
     };
 
     constructor(
@@ -48,8 +48,8 @@ export class SocialMediaAccountsPage implements OnInit {
         private facebookLoginService: FacebookLoginService,
     ) {}
 
-    ngOnInit(): void {
-        this.facebookLoginService.initFacebookSdk(this.fbConfig);
+    async ngOnInit(): Promise<void> {
+        await this.facebookLoginService.initFacebookSdk(this.fbConfig);
         this.loadAccounts();
     }
 
