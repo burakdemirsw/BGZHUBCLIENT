@@ -30,7 +30,7 @@ export class IntegrationTypesPage implements OnInit {
     totalPagesArray: number[] = [];
 
     form: any = {
-        integrationTypeCode: '',
+        connectionTypeCode: '',
         name: '',
         description: '',
         isBlocked: false,
@@ -58,7 +58,7 @@ export class IntegrationTypesPage implements OnInit {
         this.filteredItems = this.items.filter(
             i =>
                 i.name.toLowerCase().includes(q) ||
-                i.integrationTypeCode.toLowerCase().includes(q) ||
+                i.connectionTypeCode.toLowerCase().includes(q) ||
                 (i.description || '').toLowerCase().includes(q)
         );
         this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
@@ -93,7 +93,7 @@ export class IntegrationTypesPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedItem = null;
-        this.form = { integrationTypeCode: '', name: '', description: '', isBlocked: false };
+        this.form = { connectionTypeCode: '', name: '', description: '', isBlocked: false };
         this.showModal = true;
     }
 
@@ -101,7 +101,7 @@ export class IntegrationTypesPage implements OnInit {
         this.editMode = true;
         this.selectedItem = item;
         this.form = {
-            integrationTypeCode: item.integrationTypeCode,
+            connectionTypeCode: item.connectionTypeCode,
             name: item.name,
             description: item.description || '',
             isBlocked: item.isBlocked ?? false,
@@ -113,7 +113,7 @@ export class IntegrationTypesPage implements OnInit {
         try {
             if (this.editMode && this.selectedItem) {
                 const req: UpdateIntegrationTypeRequest = {
-                    integrationTypeCode: this.form.integrationTypeCode,
+                    connectionTypeCode: this.form.connectionTypeCode,
                     name: this.form.name,
                     description: this.form.description,
                     isBlocked: this.form.isBlocked ?? false,
@@ -123,7 +123,7 @@ export class IntegrationTypesPage implements OnInit {
                 console.log('Update response:', res);
             } else {
                 const req: CreateIntegrationTypeRequest = {
-                    integrationTypeCode: this.form.integrationTypeCode,
+                    connectionTypeCode: this.form.connectionTypeCode,
                     name: this.form.name,
                     description: this.form.description,
                 };

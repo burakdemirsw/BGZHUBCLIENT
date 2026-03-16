@@ -9,26 +9,26 @@ export class IntegrationTypesService {
   constructor(private http: HttpClientService) {}
 
   getAll(): Promise<any> {
-    return this.http.get_new({ controller: 'IntegrationTypes' });
+    return this.http.get_new({ controller: 'IntegrationConnectionTypes' });
   }
 
   getById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'IntegrationTypes', action: `${id}` });
+    return this.http.get_new({ controller: 'IntegrationConnectionTypes', action: `${id}` });
   }
 
   getByCode(code: string): Promise<any> {
-    return this.http.get_new({ controller: 'IntegrationTypes', action: `by-code/${code}` });
+    return this.http.get_new({ controller: 'IntegrationConnectionTypes', action: `by-code/${code}` });
   }
 
   create(request: CreateIntegrationTypeRequest): Promise<any> {
-    return this.http.post({ controller: 'IntegrationTypes' }, request);
+    return this.http.post({ controller: 'IntegrationConnectionTypes' }, request);
   }
 
   update(id: string, request: UpdateIntegrationTypeRequest): Promise<any> {
-    return this.http.post({ controller: 'IntegrationTypes', action: `update/${id}` }, request);
+    return this.http.post({ controller: 'IntegrationConnectionTypes', action: `update/${id}` }, request);
   }
 
   delete(id: string): Promise<any> {
-    return this.http.post({ controller: 'IntegrationTypes', action: `delete/${id}` }, {});
+    return this.http.post({ controller: 'IntegrationConnectionTypes', action: `delete/${id}` }, {});
   }
 }

@@ -7,7 +7,7 @@ applyTo: '**'
 ## Mimari Genel Bakış
 
 - **Angular 20+** standalone component mimarisi (NgModule KULLANILMAZ)
-- Uygulama adı: **SellenticAI** (eski adı: YanıtSende / Plexorin — bunları kullanma)
+- Uygulama adı: **SellenticAI** (eski adı: YanıtSende / SellenticAI — bunları kullanma)
 - API Base URL: `https://localhost:8991/api`
 - Tüm HTTP istekleri `HttpClientService` üzerinden `Promise` tabanlı yapılır (Observable değil)
 

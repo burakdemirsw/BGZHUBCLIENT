@@ -115,13 +115,17 @@ export class UserMenuService {
       const hasChildren = children && children.length > 0;
       const hasUrl = !!item.url; // boş string "" → false
 
+      // Ana başlık mı yoksa alt menü mü? parentId varsa alt menü öğesi
+      const isChild = !!item.parentId;
+      const defaultIcon = isChild ? 'fa fa-circle' : undefined;
+
       if (hasChildren) {
         // Alt menüleri olan eleman → collapsible grup
         const childItems = this.buildMenuLevel(children, childMap);
         result.push({
           label: item.name,
           url: hasUrl ? item.url : undefined,
-          faIcon: item.icon || undefined,
+          faIcon: item.icon || defaultIcon,
           isCollapsed: true,
           children: childItems,
         });
@@ -130,7 +134,7 @@ export class UserMenuService {
         result.push({
           label: item.name,
           url: hasUrl ? item.url : undefined,
-          faIcon: item.icon || undefined,
+          faIcon: item.icon || defaultIcon,
         });
       }
     }

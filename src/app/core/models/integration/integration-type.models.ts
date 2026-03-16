@@ -1,6 +1,6 @@
 export interface IntegrationType {
   id: string;
-  integrationTypeCode: string;
+  connectionTypeCode: string;
   name: string;
   description: string;
   isBlocked?: boolean;
@@ -9,13 +9,13 @@ export interface IntegrationType {
 }
 
 export interface CreateIntegrationTypeRequest {
-  integrationTypeCode: string;
+  connectionTypeCode: string;
   name: string;
   description: string;
 }
 
 export interface UpdateIntegrationTypeRequest {
-  integrationTypeCode: string;
+  connectionTypeCode: string;
   name: string;
   description: string;
   isBlocked: boolean;

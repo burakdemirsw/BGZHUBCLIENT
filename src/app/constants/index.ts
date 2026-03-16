@@ -8,13 +8,13 @@ export const currency: CurrencyType = '$'
 export const currentYear = new Date().getFullYear()
 
 export const credits = {
-  website: 'https://plexorin.com/',
-  name: 'Plexorin',
+  website: 'https://SellenticAI.com/',
+  name: 'SellenticAI',
 }
 
-export const appName = 'Plexorin'
-export const appTitle = 'Plexorin'
-export const appDescription: string = 'Plexorin'
+export const appName = 'SellenticAI'
+export const appTitle = 'SellenticAI'
+export const appDescription: string = 'SellenticAI'
 
 export const basePath: string = ''
 

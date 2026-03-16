@@ -182,9 +182,23 @@
                 font-family: $font-family-base;
                 color: $sidenav-item-color;
                 opacity: 0.85;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+
+                // Sub-menu ikonlarını küçük nokta olarak göster
+                .menu-icon.fa-circle {
+                    font-size: 6px;
+                    vertical-align: middle;
+                    opacity: 0.6;
+                }
 
                 &:hover {
                     opacity: 1;
+
+                    .menu-icon.fa-circle {
+                        opacity: 1;
+                    }
                 }
             }
         }

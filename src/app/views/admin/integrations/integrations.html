@@ -104,7 +104,7 @@
                             <select class="form-select" [(ngModel)]="form.integrationTypeId" name="integrationTypeId">
                                 <option value="">-- Tip Seçiniz --</option>
                                 @for (type of integrationTypes; track type.id) {
-                                    <option [value]="type.id">{{ type.name }} ({{ type.integrationTypeCode }})</option>
+                                    <option [value]="type.id">{{ type.name }} ({{ type.connectionTypeCode }})</option>
                                 }
                             </select>
                         </div>

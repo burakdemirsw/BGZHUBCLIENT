@@ -33,6 +33,9 @@ import { ImageSearchPage } from './image-search/image-search';
 import { IntegrationTypesPage } from './integration-types/integration-types';
 import { PromptsPage } from './prompts/prompts';
 import { PromptAiAssistantsPage } from './prompt-ai-assistants/prompt-ai-assistants';
+import { ProductsPage } from './products/products';
+import { IntegrationConnectionTypesPage } from './integration-connection-types/integration-connection-types';
+import { IntegrationConnectionsPage } from './integration-connections/integration-connections';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -238,6 +241,24 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/prompt-ai-assistants',
         component: PromptAiAssistantsPage,
         data: { title: 'Prompt Asistan Atamaları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/products',
+        component: ProductsPage,
+        data: { title: 'Ürünler' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/integration-connection-types',
+        component: IntegrationConnectionTypesPage,
+        data: { title: 'Entegrasyon Bağlantı Tipleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/integration-connections',
+        component: IntegrationConnectionsPage,
+        data: { title: 'Entegrasyon Bağlantıları' },
         canActivate: [AuthGuard],
     },
 ];
