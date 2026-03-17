@@ -3,11 +3,11 @@ import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { RequestParameters } from '../models/parameters/requestParameters';
 
- //const BASE_URL = 'http://195.175.214.66:7278/api';
+//const BASE_URL = 'http://195.175.214.66:7278/api';
 const BASE_URL = 'https://localhost:8991/api';
-  //const BASE_URL = 'https://investment-merchant-api.com/api';
+// const BASE_URL = 'https://investment-merchant-api.com/api';
 @Injectable({  
-  providedIn: 'root',
+  providedIn: 'root',  
 })  
 export class HttpClientService {
   constructor(private httpClient: HttpClient) {}

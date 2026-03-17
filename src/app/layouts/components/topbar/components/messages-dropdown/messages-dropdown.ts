@@ -34,7 +34,7 @@ export class MessagesDropdown implements OnInit, OnDestroy {
     async ngOnInit(): Promise<void> {
         await this.loadNotifications();
         // Her 30 saniyede bir yeni bildirimleri kontrol et
-        this.pollInterval = setInterval(() => this.loadNotifications(), 30000);
+        // this.pollInterval = setInterval(() => this.loadNotifications(), 30000);
     }
 
     ngOnDestroy(): void {

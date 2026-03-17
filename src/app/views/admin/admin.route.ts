@@ -34,8 +34,17 @@ import { IntegrationTypesPage } from './integration-types/integration-types';
 import { PromptsPage } from './prompts/prompts';
 import { PromptAiAssistantsPage } from './prompt-ai-assistants/prompt-ai-assistants';
 import { ProductsPage } from './products/products';
-import { IntegrationConnectionTypesPage } from './integration-connection-types/integration-connection-types';
-import { IntegrationConnectionsPage } from './integration-connections/integration-connections';
+import { ChatPage } from './chat/chat';
+import { ContactTypesPage } from './contact-types/contact-types';
+import { AddressTypesPage } from './address-types/address-types';
+import { CustomerTypesPage } from './customer-types/customer-types';
+import { CustomerDescriptionsPage } from './customer-descriptions/customer-descriptions';
+import { CustomerAddressesPage } from './customer-addresses/customer-addresses';
+import { CustomerContactsPage } from './customer-contacts/customer-contacts';
+import { TagsPage } from './tags/tags';
+import { NotesPage } from './notes/notes';
+import { ConversationTagsPage } from './conversation-tags/conversation-tags';
+import { ConversationNotesPage } from './conversation-notes/conversation-notes';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -250,15 +259,69 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [AuthGuard],
     },
     {
-        path: 'admin/integration-connection-types',
-        component: IntegrationConnectionTypesPage,
-        data: { title: 'Entegrasyon Bağlantı Tipleri' },
+        path: 'admin/chat',
+        component: ChatPage,
+        data: { title: 'Chat Dashboard' },
         canActivate: [AuthGuard],
     },
     {
-        path: 'admin/integration-connections',
-        component: IntegrationConnectionsPage,
-        data: { title: 'Entegrasyon Bağlantıları' },
+        path: 'admin/contact-types',
+        component: ContactTypesPage,
+        data: { title: 'İletişim Türleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/address-types',
+        component: AddressTypesPage,
+        data: { title: 'Adres Türleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/customer-types',
+        component: CustomerTypesPage,
+        data: { title: 'Müşteri Türleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/customer-descriptions',
+        component: CustomerDescriptionsPage,
+        data: { title: 'Müşteri Açıklamaları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/customer-addresses',
+        component: CustomerAddressesPage,
+        data: { title: 'Müşteri Adresleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/customer-contacts',
+        component: CustomerContactsPage,
+        data: { title: 'Müşteri İletişim Bilgileri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/tags',
+        component: TagsPage,
+        data: { title: 'Etiketler' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/notes',
+        component: NotesPage,
+        data: { title: 'Notlar' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/conversation-tags',
+        component: ConversationTagsPage,
+        data: { title: 'Konuşma Etiketleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/conversation-notes',
+        component: ConversationNotesPage,
+        data: { title: 'Konuşma Notları' },
         canActivate: [AuthGuard],
     },
 ];

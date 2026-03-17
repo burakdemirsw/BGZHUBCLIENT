@@ -1,0 +1,247 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { CustomerAddressesService } from '@/app/core/services/customer-addresses.service';
+import { CustomerAddress, CreateCustomerAddressRequest, UpdateCustomerAddressRequest } from '@/app/core/models/customer/customer-address.models';
+import { Customer } from '@/app/core/models/customer/customer.models';
+import { AddressType } from '@/app/core/models/customer/address-type.models';
+import { Country, City, District } from '@/app/core/models/address/address.models';
+import { HttpClientService } from '@/app/core/services/http-client.service';
+import { AddressTypesService } from '@/app/core/services/address-types.service';
+
+@Component({
+    selector: 'app-customer-addresses-page',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './customer-addresses.html',
+})
+export class CustomerAddressesPage implements OnInit {
+    items: CustomerAddress[] = [];
+    customers: Customer[] = [];
+    addressTypes: AddressType[] = [];
+    countries: Country[] = [];
+    cities: City[] = [];
+    districts: District[] = [];
+    filteredCities: City[] = [];
+    filteredDistricts: District[] = [];
+    loading = false;
+
+    // Datatable
+    filterText = '';
+    filteredItems: CustomerAddress[] = [];
+    pagedItems: CustomerAddress[] = [];
+    currentPage = 1;
+    pageSize = 10;
+    totalPages = 1;
+    totalPagesArray: number[] = [];
+
+    // Modal
+    showModal = false;
+    editMode = false;
+    selectedItem: CustomerAddress | null = null;
+    form: any = {
+        customerId: '', addressTypeId: '', countryId: '', cityId: '', districtId: '',
+        addressLine: '', postalCode: '', isDefault: false
+    };
+
+    constructor(
+        private service: CustomerAddressesService,
+        private addressTypesService: AddressTypesService,
+        private http: HttpClientService
+    ) {}
+
+    ngOnInit(): void {
+        this.loadLookups();
+        this.loadItems();
+    }
+
+    async loadLookups(): Promise<void> {
+        try {
+            const [custRes, atRes, countryRes, cityRes, districtRes] = await Promise.all([
+                this.http.get_new({ controller: 'Customers' }),
+                this.addressTypesService.getAll(),
+                this.http.get_new({ controller: 'Countries' }),
+                this.http.get_new({ controller: 'Cities' }),
+                this.http.get_new({ controller: 'Districts' }),
+            ]);
+            this.customers = this.extractArray(custRes);
+            this.addressTypes = this.extractArray(atRes);
+            this.countries = this.extractArray(countryRes);
+            this.cities = this.extractArray(cityRes);
+            this.districts = this.extractArray(districtRes);
+        } catch (err) {
+            console.error('Lookup load error:', err);
+        }
+    }
+
+    async loadItems(): Promise<void> {
+        this.loading = true;
+        try {
+            const response = await this.service.getAll();
+            this.items = this.extractArray(response);
+            this.applyFilterAndPaging();
+        } catch (err) {
+            console.error('CustomerAddresses load error:', err);
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    getCustomerName(customerId?: string): string {
+        if (!customerId) return '-';
+        const c = this.customers.find(x => x.id === customerId);
+        return c ? (c.fullName || c.displayName || `${c.firstName || ''} ${c.lastName || ''}`.trim() || '-') : customerId.substring(0, 8) + '...';
+    }
+
+    getAddressTypeName(id?: string): string {
+        if (!id) return '-';
+        const a = this.addressTypes.find(x => x.id === id);
+        return a?.name || '-';
+    }
+
+    getCountryName(id?: string): string {
+        if (!id) return '-';
+        const c = this.countries.find(x => x.id === id);
+        return c?.name || '-';
+    }
+
+    getCityName(id?: string): string {
+        if (!id) return '-';
+        const c = this.cities.find(x => x.id === id);
+        return c?.name || '-';
+    }
+
+    getDistrictName(id?: string): string {
+        if (!id) return '-';
+        const d = this.districts.find(x => x.id === id);
+        return d?.name || '-';
+    }
+
+    onCountryChange(): void {
+        this.filteredCities = this.cities.filter(c => c.countryId === this.form.countryId);
+        this.form.cityId = '';
+        this.form.districtId = '';
+        this.filteredDistricts = [];
+    }
+
+    onCityChange(): void {
+        this.filteredDistricts = this.districts.filter(d => d.cityId === this.form.cityId);
+        this.form.districtId = '';
+    }
+
+    openCreate(): void {
+        this.editMode = false;
+        this.selectedItem = null;
+        this.form = { customerId: '', addressTypeId: '', countryId: '', cityId: '', districtId: '', addressLine: '', postalCode: '', isDefault: false };
+        this.filteredCities = [];
+        this.filteredDistricts = [];
+        this.showModal = true;
+    }
+
+    openEdit(item: CustomerAddress): void {
+        this.editMode = true;
+        this.selectedItem = item;
+        this.form = {
+            customerId: item.customerId || '',
+            addressTypeId: item.addressTypeId || '',
+            countryId: item.countryId || '',
+            cityId: item.cityId || '',
+            districtId: item.districtId || '',
+            addressLine: item.addressLine || '',
+            postalCode: item.postalCode || '',
+            isDefault: item.isDefault || false
+        };
+        this.filteredCities = this.cities.filter(c => c.countryId === this.form.countryId);
+        this.filteredDistricts = this.districts.filter(d => d.cityId === this.form.cityId);
+        this.showModal = true;
+    }
+
+    async save(): Promise<void> {
+        try {
+            if (this.editMode && this.selectedItem) {
+                const req: UpdateCustomerAddressRequest = {
+                    customerId: this.form.customerId,
+                    addressTypeId: this.form.addressTypeId,
+                    countryId: this.form.countryId,
+                    cityId: this.form.cityId,
+                    districtId: this.form.districtId,
+                    addressLine: this.form.addressLine,
+                    postalCode: this.form.postalCode,
+                    isDefault: this.form.isDefault,
+                    isBlocked: this.selectedItem.isBlocked || false
+                };
+                await this.service.update(this.selectedItem.id, req);
+            } else {
+                const req: CreateCustomerAddressRequest = {
+                    customerId: this.form.customerId,
+                    addressTypeId: this.form.addressTypeId,
+                    countryId: this.form.countryId,
+                    cityId: this.form.cityId,
+                    districtId: this.form.districtId,
+                    addressLine: this.form.addressLine,
+                    postalCode: this.form.postalCode,
+                    isDefault: this.form.isDefault
+                };
+                await this.service.create(req);
+            }
+            this.showModal = false;
+            await this.loadItems();
+        } catch (err: any) {
+            console.error('Save error:', err);
+            const msg = err.status === 0
+                ? `Sunucuya bağlanılamadı.\nURL: ${err.url}\nMesaj: ${err.message}`
+                : `Hata ${err.status}: ${err.error?.message || err.error?.title || JSON.stringify(err.error)}`;
+            alert('İşlem hatası:\n' + msg);
+        }
+    }
+
+    closeModal(): void {
+        this.showModal = false;
+    }
+
+    async deleteItem(item: CustomerAddress): Promise<void> {
+        if (confirm('Bu müşteri adresini silmek istediğinize emin misiniz?')) {
+            try {
+                await this.service.delete(item.id);
+                await this.loadItems();
+            } catch (err) {
+                console.error('Delete error:', err);
+            }
+        }
+    }
+
+    // ────── Datatable ──────
+    onFilterChange(): void {
+        this.currentPage = 1;
+        this.applyFilterAndPaging();
+    }
+
+    setPage(page: number): void {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.applyFilterAndPaging();
+    }
+
+    applyFilterAndPaging(): void {
+        const q = (this.filterText || '').toLowerCase();
+        this.filteredItems = this.items.filter(
+            i =>
+                (i.addressLine || '').toLowerCase().includes(q) ||
+                (i.postalCode || '').toLowerCase().includes(q) ||
+                this.getCustomerName(i.customerId).toLowerCase().includes(q) ||
+                this.getAddressTypeName(i.addressTypeId).toLowerCase().includes(q)
+        );
+        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
+        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        const start = (this.currentPage - 1) * this.pageSize;
+        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+    }
+
+    private extractArray(response: any): any[] {
+        if (Array.isArray(response)) return response;
+        if (response?.$values) return response.$values;
+        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
+        if (response?.items) return response.items;
+        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
+        return [];
+    }
+}
