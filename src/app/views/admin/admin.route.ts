@@ -45,6 +45,7 @@ import { TagsPage } from './tags/tags';
 import { NotesPage } from './notes/notes';
 import { ConversationTagsPage } from './conversation-tags/conversation-tags';
 import { ConversationNotesPage } from './conversation-notes/conversation-notes';
+import { CompaniesPage } from './companies/companies';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -322,6 +323,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/conversation-notes',
         component: ConversationNotesPage,
         data: { title: 'Konuşma Notları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/companies',
+        component: CompaniesPage,
+        data: { title: 'Şirketler' },
         canActivate: [AuthGuard],
     },
 ];
