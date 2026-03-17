@@ -75,23 +75,7 @@ export class HttpClientService {
     );
   }
 
-  async delete<T>(
-    requestParameter: Partial<RequestParameters>
-  ): Promise<any> {
-    let url: string = '';
-    if (requestParameter.fullEndPoint) url = requestParameter.fullEndPoint;
-    else
-      url = `${this.url(requestParameter)}${
-        requestParameter.queryString ? `?${requestParameter.queryString}` : ''
-      }`;
-
-    return await firstValueFrom(
-      this.httpClient.delete<T>(url, {
-        headers: requestParameter.headers,
-        responseType: requestParameter.responseType as 'json',
-      })
-    );
-  }
+ 
 
 }
   

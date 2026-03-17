@@ -46,7 +46,21 @@ export class AuthGuard {
       }
 
       // URL'den query parametrelerini kaldır
-      const cleanUrl = '/' + state.url.split('?')[0].replace(/^\/+/, '');
+      let cleanUrl = '/' + state.url.split('?')[0].replace(/^\/+/, '');
+
+      // Route parametrelerini kaldır (route config'deki :param değerlerini URL'den çıkar)
+      const routeConfig = next.routeConfig;
+      if (routeConfig?.path) {
+        const segments = routeConfig.path.split('/');
+        const urlSegments = cleanUrl.replace(/^\/+/, '').split('/');
+        const baseSegments: string[] = [];
+        for (let i = 0; i < segments.length; i++) {
+          if (!segments[i].startsWith(':')) {
+            baseSegments.push(urlSegments[i]);
+          }
+        }
+        cleanUrl = '/' + baseSegments.join('/');
+      }
 
       const response = await this.menusService.isUserAuthorized(userId, cleanUrl);
       const isAuthorized = response?.data ?? response?.result ?? response === true;

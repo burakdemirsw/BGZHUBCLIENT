@@ -46,6 +46,10 @@ import { NotesPage } from './notes/notes';
 import { ConversationTagsPage } from './conversation-tags/conversation-tags';
 import { ConversationNotesPage } from './conversation-notes/conversation-notes';
 import { CompaniesPage } from './companies/companies';
+import { SegmentsPage } from './segments/segments';
+import { ConversationSegmentsPage } from './conversation-segments/conversation-segments';
+import { ConversationListDescriptionsPage } from './conversation-list-descriptions/conversation-list-descriptions';
+import { ConversationListsPage } from './conversation-lists/conversation-lists';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -260,7 +264,12 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [AuthGuard],
     },
     {
-        path: 'admin/chat',
+        path: 'chat',
+        redirectTo: 'chat/messages',
+        pathMatch: 'full',
+    },
+    {
+        path: 'chat/:conversationType',
         component: ChatPage,
         data: { title: 'Chat Dashboard' },
         canActivate: [AuthGuard],
@@ -329,6 +338,30 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/companies',
         component: CompaniesPage,
         data: { title: 'Şirketler' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/segments',
+        component: SegmentsPage,
+        data: { title: 'Segmentler' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/conversation-segments',
+        component: ConversationSegmentsPage,
+        data: { title: 'Konuşma Segmentleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/conversation-list-descriptions',
+        component: ConversationListDescriptionsPage,
+        data: { title: 'Konuşma Listeleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/conversation-lists',
+        component: ConversationListsPage,
+        data: { title: 'Konuşma Liste İçerikleri' },
         canActivate: [AuthGuard],
     },
 ];

@@ -3014,6 +3014,716 @@
         ]
       }
     },
+    "/api/ConversationFavorites": {
+      "get": {
+        "tags": [
+          "ConversationFavorites"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "ConversationFavorites"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddFavoriteRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddFavoriteRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddFavoriteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationFavorites/{id}": {
+      "get": {
+        "tags": [
+          "ConversationFavorites"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationFavorites/by-user/{userId}": {
+      "get": {
+        "tags": [
+          "ConversationFavorites"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationFavorites/by-conversation/{conversationId}": {
+      "get": {
+        "tags": [
+          "ConversationFavorites"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationFavorites/check/{userId}/{conversationId}": {
+      "get": {
+        "tags": [
+          "ConversationFavorites"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationFavorites/bulk": {
+      "post": {
+        "tags": [
+          "ConversationFavorites"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddFavoritesRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddFavoritesRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddFavoritesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationFavorites/delete/{userId}/{conversationId}": {
+      "post": {
+        "tags": [
+          "ConversationFavorites"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationFavorites/clear-user/{userId}": {
+      "post": {
+        "tags": [
+          "ConversationFavorites"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationFavorites/clear-conversation/{conversationId}": {
+      "post": {
+        "tags": [
+          "ConversationFavorites"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationLists/descriptions": {
+      "get": {
+        "tags": [
+          "ConversationLists"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "ConversationLists"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConversationListDescriptionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConversationListDescriptionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConversationListDescriptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationLists/descriptions/{id}": {
+      "get": {
+        "tags": [
+          "ConversationLists"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationLists/descriptions/by-user/{userId}": {
+      "get": {
+        "tags": [
+          "ConversationLists"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationLists/descriptions/update/{id}": {
+      "post": {
+        "tags": [
+          "ConversationLists"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConversationListDescriptionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConversationListDescriptionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConversationListDescriptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationLists/descriptions/delete/{id}": {
+      "post": {
+        "tags": [
+          "ConversationLists"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationLists/by-list/{listId}": {
+      "get": {
+        "tags": [
+          "ConversationLists"
+        ],
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationLists/by-conversation/{conversationId}": {
+      "get": {
+        "tags": [
+          "ConversationLists"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationLists": {
+      "post": {
+        "tags": [
+          "ConversationLists"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddConversationToListRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddConversationToListRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddConversationToListRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationLists/bulk": {
+      "post": {
+        "tags": [
+          "ConversationLists"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddConversationsToListRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddConversationsToListRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddConversationsToListRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationLists/delete/{conversationId}/{listId}": {
+      "post": {
+        "tags": [
+          "ConversationLists"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationLists/clear-list/{listId}": {
+      "post": {
+        "tags": [
+          "ConversationLists"
+        ],
+        "parameters": [
+          {
+            "name": "listId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationLists/clear-conversation/{conversationId}": {
+      "post": {
+        "tags": [
+          "ConversationLists"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/ConversationNotes": {
       "get": {
         "tags": [
@@ -3178,6 +3888,108 @@
         ]
       }
     },
+    "/api/Conversations/sidebar": {
+      "get": {
+        "tags": [
+          "Conversations"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Conversations/list": {
+      "get": {
+        "tags": [
+          "Conversations"
+        ],
+        "parameters": [
+          {
+            "name": "Type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "SearchTerm",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Conversations/{conversationId}/messages": {
+      "get": {
+        "tags": [
+          "Conversations"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/Conversations": {
       "get": {
         "tags": [
@@ -3258,42 +4070,14 @@
         ]
       }
     },
-    "/api/Conversations/by-user/{userId}": {
+    "/api/Conversations/by-social-media-account/{socialMediaAccountId}": {
       "get": {
         "tags": [
           "Conversations"
         ],
         "parameters": [
           {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/Conversations/unread/by-user/{userId}": {
-      "get": {
-        "tags": [
-          "Conversations"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
+            "name": "socialMediaAccountId",
             "in": "path",
             "required": true,
             "schema": {
@@ -3390,7 +4174,91 @@
         ]
       }
     },
-    "/api/Conversations/{id}/mark-read": {
+    "/api/Conversations/{id}/archive": {
+      "post": {
+        "tags": [
+          "Conversations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Conversations/{id}/unarchive": {
+      "post": {
+        "tags": [
+          "Conversations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Conversations/{id}/block": {
+      "post": {
+        "tags": [
+          "Conversations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Conversations/{id}/unblock": {
       "post": {
         "tags": [
           "Conversations"
@@ -3662,14 +4530,14 @@
         ]
       }
     },
-    "/api/Messages/by-assigned-user/{assignedUserId}": {
+    "/api/Messages/by-conversation/{conversationId}": {
       "get": {
         "tags": [
           "Messages"
         ],
         "parameters": [
           {
-            "name": "assignedUserId",
+            "name": "conversationId",
             "in": "path",
             "required": true,
             "schema": {
@@ -3690,45 +4558,19 @@
         ]
       }
     },
-    "/api/Messages/by-from/{fromId}": {
+    "/api/Messages/unread/by-conversation/{conversationId}": {
       "get": {
         "tags": [
           "Messages"
         ],
         "parameters": [
           {
-            "name": "fromId",
+            "name": "conversationId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "Bearer": [ ]
-          }
-        ]
-      }
-    },
-    "/api/Messages/unread/by-from/{fromId}": {
-      "get": {
-        "tags": [
-          "Messages"
-        ],
-        "parameters": [
-          {
-            "name": "fromId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -8998,6 +9840,413 @@
         ]
       }
     },
+    "/api/ConversationSegments/by-conversation/{conversationId}": {
+      "get": {
+        "tags": [
+          "ConversationSegments"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationSegments/by-segment/{segmentId}": {
+      "get": {
+        "tags": [
+          "ConversationSegments"
+        ],
+        "parameters": [
+          {
+            "name": "segmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationSegments": {
+      "post": {
+        "tags": [
+          "ConversationSegments"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddConversationToSegmentRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddConversationToSegmentRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddConversationToSegmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationSegments/bulk": {
+      "post": {
+        "tags": [
+          "ConversationSegments"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddConversationsToSegmentRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddConversationsToSegmentRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddConversationsToSegmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationSegments/delete/{conversationId}/{segmentId}": {
+      "post": {
+        "tags": [
+          "ConversationSegments"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "segmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationSegments/clear-segment/{segmentId}": {
+      "post": {
+        "tags": [
+          "ConversationSegments"
+        ],
+        "parameters": [
+          {
+            "name": "segmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/ConversationSegments/clear-conversation/{conversationId}": {
+      "post": {
+        "tags": [
+          "ConversationSegments"
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Segments": {
+      "get": {
+        "tags": [
+          "Segments"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Segments"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSegmentRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSegmentRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSegmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Segments/{id}": {
+      "get": {
+        "tags": [
+          "Segments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Segments/by-user/{userId}": {
+      "get": {
+        "tags": [
+          "Segments"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Segments/update/{id}": {
+      "post": {
+        "tags": [
+          "Segments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSegmentRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSegmentRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSegmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/Segments/delete/{id}": {
+      "post": {
+        "tags": [
+          "Segments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
     "/api/MailSettings": {
       "get": {
         "tags": [
@@ -12136,6 +13385,126 @@
           }
         }
       },
+      "AddConversationsToListRequest": {
+        "required": [
+          "listId",
+          "conversationIds"
+        ],
+        "type": "object",
+        "properties": {
+          "listId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversationIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "AddConversationsToSegmentRequest": {
+        "required": [
+          "segmentId",
+          "conversationIds"
+        ],
+        "type": "object",
+        "properties": {
+          "segmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversationIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "AddConversationToListRequest": {
+        "required": [
+          "conversationId",
+          "listId"
+        ],
+        "type": "object",
+        "properties": {
+          "conversationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "listId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "AddConversationToSegmentRequest": {
+        "required": [
+          "conversationId",
+          "segmentId"
+        ],
+        "type": "object",
+        "properties": {
+          "conversationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "segmentId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "AddFavoriteRequest": {
+        "required": [
+          "userId",
+          "conversationId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "AddFavoritesRequest": {
+        "required": [
+          "userId",
+          "conversationIds"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversationIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
       "BatchIndexRequest": {
         "required": [
           "productIds"
@@ -12692,6 +14061,39 @@
           }
         }
       },
+      "CreateConversationListDescriptionRequest": {
+        "required": [
+          "userId",
+          "name",
+          "description",
+          "colorCode"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "colorCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "CreateConversationNoteRequest": {
         "required": [
           "conversationId",
@@ -12713,9 +14115,9 @@
         "required": [
           "socialMediaAccountId",
           "customerId",
-          "userId",
-          "platformAccountId",
-          "customerAccountId"
+          "customerPlatformAccountId",
+          "customerPlatformUsername",
+          "customerPlatformName"
         ],
         "type": "object",
         "properties": {
@@ -12730,20 +14132,19 @@
             ],
             "format": "uuid"
           },
-          "userId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "platformAccountId": {
+          "customerPlatformAccountId": {
             "type": [
               "null",
               "string"
             ]
           },
-          "customerAccountId": {
+          "customerPlatformUsername": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "customerPlatformName": {
             "type": [
               "null",
               "string"
@@ -13297,96 +14698,31 @@
       },
       "CreateMessageRequest": {
         "required": [
-          "assignedUserId",
-          "replyUserId",
-          "socialMediaId",
-          "messageId",
           "conversationId",
-          "threadId",
+          "platformMessageId",
           "messageContent",
-          "fromId",
-          "fromUsername",
-          "fromName",
-          "toId",
-          "toName",
           "file",
           "fileType",
           "storyUrl",
-          "messageType"
+          "source",
+          "createdUserId"
         ],
         "type": "object",
         "properties": {
-          "assignedUserId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "replyUserId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "socialMediaId": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "messageId": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
           "conversationId": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
-              "integer",
+              "null",
               "string"
             ],
-            "format": "int32"
+            "format": "uuid"
           },
-          "threadId": {
+          "platformMessageId": {
             "type": [
               "null",
               "string"
             ]
           },
           "messageContent": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "fromId": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "fromUsername": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "fromName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "toId": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "toName": {
             "type": [
               "null",
               "string"
@@ -13410,11 +14746,18 @@
               "string"
             ]
           },
-          "messageType": {
+          "source": {
             "type": [
               "null",
               "string"
             ]
+          },
+          "createdUserId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         }
       },
@@ -14046,6 +15389,39 @@
           "userId": {
             "type": "string",
             "format": "uuid"
+          }
+        }
+      },
+      "CreateSegmentRequest": {
+        "required": [
+          "userId",
+          "name",
+          "description",
+          "colorCode"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "colorCode": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -15142,17 +16518,49 @@
           }
         }
       },
+      "UpdateConversationListDescriptionRequest": {
+        "required": [
+          "name",
+          "description",
+          "colorCode",
+          "isBlocked"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "colorCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isBlocked": {
+            "type": "boolean"
+          }
+        }
+      },
       "UpdateConversationRequest": {
         "required": [
           "socialMediaAccountId",
           "customerId",
-          "userId",
-          "platformAccountId",
-          "customerAccountId",
-          "lastMessageId",
+          "customerPlatformAccountId",
+          "customerPlatformUsername",
+          "customerPlatformName",
           "lastMessageDate",
-          "isRead",
-          "isBlocked"
+          "isBlocked",
+          "isArchived",
+          "isLocked"
         ],
         "type": "object",
         "properties": {
@@ -15167,40 +16575,38 @@
             ],
             "format": "uuid"
           },
-          "userId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "platformAccountId": {
+          "customerPlatformAccountId": {
             "type": [
               "null",
               "string"
             ]
           },
-          "customerAccountId": {
+          "customerPlatformUsername": {
             "type": [
               "null",
               "string"
             ]
           },
-          "lastMessageId": {
+          "customerPlatformName": {
             "type": [
               "null",
               "string"
-            ],
-            "format": "uuid"
+            ]
           },
           "lastMessageDate": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "format": "date-time"
           },
-          "isRead": {
+          "isBlocked": {
             "type": "boolean"
           },
-          "isBlocked": {
+          "isArchived": {
+            "type": "boolean"
+          },
+          "isLocked": {
             "type": "boolean"
           }
         }
@@ -15799,98 +17205,32 @@
       },
       "UpdateMessageRequest": {
         "required": [
-          "assignedUserId",
-          "replyUserId",
-          "socialMediaId",
-          "messageId",
           "conversationId",
-          "threadId",
+          "platformMessageId",
           "messageContent",
-          "fromId",
-          "fromUsername",
-          "fromName",
-          "toId",
-          "toName",
           "file",
           "fileType",
           "storyUrl",
-          "messageType",
+          "source",
           "isRead",
-          "isBlocked"
+          "createdUserId"
         ],
         "type": "object",
         "properties": {
-          "assignedUserId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "replyUserId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "socialMediaId": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "messageId": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
           "conversationId": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
-              "integer",
+              "null",
               "string"
             ],
-            "format": "int32"
+            "format": "uuid"
           },
-          "threadId": {
+          "platformMessageId": {
             "type": [
               "null",
               "string"
             ]
           },
           "messageContent": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "fromId": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "fromUsername": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "fromName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "toId": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "toName": {
             "type": [
               "null",
               "string"
@@ -15914,7 +17254,7 @@
               "string"
             ]
           },
-          "messageType": {
+          "source": {
             "type": [
               "null",
               "string"
@@ -15923,8 +17263,12 @@
           "isRead": {
             "type": "boolean"
           },
-          "isBlocked": {
-            "type": "boolean"
+          "createdUserId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         }
       },
@@ -16479,6 +17823,38 @@
           }
         }
       },
+      "UpdateSegmentRequest": {
+        "required": [
+          "name",
+          "description",
+          "colorCode",
+          "isBlocked"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "colorCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isBlocked": {
+            "type": "boolean"
+          }
+        }
+      },
       "UpdateSocialMediaAccountPropertyRequest": {
         "required": [
           "userSocialMediaAccountId",
@@ -16941,6 +18317,12 @@
       "name": "ImageSearch"
     },
     {
+      "name": "ConversationFavorites"
+    },
+    {
+      "name": "ConversationLists"
+    },
+    {
       "name": "ConversationNotes"
     },
     {
@@ -17017,6 +18399,12 @@
     },
     {
       "name": "UserRequests"
+    },
+    {
+      "name": "ConversationSegments"
+    },
+    {
+      "name": "Segments"
     },
     {
       "name": "MailSettings"

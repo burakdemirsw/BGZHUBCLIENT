@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MenusService } from '@/app/core/services/menus.service';
 import { Menu, CreateMenuRequest, UpdateMenuRequest } from '@/app/core/models/menu/menu.models';
+import { FA_ICONS } from '@/app/constants/fa-icons';
+import { UserMenuService } from '@/app/core/services/user-menu.service';
 
 @Component({
     selector: 'app-menus-page',
@@ -36,7 +38,16 @@ export class MenusPage implements OnInit {
         isBlocked: false,
     };
 
-    constructor(private menusService: MenusService) {}
+    // İkon seçici
+    allIcons = FA_ICONS;
+    iconSearchText = '';
+    filteredIcons = FA_ICONS;
+    showIconDropdown = false;
+
+    constructor(
+        private menusService: MenusService,
+        private userMenuService: UserMenuService
+    ) {}
 
     ngOnInit(): void {
         this.loadMenus();
@@ -58,7 +69,9 @@ export class MenusPage implements OnInit {
         const filter = (this.filterText || '').toLowerCase();
         this.filteredMenus = this.menus.filter(menu =>
             menu.name.toLowerCase().includes(filter) ||
-            (menu.description || '').toLowerCase().includes(filter)
+            (menu.description || '').toLowerCase().includes(filter) ||
+            (menu.icon || '').toLowerCase().includes(filter) ||
+            (menu.url || '').toLowerCase().includes(filter)
         );
         // Pagination
         this.totalPages = Math.max(1, Math.ceil(this.filteredMenus.length / this.pageSize));
@@ -142,6 +155,7 @@ export class MenusPage implements OnInit {
             }
             this.showModal = false;
             await this.loadMenus();
+            await this.userMenuService.loadUserMenus();
         } catch (err) {
             console.error('Save error:', err);
         }
@@ -152,6 +166,7 @@ export class MenusPage implements OnInit {
             try {
                 await this.menusService.delete(menu.id);
                 await this.loadMenus();
+                await this.userMenuService.loadUserMenus();
             } catch (err) {
                 console.error('Delete error:', err);
             }
@@ -164,7 +179,38 @@ export class MenusPage implements OnInit {
         return parent ? parent.name : '—';
     }
 
+    // ── İkon Seçici ──
+    onIconSearch(): void {
+        const q = (this.iconSearchText || '').toLowerCase();
+        this.filteredIcons = this.allIcons.filter(
+            i => i.label.toLowerCase().includes(q) || i.class.toLowerCase().includes(q)
+        );
+        this.showIconDropdown = true;
+    }
+
+    selectIcon(icon: { class: string; label: string }): void {
+        this.form.icon = icon.class;
+        this.iconSearchText = '';
+        this.filteredIcons = this.allIcons;
+        this.showIconDropdown = false;
+    }
+
+    clearIcon(): void {
+        this.form.icon = '';
+        this.iconSearchText = '';
+        this.filteredIcons = this.allIcons;
+    }
+
+    toggleIconDropdown(): void {
+        this.showIconDropdown = !this.showIconDropdown;
+        if (this.showIconDropdown) {
+            this.filteredIcons = this.allIcons;
+            this.iconSearchText = '';
+        }
+    }
+
     closeModal(): void {
         this.showModal = false;
+        this.showIconDropdown = false;
     }
 }

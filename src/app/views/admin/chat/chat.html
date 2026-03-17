@@ -26,7 +26,7 @@
         <nav class="sidebar-nav">
             <!-- Main items -->
             @for (item of sidebarItems; track item.label) {
-                <a class="sidebar-nav-item" [class.active]="item.active" (click)="setActiveItem(item)">
+                <a class="sidebar-nav-item" [class.active]="item.active" [routerLink]="['/chat', item.path]">
                     <i [class]="item.icon" class="sidebar-nav-icon"></i>
                     <span class="sidebar-nav-label">{{ item.label }}</span>
                     @if (item.badge) {
@@ -35,40 +35,28 @@
                 </a>
             }
 
-            <!-- Team Inboxes -->
-            <div class="sidebar-section-header" (click)="toggleSidebarSection('teamInboxes')">
-                <span>Team inboxes</span>
-                <i class="fa-solid" [class.fa-chevron-down]="showTeamInboxes"
-                    [class.fa-chevron-right]="!showTeamInboxes"></i>
-            </div>
-            @if (showTeamInboxes) {
-                @for (inbox of teamInboxes; track inbox.label) {
-                    <a class="sidebar-nav-item sub-item">
-                        <i class="fa-solid fa-inbox sidebar-nav-icon"></i>
-                        <span class="sidebar-nav-label">{{ inbox.label }}</span>
-                    </a>
-                }
-            }
-
-            <!-- Teammates -->
+            <!-- Takım Arkadaşları -->
             <div class="sidebar-section-header" (click)="toggleSidebarSection('teammates')">
-                <span>Teammates</span>
+                <span>Takım Arkadaşları</span>
                 <i class="fa-solid" [class.fa-chevron-down]="showTeammates"
                     [class.fa-chevron-right]="!showTeammates"></i>
             </div>
-
-            <!-- Views -->
-            <div class="sidebar-section-header" (click)="toggleSidebarSection('views')">
-                <span>Views</span>
-                <i class="fa-solid" [class.fa-chevron-down]="showViews"
-                    [class.fa-chevron-right]="!showViews"></i>
-            </div>
-
-            <!-- AI Agent -->
-            <a class="sidebar-nav-item">
-                <i class="fa-solid fa-robot sidebar-nav-icon"></i>
-                <span class="sidebar-nav-label">Fin AI Agent</span>
-            </a>
+            @if (showTeammates) {
+                @for (mate of teammates; track mate.name) {
+                    <a class="sidebar-nav-item sub-item">
+                        <div class="teammate-avatar-sm" [style.background-color]="mate.avatarColor">
+                            {{ mate.initials }}
+                            @if (mate.online) {
+                                <span class="online-indicator"></span>
+                            }
+                        </div>
+                        <span class="sidebar-nav-label">{{ mate.name }}</span>
+                        @if (mate.online) {
+                            <span class="live-badge">Live</span>
+                        }
+                    </a>
+                }
+            }
         </nav>
 
         <div class="sidebar-footer">
@@ -102,18 +90,19 @@
             @for (conv of conversations; track conv.id) {
                 <div class="conversation-item" [class.active]="selectedConversation?.id === conv.id"
                     (click)="selectConversation(conv)">
-                    <div class="conversation-avatar" [style.background-color]="conv.avatarColor">
-                        <span>{{ conv.initials }}</span>
-                        @if (conv.online) {
-                            <span class="online-dot"></span>
-                        }
-                    </div>
+                    @if (conv.socialMediaPhotoUrl) {
+                        <img class="conversation-avatar-img" [src]="conv.socialMediaPhotoUrl" [alt]="conv.customerName">
+                    } @else {
+                        <div class="conversation-avatar" [style.background-color]="conv.customerAvatarColor">
+                            <span>{{ conv.customerInitials }}</span>
+                        </div>
+                    }
                     <div class="conversation-content">
                         <div class="conversation-header-row">
-                            <span class="conversation-name" [class.fw-bold]="conv.unread">{{ conv.name }}</span>
-                            <span class="conversation-time">{{ conv.time }}</span>
+                            <span class="conversation-name" [class.fw-bold]="conv.unreadCount > 0">{{ conv.customerName }}</span>
+                            <span class="conversation-time">{{ conv.lastMessageDate }}</span>
                         </div>
-                        <p class="conversation-preview" [class.fw-semibold]="conv.unread">{{ conv.lastMessage }}</p>
+                        <p class="conversation-preview" [class.fw-semibold]="conv.unreadCount > 0">{{ conv.lastMessage }}</p>
                     </div>
                 </div>
             } @empty {
@@ -128,11 +117,11 @@
             <!-- Chat Header -->
             <div class="chat-header">
                 <div class="chat-header-left">
-                    <div class="chat-header-avatar" [style.background-color]="selectedConversation.avatarColor">
-                        {{ selectedConversation.initials }}
+                    <div class="chat-header-avatar" [style.background-color]="selectedConversation.customerAvatarColor">
+                        {{ selectedConversation.customerInitials }}
                     </div>
                     <div class="chat-header-info">
-                        <h6 class="chat-header-name mb-0">{{ selectedConversation.name }}</h6>
+                        <h6 class="chat-header-name mb-0">{{ selectedConversation.customerName }}</h6>
                     </div>
                 </div>
                 <div class="chat-header-actions">
@@ -157,32 +146,20 @@
 
             <!-- Chat Body -->
             <div class="chat-body" #chatBody>
-                <!-- Summary card -->
-                @if (selectedConversation.id === '1') {
-                    <div class="summary-card">
-                        <div class="summary-header">
-                            <i class="fa-solid fa-wand-magic-sparkles me-2"></i>
-                            <span class="fw-semibold">Summary</span>
-                        </div>
-                        <p class="summary-text mb-0">
-                            Refund request for order #56789 due to a torn sleeve. Order is fulfilled—needs approval.
-                        </p>
-                    </div>
-                }
 
                 @for (msg of messages; track msg.id) {
                     <!-- System note -->
                     @if (msg.isNote) {
                         <div class="system-note">
                             <span class="system-note-text">{{ msg.text }}</span>
-                            <span class="system-note-time">{{ msg.time }}</span>
+                            <span class="system-note-time">{{ msg.createdDate }}</span>
                         </div>
                     } @else {
                         <!-- Customer message -->
-                        @if (msg.sender === 'customer') {
+                        @if (msg.source === 'customer') {
                             <div class="message-row customer">
-                                <div class="message-avatar" [style.background-color]="selectedConversation.avatarColor">
-                                    {{ selectedConversation.initials }}
+                                <div class="message-avatar" [style.background-color]="selectedConversation.customerAvatarColor">
+                                    {{ selectedConversation.customerInitials }}
                                 </div>
                                 <div class="message-group">
                                     <div class="message-bubble customer-bubble">
@@ -193,13 +170,13 @@
                                             <img [src]="msg.imageUrl" alt="Attached image" loading="lazy">
                                         </div>
                                     }
-                                    <span class="message-time">{{ msg.time }}</span>
+                                    <span class="message-time">{{ msg.createdDate }}</span>
                                 </div>
                             </div>
                         }
 
                         <!-- AI / System message -->
-                        @if (msg.sender === 'system') {
+                        @if (msg.source === 'system' || msg.source === 'ai') {
                             <div class="message-row system-msg">
                                 <div class="message-avatar ai-avatar">
                                     <i class="fa-solid fa-robot"></i>
@@ -207,24 +184,24 @@
                                 <div class="message-group">
                                     <div class="message-sender-name">
                                         <i class="fa-solid fa-wand-magic-sparkles me-1"></i>
-                                        {{ msg.senderName }}
+                                        AI Assistant
                                     </div>
                                     <div class="message-bubble system-bubble">
                                         <p class="mb-0">{{ msg.text }}</p>
                                     </div>
-                                    <span class="message-time">Seen · {{ msg.time }}</span>
+                                    <span class="message-time">Seen · {{ msg.createdDate }}</span>
                                 </div>
                             </div>
                         }
 
                         <!-- Agent message -->
-                        @if (msg.sender === 'agent') {
+                        @if (msg.source === 'agent') {
                             <div class="message-row agent">
                                 <div class="message-group agent-group">
                                     <div class="message-bubble agent-bubble">
                                         <p class="mb-0" style="white-space: pre-line;">{{ msg.text }}</p>
                                     </div>
-                                    <span class="message-time">Seen · {{ msg.time }}</span>
+                                    <span class="message-time">Seen · {{ msg.createdDate }}</span>
                                 </div>
                                 <div class="message-avatar agent-avatar">
                                     <i class="fa-solid fa-headset"></i>
@@ -302,38 +279,9 @@
             <!-- Customer Info -->
             <div class="details-customer-info">
                 <div class="details-customer-bubble">
-                    <p class="mb-1"><strong>{{ selectedConversation.name }}</strong></p>
-                    @if (selectedConversation.id === '1') {
-                        <p class="mb-0 small text-muted">
-                            I'd like a refund, the sweater I received has a torn sleeve.
-                        </p>
-                    }
+                    <p class="mb-1"><strong>{{ selectedConversation.customerName }}</strong></p>
                 </div>
             </div>
-
-            <!-- AI Suggested Actions -->
-            @if (selectedConversation.id === '1') {
-                <div class="details-ai-section">
-                    <div class="ai-suggestion-header">
-                        <span class="small text-muted">5 relevant sources found</span>
-                    </div>
-                    <div class="ai-suggestion-items">
-                        <div class="ai-suggestion-item">
-                            <i class="fa-solid fa-circle text-primary me-2 tiny-dot"></i>
-                            Getting a refund
-                        </div>
-                        <div class="ai-suggestion-item">
-                            <i class="fa-solid fa-circle text-success me-2 tiny-dot"></i>
-                            Loyalty refund macro
-                        </div>
-                        <div class="ai-suggestion-item">
-                            <i class="fa-solid fa-circle text-info me-2 tiny-dot"></i>
-                            Refund for an unwanted gift
-                        </div>
-                        <a class="see-all-link">See all</a>
-                    </div>
-                </div>
-            }
 
             <!-- Accordion Sections -->
             <div class="details-sections">

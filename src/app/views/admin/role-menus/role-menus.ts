@@ -6,6 +6,14 @@ import { RolesService } from '@/app/core/services/roles.service';
 import { Role } from '@/app/core/models/role/role.models';
 import { Menu, RoleMenu, CreateRoleMenuRequest, UpdateRoleMenuRequest } from '@/app/core/models/menu/menu.models';
 
+export interface MenuTreeNode {
+    menu: Menu;
+    children: MenuTreeNode[];
+    expanded: boolean;
+    assigned: boolean;
+    roleMenu?: RoleMenu;
+}  
+
 @Component({
     selector: 'app-role-menus-page',
     imports: [CommonModule, FormsModule],
@@ -16,13 +24,16 @@ export class RoleMenusPage implements OnInit {
     menus: Menu[] = [];
     loading = false;
 
-    selectedRoleId: string = '';
+    selectedRoleId = '';
     roleMenus: RoleMenu[] = [];
     loadingMenus = false;
 
-    // Atama modalı
-    showAssignModal = false;
-    assignMenuIds: string[] = [];
+    // Full tree (tüm menüler, assigned bilgisi ile)
+    fullTree: MenuTreeNode[] = [];
+    selectedNode: MenuTreeNode | null = null;
+    treeFilterText = '';
+    assigning = false;
+
     // Düzenleme modalı
     showEditModal = false;
     editingRoleMenu: RoleMenu | null = null;
@@ -40,10 +51,11 @@ export class RoleMenusPage implements OnInit {
     async loadInitialData(): Promise<void> {
         this.loading = true;
         try {
-            const rolesResp = await this.rolesService.getAll();
+            const [rolesResp, menusResp] = await Promise.all([
+                this.rolesService.getAll(),
+                this.menusService.getAll(),
+            ]);
             this.roles = this.extractArray(rolesResp);
-
-            const menusResp = await this.menusService.getAll();
             this.menus = this.extractArray(menusResp);
         } catch (err) {
             console.error('LoadInitialData error:', err);
@@ -61,9 +73,58 @@ export class RoleMenusPage implements OnInit {
         return [];
     }
 
+    // ── Tree builder ──
+    private buildFullTree(): void {
+        const roleMenuMap = new Map<string, RoleMenu>();
+        for (const rm of this.roleMenus) roleMenuMap.set(rm.menuId, rm);
+
+        // Filtrele
+        let menuList = this.menus;
+        if (this.treeFilterText) {
+            const q = this.treeFilterText.toLowerCase();
+            const matchedIds = new Set<string>();
+            for (const m of this.menus) {
+                if ((m.name || '').toLowerCase().includes(q) || (m.url || '').toLowerCase().includes(q)) {
+                    // Eşleşen menünün kendisi ve tüm parent zinciri
+                    let current: Menu | undefined = m;
+                    while (current) {
+                        matchedIds.add(current.id);
+                        current = current.parentId ? this.menus.find(x => x.id === current!.parentId) : undefined;
+                    }
+                }
+            }
+            menuList = this.menus.filter(m => matchedIds.has(m.id));
+        }
+
+        const map = new Map<string | null, Menu[]>();
+        for (const m of menuList) {
+            const pid = m.parentId || null;
+            if (!map.has(pid)) map.set(pid, []);
+            map.get(pid)!.push(m);
+        }
+
+        const build = (parentId: string | null): MenuTreeNode[] => {
+            const children = map.get(parentId) || [];
+            return children
+                .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
+                .map(m => ({
+                    menu: m,
+                    children: build(m.id),
+                    expanded: !!this.treeFilterText, // filtre varsa açık, yoksa kapalı
+                    assigned: roleMenuMap.has(m.id),
+                    roleMenu: roleMenuMap.get(m.id),
+                }));
+        };
+        this.fullTree = build(null);
+    }
+
+    // ── Role ──
     onRoleChange(): void {
+        this.selectedNode = null;
+        this.treeFilterText = '';
         if (!this.selectedRoleId) {
             this.roleMenus = [];
+            this.fullTree = [];
             return;
         }
         this.loadRoleMenus();
@@ -74,6 +135,7 @@ export class RoleMenusPage implements OnInit {
         try {
             const resp = await this.menusService.getMenusByRole(this.selectedRoleId);
             this.roleMenus = this.extractArray(resp);
+            this.buildFullTree();
         } catch (err) {
             console.error('LoadRoleMenus error:', err);
         } finally {
@@ -81,97 +143,117 @@ export class RoleMenusPage implements OnInit {
         }
     }
 
+    onTreeFilterChange(): void {
+        this.buildFullTree();
+    }
+
     getMenuName(menuId: string): string {
         return this.menus.find(m => m.id === menuId)?.name ?? '-';
     }
 
-    getAvailableMenus(): Menu[] {
-        const assignedMenuIds = this.roleMenus.map(rm => rm.menuId);
-        return this.menus.filter(m => !assignedMenuIds.includes(m.id));
+    getParentName(parentId: string | null): string {
+        if (!parentId) return 'Kök (Ana Menü)';
+        return this.menus.find(m => m.id === parentId)?.name ?? '-';
     }
 
-    // Yeni menü atama
-    openAssignModal(): void {
-        this.assignMenuIds = [];
-        this.showAssignModal = true;
+    // ── Tree actions ──
+    toggleNode(node: MenuTreeNode, event: Event): void {
+        event.stopPropagation();
+        node.expanded = !node.expanded;
     }
 
-    toggleMenuSelection(menuId: string): void {
-        const idx = this.assignMenuIds.indexOf(menuId);
-        if (idx > -1) {
-            this.assignMenuIds.splice(idx, 1);
-        } else {
-            this.assignMenuIds.push(menuId);
+    selectNode(node: MenuTreeNode): void {
+        this.selectedNode = node;
+    }
+
+    expandAll(): void {
+        this.setExpanded(this.fullTree, true);
+    }
+
+    collapseAll(): void {
+        this.setExpanded(this.fullTree, false);
+    }
+
+    private setExpanded(nodes: MenuTreeNode[], val: boolean): void {
+        for (const n of nodes) {
+            n.expanded = val;
+            this.setExpanded(n.children, val);
         }
     }
 
-    isMenuSelected(menuId: string): boolean {
-        return this.assignMenuIds.includes(menuId);
-    }
-
-    selectAllMenus(): void {
-        const available = this.getAvailableMenus();
-        if (this.assignMenuIds.length === available.length) {
-            this.assignMenuIds = [];
-        } else {
-            this.assignMenuIds = available.map(m => m.id);
-        }
-    }
-
-    async assignMenus(): Promise<void> {
-        if (!this.selectedRoleId || this.assignMenuIds.length === 0) return;
+    // ── Checkbox toggle: assign/unassign ──
+    async toggleAssign(node: MenuTreeNode, event: Event): Promise<void> {
+        event.stopPropagation();
+        if (this.assigning) return;
+        this.assigning = true;
         try {
-            for (const menuId of this.assignMenuIds) {
-                const req: CreateRoleMenuRequest = {
-                    roleId: this.selectedRoleId,
-                    menuId: menuId,
-                };
+            if (node.assigned && node.roleMenu) {
+                // Kaldır
+                await this.menusService.removeRoleMenu(node.roleMenu.id);
+                if (this.selectedNode?.menu.id === node.menu.id) this.selectedNode = null;
+            } else {
+                // Ata
+                const req: CreateRoleMenuRequest = { roleId: this.selectedRoleId, menuId: node.menu.id };
                 await this.menusService.assignMenu(req);
             }
-            this.showAssignModal = false;
             await this.loadRoleMenus();
+            // Seçili node'u güncelle
+            if (this.selectedNode) {
+                this.selectedNode = this.findNode(this.fullTree, this.selectedNode.menu.id) || null;
+            }
         } catch (err) {
-            console.error('Assign error:', err);
+            console.error('Toggle assign error:', err);
+        } finally {
+            this.assigning = false;
         }
     }
 
-    // İzinleri düzenle
+    private findNode(nodes: MenuTreeNode[], menuId: string): MenuTreeNode | undefined {
+        for (const n of nodes) {
+            if (n.menu.id === menuId) return n;
+            const found = this.findNode(n.children, menuId);
+            if (found) return found;
+        }
+        return undefined;
+    }
+
+    getAssignedCount(): number {
+        return this.roleMenus.length;
+    }
+
+    // ── Edit modal ──
     openEditModal(rm: RoleMenu): void {
         this.editingRoleMenu = rm;
-        this.editForm = {
-            isBlocked: rm.isBlocked,
-        };
+        this.editForm = { isBlocked: rm.isBlocked };
         this.showEditModal = true;
     }
 
     async saveEdit(): Promise<void> {
         if (!this.editingRoleMenu) return;
         try {
-            const req: UpdateRoleMenuRequest = {
-                isBlocked: this.editForm.isBlocked,
-            };
+            const req: UpdateRoleMenuRequest = { isBlocked: this.editForm.isBlocked };
             await this.menusService.updateRoleMenu(this.editingRoleMenu.id, req);
             this.showEditModal = false;
             await this.loadRoleMenus();
+            if (this.selectedNode) {
+                this.selectedNode = this.findNode(this.fullTree, this.selectedNode.menu.id) || null;
+            }
         } catch (err) {
             console.error('SaveEdit error:', err);
         }
     }
 
-    // Menü kaldır
+    // ── Remove from preview ──
     async removeMenu(rm: RoleMenu): Promise<void> {
         if (confirm(`"${this.getMenuName(rm.menuId)}" menüsünü bu rolden kaldırmak istediğinize emin misiniz?`)) {
             try {
                 await this.menusService.removeRoleMenu(rm.id);
+                if (this.selectedNode?.roleMenu?.id === rm.id) this.selectedNode = null;
                 await this.loadRoleMenus();
             } catch (err) {
                 console.error('Remove error:', err);
             }
         }
-    }
-
-    closeAssignModal(): void {
-        this.showAssignModal = false;
     }
 
     closeEditModal(): void {

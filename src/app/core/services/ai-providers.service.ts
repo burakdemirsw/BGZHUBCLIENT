@@ -30,7 +30,7 @@ export class AiProvidersService {
   }
 
   deleteProvider(id: string): Promise<any> {
-    return this.http.delete({ controller: 'AiProviders', action: id });
+    return this.http.get_new({ controller: 'AiProviders', action: id });
   }
 
   // ── AiSettings ──
@@ -51,7 +51,7 @@ export class AiProvidersService {
   }
 
   deleteSetting(id: string): Promise<any> {
-    return this.http.delete({ controller: 'AiSettings', action: id });
+    return this.http.get_new({ controller: 'AiSettings', action: id });
   }
 
   // ── AiProviderSettings ──
@@ -80,7 +80,7 @@ export class AiProvidersService {
   }
 
   deleteProviderSetting(id: string): Promise<any> {
-    return this.http.delete({ controller: 'AiProviderSettings', action: id });
+    return this.http.get_new({ controller: 'AiProviderSettings', action: id });
   }
 
   // ── AiModels ──
@@ -109,7 +109,7 @@ export class AiProvidersService {
   }
 
   deleteModel(id: string): Promise<any> {
-    return this.http.delete({ controller: 'AiModels', action: id });
+    return this.http.get_new({ controller: 'AiModels', action: id });
   }
 
   // ── AiAssistants ──
@@ -134,7 +134,7 @@ export class AiProvidersService {
   }
 
   deleteAssistant(id: string): Promise<any> {
-    return this.http.delete({ controller: 'AiAssistants', action: id });
+    return this.http.get_new({ controller: 'AiAssistants', action: id });
   }
 
   // ── AiKnowledge ──
