@@ -1,0 +1,34 @@
+import { Injectable } from '@angular/core';
+import { HttpClientService } from './http-client.service';
+import { CreateShortcutTypeRequest, UpdateShortcutTypeRequest } from '../models/shortcut/shortcut.models';
+
+@Injectable({
+    providedIn: 'root',
+})
+export class ShortcutTypesService {
+    constructor(private http: HttpClientService) {}
+
+    getAll(): Promise<any> {
+        return this.http.get_new({ controller: 'Shortcut/types' });
+    }
+
+    getById(id: string): Promise<any> {
+        return this.http.get_new({ controller: 'Shortcut/types' }, id);
+    }
+
+    getByUser(userId: string): Promise<any> {
+        return this.http.get_new({ controller: 'Shortcut/types', action: `by-user/${userId}` });
+    }
+
+    create(request: CreateShortcutTypeRequest): Promise<any> {
+        return this.http.post({ controller: 'Shortcut/types' }, request);
+    }
+
+    update(id: string, request: UpdateShortcutTypeRequest): Promise<any> {
+        return this.http.post({ controller: 'Shortcut/types', action: `update/${id}` }, request);
+    }
+
+    delete(id: string): Promise<any> {
+        return this.http.post({ controller: 'Shortcut/types', action: `delete/${id}` }, {});
+    }
+}

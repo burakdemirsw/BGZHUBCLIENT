@@ -1,9 +1,10 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewChecked, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { trigger, transition, style, animate, query, stagger, state, group, animateChild } from '@angular/animations';
 import { CONVERSATION_TYPES, ConversationType, DEFAULT_CONVERSATION_TYPE, isValidConversationType } from '@/app/core/models/conversation/conversation-type.constants';
-import { ConversationHeader, ChatMessage } from '@/app/core/models/conversation/conversation.models';
+import { ConversationHeader, ChatMessage, ConversationListResponse } from '@/app/core/models/conversation/conversation.models';
 import { ConversationsService } from '@/app/core/services/conversations.service';
 
 interface SidebarSection {
@@ -17,9 +18,59 @@ interface SidebarSection {
     imports: [CommonModule, FormsModule, RouterModule],
     templateUrl: './chat.html',
     styleUrls: ['./chat.scss'],
+    animations: [
+        // Sağ sidebar slide animasyonu
+        trigger('detailsSlide', [
+            transition(':enter', [
+                style({ width: 0, minWidth: 0, opacity: 0, overflow: 'hidden' }),
+                animate('250ms cubic-bezier(0.4, 0, 0.2, 1)', style({ width: '*', minWidth: '*', opacity: 1 }))
+            ]),
+            transition(':leave', [
+                style({ overflow: 'hidden' }),
+                animate('200ms cubic-bezier(0.4, 0, 0.2, 1)', style({ width: 0, minWidth: 0, opacity: 0 }))
+            ])
+        ]),
+        // Mesaj baloncukları fade-slide
+        trigger('messageAnim', [
+            transition(':enter', [
+                style({ opacity: 0, transform: 'translateY(12px)' }),
+                animate('300ms 50ms cubic-bezier(0.4, 0, 0.2, 1)', style({ opacity: 1, transform: 'translateY(0)' }))
+            ])
+        ]),
+        // Chat paneli fade
+        trigger('chatPanelAnim', [
+            transition(':enter', [
+                style({ opacity: 0 }),
+                animate('250ms ease-out', style({ opacity: 1 }))
+            ])
+        ]),
+        // Search bar slide-down
+        trigger('slideDown', [
+            transition(':enter', [
+                style({ height: 0, opacity: 0, overflow: 'hidden' }),
+                animate('200ms ease-out', style({ height: '*', opacity: 1 }))
+            ]),
+            transition(':leave', [
+                style({ overflow: 'hidden' }),
+                animate('150ms ease-in', style({ height: 0, opacity: 0 }))
+            ])
+        ]),
+        // Teammate listesi
+        trigger('expandCollapse', [
+            transition(':enter', [
+                style({ height: 0, opacity: 0, overflow: 'hidden' }),
+                animate('200ms ease-out', style({ height: '*', opacity: 1 }))
+            ]),
+            transition(':leave', [
+                style({ overflow: 'hidden' }),
+                animate('150ms ease-in', style({ height: 0, opacity: 0 }))
+            ])
+        ]),
+    ],
 })
-export class ChatPage implements OnInit, AfterViewChecked {
+export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     @ViewChild('chatBody') chatBody!: ElementRef;
+    private contentPageEl: Element | null = null;
 
     // Route params
     activeConversationType: string = DEFAULT_CONVERSATION_TYPE;
@@ -39,6 +90,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
     constructor(
         private route: ActivatedRoute,
         private router: Router,
+        private renderer: Renderer2,
         private conversationsService: ConversationsService
     ) {}
 
@@ -52,6 +104,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
     // Conversations
     conversations: ConversationHeader[] = [];
     selectedConversation: ConversationHeader | null = null;
+    totalConversationCount = 0;
     conversationFilter = '12 Open';
     conversationSort = 'Newest';
 
@@ -71,6 +124,12 @@ export class ChatPage implements OnInit, AfterViewChecked {
     private shouldScroll = false;
 
     ngOnInit(): void {
+        // content-page scroll'u engelle
+        this.contentPageEl = document.querySelector('.content-page');
+        if (this.contentPageEl) {
+            this.renderer.addClass(this.contentPageEl, 'chat-page-active');
+        }
+
         this.route.params.subscribe(async params => {
             const type = params['conversationType'] || DEFAULT_CONVERSATION_TYPE;
 
@@ -78,6 +137,11 @@ export class ChatPage implements OnInit, AfterViewChecked {
             if (!isValidConversationType(type)) {
                 this.router.navigate(['/chat', DEFAULT_CONVERSATION_TYPE]);
                 return;
+            }
+
+            // Sadece farklı bir tipe geçişte sağ sidebar'ı kapat
+            if (this.activeConversationType !== type && this.activeConversationType !== DEFAULT_CONVERSATION_TYPE) {
+                this.showDetails = false;
             }
 
             this.activeConversationType = type;
@@ -108,6 +172,12 @@ export class ChatPage implements OnInit, AfterViewChecked {
         });
     }
 
+    ngOnDestroy(): void {
+        if (this.contentPageEl) {
+            this.renderer.removeClass(this.contentPageEl, 'chat-page-active');
+        }
+    }
+
     ngAfterViewChecked(): void {
         if (this.shouldScroll) {
             this.scrollToBottom();
@@ -133,10 +203,20 @@ export class ChatPage implements OnInit, AfterViewChecked {
     async loadConversations(): Promise<void> {
         try {
             const response = await this.conversationsService.getList(this.activeConversationType);
-            this.conversations = this.extractArray(response);
+            const body = response?.data ?? response;
+            if (body?.conversations) {
+                this.conversations = Array.isArray(body.conversations)
+                    ? body.conversations
+                    : (body.conversations?.$values ?? []);
+                this.totalConversationCount = body.totalCount ?? this.conversations.length;
+            } else {
+                this.conversations = this.extractArray(response);
+                this.totalConversationCount = this.conversations.length;
+            }
         } catch (err) {
             console.error('Sohbet listesi yüklenemedi:', err);
             this.conversations = [];
+            this.totalConversationCount = 0;
         }
     }
 
@@ -212,7 +292,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
     }
 
     getConversationCount(): number {
-        return this.conversations.length;
+        return this.totalConversationCount;
     }
 
     toggleSidebarSection(section: string): void {

@@ -17,7 +17,7 @@
         </div>
 
         @if (searchOpen) {
-            <div class="sidebar-search">
+            <div class="sidebar-search" @slideDown>
                 <input type="text" class="form-control form-control-sm" placeholder="Search conversations..."
                     [(ngModel)]="searchText">
             </div>
@@ -42,6 +42,7 @@
                     [class.fa-chevron-right]="!showTeammates"></i>
             </div>
             @if (showTeammates) {
+                <div @expandCollapse>
                 @for (mate of teammates; track mate.name) {
                     <a class="sidebar-nav-item sub-item">
                         <div class="teammate-avatar-sm" [style.background-color]="mate.avatarColor">
@@ -56,19 +57,10 @@
                         }
                     </a>
                 }
+                </div>
             }
         </nav>
 
-        <div class="sidebar-footer">
-            <div class="sidebar-user">
-                <div class="sidebar-avatar">
-                    <i class="fa-solid fa-user"></i>
-                </div>
-                <button class="sidebar-icon-btn" title="Settings">
-                    <i class="fa-solid fa-gear"></i>
-                </button>
-            </div>
-        </div>
     </aside>
 
     <!-- 2) CONVERSATION LIST -->
@@ -99,10 +91,22 @@
                     }
                     <div class="conversation-content">
                         <div class="conversation-header-row">
-                            <span class="conversation-name" [class.fw-bold]="conv.unreadCount > 0">{{ conv.customerName }}</span>
+                            <span class="conversation-name" [class.fw-bold]="conv.unreadCount > 0">
+                                {{ conv.customerName }}
+                                @if (conv.isBlocked) {
+                                    <i class="fa-solid fa-ban text-danger ms-1 small" title="Engelli"></i>
+                                }
+                            </span>
                             <span class="conversation-time">{{ conv.lastMessageDate }}</span>
                         </div>
                         <p class="conversation-preview" [class.fw-semibold]="conv.unreadCount > 0">{{ conv.lastMessage }}</p>
+                        @if (conv.tags && conv.tags.length > 0) {
+                            <div class="conversation-tags">
+                                @for (tag of conv.tags; track tag.id) {
+                                    <span class="badge rounded-pill me-1" [style.background-color]="tag.colorCode || '#6c757d'" style="font-size: 0.65rem;">{{ tag.name }}</span>
+                                }
+                            </div>
+                        }
                     </div>
                 </div>
             } @empty {
@@ -115,27 +119,30 @@
     <div class="chat-main">
         @if (selectedConversation) {
             <!-- Chat Header -->
-            <div class="chat-header">
+            <div class="chat-header" @chatPanelAnim>
                 <div class="chat-header-left">
                     <div class="chat-header-avatar" [style.background-color]="selectedConversation.customerAvatarColor">
                         {{ selectedConversation.customerInitials }}
                     </div>
                     <div class="chat-header-info">
-                        <h6 class="chat-header-name mb-0">{{ selectedConversation.customerName }}</h6>
+                        <h6 class="chat-header-name mb-0">
+                            {{ selectedConversation.customerName }}
+                            @if (selectedConversation.isBlocked) {
+                                <span class="badge bg-danger-subtle text-danger ms-2" style="font-size: 0.7rem;">Engelli</span>
+                            }
+                        </h6>
                     </div>
                 </div>
                 <div class="chat-header-actions">
+                    <button class="header-action-btn" title="Details" (click)="showDetails = !showDetails"
+                        [class.active]="showDetails">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </button>
                     <button class="header-action-btn" title="Star">
                         <i class="fa-regular fa-star"></i>
                     </button>
                     <button class="header-action-btn" title="More">
                         <i class="fa-solid fa-ellipsis"></i>
-                    </button>
-                    <button class="header-action-btn" title="Snooze">
-                        <i class="fa-regular fa-clock"></i>
-                    </button>
-                    <button class="header-action-btn" title="Call">
-                        <i class="fa-solid fa-phone"></i>
                     </button>
                     <button class="header-action-btn btn-close-conv" title="Close">
                         <i class="fa-solid fa-circle-check"></i>
@@ -150,14 +157,14 @@
                 @for (msg of messages; track msg.id) {
                     <!-- System note -->
                     @if (msg.isNote) {
-                        <div class="system-note">
+                        <div class="system-note" @messageAnim>
                             <span class="system-note-text">{{ msg.text }}</span>
                             <span class="system-note-time">{{ msg.createdDate }}</span>
                         </div>
                     } @else {
                         <!-- Customer message -->
                         @if (msg.source === 'customer') {
-                            <div class="message-row customer">
+                            <div class="message-row customer" @messageAnim>
                                 <div class="message-avatar" [style.background-color]="selectedConversation.customerAvatarColor">
                                     {{ selectedConversation.customerInitials }}
                                 </div>
@@ -177,7 +184,7 @@
 
                         <!-- AI / System message -->
                         @if (msg.source === 'system' || msg.source === 'ai') {
-                            <div class="message-row system-msg">
+                            <div class="message-row system-msg" @messageAnim>
                                 <div class="message-avatar ai-avatar">
                                     <i class="fa-solid fa-robot"></i>
                                 </div>
@@ -196,7 +203,7 @@
 
                         <!-- Agent message -->
                         @if (msg.source === 'agent') {
-                            <div class="message-row agent">
+                            <div class="message-row agent" @messageAnim>
                                 <div class="message-group agent-group">
                                     <div class="message-bubble agent-bubble">
                                         <p class="mb-0" style="white-space: pre-line;">{{ msg.text }}</p>
@@ -268,7 +275,7 @@
 
     <!-- 4) RIGHT SIDEBAR (Details) -->
     @if (selectedConversation && showDetails) {
-        <aside class="chat-details">
+        <aside class="chat-details" @detailsSlide>
             <div class="details-header">
                 <div class="details-tabs">
                     <button class="details-tab active">Details</button>

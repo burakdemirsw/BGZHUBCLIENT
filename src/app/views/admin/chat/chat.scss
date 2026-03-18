@@ -27,7 +27,7 @@ $radius-lg: 18px;
 
 :host {
     display: block;
-    height: calc(100vh - 70px);
+    height: 100%;
     overflow: hidden;
 }
 
@@ -49,6 +49,7 @@ $radius-lg: 18px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-height: 0;
 }
 
 .sidebar-header {
@@ -103,6 +104,7 @@ $radius-lg: 18px;
     flex: 1;
     overflow-y: auto;
     padding: 8px 0;
+    min-height: 0;
 }
 
 .sidebar-nav-item {
@@ -246,6 +248,7 @@ $radius-lg: 18px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-height: 0;
 }
 
 .conversation-list-header {
@@ -283,6 +286,7 @@ $radius-lg: 18px;
 .conversation-items {
     flex: 1;
     overflow-y: auto;
+    min-height: 0;
 }
 
 .conversation-item {
@@ -383,6 +387,7 @@ $radius-lg: 18px;
     background: $bg-main;
     overflow: hidden;
     min-width: 0;
+    min-height: 0;
 }
 
 .chat-header {
@@ -442,6 +447,11 @@ $radius-lg: 18px;
         background: $hover-bg;
         color: $text-primary;
     }
+
+    &.active {
+        background: rgba($accent-blue, 0.1);
+        color: $accent-blue;
+    }
 }
 
 .btn-close-conv {
@@ -452,11 +462,6 @@ $radius-lg: 18px;
     border-radius: 20px;
     font-size: 13px;
     font-weight: 500;
-
-    &:hover {
-        background: #1F2937;
-        color: #fff;
-    }
 }
 
 .chat-body {
@@ -466,6 +471,7 @@ $radius-lg: 18px;
     display: flex;
     flex-direction: column;
     gap: 16px;
+    min-height: 0;
 }
 
 .chat-empty-state {
@@ -721,14 +727,9 @@ $radius-lg: 18px;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.15s;
     display: flex;
     align-items: center;
     gap: 2px;
-
-    &:hover:not(:disabled) {
-        background: #1F2937;
-    }
 
     &:disabled {
         opacity: 0.5;
@@ -766,12 +767,12 @@ $radius-lg: 18px;
     cursor: pointer;
     text-align: center;
     border-bottom: 2px solid transparent;
-    transition: all 0.15s;
+    transition: color 0.2s ease, font-weight 0.15s;
 
     &.active {
         color: $text-primary;
         font-weight: 600;
-        border-bottom-color: $accent-blue;
+        border-bottom-color: transparent;
     }
 
     &:hover:not(.active) {
@@ -929,6 +930,260 @@ $radius-lg: 18px;
     &:hover {
         background: $hover-bg;
         color: $text-primary;
+    }
+}
+
+/* ---- ANIMATIONS ---- */
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulseOnce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+// Conversation item staggered load
+.conversation-item {
+    animation: fadeSlideUp 0.3s ease-out both;
+
+    @for $i from 1 through 20 {
+        &:nth-child(#{$i}) {
+            animation-delay: #{$i * 40}ms;
+        }
+    }
+}
+
+// Badge pulse on appear
+.sidebar-nav-badge {
+    animation: scaleIn 0.3s ease-out;
+}
+
+// Chat input area fade in
+.chat-input-area {
+    animation: fadeSlideUp 0.25s ease-out 0.15s both;
+}
+
+// Details panel inner content stagger
+.details-customer-info {
+    animation: fadeSlideUp 0.25s ease-out 0.1s both;
+}
+
+.details-accordion {
+    animation: fadeSlideUp 0.25s ease-out both;
+
+    @for $i from 1 through 10 {
+        &:nth-child(#{$i}) {
+            animation-delay: #{0.1 + $i * 0.05}s;
+        }
+    }
+}
+
+.details-footer {
+    animation: fadeIn 0.3s ease-out 0.3s both;
+}
+
+// Button hover scale
+.sidebar-icon-btn,
+.header-action-btn,
+.input-tool-btn,
+.ask-btn {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:active {
+        transform: scale(0.92);
+    }
+}
+
+// Send button
+.btn-send {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(17, 24, 39, 0.25);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0) scale(0.97);
+    }
+}
+
+// Close conversation button
+.btn-close-conv {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(17, 24, 39, 0.2);
+    }
+
+    &:active {
+        transform: translateY(0) scale(0.97);
+    }
+}
+
+// Conversation avatar hover
+.conversation-avatar,
+.conversation-avatar-img {
+    transition: transform 0.2s ease;
+}
+
+.conversation-item:hover {
+    .conversation-avatar,
+    .conversation-avatar-img {
+        transform: scale(1.08);
+    }
+}
+
+// Message bubble hover
+.message-bubble {
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+
+    &:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+}
+
+// Online indicator pulse
+.online-indicator {
+    animation: pulseOnce 2s ease-in-out infinite;
+}
+
+// Live badge shimmer
+.live-badge {
+    position: relative;
+    overflow: hidden;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+        background-size: 200% 100%;
+        animation: shimmer 3s ease-in-out infinite;
+    }
+}
+
+// Details tab underline transition
+.details-tab {
+    position: relative;
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: $accent-blue;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateX(-50%);
+    }
+
+    &.active::after {
+        width: 100%;
+    }
+
+    &:hover:not(.active)::after {
+        width: 60%;
+    }
+}
+
+// Reply type button transition
+.reply-type-btn {
+    position: relative;
+    overflow: hidden;
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: $accent-blue;
+        transform: scaleX(0);
+        transition: transform 0.2s ease;
+    }
+
+    &.active::after {
+        transform: scaleX(1);
+    }
+}
+
+// Sidebar nav item active indicator
+.sidebar-nav-item {
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 3px;
+        background: $accent-blue;
+        transform: scaleY(0);
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    &.active::before {
+        transform: scaleY(1);
+    }
+
+    &.active {
+        box-shadow: none; // Remove old box-shadow indicator
+    }
+}
+
+// Empty state animation
+.chat-empty-state {
+    animation: fadeIn 0.4s ease-out;
+
+    i {
+        animation: scaleIn 0.5s ease-out 0.1s both;
+    }
+
+    h5 {
+        animation: fadeSlideUp 0.4s ease-out 0.2s both;
+    }
+
+    p {
+        animation: fadeSlideUp 0.4s ease-out 0.3s both;
     }
 }
 

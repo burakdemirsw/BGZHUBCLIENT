@@ -50,6 +50,8 @@ import { SegmentsPage } from './segments/segments';
 import { ConversationSegmentsPage } from './conversation-segments/conversation-segments';
 import { ConversationListDescriptionsPage } from './conversation-list-descriptions/conversation-list-descriptions';
 import { ConversationListsPage } from './conversation-lists/conversation-lists';
+import { ShortcutTypesPage } from './shortcut-types/shortcut-types';
+import { ShortcutsPage } from './shortcuts/shortcuts';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -362,6 +364,18 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/conversation-lists',
         component: ConversationListsPage,
         data: { title: 'Konuşma Liste İçerikleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/shortcut-types',
+        component: ShortcutTypesPage,
+        data: { title: 'Kısayol Tipleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/shortcuts',
+        component: ShortcutsPage,
+        data: { title: 'Kısayollar' },
         canActivate: [AuthGuard],
     },
 ];

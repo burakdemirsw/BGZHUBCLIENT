@@ -12,6 +12,22 @@ export interface ConversationTypeSidebarItem {
 export type ConversationTypeSidebarResponse = ConversationTypeSidebarItem[];
 
 // ========================
+// Conversation Tag & Note Items
+// ========================
+
+export interface ConversationTagItem {
+    id: string;
+    name: string;
+    colorCode?: string;
+}
+
+export interface ConversationNoteItem {
+    id: string;
+    content: string;
+    createdDate?: string;
+}
+
+// ========================
 // Conversation Header (Sohbet Başlığı)
 // Orta paneldeki sohbet listesi
 // ========================
@@ -22,12 +38,22 @@ export interface ConversationHeader {
     customerInitials: string;
     customerAvatarColor: string;
     socialMediaPhotoUrl?: string;
-    lastMessage: string;  
-    lastMessageDate: string;
+    lastMessage?: string;
+    lastMessageDate?: string;
     unreadCount: number;
+    isBlocked: boolean;
+    tags: ConversationTagItem[];
+    notes: ConversationNoteItem[];
 }
 
-export type ConversationHeadersResponse = ConversationHeader[];
+// ========================
+// Conversation List Response
+// ========================
+
+export interface ConversationListResponse {
+    conversations: ConversationHeader[];
+    totalCount: number;
+}
 
 // ========================
 // Chat Message (Mesaj)

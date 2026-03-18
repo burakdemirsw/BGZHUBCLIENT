@@ -14,3 +14,11 @@
 @use "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css";
 
 @use "./assets/scss/app.scss";
+
+// Chat sayfası aktifken content-page scroll'u engelle
+.content-page.chat-page-active {
+    height: calc(100vh - 71px);
+    min-height: unset !important;
+    overflow: hidden;
+    padding: 0 !important;
+}
