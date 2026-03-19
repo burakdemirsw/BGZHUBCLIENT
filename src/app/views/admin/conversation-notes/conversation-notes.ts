@@ -2,9 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConversationNotesService } from '@/app/core/services/conversation-notes.service';
-import { NotesService } from '@/app/core/services/notes.service';
-import { ConversationNote, CreateConversationNoteRequest } from '@/app/core/models/conversation-note/conversation-note.models';
-import { Note } from '@/app/core/models/note/note.models';
+import { ConversationNote, CreateConversationNoteRequest, UpdateConversationNoteRequest } from '@/app/core/models/conversation-note/conversation-note.models';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 
 @Component({
     selector: 'app-conversation-notes-page',
@@ -13,7 +12,6 @@ import { Note } from '@/app/core/models/note/note.models';
 })
 export class ConversationNotesPage implements OnInit {
     items: ConversationNote[] = [];
-    notes: Note[] = [];
     loading = false;
 
     // Datatable
@@ -27,16 +25,17 @@ export class ConversationNotesPage implements OnInit {
 
     // Modal
     showModal = false;
-    form: any = { conversationId: '', noteId: '' };
+    editMode = false;
+    selectedItem: ConversationNote | null = null;
+    form: any = { conversationId: '', noteText: '' };
 
     constructor(
         private service: ConversationNotesService,
-        private notesService: NotesService
+        private authStateService: AuthStateService
     ) {}
 
     ngOnInit(): void {
         this.loadItems();
-        this.loadNotes();
     }
 
     async loadItems(): Promise<void> {
@@ -52,33 +51,38 @@ export class ConversationNotesPage implements OnInit {
         }
     }
 
-    async loadNotes(): Promise<void> {
-        try {
-            const response = await this.notesService.getAll();
-            this.notes = this.extractArray(response);
-        } catch (err) {
-            console.error('Notes load error:', err);
-        }
-    }
-
-    getNoteName(noteId: string | undefined): string {
-        if (!noteId) return '-';
-        const note = this.notes.find(n => n.id === noteId);
-        return note?.title || noteId;
-    }
-
     openCreate(): void {
-        this.form = { conversationId: '', noteId: '' };
+        this.editMode = false;
+        this.selectedItem = null;
+        this.form = { conversationId: '', noteText: '' };
+        this.showModal = true;
+    }
+
+    openEdit(item: ConversationNote): void {
+        this.editMode = true;
+        this.selectedItem = item;
+        this.form = {
+            conversationId: item.conversationId || '',
+            noteText: item.noteText || '',
+        };
         this.showModal = true;
     }
 
     async save(): Promise<void> {
         try {
-            const req: CreateConversationNoteRequest = {
-                conversationId: this.form.conversationId,
-                noteId: this.form.noteId,
-            };
-            await this.service.create(req);
+            if (this.editMode && this.selectedItem) {
+                const req: UpdateConversationNoteRequest = {
+                    noteText: this.form.noteText,
+                };
+                await this.service.update(this.selectedItem.id, req);
+            } else {
+                const req: CreateConversationNoteRequest = {
+                    conversationId: this.form.conversationId,
+                    userId: this.authStateService.profile?.userId || '',
+                    noteText: this.form.noteText,
+                };
+                await this.service.create(req);
+            }
             this.showModal = false;
             await this.loadItems();
         } catch (err: any) {
@@ -122,8 +126,8 @@ export class ConversationNotesPage implements OnInit {
         this.filteredItems = this.items.filter(
             i =>
                 (i.conversationId || '').toLowerCase().includes(q) ||
-                (i.noteId || '').toLowerCase().includes(q) ||
-                (i.noteTitle || '').toLowerCase().includes(q)
+                (i.noteText || '').toLowerCase().includes(q) ||
+                (i.userId || '').toLowerCase().includes(q)
         );
         this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
         this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);

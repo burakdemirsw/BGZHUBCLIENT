@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
 export interface UserProfile {
+  userId : string;
   name: string;
   surname: string;
   lastLoginDate: string;
@@ -8,7 +9,7 @@ export interface UserProfile {
 
 const PROFILE_KEY = 'userProfile';
 
-@Injectable({
+@Injectable({  
   providedIn: 'root',
 })
 export class AuthStateService {

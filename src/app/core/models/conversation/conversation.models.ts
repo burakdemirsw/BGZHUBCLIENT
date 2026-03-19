@@ -42,6 +42,9 @@ export interface ConversationHeader {
     lastMessageDate?: string;
     unreadCount: number;
     isBlocked: boolean;
+    isArchived?: boolean;
+    isLocked?: boolean;
+    isPinned?: boolean;
     tags: ConversationTagItem[];
     notes: ConversationNoteItem[];
 }

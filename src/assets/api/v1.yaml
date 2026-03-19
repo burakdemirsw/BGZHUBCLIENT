@@ -1724,180 +1724,6 @@ paths:
           description: OK
       security:
         - Bearer: []
-  /api/ConversationFavorites:
-    get:
-      tags:
-        - ConversationFavorites
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-    post:
-      tags:
-        - ConversationFavorites
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AddFavoriteRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/AddFavoriteRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/AddFavoriteRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/ConversationFavorites/{id}:
-    get:
-      tags:
-        - ConversationFavorites
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/ConversationFavorites/by-user/{userId}:
-    get:
-      tags:
-        - ConversationFavorites
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/ConversationFavorites/by-conversation/{conversationId}:
-    get:
-      tags:
-        - ConversationFavorites
-      parameters:
-        - name: conversationId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/ConversationFavorites/check/{userId}/{conversationId}:
-    get:
-      tags:
-        - ConversationFavorites
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: conversationId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/ConversationFavorites/bulk:
-    post:
-      tags:
-        - ConversationFavorites
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AddFavoritesRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/AddFavoritesRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/AddFavoritesRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/ConversationFavorites/delete/{userId}/{conversationId}:
-    post:
-      tags:
-        - ConversationFavorites
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: conversationId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/ConversationFavorites/clear-user/{userId}:
-    post:
-      tags:
-        - ConversationFavorites
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/ConversationFavorites/clear-conversation/{conversationId}:
-    post:
-      tags:
-        - ConversationFavorites
-      parameters:
-        - name: conversationId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
   /api/ConversationLists/descriptions:
     get:
       tags:
@@ -2192,17 +2018,45 @@ paths:
           description: OK
       security:
         - Bearer: []
-  /api/ConversationNotes/by-note/{noteId}:
+  /api/ConversationNotes/by-user/{userId}:
     get:
       tags:
         - ConversationNotes
       parameters:
-        - name: noteId
+        - name: userId
           in: path
           required: true
           schema:
             type: string
             format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/ConversationNotes/update/{id}:
+    post:
+      tags:
+        - ConversationNotes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateConversationNoteRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateConversationNoteRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateConversationNoteRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -2670,111 +2524,6 @@ paths:
     post:
       tags:
         - Messages
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/Notes:
-    get:
-      tags:
-        - Notes
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-    post:
-      tags:
-        - Notes
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateNoteRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/CreateNoteRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/CreateNoteRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/Notes/{id}:
-    get:
-      tags:
-        - Notes
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/Notes/by-user/{userId}:
-    get:
-      tags:
-        - Notes
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/Notes/update/{id}:
-    post:
-      tags:
-        - Notes
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNoteRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNoteRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/UpdateNoteRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/Notes/delete/{id}:
-    post:
-      tags:
-        - Notes
       parameters:
         - name: id
           in: path
@@ -5881,239 +5630,6 @@ paths:
           description: OK
       security:
         - Bearer: []
-  /api/ConversationSegments/by-conversation/{conversationId}:
-    get:
-      tags:
-        - ConversationSegments
-      parameters:
-        - name: conversationId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/ConversationSegments/by-segment/{segmentId}:
-    get:
-      tags:
-        - ConversationSegments
-      parameters:
-        - name: segmentId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/ConversationSegments:
-    post:
-      tags:
-        - ConversationSegments
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AddConversationToSegmentRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/AddConversationToSegmentRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/AddConversationToSegmentRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/ConversationSegments/bulk:
-    post:
-      tags:
-        - ConversationSegments
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AddConversationsToSegmentRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/AddConversationsToSegmentRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/AddConversationsToSegmentRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/ConversationSegments/delete/{conversationId}/{segmentId}:
-    post:
-      tags:
-        - ConversationSegments
-      parameters:
-        - name: conversationId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: segmentId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/ConversationSegments/clear-segment/{segmentId}:
-    post:
-      tags:
-        - ConversationSegments
-      parameters:
-        - name: segmentId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/ConversationSegments/clear-conversation/{conversationId}:
-    post:
-      tags:
-        - ConversationSegments
-      parameters:
-        - name: conversationId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/Segments:
-    get:
-      tags:
-        - Segments
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-    post:
-      tags:
-        - Segments
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateSegmentRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/CreateSegmentRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/CreateSegmentRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/Segments/{id}:
-    get:
-      tags:
-        - Segments
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/Segments/by-user/{userId}:
-    get:
-      tags:
-        - Segments
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/Segments/update/{id}:
-    post:
-      tags:
-        - Segments
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateSegmentRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/UpdateSegmentRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/UpdateSegmentRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/Segments/delete/{id}:
-    post:
-      tags:
-        - Segments
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
   /api/MailSettings:
     get:
       tags:
@@ -6655,6 +6171,171 @@ paths:
           schema:
             type: string
             format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Webhook/test/push:
+    post:
+      tags:
+        - Webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestPushRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/TestPushRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/TestPushRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Webhook/test/full:
+    post:
+      tags:
+        - Webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestIncomingMessageRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/TestIncomingMessageRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/TestIncomingMessageRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Webhook/incoming:
+    post:
+      tags:
+        - Webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IncomingMessageRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/IncomingMessageRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/IncomingMessageRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Webhook/facebook:
+    get:
+      tags:
+        - Webhook
+      parameters:
+        - name: hub.mode
+          in: query
+          schema:
+            type: string
+        - name: hub.verify_token
+          in: query
+          schema:
+            type: string
+        - name: hub.challenge
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+    post:
+      tags:
+        - Webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FacebookWebhookPayload"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/FacebookWebhookPayload"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/FacebookWebhookPayload"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Webhook/whatsapp:
+    get:
+      tags:
+        - Webhook
+      parameters:
+        - name: hub.mode
+          in: query
+          schema:
+            type: string
+        - name: hub.verify_token
+          in: query
+          schema:
+            type: string
+        - name: hub.challenge
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+    post:
+      tags:
+        - Webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WhatsAppWebhookPayload"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/WhatsAppWebhookPayload"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/WhatsAppWebhookPayload"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Webhook/instagram:
+    post:
+      tags:
+        - Webhook
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+          text/json:
+            schema: {}
+          application/*+json:
+            schema: {}
+        required: true
       responses:
         "200":
           description: OK
@@ -7585,6 +7266,239 @@ paths:
           description: OK
       security:
         - Bearer: []
+  /api/ConversationSegments/by-conversation/{conversationId}:
+    get:
+      tags:
+        - ConversationSegments
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/ConversationSegments/by-segment/{segmentId}:
+    get:
+      tags:
+        - ConversationSegments
+      parameters:
+        - name: segmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/ConversationSegments:
+    post:
+      tags:
+        - ConversationSegments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddConversationToSegmentRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/AddConversationToSegmentRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/AddConversationToSegmentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/ConversationSegments/bulk:
+    post:
+      tags:
+        - ConversationSegments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddConversationsToSegmentRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/AddConversationsToSegmentRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/AddConversationsToSegmentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/ConversationSegments/delete/{conversationId}/{segmentId}:
+    post:
+      tags:
+        - ConversationSegments
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: segmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/ConversationSegments/clear-segment/{segmentId}:
+    post:
+      tags:
+        - ConversationSegments
+      parameters:
+        - name: segmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/ConversationSegments/clear-conversation/{conversationId}:
+    post:
+      tags:
+        - ConversationSegments
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Segments:
+    get:
+      tags:
+        - Segments
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+    post:
+      tags:
+        - Segments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSegmentRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateSegmentRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateSegmentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Segments/{id}:
+    get:
+      tags:
+        - Segments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Segments/by-user/{userId}:
+    get:
+      tags:
+        - Segments
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Segments/update/{id}:
+    post:
+      tags:
+        - Segments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSegmentRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSegmentRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateSegmentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Segments/delete/{id}:
+    post:
+      tags:
+        - Segments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
   /api/Addresses/countries:
     get:
       tags:
@@ -7968,34 +7882,6 @@ components:
         segmentId:
           type: string
           format: uuid
-    AddFavoriteRequest:
-      required:
-        - userId
-        - conversationId
-      type: object
-      properties:
-        userId:
-          type: string
-          format: uuid
-        conversationId:
-          type: string
-          format: uuid
-    AddFavoritesRequest:
-      required:
-        - userId
-        - conversationIds
-      type: object
-      properties:
-        userId:
-          type: string
-          format: uuid
-        conversationIds:
-          type:
-            - "null"
-            - array
-          items:
-            type: string
-            format: uuid
     BatchIndexRequest:
       required:
         - productIds
@@ -8419,44 +8305,32 @@ components:
     CreateConversationNoteRequest:
       required:
         - conversationId
-        - noteId
+        - userId
+        - noteText
       type: object
       properties:
         conversationId:
           type: string
           format: uuid
-        noteId:
+        userId:
           type: string
           format: uuid
+        noteText:
+          type:
+            - "null"
+            - string
     CreateConversationRequest:
       required:
         - socialMediaAccountId
         - customerId
-        - customerPlatformAccountId
-        - customerPlatformUsername
-        - customerPlatformName
       type: object
       properties:
         socialMediaAccountId:
           type: string
           format: uuid
         customerId:
-          type:
-            - "null"
-            - string
+          type: string
           format: uuid
-        customerPlatformAccountId:
-          type:
-            - "null"
-            - string
-        customerPlatformUsername:
-          type:
-            - "null"
-            - string
-        customerPlatformName:
-          type:
-            - "null"
-            - string
     CreateConversationTagRequest:
       required:
         - conversationId
@@ -8580,6 +8454,8 @@ components:
         - userId
         - socialMediaAccountId
         - platformAccountId
+        - platformUsername
+        - platformName
       type: object
       properties:
         userId:
@@ -8589,6 +8465,14 @@ components:
           type: string
           format: uuid
         platformAccountId:
+          type:
+            - "null"
+            - string
+        platformUsername:
+          type:
+            - "null"
+            - string
+        platformName:
           type:
             - "null"
             - string
@@ -8907,19 +8791,6 @@ components:
             - string
         isFirst:
           type: boolean
-    CreateNoteRequest:
-      required:
-        - userId
-        - noteText
-      type: object
-      properties:
-        userId:
-          type: string
-          format: uuid
-        noteText:
-          type:
-            - "null"
-            - string
     CreateNotificationRequest:
       required:
         - notificationTypeId
@@ -9676,6 +9547,77 @@ components:
         socialMediaAccountId:
           type: string
           format: uuid
+    FacebookEntry:
+      type: object
+      properties:
+        id:
+          type:
+            - "null"
+            - string
+        time:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        messaging:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/FacebookMessaging"
+    FacebookMessage:
+      type: object
+      properties:
+        mid:
+          type:
+            - "null"
+            - string
+        text:
+          type:
+            - "null"
+            - string
+    FacebookMessaging:
+      type: object
+      properties:
+        sender:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/FacebookParticipant"
+        recipient:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/FacebookParticipant"
+        timestamp:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        message:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/FacebookMessage"
+    FacebookParticipant:
+      type: object
+      properties:
+        id:
+          type:
+            - "null"
+            - string
+    FacebookWebhookPayload:
+      type: object
+      properties:
+        object:
+          type:
+            - "null"
+            - string
+        entry:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/FacebookEntry"
     IFormFile:
       type: string
       format: binary
@@ -9702,6 +9644,149 @@ components:
             - string
           format: float
           default: 0.7
+    IncomingAddressItem:
+      required:
+        - addressLine
+        - cityName
+        - districtName
+        - countryName
+        - postalCode
+      type: object
+      properties:
+        addressLine:
+          type:
+            - "null"
+            - string
+        cityName:
+          type:
+            - "null"
+            - string
+        districtName:
+          type:
+            - "null"
+            - string
+        countryName:
+          type:
+            - "null"
+            - string
+        postalCode:
+          type:
+            - "null"
+            - string
+        isDefault:
+          type: boolean
+          default: true
+    IncomingContactItem:
+      required:
+        - contactTypeId
+        - value
+      type: object
+      properties:
+        contactTypeId:
+          type: string
+          format: uuid
+        value:
+          type:
+            - "null"
+            - string
+        isDefault:
+          type: boolean
+          default: false
+    IncomingMessageItem:
+      required:
+        - platformMessageId
+        - messageText
+        - fileUrl
+        - fileType
+        - storyUrl
+      type: object
+      properties:
+        platformMessageId:
+          type:
+            - "null"
+            - string
+        messageText:
+          type:
+            - "null"
+            - string
+        fileUrl:
+          type:
+            - "null"
+            - string
+        fileType:
+          type:
+            - "null"
+            - string
+        storyUrl:
+          type:
+            - "null"
+            - string
+    IncomingMessageRequest:
+      required:
+        - socialMediaAccountId
+        - customerPlatformAccountId
+        - customerPlatformUsername
+        - customerPlatformName
+        - firstName
+        - lastName
+        - description
+        - langCode
+        - messages
+        - contacts
+        - address
+        - userId
+      type: object
+      properties:
+        socialMediaAccountId:
+          type: string
+          format: uuid
+        customerPlatformAccountId:
+          type:
+            - "null"
+            - string
+        customerPlatformUsername:
+          type:
+            - "null"
+            - string
+        customerPlatformName:
+          type:
+            - "null"
+            - string
+        firstName:
+          type:
+            - "null"
+            - string
+        lastName:
+          type:
+            - "null"
+            - string
+        description:
+          type:
+            - "null"
+            - string
+        langCode:
+          type:
+            - "null"
+            - string
+        messages:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/IncomingMessageItem"
+        contacts:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/IncomingContactItem"
+        address:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/IncomingAddressItem"
+        userId:
+          type: string
+          format: uuid
     LoginRequest:
       required:
         - email
@@ -9791,6 +9876,147 @@ components:
             - "null"
             - string
           format: uuid
+    TestAddressItem:
+      required:
+        - addressLine
+        - cityName
+        - districtName
+        - countryName
+        - postalCode
+      type: object
+      properties:
+        addressLine:
+          type:
+            - "null"
+            - string
+        cityName:
+          type:
+            - "null"
+            - string
+        districtName:
+          type:
+            - "null"
+            - string
+        countryName:
+          type:
+            - "null"
+            - string
+        postalCode:
+          type:
+            - "null"
+            - string
+        isDefault:
+          type: boolean
+          default: true
+    TestContactItem:
+      required:
+        - contactTypeId
+        - value
+      type: object
+      properties:
+        contactTypeId:
+          type: string
+          format: uuid
+        value:
+          type: string
+        isDefault:
+          type: boolean
+          default: false
+    TestIncomingMessageRequest:
+      required:
+        - socialMediaAccountId
+        - customerPlatformAccountId
+        - customerPlatformUsername
+        - customerPlatformName
+        - firstName
+        - lastName
+        - description
+        - langCode
+        - messages
+        - contacts
+        - address
+        - userId
+      type: object
+      properties:
+        socialMediaAccountId:
+          type: string
+          format: uuid
+        customerPlatformAccountId:
+          type: string
+        customerPlatformUsername:
+          type: string
+        customerPlatformName:
+          type: string
+        firstName:
+          type:
+            - "null"
+            - string
+        lastName:
+          type:
+            - "null"
+            - string
+        description:
+          type:
+            - "null"
+            - string
+        langCode:
+          type:
+            - "null"
+            - string
+        messages:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/TestMessageItem"
+        contacts:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/TestContactItem"
+        address:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TestAddressItem"
+        userId:
+          type: string
+          format: uuid
+    TestMessageItem:
+      required:
+        - messageText
+        - fileUrl
+        - fileType
+        - storyUrl
+      type: object
+      properties:
+        messageText:
+          type:
+            - "null"
+            - string
+        fileUrl:
+          type:
+            - "null"
+            - string
+        fileType:
+          type:
+            - "null"
+            - string
+        storyUrl:
+          type:
+            - "null"
+            - string
+    TestPushRequest:
+      required:
+        - conversationId
+        - text
+      type: object
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+        text:
+          type: string
     UpdateAddressTypeRequest:
       required:
         - name
@@ -10209,14 +10435,21 @@ components:
             - string
         isBlocked:
           type: boolean
+    UpdateConversationNoteRequest:
+      required:
+        - noteText
+      type: object
+      properties:
+        noteText:
+          type:
+            - "null"
+            - string
     UpdateConversationRequest:
       required:
         - socialMediaAccountId
         - customerId
-        - customerPlatformAccountId
-        - customerPlatformUsername
-        - customerPlatformName
         - lastMessageDate
+        - isFavorite
         - isBlocked
         - isArchived
         - isLocked
@@ -10226,27 +10459,15 @@ components:
           type: string
           format: uuid
         customerId:
-          type:
-            - "null"
-            - string
+          type: string
           format: uuid
-        customerPlatformAccountId:
-          type:
-            - "null"
-            - string
-        customerPlatformUsername:
-          type:
-            - "null"
-            - string
-        customerPlatformName:
-          type:
-            - "null"
-            - string
         lastMessageDate:
           type:
             - "null"
             - string
           format: date-time
+        isFavorite:
+          type: boolean
         isBlocked:
           type: boolean
         isArchived:
@@ -10373,6 +10594,8 @@ components:
         - userId
         - socialMediaAccountId
         - platformAccountId
+        - platformUsername
+        - platformName
         - status
         - isBlocked
       type: object
@@ -10384,6 +10607,14 @@ components:
           type: string
           format: uuid
         platformAccountId:
+          type:
+            - "null"
+            - string
+        platformUsername:
+          type:
+            - "null"
+            - string
+        platformName:
           type:
             - "null"
             - string
@@ -10744,22 +10975,6 @@ components:
             - string
         isFirst:
           type: boolean
-        isBlocked:
-          type: boolean
-    UpdateNoteRequest:
-      required:
-        - userId
-        - noteText
-        - isBlocked
-      type: object
-      properties:
-        userId:
-          type: string
-          format: uuid
-        noteText:
-          type:
-            - "null"
-            - string
         isBlocked:
           type: boolean
     UpdateNotificationRequest:
@@ -11471,6 +11686,82 @@ components:
           format: uuid
         isBlocked:
           type: boolean
+    WhatsAppChange:
+      type: object
+      properties:
+        field:
+          type:
+            - "null"
+            - string
+        value:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/WhatsAppValue"
+    WhatsAppEntry:
+      type: object
+      properties:
+        id:
+          type:
+            - "null"
+            - string
+        changes:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/WhatsAppChange"
+    WhatsAppMessage:
+      type: object
+      properties:
+        id:
+          type:
+            - "null"
+            - string
+        from:
+          type:
+            - "null"
+            - string
+        type:
+          type:
+            - "null"
+            - string
+        text:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/WhatsAppTextMessage"
+    WhatsAppTextMessage:
+      type: object
+      properties:
+        body:
+          type:
+            - "null"
+            - string
+    WhatsAppValue:
+      type: object
+      properties:
+        messagingProduct:
+          type:
+            - "null"
+            - string
+        messages:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/WhatsAppMessage"
+    WhatsAppWebhookPayload:
+      type: object
+      properties:
+        object:
+          type:
+            - "null"
+            - string
+        entry:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/WhatsAppEntry"
   securitySchemes:
     Bearer:
       type: http
@@ -11492,13 +11783,11 @@ tags:
   - name: RoleUsers
   - name: Users
   - name: ImageSearch
-  - name: ConversationFavorites
   - name: ConversationLists
   - name: ConversationNotes
   - name: Conversations
   - name: ConversationTags
   - name: Messages
-  - name: Notes
   - name: Notifications
   - name: Shortcut
   - name: SocialMedia
@@ -11521,11 +11810,10 @@ tags:
   - name: RequestPriorities
   - name: RequestStatuses
   - name: UserRequests
-  - name: ConversationSegments
-  - name: Segments
   - name: MailSettings
   - name: NetGsmSettings
   - name: Teams
+  - name: Webhook
   - name: Carts
   - name: OrderPayments
   - name: Orders
@@ -11534,4 +11822,6 @@ tags:
   - name: PaymentTypes
   - name: IntegrationTypes
   - name: Companies
+  - name: ConversationSegments
+  - name: Segments
   - name: Addresses

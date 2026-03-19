@@ -42,7 +42,6 @@ import { CustomerDescriptionsPage } from './customer-descriptions/customer-descr
 import { CustomerAddressesPage } from './customer-addresses/customer-addresses';
 import { CustomerContactsPage } from './customer-contacts/customer-contacts';
 import { TagsPage } from './tags/tags';
-import { NotesPage } from './notes/notes';
 import { ConversationTagsPage } from './conversation-tags/conversation-tags';
 import { ConversationNotesPage } from './conversation-notes/conversation-notes';
 import { CompaniesPage } from './companies/companies';
@@ -316,12 +315,6 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/tags',
         component: TagsPage,
         data: { title: 'Etiketler' },
-        canActivate: [AuthGuard],
-    },
-    {
-        path: 'admin/notes',
-        component: NotesPage,
-        data: { title: 'Notlar' },
         canActivate: [AuthGuard],
     },
     {

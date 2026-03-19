@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
-import { CreateConversationNoteRequest } from '../models/conversation-note/conversation-note.models';
+import { CreateConversationNoteRequest, UpdateConversationNoteRequest } from '../models/conversation-note/conversation-note.models';
 
 @Injectable({ providedIn: 'root' })
 export class ConversationNotesService {
@@ -18,12 +18,16 @@ export class ConversationNotesService {
         return this.http.get_new({ controller: 'ConversationNotes', action: `by-conversation/${conversationId}` });
     }
 
-    getByNote(noteId: string): Promise<any> {
-        return this.http.get_new({ controller: 'ConversationNotes', action: `by-note/${noteId}` });
+    getByUser(userId: string): Promise<any> {
+        return this.http.get_new({ controller: 'ConversationNotes', action: `by-user/${userId}` });
     }
 
     create(request: CreateConversationNoteRequest): Promise<any> {
         return this.http.post({ controller: 'ConversationNotes' }, request);
+    }
+
+    update(id: string, request: UpdateConversationNoteRequest): Promise<any> {
+        return this.http.post({ controller: 'ConversationNotes', action: `update/${id}` }, request);
     }
 
     delete(id: string): Promise<any> {

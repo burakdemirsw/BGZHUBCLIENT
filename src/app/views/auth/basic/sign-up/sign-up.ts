@@ -26,10 +26,16 @@ export class SignUp {
     errorMessage = '';
     successMessage = '';
     showPassword = false;
+    termsError = false;
 
     constructor(private userService: UserService, private router: Router) {}
 
     onSubmit() {
+        if (!this.agreeTerms) {
+            this.termsError = true;
+            return;
+        }
+        this.termsError = false;
         this.loading = true;
         this.errorMessage = '';
         this.successMessage = '';

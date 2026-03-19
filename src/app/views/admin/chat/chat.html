@@ -38,24 +38,49 @@
             <!-- Takım Arkadaşları -->
             <div class="sidebar-section-header" (click)="toggleSidebarSection('teammates')">
                 <span>Takım Arkadaşları</span>
-                <i class="fa-solid" [class.fa-chevron-down]="showTeammates"
-                    [class.fa-chevron-right]="!showTeammates"></i>
+                <div class="d-flex align-items-center gap-2">
+                    @if (hubConnectionState === 'connected') {
+                        <span class="presence-status-dot connected" title="Bağlı"></span>
+                    } @else if (hubConnectionState === 'reconnecting') {
+                        <span class="presence-status-dot reconnecting" title="Yeniden bağlanıyor..."></span>
+                    } @else {
+                        <span class="presence-status-dot disconnected" title="Bağlantı kesildi"></span>
+                    }
+                    @if (onlineTeammateCount > 0) {
+                        <span class="teammate-online-count">{{ onlineTeammateCount }}</span>
+                    }
+                    <i class="fa-solid" [class.fa-chevron-down]="showTeammates"
+                        [class.fa-chevron-right]="!showTeammates"></i>
+                </div>
             </div>
             @if (showTeammates) {
                 <div @expandCollapse>
-                @for (mate of teammates; track mate.name) {
-                    <a class="sidebar-nav-item sub-item">
+                @for (mate of teammates; track mate.id) {
+                    <a class="sidebar-nav-item sub-item" [class.offline]="!mate.online">
                         <div class="teammate-avatar-sm" [style.background-color]="mate.avatarColor">
                             {{ mate.initials }}
                             @if (mate.online) {
                                 <span class="online-indicator"></span>
+                            } @else {
+                                <span class="offline-indicator"></span>
                             }
                         </div>
                         <span class="sidebar-nav-label">{{ mate.name }}</span>
                         @if (mate.online) {
-                            <span class="live-badge">Live</span>
+                            <span class="live-badge">Çevrimiçi</span>
+                        } @else {
+                            <span class="offline-badge">Çevrimdışı</span>
                         }
                     </a>
+                }
+                @empty {
+                    <div class="text-muted small px-3 py-2">
+                        @if (hubConnectionState === 'disconnected') {
+                            <i class="fa-solid fa-plug-circle-xmark me-1"></i> Hub bağlantısı yok
+                        } @else {
+                            Aktif kullanıcı yok
+                        }
+                    </div>
                 }
                 </div>
             }
@@ -81,7 +106,8 @@
         <div class="conversation-items">
             @for (conv of conversations; track conv.id) {
                 <div class="conversation-item" [class.active]="selectedConversation?.id === conv.id"
-                    (click)="selectConversation(conv)">
+                    [class.pinned]="conv.isPinned" [class.archived]="conv.isArchived"
+                    (click)="selectConversation(conv)" (contextmenu)="openContextMenu($event, conv)">
                     @if (conv.socialMediaPhotoUrl) {
                         <img class="conversation-avatar-img" [src]="conv.socialMediaPhotoUrl" [alt]="conv.customerName">
                     } @else {
@@ -93,11 +119,25 @@
                         <div class="conversation-header-row">
                             <span class="conversation-name" [class.fw-bold]="conv.unreadCount > 0">
                                 {{ conv.customerName }}
+                                @if (conv.isPinned) {
+                                    <i class="fa-solid fa-thumbtack text-warning ms-1 small" title="Sabitlendi"></i>
+                                }
                                 @if (conv.isBlocked) {
                                     <i class="fa-solid fa-ban text-danger ms-1 small" title="Engelli"></i>
                                 }
+                                @if (conv.isArchived) {
+                                    <i class="fa-solid fa-box-archive text-secondary ms-1 small" title="Arşivlendi"></i>
+                                }
+                                @if (conv.isLocked) {
+                                    <i class="fa-solid fa-lock text-info ms-1 small" title="Kilitli"></i>
+                                }
                             </span>
-                            <span class="conversation-time">{{ conv.lastMessageDate }}</span>
+                            <div class="conversation-header-right">
+                                <span class="conversation-time">{{ conv.lastMessageDate }}</span>
+                                <button class="conv-more-btn" (click)="openContextMenu($event, conv)" title="Seçenekler">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                            </div>
                         </div>
                         <p class="conversation-preview" [class.fw-semibold]="conv.unreadCount > 0">{{ conv.lastMessage }}</p>
                         @if (conv.tags && conv.tags.length > 0) {
@@ -113,6 +153,29 @@
                 <div class="text-center text-muted py-4">No conversations found.</div>
             }
         </div>
+
+        <!-- Context Menu -->
+        @if (contextMenuConv) {
+            <div class="conv-context-menu" [style.left.px]="contextMenuX" [style.top.px]="contextMenuY"
+                 (click)="$event.stopPropagation()">
+                <button class="ctx-menu-item" (click)="togglePin(contextMenuConv!)">
+                    <i class="fa-solid" [class.fa-thumbtack]="!contextMenuConv!.isPinned" [class.fa-thumbtack-slash]="contextMenuConv!.isPinned"></i>
+                    {{ contextMenuConv!.isPinned ? 'Sabitlemeyi Kaldır' : 'Sabitle (Üste Taşı)' }}
+                </button>
+                <button class="ctx-menu-item" (click)="toggleBlock(contextMenuConv!)">
+                    <i class="fa-solid" [class.fa-ban]="!contextMenuConv!.isBlocked" [class.fa-check-circle]="contextMenuConv!.isBlocked"></i>
+                    {{ contextMenuConv!.isBlocked ? 'Engeli Kaldır' : 'Engelle' }}
+                </button>
+                <button class="ctx-menu-item" (click)="toggleArchive(contextMenuConv!)">
+                    <i class="fa-solid" [class.fa-box-archive]="!contextMenuConv!.isArchived" [class.fa-box-open]="contextMenuConv!.isArchived"></i>
+                    {{ contextMenuConv!.isArchived ? 'Arşivden Çıkar' : 'Arşivle' }}
+                </button>
+                <button class="ctx-menu-item" (click)="toggleLock(contextMenuConv!)">
+                    <i class="fa-solid" [class.fa-lock]="!contextMenuConv!.isLocked" [class.fa-lock-open]="contextMenuConv!.isLocked"></i>
+                    {{ contextMenuConv!.isLocked ? 'Kilidi Aç' : 'Kilitle' }}
+                </button>
+            </div>
+        }
     </div>
 
     <!-- 3) MAIN CHAT PANEL -->
@@ -131,6 +194,15 @@
                                 <span class="badge bg-danger-subtle text-danger ms-2" style="font-size: 0.7rem;">Engelli</span>
                             }
                         </h6>
+                        <span class="chat-hub-status">
+                            @if (chatHubState === 'connected') {
+                                <span class="chat-hub-dot connected"></span> Canlı bağlantı
+                            } @else if (chatHubState === 'reconnecting') {
+                                <span class="chat-hub-dot reconnecting"></span> Yeniden bağlanıyor…
+                            } @else {
+                                <span class="chat-hub-dot disconnected"></span> Bağlantı yok
+                            }
+                        </span>
                     </div>
                 </div>
                 <div class="chat-header-actions">
@@ -217,48 +289,88 @@
                         }
                     }
                 }
-            </div>
 
-            <!-- Chat Input -->
+                <!-- Typing indicator -->
+                @if (typingUser) {
+                    <div class="message-row customer" @messageAnim>
+                        <div class="message-avatar" [style.background-color]="selectedConversation!.customerAvatarColor">
+                            {{ selectedConversation!.customerInitials }}
+                        </div>
+                        <div class="message-group">
+                            <div class="message-bubble customer-bubble typing-indicator">
+                                <span class="typing-dot"></span>
+                                <span class="typing-dot"></span>
+                                <span class="typing-dot"></span>
+                            </div>
+                            <span class="message-time text-muted fst-italic">{{ typingUser }} yazıyor…</span>
+                        </div>
+                    </div>
+                }
+            </div>
             <div class="chat-input-area">
                 <div class="chat-input-header">
                     <div class="reply-type">
                         <button class="reply-type-btn" [class.active]="replyType === 'reply'"
                             (click)="replyType = 'reply'">
-                            <i class="fa-solid fa-reply me-1"></i> Reply
+                            <i class="fa-solid fa-reply me-1"></i> Yanıtla
                         </button>
                         <button class="reply-type-btn" [class.active]="replyType === 'note'"
                             (click)="replyType = 'note'">
-                            <i class="fa-solid fa-note-sticky me-1"></i> Note
+                            <i class="fa-solid fa-note-sticky me-1"></i> Not
                         </button>
                     </div>
                 </div>
                 <div class="chat-input-body">
-                    <textarea class="chat-textarea" rows="3" placeholder="Type your message..."
-                        [(ngModel)]="newMessage" (keydown)="onKeyDown($event)"></textarea>
+                    <!-- Kısayol popup -->
+                    @if (showShortcutPopup) {
+                        <div class="shortcut-popup">
+                            <div class="shortcut-popup-header">
+                                <i class="fa-solid fa-bolt me-1"></i> Kısayollar
+                                <span class="text-muted ms-auto" style="font-size: 11px;">ESC kapat</span>
+                            </div>
+                            <div class="shortcut-popup-list">
+                                @for (sc of filteredShortcuts; track sc.id; let i = $index) {
+                                    <div class="shortcut-popup-item"
+                                         [class.active]="i === selectedShortcutIndex"
+                                         (click)="selectShortcut(sc)"
+                                         (mouseenter)="selectedShortcutIndex = i">
+                                        <div class="shortcut-item-code">
+                                            <code>/{{ sc.shortCode }}</code>
+                                        </div>
+                                        <div class="shortcut-item-info">
+                                            <span class="shortcut-item-name">{{ sc.name }}</span>
+                                            <span class="shortcut-item-content">{{ sc.content }}</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    <textarea class="chat-textarea" rows="3" placeholder="Mesajınızı yazın... ( / ile kısayol kullanın)"
+                        [(ngModel)]="newMessage" (keydown)="onKeyDown($event)" (input)="onMessageInput()"></textarea>
                 </div>
                 <div class="chat-input-footer">
                     <div class="chat-input-tools">
-                        <button class="input-tool-btn" title="Insert template">
+                        <button class="input-tool-btn" title="Şablon ekle">
                             <i class="fa-solid fa-bolt"></i>
                         </button>
-                        <button class="input-tool-btn" title="Knowledge base">
+                        <button class="input-tool-btn" title="Bilgi bankası">
                             <i class="fa-solid fa-book"></i>
                         </button>
                         <button class="input-tool-btn" title="Emoji">
                             <i class="fa-regular fa-face-smile"></i>
                         </button>
-                        <button class="input-tool-btn" title="Attach">
+                        <button class="input-tool-btn" title="Dosya ekle">
                             <i class="fa-solid fa-paperclip"></i>
                         </button>
-                        <button class="input-tool-btn" title="GIF">
+                        <button class="input-tool-btn" title="Görsel">
                             <i class="fa-solid fa-image"></i>
                         </button>
                     </div>
                     <div class="chat-input-send">
-                        <span class="shortcut-hint">Use ⌘K for shortcuts</span>
+                        <span class="shortcut-hint">/ ile kısayol kullanın</span>
                         <button class="btn-send" (click)="sendMessage()" [disabled]="!newMessage.trim()">
-                            Send
+                            Gönder
                             <i class="fa-solid fa-chevron-down ms-1 small"></i>
                         </button>
                     </div>
@@ -267,8 +379,8 @@
         } @else {
             <div class="chat-empty-state">
                 <i class="fa-solid fa-comments fa-3x text-muted mb-3"></i>
-                <h5 class="text-muted">Select a conversation</h5>
-                <p class="text-muted small">Choose a conversation from the list to start chatting.</p>
+                <h5 class="text-muted">Bir konuşma seçin</h5>
+                <p class="text-muted small">Sohbet başlatmak için listeden bir konuşma seçin.</p>
             </div>
         }
     </div>
@@ -278,8 +390,10 @@
         <aside class="chat-details" @detailsSlide>
             <div class="details-header">
                 <div class="details-tabs">
-                    <button class="details-tab active">Details</button>
-                    <button class="details-tab">Copilot</button>
+                    <button class="details-tab" [class.active]="detailsActiveTab === 'details'"
+                        (click)="detailsActiveTab = 'details'">Detaylar</button>
+                    <button class="details-tab" [class.active]="detailsActiveTab === 'copilot'"
+                        (click)="detailsActiveTab = 'copilot'">Copilot</button>
                 </div>
             </div>
 
@@ -287,6 +401,170 @@
             <div class="details-customer-info">
                 <div class="details-customer-bubble">
                     <p class="mb-1"><strong>{{ selectedConversation.customerName }}</strong></p>
+                </div>
+            </div>
+
+            <!-- ═══ TAGS SECTION ═══ -->
+            <div class="details-panel-section">
+                <div class="panel-section-header" (click)="showTagDropdown = false">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-tags text-muted" style="font-size: 13px;"></i>
+                        <span class="panel-section-title">Etiketler</span>
+                        <span class="badge bg-light text-muted" style="font-size: 10px;">{{ conversationTags.length }}</span>
+                    </div>
+                    <button class="panel-add-btn" (click)="showTagDropdown = !showTagDropdown; $event.stopPropagation()" title="Etiket ekle">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+
+                <!-- Atanmış tag'ler -->
+                <div class="panel-section-body">
+                    @if (conversationTags.length > 0) {
+                        <div class="tag-chips">
+                            @for (ct of conversationTags; track ct.id) {
+                                <span class="tag-chip" [style.background-color]="(ct.tagColor || ct.color || '#6c757d') + '20'"
+                                      [style.color]="ct.tagColor || ct.color || '#6c757d'"
+                                      [style.border-color]="ct.tagColor || ct.color || '#6c757d'">
+                                    <span class="tag-dot" [style.background-color]="ct.tagColor || ct.color || '#6c757d'"></span>
+                                    {{ ct.tagName || ct.name || 'Etiket' }}
+                                    <button class="tag-remove" (click)="removeTag(ct)" title="Kaldır">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </span>
+                            }
+                        </div>
+                    } @else {
+                        <p class="text-muted small mb-0">Henüz etiket eklenmemiş.</p>
+                    }
+
+                    <!-- Tag dropdown -->
+                    @if (showTagDropdown) {
+                        <div class="panel-dropdown" (click)="$event.stopPropagation()">
+                            <input type="text" class="form-control form-control-sm mb-2"
+                                   placeholder="Etiket ara..."
+                                   [(ngModel)]="tagSearchText">
+                            <div class="panel-dropdown-list">
+                                @for (tag of filteredAvailableTags; track tag.id) {
+                                    <div class="panel-dropdown-item" (click)="addTag(tag)">
+                                        <span class="tag-dot" [style.background-color]="tag.color || '#6c757d'"></span>
+                                        {{ tag.name }}
+                                    </div>
+                                } @empty {
+                                    <p class="text-muted small mb-0 px-2 py-1">Eklenecek etiket bulunamadı.</p>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- ═══ SEGMENTS SECTION ═══ -->
+            <div class="details-panel-section">
+                <div class="panel-section-header" (click)="showSegmentDropdown = false">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-muted" style="font-size: 13px;"></i>
+                        <span class="panel-section-title">Segmentler</span>
+                        <span class="badge bg-light text-muted" style="font-size: 10px;">{{ conversationSegments.length }}</span>
+                    </div>
+                    <button class="panel-add-btn" (click)="showSegmentDropdown = !showSegmentDropdown; $event.stopPropagation()" title="Segment ekle">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+
+                <div class="panel-section-body">
+                    @if (conversationSegments.length > 0) {
+                        <div class="segment-chips">
+                            @for (cs of conversationSegments; track cs.segmentId || cs.id) {
+                                <span class="segment-chip"
+                                      [style.background-color]="(cs.segmentColorCode || cs.colorCode || '#6366f1') + '18'"
+                                      [style.color]="cs.segmentColorCode || cs.colorCode || '#6366f1'"
+                                      [style.border-color]="(cs.segmentColorCode || cs.colorCode || '#6366f1') + '50'">
+                                    <i class="fa-solid fa-layer-group me-1" style="font-size: 10px;"></i>
+                                    {{ cs.segmentName || cs.name || 'Segment' }}
+                                    <button class="tag-remove" (click)="removeSegment(cs)" title="Kaldır">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </span>
+                            }
+                        </div>
+                    } @else {
+                        <p class="text-muted small mb-0">Henüz segment eklenmemiş.</p>
+                    }
+
+                    <!-- Segment dropdown -->
+                    @if (showSegmentDropdown) {
+                        <div class="panel-dropdown" (click)="$event.stopPropagation()">
+                            <input type="text" class="form-control form-control-sm mb-2"
+                                   placeholder="Segment ara..."
+                                   [(ngModel)]="segmentSearchText">
+                            <div class="panel-dropdown-list">
+                                @for (seg of filteredAvailableSegments; track seg.id) {
+                                    <div class="panel-dropdown-item" (click)="addSegment(seg)">
+                                        <span class="tag-dot" [style.background-color]="seg.colorCode || '#6366f1'"></span>
+                                        {{ seg.name }}
+                                        @if (seg.description) {
+                                            <span class="text-muted ms-1" style="font-size: 11px;">— {{ seg.description }}</span>
+                                        }
+                                    </div>
+                                } @empty {
+                                    <p class="text-muted small mb-0 px-2 py-1">Eklenecek segment bulunamadı.</p>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- ═══ NOTES SECTION ═══ -->
+            <div class="details-panel-section">
+                <div class="panel-section-header">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-note-sticky text-muted" style="font-size: 13px;"></i>
+                        <span class="panel-section-title">Notlar</span>
+                        <span class="badge bg-light text-muted" style="font-size: 10px;">{{ conversationNotes.length }}</span>
+                    </div>
+                    <button class="panel-add-btn" (click)="showNoteForm = !showNoteForm" title="Not ekle">
+                        <i class="fa-solid" [class.fa-plus]="!showNoteForm" [class.fa-minus]="showNoteForm"></i>
+                    </button>
+                </div>
+
+                <div class="panel-section-body">
+                    <!-- Yeni not formu -->
+                    @if (showNoteForm) {
+                        <div class="note-form">
+                            <textarea class="form-control form-control-sm mb-2" rows="3"
+                                      placeholder="Not içeriğini yazın..."
+                                      [(ngModel)]="newNoteContent"></textarea>
+                            <div class="d-flex gap-2 justify-content-end">
+                                <button class="btn btn-sm btn-light" (click)="showNoteForm = false; newNoteContent = ''">İptal</button>
+                                <button class="btn btn-sm btn-primary" (click)="addNote()" [disabled]="!newNoteContent.trim()">
+                                    <i class="fa-solid fa-check me-1"></i> Kaydet
+                                </button>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Not listesi -->
+                    @if (conversationNotes.length > 0) {
+                        <div class="note-list">
+                            @for (cn of conversationNotes; track cn.id) {
+                                <div class="note-card">
+                                    <div class="note-card-header">
+                                        <span class="note-card-title">Not</span>
+                                        <button class="note-remove-btn" (click)="removeNote(cn)" title="Notu kaldır">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                    <p class="note-card-content">{{ cn.noteText }}</p>
+                                    @if (cn.createdDate) {
+                                        <span class="note-card-date">{{ cn.createdDate | date:'dd.MM.yyyy HH:mm' }}</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    } @else if (!showNoteForm) {
+                        <p class="text-muted small mb-0">Henüz not eklenmemiş.</p>
+                    }
                 </div>
             </div>
 
@@ -316,7 +594,7 @@
             <!-- Ask a question -->
             <div class="details-footer">
                 <div class="details-ask-input">
-                    <input type="text" class="form-control form-control-sm" placeholder="Ask a question">
+                    <input type="text" class="form-control form-control-sm" placeholder="Soru sorun...">
                     <div class="ask-actions">
                         <button class="ask-btn"><i class="fa-solid fa-sliders"></i></button>
                         <button class="ask-btn"><i class="fa-solid fa-arrow-up"></i></button>

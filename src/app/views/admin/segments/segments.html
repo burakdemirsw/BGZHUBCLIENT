@@ -25,7 +25,6 @@
                                     <th>Segment Adı</th>
                                     <th>Açıklama</th>
                                     <th>Renk</th>
-                                    <th>Kullanıcı</th>
                                     <th class="text-center">Durum</th>
                                     <th>Oluşturulma</th>
                                     <th class="text-end">İşlemler</th>
@@ -54,7 +53,6 @@
                                                 <span class="text-muted">—</span>
                                             }
                                         </td>
-                                        <td>{{ getUserName(item.userId) }}</td>
                                         <td class="text-center">
                                             @if (item.isBlocked) {
                                                 <span class="badge bg-danger-subtle text-danger">Pasif</span>
@@ -73,7 +71,7 @@
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="8" class="text-center text-muted">Segment bulunamadı.</td></tr>
+                                    <tr><td colspan="7" class="text-center text-muted">Segment bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -113,17 +111,6 @@
                 </div>
                 <div class="modal-body">
                     <form>
-                        @if (!editMode) {
-                            <div class="mb-3">
-                                <label class="form-label">Kullanıcı</label>
-                                <select class="form-select" [(ngModel)]="form.userId" name="userId">
-                                    <option value="">Kullanıcı seçiniz...</option>
-                                    @for (u of users; track u.id) {
-                                        <option [value]="u.id">{{ u.fullName || u.userName || u.email }}</option>
-                                    }
-                                </select>
-                            </div>
-                        }
                         <div class="mb-3">
                             <label class="form-label">Segment Adı</label>
                             <input type="text" class="form-control" [(ngModel)]="form.name" name="name" placeholder="Segment adı">

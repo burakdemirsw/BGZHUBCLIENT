@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ShortcutTypesService } from '@/app/core/services/shortcut-types.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { ShortcutType, CreateShortcutTypeRequest, UpdateShortcutTypeRequest } from '@/app/core/models/shortcut/shortcut.models';
 
 @Component({
@@ -32,7 +33,7 @@ export class ShortcutTypesPage implements OnInit {
         isBlocked: false,
     };
 
-    constructor(private shortcutTypesService: ShortcutTypesService) {}
+    constructor(private shortcutTypesService: ShortcutTypesService, private authState: AuthStateService) {}
 
     ngOnInit(): void {
         this.loadItems();
@@ -114,7 +115,7 @@ export class ShortcutTypesPage implements OnInit {
                 };
                 await this.shortcutTypesService.update(this.selectedItem.id, req);
             } else {
-                const userId = localStorage.getItem('userId') || '';
+                const userId = this.authState.profile?.userId || '';
                 const req: CreateShortcutTypeRequest = {
                     userId,
                     name: this.form.name,

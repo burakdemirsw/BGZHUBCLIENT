@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SegmentsService } from '@/app/core/services/segments.service';
 import { Segment, CreateSegmentRequest, UpdateSegmentRequest } from '@/app/core/models/customer/segment.models';
-import { HttpClientService } from '@/app/core/services/http-client.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 
 @Component({
     selector: 'app-segments-page',
@@ -12,7 +12,6 @@ import { HttpClientService } from '@/app/core/services/http-client.service';
 })
 export class SegmentsPage implements OnInit {
     items: Segment[] = [];
-    users: any[] = [];
     loading = false;
 
     // Datatable
@@ -29,26 +28,16 @@ export class SegmentsPage implements OnInit {
     editMode = false;
     selectedItem: Segment | null = null;
     form: any = {
-        userId: '', name: '', description: '', colorCode: '#6c757d'
+        name: '', description: '', colorCode: '#6c757d'
     };
 
     constructor(
         private service: SegmentsService,
-        private http: HttpClientService
+        private authStateService: AuthStateService
     ) {}
 
     ngOnInit(): void {
-        this.loadLookups();
         this.loadItems();
-    }
-
-    async loadLookups(): Promise<void> {
-        try {
-            const res = await this.http.get_new({ controller: 'Users' });
-            this.users = this.extractArray(res);
-        } catch (err) {
-            console.error('Users load error:', err);
-        }
     }
 
     async loadItems(): Promise<void> {
@@ -64,16 +53,10 @@ export class SegmentsPage implements OnInit {
         }
     }
 
-    getUserName(userId?: string): string {
-        if (!userId) return '-';
-        const u = this.users.find(x => x.id === userId);
-        return u ? (u.fullName || u.userName || u.email || '-') : '-';
-    }
-
     openCreate(): void {
         this.editMode = false;
         this.selectedItem = null;
-        this.form = { userId: '', name: '', description: '', colorCode: '#6c757d' };
+        this.form = { name: '', description: '', colorCode: '#6c757d' };
         this.showModal = true;
     }
 
@@ -81,7 +64,6 @@ export class SegmentsPage implements OnInit {
         this.editMode = true;
         this.selectedItem = item;
         this.form = {
-            userId: item.userId || '',
             name: item.name || '',
             description: item.description || '',
             colorCode: item.colorCode || '#6c757d'
@@ -101,7 +83,7 @@ export class SegmentsPage implements OnInit {
                 await this.service.update(this.selectedItem.id, req);
             } else {
                 const req: CreateSegmentRequest = {
-                    userId: this.form.userId,
+                    userId: this.authStateService.profile?.userId || '',
                     name: this.form.name,
                     description: this.form.description,
                     colorCode: this.form.colorCode

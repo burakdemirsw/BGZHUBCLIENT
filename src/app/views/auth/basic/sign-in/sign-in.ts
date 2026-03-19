@@ -57,10 +57,11 @@ export class SignIn {
             }
 
             // Kullanıcı profil bilgilerini kaydet
+            const userId = response?.userId ?? response?.data?.userId ?? '';
             const name = response?.name ?? response?.data?.name ?? '';
             const surname = response?.surname ?? response?.data?.surname ?? '';
             const lastLoginDate = response?.lastLoginDate ?? response?.data?.lastLoginDate ?? '';
-            this.authState.setProfile({ name, surname, lastLoginDate });
+            this.authState.setProfile({ userId, name, surname, lastLoginDate });
 
             // Kullanıcı menülerini yükle
             await this.userMenuService.loadUserMenus();

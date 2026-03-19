@@ -35,6 +35,31 @@ export class MessagesService {
     return this.extractArray(response);
   }
 
+  async sendMessage(request: {
+    conversationId: string;
+    messageContent: string;
+    source?: string;
+    platformMessageId?: string | null;
+    file?: string | null;
+    fileType?: string | null;
+    storyUrl?: string | null;
+    createdUserId?: string | null;
+  }): Promise<any> {
+    return await this.httpClientService.post(
+      { controller: 'Messages' },
+      {
+        conversationId: request.conversationId,
+        messageContent: request.messageContent,
+        source: request.source ?? 'agent',
+        platformMessageId: request.platformMessageId ?? null,
+        file: request.file ?? null,
+        fileType: request.fileType ?? null,
+        storyUrl: request.storyUrl ?? null,
+        createdUserId: request.createdUserId ?? null,
+      }
+    );
+  }
+
   private extractArray(response: unknown): AiMessageDto[] {
     if (!response) return [];
     if (Array.isArray(response)) return response as AiMessageDto[];

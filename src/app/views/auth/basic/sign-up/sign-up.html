@@ -125,12 +125,18 @@
                     </div>
 
                     <label class="custom-checkbox">
-                        <input type="checkbox" [(ngModel)]="agreeTerms" name="agreeTerms">
+                        <input type="checkbox" [(ngModel)]="agreeTerms" name="agreeTerms" (change)="termsError = false">
                         <span class="checkmark"></span>
                         <a href="javascript:void(0)" class="terms-link">Şartları ve Koşulları</a>&nbsp;Kabul Ediyorum
                     </label>
+                    @if (termsError) {
+                        <div class="alert-box alert-error" style="margin-top: 0.25rem; margin-bottom: 0.5rem;">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span>Devam etmek için Şartları ve Koşulları kabul etmeniz gerekmektedir.</span>
+                        </div>
+                    }
 
-                    <button type="submit" class="register-btn" [disabled]="loading || !agreeTerms" [class.is-loading]="loading">
+                    <button type="submit" class="register-btn" [disabled]="loading" [class.is-loading]="loading">
                         @if (loading) {
                             <span class="spinner"></span>
                             <span>Hesap oluşturuluyor...</span>

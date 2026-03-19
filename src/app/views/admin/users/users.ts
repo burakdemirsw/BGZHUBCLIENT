@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsersService } from '@/app/core/services/users.service';
+import { CompaniesService } from '@/app/core/services/companies.service';
 import { User, CreateUserRequest, UpdateUserRequest } from '@/app/core/models/user/user.models';
+import { Company } from '@/app/core/models/customer/company.models';
 import { PAGE_SIZE_OPTIONS, DEFAULT_PAGE_SIZE } from '@/app/constants';
 
 @Component({
@@ -28,18 +30,25 @@ export class UsersPage implements OnInit {
     totalPagesArray: number[] = [];
     totalCount = 0;
 
+    companies: Company[] = [];
+
     form: any = {
         name: '',
         lastName: '',
         email: '',
         password: '',
         gender: 'Erkek',
+        companyId: '',
     };
 
-    constructor(private usersService: UsersService) {}
+    constructor(
+        private usersService: UsersService,
+        private companiesService: CompaniesService
+    ) {}
 
     ngOnInit(): void {
         this.loadUsers();
+        this.loadCompanies();
     }
 
     onFilterChange(): void {
@@ -97,10 +106,28 @@ export class UsersPage implements OnInit {
         return [];
     }
 
+    private extractArray(response: any): any[] {
+        if (Array.isArray(response)) return response;
+        if (response?.$values) return response.$values;
+        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
+        if (response?.items) return response.items;
+        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
+        return [];
+    }
+
+    async loadCompanies(): Promise<void> {
+        try {
+            const res = await this.companiesService.getAll();
+            this.companies = this.extractArray(res);
+        } catch (err) {
+            console.error('Companies load error:', err);
+        }
+    }
+
     openCreate(): void {
         this.editMode = false;
         this.selectedUser = null;
-        this.form = { name: '', lastName: '', email: '', password: '', gender: 'Erkek' };
+        this.form = { name: '', lastName: '', email: '', password: '', gender: 'Erkek', companyId: '' };
         this.showModal = true;
     }
 
@@ -113,6 +140,7 @@ export class UsersPage implements OnInit {
             email: user.email,
             gender: user.gender,
             isBlocked: user.isBlocked,
+            companyId: user.companyId || '',
         };
         this.showModal = true;
     }
@@ -126,6 +154,7 @@ export class UsersPage implements OnInit {
                     email: this.form.email,
                     gender: this.form.gender,
                     isBlocked: this.form.isBlocked ?? false,
+                    companyId: this.form.companyId || undefined,
                 };
                 await this.usersService.update(this.selectedUser.id, req);
             } else {
@@ -135,6 +164,7 @@ export class UsersPage implements OnInit {
                     email: this.form.email,
                     password: this.form.password,
                     gender: this.form.gender,
+                    companyId: this.form.companyId || undefined,
                 };
                 await this.usersService.create(req);
             }

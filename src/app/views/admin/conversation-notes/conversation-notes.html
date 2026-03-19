@@ -4,12 +4,12 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0"><i class="fa-solid fa-note-sticky me-2"></i>Konuşma Notları</h4>
                 <button class="btn btn-primary btn-sm" (click)="openCreate()">
-                    <i class="fa-solid fa-plus me-1"></i>Yeni Atama
+                    <i class="fa-solid fa-plus me-1"></i>Yeni Not
                 </button>
             </div>
             <div class="card-body">
                 <div class="d-flex mb-3">
-                    <input type="text" class="form-control form-control-sm w-auto" placeholder="Konuşma ID veya not ara..." [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+                    <input type="text" class="form-control form-control-sm w-auto" placeholder="Not veya konuşma ID ara..." [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
                 </div>
                 @if (loading) {
                     <div class="text-center py-4">
@@ -23,9 +23,10 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Konuşma ID</th>
-                                    <th>Not</th>
-                                    <th>Not ID</th>
+                                    <th>Not Metni</th>
+                                    <th>Kullanıcı ID</th>
                                     <th>Oluşturulma</th>
+                                    <th>Güncellenme</th>
                                     <th class="text-end">İşlemler</th>
                                 </tr>
                             </thead>
@@ -37,22 +38,22 @@
                                         </td>
                                         <td class="small text-muted">{{ item.conversationId || '-' }}</td>
                                         <td>
-                                            @if (item.noteTitle) {
-                                                <span class="fw-medium">{{ item.noteTitle }}</span>
-                                            } @else {
-                                                {{ getNoteName(item.noteId) }}
-                                            }
+                                            <span class="text-truncate d-inline-block" style="max-width: 300px;">{{ item.noteText || '-' }}</span>
                                         </td>
-                                        <td class="small text-muted">{{ item.noteId || '-' }}</td>
+                                        <td class="small text-muted">{{ item.userId || '-' }}</td>
                                         <td class="small text-muted">{{ item.createdDate | date:'dd.MM.yyyy HH:mm' }}</td>
+                                        <td class="small text-muted">{{ item.updatedDate | date:'dd.MM.yyyy HH:mm' }}</td>
                                         <td class="text-end">
+                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(item)">
+                                                <i class="fa-solid fa-pen-to-square me-1"></i>Düzenle
+                                            </button>
                                             <button class="btn btn-soft-danger btn-sm" (click)="deleteItem(item)">
                                                 <i class="fa-solid fa-trash me-1"></i>Sil
                                             </button>
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="6" class="text-center text-muted">Kayıt bulunamadı.</td></tr>
+                                    <tr><td colspan="7" class="text-center text-muted">Kayıt bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -87,29 +88,28 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Konuşmaya Not Ata</h5>
+                    <h5 class="modal-title">{{ editMode ? 'Notu Düzenle' : 'Yeni Konuşma Notu' }}</h5>
                     <button type="button" class="btn-close" (click)="closeModal()"></button>
                 </div>
                 <div class="modal-body">
                     <form>
+                        @if (!editMode) {
+                            <div class="mb-3">
+                                <label class="form-label">Konuşma ID</label>
+                                <input type="text" class="form-control" [(ngModel)]="form.conversationId" name="conversationId" placeholder="Konuşma ID giriniz">
+                            </div>
+                        }
                         <div class="mb-3">
-                            <label class="form-label">Konuşma ID</label>
-                            <input type="text" class="form-control" [(ngModel)]="form.conversationId" name="conversationId" placeholder="Konuşma ID giriniz">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Not</label>
-                            <select class="form-select" [(ngModel)]="form.noteId" name="noteId">
-                                <option value="">Not seçiniz...</option>
-                                @for (note of notes; track note.id) {
-                                    <option [value]="note.id">{{ note.title }}</option>
-                                }
-                            </select>
+                            <label class="form-label">Not Metni</label>
+                            <textarea class="form-control" [(ngModel)]="form.noteText" name="noteText" rows="4" placeholder="Not içeriğini yazın..."></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
-                    <button type="button" class="btn btn-primary" (click)="save()">Kaydet</button>
+                    <button type="button" class="btn btn-primary" (click)="save()">
+                        {{ editMode ? 'Güncelle' : 'Kaydet' }}
+                    </button>
                 </div>
             </div>
         </div>
