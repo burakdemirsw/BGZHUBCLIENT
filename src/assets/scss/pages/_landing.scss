@@ -142,12 +142,12 @@ $landing-gradient: linear-gradient(135deg, $landing-accent, $landing-accent-2);
 // ─── Hero ───
 .landing-hero {
     position: relative;
-    padding: 7rem 0 5rem;
+    padding: 5rem 0 5rem;
     background: linear-gradient(180deg, $landing-bg-alt 0%, $landing-bg 100%);
     overflow: hidden;
 
     @include media-breakpoint-up(lg) {
-        padding: 9rem 0 6rem;
+        padding: 6rem 0 6rem;
     }
 
     .hero-title {
