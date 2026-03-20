@@ -1,15 +1,14 @@
 import {Component, OnInit} from '@angular/core';
 import {StatisticCard} from '@/app/views/dashboards/dashboard-1/components/statistic-card';
 import {SalesCharts} from '@/app/views/dashboards/dashboard-1/components/sales-charts';
-import {ProductInventory} from '@/app/views/dashboards/dashboard-1/components/product-inventory';
-import {RecentOrders} from '@/app/views/dashboards/dashboard-1/components/recent-orders';
+
 import {DashboardStatsService, DashboardStatsDto} from '@/app/core/services/dashboard-stats.service';
 import {DashboardMetric} from '@/app/views/dashboards/dashboard-1/types';
 import {dashboardMetricPlaceholders} from '@/app/views/dashboards/dashboard-1/data';
 
 @Component({
     selector: 'app-dashboard-1',
-    imports: [StatisticCard, SalesCharts, ProductInventory, RecentOrders],
+    imports: [StatisticCard, SalesCharts],
     templateUrl: './dashboard-1.html'
 })
 export class Dashboard1 implements OnInit {
@@ -32,10 +31,10 @@ export class Dashboard1 implements OnInit {
 
     private mapStatsToMetrics(stats: DashboardStatsDto): DashboardMetric[] {
         const values: Record<string, number> = {
-            ai: stats.aiAssistants,
-            conversations: stats.conversations,
-            messages: stats.messages,
-            customers: stats.customers,
+            connections: stats.connections,
+            orders: stats.orders,
+            revenue: stats.revenue,
+            assistants: stats.assistants,
         };
 
         return dashboardMetricPlaceholders.map(metric => ({

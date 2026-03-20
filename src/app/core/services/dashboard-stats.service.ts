@@ -1,32 +1,39 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
+import { AuthStateService } from './auth-state.service';
 
 export interface DashboardStatsDto {
-  aiAssistants: number;
-  conversations: number;
-  messages: number;
-  customers: number;
+  connections: number;
+  orders: number;
+  revenue: number;
+  assistants: number;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class DashboardStatsService {
-  constructor(private httpClientService: HttpClientService) {}
+  constructor(
+    private httpClientService: HttpClientService,
+    private authStateService: AuthStateService
+  ) {}
 
   async getDashboardStats(): Promise<DashboardStatsDto> {
-    const [assistants, conversations, messages, customers] = await Promise.all([
+    const companyId = this.authStateService.profile?.companyId || '';
+
+    const [connectionsList, ordersList, assistantsList] = await Promise.all([
+      this.fetchItems('IntegrationConnections'),
+      companyId ? this.fetchItems('Orders', `company/${companyId}`) : Promise.resolve([]),
       this.fetchItems('AiAssistants'),
-      this.fetchItems('Conversations'),
-      this.fetchItems('Ai', 'messages'),
-      this.fetchItems('Customers'),
     ]);
 
+    const revenue = (ordersList as any[]).reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
     return {
-      aiAssistants: assistants.length,
-      conversations: conversations.length,
-      messages: messages.length,
-      customers: customers.length,
+      connections: connectionsList.length,
+      orders: ordersList.length,
+      revenue: Math.round(revenue),
+      assistants: (assistantsList as any[]).filter(a => a.isActive !== false && a.isBlocked !== true).length,
     };
   }
 
@@ -43,18 +50,10 @@ export class DashboardStatsService {
     if (!payload) return [];
     if (Array.isArray(payload)) return payload;
     const value = payload as any;
-    if (value?.data) {
-      return Array.isArray(value.data) ? value.data : [value.data];
-    }
-    if (value?.items) {
-      return Array.isArray(value.items) ? value.items : [value.items];
-    }
-    if (value?.result) {
-      return Array.isArray(value.result) ? value.result : [value.result];
-    }
-    if (value?.$values) {
-      return Array.isArray(value.$values) ? value.$values : [value.$values];
-    }
+    if (value?.$values) return value.$values;
+    if (value?.data) return Array.isArray(value.data) ? value.data : [value.data];
+    if (value?.items) return Array.isArray(value.items) ? value.items : [value.items];
+    if (value?.result) return Array.isArray(value.result) ? value.result : [value.result];
     return [];
   }
 }
