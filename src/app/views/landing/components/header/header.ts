@@ -19,6 +19,7 @@ export class Header {
     public layout = inject(LayoutStoreService)
 
     navItems = ['Home', 'Services', 'Features', 'Plans', 'Reviews', 'Contact'];
+    appName = 'SellenticAI';
 
     logoWhite = LOGO_WHITE;
     logoColor = LOGO_COLOR;

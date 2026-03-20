@@ -10,45 +10,45 @@ import {PricingPlanCard} from "../pricing-plan-card/pricing-plan-card";
 export class PricingPlans {
     plans = [
         {
-            name: "Starter Plan",
-            description: "Best for freelancers and personal use",
-            price: 9,
-            highlight: "1 project included",
+            name: "Başlangıç",
+            description: "Küçük işletmeler ve bireysel kullanım",
+            price: 299,
+            highlight: "Aylık 1.000 mesaj",
             features: [
-                { text: "1 active project", included: true },
-                { text: "Access to all components", included: true },
-                { text: "Email support", included: true },
-                { text: "No team collaboration", included: false },
-                { text: "No SaaS rights", included: false }
+                { text: "1 kanal (Web Chat)", included: true },
+                { text: "AI Chatbot (temel)", included: true },
+                { text: "E-posta destek", included: true },
+                { text: "Ekip işbirliği", included: false },
+                { text: "Özel entegrasyonlar", included: false }
             ],
             btnClass: "btn-outline-primary"
         },
         {
-            name: "Professional",
-            description: "Ideal for small teams and startups",
-            price: 29,
-            highlight: "Up to 5 projects",
+            name: "Profesyonel",
+            description: "Büyüyen ekipler ve KOBİ'ler için",
+            price: 799,
+            highlight: "Aylık 10.000 mesaj",
             features: [
-                { text: "5 active projects", included: true },
-                { text: "Component + plugin access", included: true },
-                { text: "Team collaboration", included: true },
-                { text: "Priority email support", included: true },
-                { text: "No resale rights", included: false }
+                { text: "3 kanal (Web, WhatsApp, SMS)", included: true },
+                { text: "AI Chatbot (gelişmiş)", included: true },
+                { text: "Ekip işbirliği (5 kullanıcı)", included: true },
+                { text: "Öncelikli destek", included: true },
+                { text: "Özel entegrasyonlar", included: false }
             ],
             btnClass: "btn-light",
             isPopular: true
         },
         {
-            name: "Business",
-            description: "For agencies and large teams",
-            price: 79,
-            highlight: "Unlimited projects",
+            name: "Kurumsal",
+            description: "Büyük ölçekli işletmeler için",
+            price: 1999,
+            highlight: "Sınırsız mesaj",
             features: [
-                { text: "Unlimited projects", included: true },
-                { text: "SaaS & client projects allowed", included: true },
-                { text: "All premium components", included: true },
-                { text: "Priority support", included: true },
-                { text: "Team management tools", included: true }
+                { text: "Tüm kanallar (sınırsız)", included: true },
+                { text: "AI Chatbot (özel eğitimli)", included: true },
+                { text: "Sınırsız ekip üyesi", included: true },
+                { text: "7/24 öncelikli destek", included: true },
+                { text: "Özel API & entegrasyonlar", included: true }
             ],
             btnClass: "btn-dark"
         }

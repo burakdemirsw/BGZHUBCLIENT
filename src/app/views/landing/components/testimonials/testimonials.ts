@@ -11,28 +11,29 @@ export class Testimonials {
     testimonials = [
         {
             avatar: 'assets/images/users/user-1.jpg',
-            name: 'Emily Carter',
-            title: 'Fantastic experience!',
-            description: 'The admin dashboard is intuitive, fast, and packed with useful features. Highly recommend it!',
+            name: 'Ahmet Yılmaz',
+            title: 'Müşteri iletişimimiz tamamen değişti!',
+            description: 'SellenticAI sayesinde müşteri yanıt süremiz %80 düştü. AI chatbot gerçekten insan gibi konuşuyor!',
             rating: 5
         },
         {
             avatar: 'assets/images/users/user-2.jpg',
-            name: 'Michael Zhang',
-            title: 'Excellent quality & support',
-            description: 'The template’s quality is top-notch and the support team is quick to help. A truly seamless experience!',
+            name: 'Elif Kara',
+            title: 'Harika otomasyon araçları',
+            description: 'Tüm kanalları tek panelden yönetmek inanılmaz kolaylık sağlıyor. Ekibimizin verimliliği 3 katına çıktı.',
             rating: 4.5
         },
         {
             avatar: 'assets/images/users/user-3.jpg',
-            name: 'Sara Lopez',
-            title: 'Outstanding experience',
-            description: 'Everything from setup to customization was smooth and easy. The support team went above and beyond!',
+            name: 'Mehmet Demir',
+            title: 'Kurumsal düzeyde güvenlik',
+            description: 'KVKK uyumluluğu ve uçtan uca şifreleme ile verilerimiz güvende. Teknik destek ekibi çok hızlı yanıt veriyor.',
             rating: 4
         },
     ];
 
     clients = [
+
         'assets/images/clients/01.svg',
         'assets/images/clients/02.svg',
         'assets/images/clients/03.svg',

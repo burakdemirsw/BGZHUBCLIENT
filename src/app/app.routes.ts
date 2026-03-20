@@ -5,8 +5,13 @@ import {Landing} from './views/landing/landing';
 export const routes: Routes = [
     {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: 'home',
         pathMatch: 'full',
+    },
+    {
+        path: 'home',
+        component: Landing,
+        data: {title: 'SellenticAI — AI Destekli Müşteri İletişim Platformu'}
     },
     {
         path: '',
@@ -27,7 +32,7 @@ export const routes: Routes = [
     },
     {
         path: 'landing',
-        component: Landing,
-        data: {title: 'One page Landing'}
+        redirectTo: 'home',
+        pathMatch: 'full'
     },
 ];

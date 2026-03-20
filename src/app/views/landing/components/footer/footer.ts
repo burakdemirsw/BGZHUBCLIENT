@@ -34,45 +34,44 @@ export class Footer {
         {title: 'Facebook', icon: 'tablerBrandFacebook', url: '',},
         {title: 'Twitter-x', icon: 'tablerBrandX', url: '',},
         {title: 'Instagram', icon: 'tablerBrandInstagram', url: '',},
-        {title: 'WhatsApp', icon: 'tablerBrandDribbble', url: '',},
+        {title: 'LinkedIn', icon: 'tablerBrandLinkedin', url: '',},
     ];
 
     footerLinks: footerLinksType[] = [
         {
-            title: 'Company',
+            title: 'Şirket',
             links: [
-                {name: 'Our Story', url: ''},
-                {name: 'Leadership Team', url: ''},
+                {name: 'Hakkımızda', url: ''},
+                {name: 'Ekibimiz', url: ''},
                 {
-                    name: 'Careers',
+                    name: 'Kariyer',
                     url: '',
-                    badge: {title: "We're Hiring", variant: 'warning'}
+                    badge: {title: 'Yeni Pozisyonlar', variant: 'warning'}
                 },
-                {name: 'Press & Media', url: ''},
-                {name: 'Investor Relations', url: ''},
-                {name: 'Sustainability', url: ''},
+                {name: 'Blog', url: ''},
+                {name: 'İletişim', url: ''},
             ],
         },
         {
-            title: 'Community',
+            title: 'Ürün',
             links: [
-                {name: 'Community Forum', url: ''},
-                {name: 'Events & Meetups', url: ''},
-                {name: 'Ambassadors', url: ''},
-                {name: 'Customer Stories', url: ''},
-                {name: 'Open Source', url: ''},
-                {name: 'Code of Conduct', url: ''},
+                {name: 'AI Chatbot', url: ''},
+                {name: 'Çok Kanallı Mesajlaşma', url: ''},
+                {name: 'Otomasyon', url: ''},
+                {name: 'Analitik', url: ''},
+                {name: 'Entegrasyonlar', url: ''},
+                {name: 'API Dokümantasyonu', url: ''},
             ],
         },
         {
-            title: 'Admin',
+            title: 'Destek',
             links: [
-                {name: 'Dashboard', url: ''},
-                {name: 'User Management', url: ''},
-                {name: 'Roles & Permissions', url: ''},
-                {name: 'System Logs', url: ''},
-                {name: 'Settings', url: ''},
-                {name: 'API Access', url: ''},
+                {name: 'Yardım Merkezi', url: ''},
+                {name: 'Başlangıç Kılavuzu', url: ''},
+                {name: 'Durum Sayfası', url: ''},
+                {name: 'Gizlilik Politikası', url: ''},
+                {name: 'Kullanım Koşulları', url: ''},
+                {name: 'KVKK', url: ''},
             ],
         }
     ];

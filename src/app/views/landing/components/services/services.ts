@@ -19,34 +19,34 @@ export class Services {
 
     services: ServiceType[] = [
         {
-            name: "Strategic Consulting",
-            description: "We help businesses define clear digital goals and create custom strategies that align with long-term success. From planning to execution.",
-            icon: "tablerBulb",
+            name: "AI Chatbot",
+            description: "Akıllı yapay zeka destekli chatbot ile müşterilerinize 7/24 anında yanıt verin. Doğal dil işleme ile insan benzeri konuşma deneyimi sunun.",
+            icon: "tablerMessageChatbot",
         },
         {
-            name: "SEO & Traffic Growth",
-            description: "Boost your search visibility and drive organic traffic with our comprehensive SEO services — including keyword strategy, technical audits, etc.",
+            name: "Çok Kanallı Mesajlaşma",
+            description: "WhatsApp, SMS, e-posta ve web chat kanallarını tek bir panelden yönetin. Tüm müşteri iletişiminizi merkezi bir noktada toplayın.",
+            icon: "tablerMessages",
+        },
+        {
+            name: "Otomasyon & İş Akışları",
+            description: "Tekrarlayan görevleri otomatikleştirin, akıllı iş akışları oluşturun ve ekibinizin verimliliğini artırın.",
+            icon: "tablerSettingsAutomation",
+        },
+        {
+            name: "Gerçek Zamanlı Analitik",
+            description: "Mesaj performansını, müşteri memnuniyetini ve ekip verimliliğini gerçek zamanlı panolarla takip edin.",
             icon: "tablerChartBar",
         },
         {
-            name: "Social Media Management",
-            description: "Elevate your brand's presence with targeted content, community engagement, and performance analytics across platforms like Instagram, Facebook, etc.",
-            icon: "tablerSpeakerphone",
+            name: "Ekip İşbirliği",
+            description: "Ekip üyeleriniz arasında sorunsuz iş birliği sağlayın. Mesajları atayın, notlar ekleyin ve birlikte çalışın.",
+            icon: "tablerUsersGroup",
         },
         {
-            name: "Custom Web Development",
-            description: "We build modern, scalable websites and applications tailored to your business needs — optimized for speed, mobile responsiveness.",
-            icon: "tablerWorld",
-        },
-        {
-            name: "Brand Identity & Design",
-            description: "From logos to full brand systems, we create memorable visual identities that express your values and connect with your target audience.",
-            icon: "tablerBrush",
-        },
-        {
-            name: "Analytics & Insights",
-            description: "Turn data into decisions with real-time dashboards, performance reports, and analytics solutions that help you measure success.",
-            icon: "tablerReportAnalytics",
+            name: "Güvenlik & Uyumluluk",
+            description: "Uçtan uca şifreleme, KVKK uyumluluğu ve kurumsal düzeyde güvenlik altyapısıyla verilerinizi koruyun.",
+            icon: "tablerShieldCheck",
         },
     ];
 }

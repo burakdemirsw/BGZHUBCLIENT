@@ -7,8 +7,8 @@
         </div>
 
         <div class="my-4">
-            <h1 class="display-6 fw-bold mb-0">${{ plan.price }}</h1>
-            <small class="d-block text-muted fs-base fw-medium">One-time payment</small>
+            <h1 class="display-6 fw-bold mb-0">₺{{ plan.price }}</h1>
+            <small class="d-block text-muted fs-base fw-medium">Aylık</small>
             <small class="d-block text-muted fw-medium">{{ plan.highlight }}</small>
 
         </div>
@@ -26,7 +26,7 @@
 
     <div class="card-footer bg-transparent border-0 px-5 pb-4">
         <a href="javascript:void(0)" class="btn w-100 py-2 fw-semibold rounded-pill" [class]="plan.btnClass">
-            Buy {{ plan.name }}
+            Planı Seç
         </a>
     </div>
 </div>
