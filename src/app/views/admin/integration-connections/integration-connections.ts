@@ -38,6 +38,7 @@ export class IntegrationConnectionsPage implements OnInit {
     form: any = {
         integrationId: '',
         connectionTypeId: '',
+        companyId: '',
         name: '',
         url: '',
         isBlocked: false,
@@ -132,6 +133,7 @@ export class IntegrationConnectionsPage implements OnInit {
         this.form = {
             integrationId: '',
             connectionTypeId: '',
+            companyId: localStorage.getItem('companyId') || '',
             name: '',
             url: '',
             isBlocked: false,
@@ -145,6 +147,7 @@ export class IntegrationConnectionsPage implements OnInit {
         this.form = {
             integrationId: item.integrationId,
             connectionTypeId: item.connectionTypeId,
+            companyId: item.companyId || localStorage.getItem('companyId') || '',
             name: item.name,
             url: item.url || '',
             isBlocked: item.isBlocked ?? false,
@@ -158,6 +161,7 @@ export class IntegrationConnectionsPage implements OnInit {
                 const req: UpdateIntegrationConnectionRequest = {
                     integrationId: this.form.integrationId,
                     connectionTypeId: this.form.connectionTypeId,
+                    companyId: this.form.companyId,
                     name: this.form.name,
                     url: this.form.url,
                     isBlocked: this.form.isBlocked ?? false,
@@ -169,6 +173,7 @@ export class IntegrationConnectionsPage implements OnInit {
                 const req: CreateIntegrationConnectionRequest = {
                     integrationId: this.form.integrationId,
                     connectionTypeId: this.form.connectionTypeId,
+                    companyId: this.form.companyId,
                     name: this.form.name,
                     url: this.form.url,
                 };

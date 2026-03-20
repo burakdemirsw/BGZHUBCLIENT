@@ -80,6 +80,7 @@ export class ConversationTagsPage implements OnInit {
             const req: CreateConversationTagRequest = {
                 conversationId: this.form.conversationId,
                 tagId: this.form.tagId,
+                companyId: localStorage.getItem('companyId') || '',
             };
             await this.service.create(req);
             this.showModal = false;

@@ -11,6 +11,7 @@ export interface Segment {
 
 export interface CreateSegmentRequest {
     userId: string;
+    companyId: string;
     name: string;
     description: string;
     colorCode: string;
@@ -27,10 +28,12 @@ export interface UpdateSegmentRequest {
 export interface AddConversationToSegmentRequest {
     conversationId: string;
     segmentId: string;
+    companyId: string;
 }
 
 /** Toplu konuşma → segment ataması */
 export interface AddConversationsToSegmentRequest {
     segmentId: string;
+    companyId: string;
     conversationIds: string[];
 }

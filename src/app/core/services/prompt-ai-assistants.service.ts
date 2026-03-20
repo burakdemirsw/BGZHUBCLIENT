@@ -12,6 +12,12 @@ export class PromptAiAssistantsService {
     return this.http.get_new({ controller: 'PromptAiAssistants' });
   }
 
+  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+    let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
+    return this.http.get_new({ controller: 'PromptAiAssistants', action });
+  }
+
   getById(id: string): Promise<any> {
     return this.http.get_new({ controller: 'PromptAiAssistants', action: `${id}` });
   }

@@ -58,9 +58,12 @@ export class CompaniesPage implements OnInit {
                 this.addressesService.getCities(),
                 this.addressesService.getDistricts(),
             ]);  
-            this.countries = this.extractArray(countryRes);
-            this.cities = this.extractArray(cityRes);
-            this.districts = this.extractArray(districtRes);
+            const countryData = countryRes?.data || countryRes;
+            const cityData = cityRes?.data || cityRes;
+            const districtData = districtRes?.data || districtRes;
+            this.countries = this.extractArray(countryData?.items || countryData);
+            this.cities = this.extractArray(cityData?.items || cityData);
+            this.districts = this.extractArray(districtData?.items || districtData);
         } catch (err) {
             console.error('Lookup load error:', err);
         }
@@ -70,7 +73,8 @@ export class CompaniesPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.service.getAll();
-            this.items = this.extractArray(response);
+            const data = response?.data || response;
+            this.items = this.extractArray(data?.items || data);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('Companies load error:', err);

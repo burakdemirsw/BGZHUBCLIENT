@@ -2,6 +2,7 @@ export interface IntegrationUser {
   id: string;
   integrationId: string;
   userId: string;
+  companyId?: string;
   isBlocked?: boolean;
   createdDate?: string;
   updatedDate?: string;
@@ -15,10 +16,12 @@ export interface IntegrationUser {
 export interface CreateIntegrationUserRequest {
   integrationId: string;
   userId: string;
+  companyId?: string;
 }
 
 export interface UpdateIntegrationUserRequest {
   integrationId: string;
   userId: string;
+  companyId?: string;
   isBlocked: boolean;
 }

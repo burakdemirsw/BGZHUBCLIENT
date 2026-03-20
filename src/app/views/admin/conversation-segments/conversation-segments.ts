@@ -108,7 +108,8 @@ export class ConversationSegmentsPage implements OnInit {
         try {
             const req: AddConversationToSegmentRequest = {
                 conversationId: this.addForm.conversationId,
-                segmentId: this.addForm.segmentId
+                segmentId: this.addForm.segmentId,
+                companyId: localStorage.getItem('companyId') || ''
             };
             await this.service.add(req);
             this.showModal = false;
@@ -152,6 +153,7 @@ export class ConversationSegmentsPage implements OnInit {
         try {
             await this.service.addBulk({
                 segmentId: this.bulkSegmentId,
+                companyId: localStorage.getItem('companyId') || '',
                 conversationIds: this.selectedConversationIds
             });
             this.showBulkModal = false;

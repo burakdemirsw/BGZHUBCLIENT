@@ -66,7 +66,8 @@ export class PromptTypesPage implements OnInit {
         try {
             const response = await this.promptTypesService.getAll();
             console.log('PromptTypes response:', response);
-            this.items = this.extractArray(response);
+            const data = response?.data || response;
+            this.items = this.extractArray(data?.items || data);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('PromptTypes load error:', err);

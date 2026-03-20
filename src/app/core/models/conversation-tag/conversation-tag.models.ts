@@ -2,6 +2,7 @@ export interface ConversationTag {
     id: string;
     conversationId?: string;
     tagId?: string;
+    companyId?: string;
     tagName?: string;
     tagColor?: string;
     createdDate?: string;
@@ -11,4 +12,5 @@ export interface ConversationTag {
 export interface CreateConversationTagRequest {
     conversationId: string;
     tagId: string;
+    companyId: string;
 }

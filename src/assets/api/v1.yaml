@@ -9,6 +9,35 @@ paths:
     get:
       tags:
         - AiAssistants
+      parameters:
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -97,6 +126,35 @@ paths:
     get:
       tags:
         - Ai
+      parameters:
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -202,6 +260,35 @@ paths:
     get:
       tags:
         - Ai
+      parameters:
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -307,6 +394,35 @@ paths:
     get:
       tags:
         - AiModels
+      parameters:
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -410,6 +526,35 @@ paths:
     get:
       tags:
         - AiProviders
+      parameters:
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -482,6 +627,35 @@ paths:
     get:
       tags:
         - AiProviderSettings
+      parameters:
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -586,6 +760,35 @@ paths:
     get:
       tags:
         - AiSettings
+      parameters:
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -658,6 +861,35 @@ paths:
     get:
       tags:
         - PromptAiAssistants
+      parameters:
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -779,6 +1011,35 @@ paths:
     get:
       tags:
         - Prompts
+      parameters:
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -868,6 +1129,35 @@ paths:
     get:
       tags:
         - PromptTypes
+      parameters:
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -3968,6 +4258,22 @@ paths:
           description: OK
       security:
         - Bearer: []
+  /api/Tags/by-company/{companyId}:
+    get:
+      tags:
+        - Tags
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
   /api/Tags/update/{id}:
     post:
       tags:
@@ -4751,6 +5057,76 @@ paths:
           schema:
             type: string
             format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Customers/by-company/{companyId}:
+    get:
+      tags:
+        - Customers
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: PlatformName
+          in: query
+          schema:
+            type: string
+        - name: Status
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: uint8
+        - name: IsBlocked
+          in: query
+          schema:
+            type: boolean
+        - name: UserId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: SocialMediaAccountId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -5560,6 +5936,22 @@ paths:
           description: OK
       security:
         - Bearer: []
+  /api/Integrations/users/by-company/{companyId}:
+    get:
+      tags:
+        - Integrations
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
   /api/Integrations/update/users/{id}:
     post:
       tags:
@@ -5649,12 +6041,12 @@ paths:
           description: OK
       security:
         - Bearer: []
-  /api/Integrations/{integrationId}/properties:
+  /api/Integrations/properties/by-integration-user/{integrationUserId}:
     get:
       tags:
         - Integrations
       parameters:
-        - name: integrationId
+        - name: integrationUserId
           in: path
           required: true
           schema:
@@ -5671,6 +6063,22 @@ paths:
         - Integrations
       parameters:
         - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Integrations/properties/by-company/{companyId}:
+    get:
+      tags:
+        - Integrations
+      parameters:
+        - name: companyId
           in: path
           required: true
           schema:
@@ -6138,7 +6546,12 @@ paths:
           in: query
           schema:
             type: boolean
-        - name: IntegrationId
+        - name: IntegrationUserId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: CompanyId
           in: query
           schema:
             type: string
@@ -6207,17 +6620,99 @@ paths:
           description: OK
       security:
         - Bearer: []
-  /api/Products/by-integration/{integrationId}:
+  /api/Products/by-integration-user/{integrationUserId}:
     get:
       tags:
         - Products
       parameters:
-        - name: integrationId
+        - name: integrationUserId
           in: path
           required: true
           schema:
             type: string
             format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Products/by-company/{companyId}:
+    get:
+      tags:
+        - Products
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: Brand
+          in: query
+          schema:
+            type: string
+        - name: Category
+          in: query
+          schema:
+            type: string
+        - name: MinPrice
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+            type:
+              - number
+              - string
+            format: double
+        - name: MaxPrice
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+            type:
+              - number
+              - string
+            format: double
+        - name: IsActive
+          in: query
+          schema:
+            type: boolean
+        - name: IntegrationUserId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: CompanyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -7042,6 +7537,35 @@ paths:
     get:
       tags:
         - Teams
+      parameters:
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -7147,6 +7671,35 @@ paths:
     get:
       tags:
         - Teams
+      parameters:
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -7268,6 +7821,35 @@ paths:
     get:
       tags:
         - Teams
+      parameters:
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -7838,12 +8420,12 @@ paths:
           description: OK
       security:
         - Bearer: []
-  /api/Orders/integration/{integrationId}:
+  /api/Orders/integration-user/{integrationUserId}:
     get:
       tags:
         - Orders
       parameters:
-        - name: integrationId
+        - name: integrationUserId
           in: path
           required: true
           schema:
@@ -7865,6 +8447,88 @@ paths:
           schema:
             type: string
             format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Orders/company/{companyId}/paged:
+    get:
+      tags:
+        - Orders
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: OrderStatusId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: PaymentTypeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: CustomerId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: UserId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: StartDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: EndDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: IsCompleted
+          in: query
+          schema:
+            type: boolean
+        - name: IsCancel
+          in: query
+          schema:
+            type: boolean
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -8366,6 +9030,35 @@ paths:
     get:
       tags:
         - Companies
+      parameters:
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -8711,6 +9404,22 @@ paths:
         - Segments
       parameters:
         - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Segments/by-company/{companyId}:
+    get:
+      tags:
+        - Segments
+      parameters:
+        - name: companyId
           in: path
           required: true
           schema:
@@ -9085,10 +9794,14 @@ components:
     AddConversationsToSegmentRequest:
       required:
         - segmentId
+        - companyId
         - conversationIds
       type: object
       properties:
         segmentId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         conversationIds:
@@ -9114,12 +9827,16 @@ components:
       required:
         - conversationId
         - segmentId
+        - companyId
       type: object
       properties:
         conversationId:
           type: string
           format: uuid
         segmentId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
     Base64UploadRequest:
@@ -9507,12 +10224,16 @@ components:
     CreateConversationListDescriptionRequest:
       required:
         - userId
+        - companyId
         - name
         - description
         - colorCode
       type: object
       properties:
         userId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         name:
@@ -9531,6 +10252,7 @@ components:
       required:
         - conversationId
         - userId
+        - companyId
         - noteText
       type: object
       properties:
@@ -9538,6 +10260,9 @@ components:
           type: string
           format: uuid
         userId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         noteText:
@@ -9548,6 +10273,7 @@ components:
       required:
         - socialMediaAccountId
         - customerId
+        - companyId
       type: object
       properties:
         socialMediaAccountId:
@@ -9556,16 +10282,23 @@ components:
         customerId:
           type: string
           format: uuid
+        companyId:
+          type: string
+          format: uuid
     CreateConversationTagRequest:
       required:
         - conversationId
         - tagId
+        - companyId
       type: object
       properties:
         conversationId:
           type: string
           format: uuid
         tagId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
     CreateCountryRequest:
@@ -9678,6 +10411,7 @@ components:
       required:
         - userId
         - socialMediaAccountId
+        - companyId
         - platformAccountId
         - platformUsername
         - platformName
@@ -9687,6 +10421,9 @@ components:
           type: string
           format: uuid
         socialMediaAccountId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         platformAccountId:
@@ -9732,6 +10469,7 @@ components:
       required:
         - integrationId
         - connectionTypeId
+        - companyId
         - name
         - url
       type: object
@@ -9740,6 +10478,9 @@ components:
           type: string
           format: uuid
         connectionTypeId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         name:
@@ -9771,16 +10512,22 @@ components:
             - string
     CreateIntegrationPropertyRequest:
       required:
-        - integrationId
         - userId
+        - integrationUserId
+        - companyId
         - key
         - value
       type: object
       properties:
-        integrationId:
+        userId:
           type: string
           format: uuid
-        userId:
+        integrationUserId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         key:
@@ -9850,6 +10597,7 @@ components:
       required:
         - integrationId
         - userId
+        - companyId
       type: object
       properties:
         integrationId:
@@ -9857,6 +10605,11 @@ components:
           format: uuid
         userId:
           type: string
+          format: uuid
+        companyId:
+          type:
+            - "null"
+            - string
           format: uuid
     CreateItemRequest:
       required:
@@ -10062,7 +10815,7 @@ components:
             - string
     CreateOrderRequest:
       required:
-        - integrationId
+        - integrationUserId
         - companyId
         - userId
         - customerId
@@ -10076,7 +10829,7 @@ components:
         - description
       type: object
       properties:
-        integrationId:
+        integrationUserId:
           type: string
           format: uuid
         companyId:
@@ -10193,7 +10946,7 @@ components:
         - color
         - size
         - additionalImages
-        - integrationId
+        - integrationUserId
       type: object
       properties:
         productCode:
@@ -10266,7 +11019,7 @@ components:
           type:
             - "null"
             - string
-        integrationId:
+        integrationUserId:
           type:
             - "null"
             - string
@@ -10441,12 +11194,16 @@ components:
     CreateSegmentRequest:
       required:
         - userId
+        - companyId
         - name
         - description
         - colorCode
       type: object
       properties:
         userId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         name:
@@ -10551,11 +11308,15 @@ components:
     CreateTagRequest:
       required:
         - userId
+        - companyId
         - name
         - colorCode
       type: object
       properties:
         userId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         name:
@@ -11689,6 +12450,7 @@ components:
       required:
         - socialMediaAccountId
         - customerId
+        - companyId
         - lastMessageDate
         - isFavorite
         - isBlocked
@@ -11700,6 +12462,9 @@ components:
           type: string
           format: uuid
         customerId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         lastMessageDate:
@@ -11834,6 +12599,7 @@ components:
       required:
         - userId
         - socialMediaAccountId
+        - companyId
         - platformAccountId
         - platformUsername
         - platformName
@@ -11845,6 +12611,9 @@ components:
           type: string
           format: uuid
         socialMediaAccountId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         platformAccountId:
@@ -11904,6 +12673,7 @@ components:
       required:
         - integrationId
         - connectionTypeId
+        - companyId
         - name
         - url
         - isBlocked
@@ -11913,6 +12683,9 @@ components:
           type: string
           format: uuid
         connectionTypeId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         name:
@@ -11949,17 +12722,23 @@ components:
           type: boolean
     UpdateIntegrationPropertyRequest:
       required:
-        - integrationId
         - userId
+        - integrationUserId
+        - companyId
         - key
         - value
         - isBlocked
       type: object
       properties:
-        integrationId:
+        userId:
           type: string
           format: uuid
-        userId:
+        integrationUserId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         key:
@@ -12034,6 +12813,7 @@ components:
       required:
         - integrationId
         - userId
+        - companyId
         - isBlocked
       type: object
       properties:
@@ -12042,6 +12822,11 @@ components:
           format: uuid
         userId:
           type: string
+          format: uuid
+        companyId:
+          type:
+            - "null"
+            - string
           format: uuid
         isBlocked:
           type: boolean
@@ -12354,7 +13139,7 @@ components:
         - size
         - additionalImages
         - isActive
-        - integrationId
+        - integrationUserId
       type: object
       properties:
         productCode:
@@ -12429,7 +13214,7 @@ components:
             - string
         isActive:
           type: boolean
-        integrationId:
+        integrationUserId:
           type:
             - "null"
             - string
@@ -12723,15 +13508,11 @@ components:
           type: boolean
     UpdateTagRequest:
       required:
-        - userId
         - name
         - colorCode
         - isBlocked
       type: object
       properties:
-        userId:
-          type: string
-          format: uuid
         name:
           type:
             - "null"

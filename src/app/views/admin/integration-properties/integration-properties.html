@@ -3,29 +3,17 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0">Entegrasyon Özellikleri</h4>
-                <button class="btn btn-primary btn-sm" (click)="openCreate()">+ Yeni Özellik</button>
+                <button class="btn btn-primary btn-sm" (click)="openCreate()">
+                    <i class="fa-solid fa-plus me-1"></i>Yeni Özellik
+                </button>
             </div>
             <div class="card-body">
-                <!-- Filtreler -->
-                <div class="row mb-3 g-2">
-                    <div class="col-md-4">
-                        <label class="form-label small text-muted">Entegrasyon</label>
-                        <select class="form-select form-select-sm" [(ngModel)]="filterIntegrationId">
-                            <option value="">Tümü</option>
-                            @for (int of integrations; track $index) {
-                                <option [value]="int.id">{{ int.integrationDescription }}</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small text-muted">Kullanıcı</label>
-                        <select class="form-select form-select-sm" [(ngModel)]="filterUserId">
-                            <option value="">Tümü</option>
-                            @for (user of users; track $index) {
-                                <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
-                            }
-                        </select>
-                    </div>
+                <!-- Arama Filtresi -->
+                <div class="d-flex mb-3 gap-2">
+                    <input type="text" class="form-control form-control-sm w-auto" 
+                           placeholder="Kullanıcı, key veya value ara..." 
+                           [(ngModel)]="filterText" 
+                           (ngModelChange)="onFilterChange()">
                 </div>
 
                 @if (loading) {
@@ -38,8 +26,8 @@
                         <table class="table table-centered table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Entegrasyon</th>
                                     <th>Kullanıcı</th>
+                                    <th>Entegrasyon Kullanıcısı</th>
                                     <th>Anahtar (Key)</th>
                                     <th>Değer (Value)</th>
                                     <th class="text-center">Durum</th>
@@ -47,14 +35,18 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (prop of filteredProperties; track $index) {
+                                @for (prop of pagedItems; track prop.id) {
                                     <tr>
-                                        <td>
-                                            <span class="badge bg-info-subtle text-info">
-                                                {{ getIntegrationName(prop.integrationId) }}
-                                            </span>
-                                        </td>
                                         <td>{{ getUserName(prop.userId) }}</td>
+                                        <td>
+                                            @if (prop.integrationUserId) {
+                                                <span class="badge bg-info-subtle text-info">
+                                                    {{ getIntegrationUserName(prop.integrationUserId) }}
+                                                </span>
+                                            } @else {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
                                         <td><code>{{ prop.key }}</code></td>
                                         <td>
                                             <span class="text-truncate d-inline-block" style="max-width: 250px" [title]="prop.value">
@@ -74,11 +66,11 @@
                                                     (click)="toggleBlock(prop)">
                                                 {{ prop.isBlocked ? 'Aktif Et' : 'Engelle' }}
                                             </button>
-                                            <button class="btn btn-soft-info btn-sm me-1" (click)="openEdit(prop)">
-                                                Düzenle
+                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(prop)">
+                                                <i class="fa-solid fa-pen-to-square me-1"></i>Düzenle
                                             </button>
                                             <button class="btn btn-soft-danger btn-sm" (click)="deleteProperty(prop)">
-                                                Sil
+                                                <i class="fa-solid fa-trash me-1"></i>Sil
                                             </button>
                                         </td>
                                     </tr>
@@ -87,6 +79,25 @@
                                 }
                             </tbody>
                         </table>
+                    </div>
+                    <!-- Sayfalama -->
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="small text-muted">Toplam: {{ filteredItems.length }} kayıt</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track $index) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                 }
             </div>
@@ -105,20 +116,20 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Entegrasyon</label>
-                        <select class="form-select" [(ngModel)]="form.integrationId" [disabled]="editMode">
+                        <label class="form-label">Kullanıcı</label>
+                        <select class="form-select" [(ngModel)]="form.userId" [disabled]="editMode">
                             <option value="" disabled>Seçin</option>
-                            @for (int of integrations; track $index) {
-                                <option [value]="int.id">{{ int.integrationDescription }}</option>
+                            @for (user of users; track user.id) {
+                                <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
                             }
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Kullanıcı</label>
-                        <select class="form-select" [(ngModel)]="form.userId" [disabled]="editMode">
-                            <option value="" disabled>Seçin</option>
-                            @for (user of users; track $index) {
-                                <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
+                        <label class="form-label">Entegrasyon Kullanıcısı (Opsiyonel)</label>
+                        <select class="form-select" [(ngModel)]="form.integrationUserId">
+                            <option value="">Seçilmedi</option>
+                            @for (iu of integrationUsers; track iu.id) {
+                                <option [value]="iu.id">{{ iu.integrationDescription || getUserName(iu.userId) }}</option>
                             }
                         </select>
                     </div>
@@ -134,7 +145,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
                     <button type="button" class="btn btn-primary"
-                            [disabled]="!form.integrationId || !form.userId || !form.key || !form.value"
+                            [disabled]="!form.userId || !form.key || !form.value"
                             (click)="save()">
                         {{ editMode ? 'Güncelle' : 'Kaydet' }}
                     </button>

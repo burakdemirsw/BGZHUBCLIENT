@@ -28,7 +28,7 @@ export class CustomersPage implements OnInit {
     showModal = false;
     editMode = false;
     selectedItem: Customer | null = null;
-    form: any = { userId: '', socialMediaAccountId: '', platformAccountId: '' };
+    form: any = { userId: '', socialMediaAccountId: '', companyId: '', platformAccountId: '' };
 
     constructor(
         private service: CustomersService,
@@ -91,7 +91,14 @@ export class CustomersPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedItem = null;
-        this.form = { userId: '', socialMediaAccountId: '', platformAccountId: '', platformUsername: '', platformName: '' };
+        this.form = { 
+            userId: '', 
+            socialMediaAccountId: '', 
+            companyId: localStorage.getItem('companyId') || '', 
+            platformAccountId: '', 
+            platformUsername: '', 
+            platformName: '' 
+        };
         this.showModal = true;
     }
 
@@ -101,6 +108,7 @@ export class CustomersPage implements OnInit {
         this.form = {
             userId: item.userId || '',
             socialMediaAccountId: item.socialMediaAccountId || '',
+            companyId: item.companyId || localStorage.getItem('companyId') || '',
             platformAccountId: item.platformAccountId || '',
             platformUsername: item.platformUsername || '',
             platformName: item.platformName || '',
@@ -115,6 +123,7 @@ export class CustomersPage implements OnInit {
                 const req: UpdateCustomerRequest = {
                     userId: this.form.userId,
                     socialMediaAccountId: this.form.socialMediaAccountId,
+                    companyId: this.form.companyId || localStorage.getItem('companyId') || '',
                     platformAccountId: this.form.platformAccountId,
                     platformUsername: this.form.platformUsername,
                     platformName: this.form.platformName,
@@ -126,6 +135,7 @@ export class CustomersPage implements OnInit {
                 const req: CreateCustomerRequest = {
                     userId: this.form.userId,
                     socialMediaAccountId: this.form.socialMediaAccountId,
+                    companyId: this.form.companyId || localStorage.getItem('companyId') || '',
                     platformAccountId: this.form.platformAccountId,
                     platformUsername: this.form.platformUsername,
                     platformName: this.form.platformName

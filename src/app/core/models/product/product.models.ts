@@ -15,6 +15,8 @@ export interface Product {
     itemGroupId?: string;
     color?: string;
     size?: string;
+    barcode?: string;
+    stockQuantity?: number;
     additionalImages?: string;
     integrationId?: string;
     isActive?: boolean;

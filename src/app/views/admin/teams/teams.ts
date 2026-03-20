@@ -17,6 +17,15 @@ export class TeamsPage implements OnInit {
     editMode = false;
     selectedItem: Team | null = null;
 
+    // Datatable filter & pagination
+    filterText = '';
+    filteredItems: Team[] = [];
+    pagedItems: Team[] = [];
+    currentPage = 1;
+    pageSize = 10;
+    totalPages = 1;
+    totalPagesArray: number[] = [];
+
     form: any = {
         teamName: '',
         profilePictureUrl: '',
@@ -29,12 +38,37 @@ export class TeamsPage implements OnInit {
         this.loadItems();
     }
 
+    onFilterChange(): void {
+        this.currentPage = 1;
+        this.applyFilterAndPaging();
+    }
+
+    setPage(page: number): void {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.applyFilterAndPaging();
+    }
+
+    applyFilterAndPaging(): void {
+        const filter = (this.filterText || '').toLowerCase();
+        this.filteredItems = this.teams.filter(item =>
+            (item.teamName || '').toLowerCase().includes(filter)
+        );
+        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
+        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
+        const start = (this.currentPage - 1) * this.pageSize;
+        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+    }
+
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
             const response = await this.teamsService.getAll();
             console.log('Teams response:', response);
-            this.teams = this.extractArray(response);
+            const data = response?.data || response;
+            this.teams = this.extractArray(data?.items || data);
+            this.applyFilterAndPaging();
         } catch (err) {
             console.error('Teams error:', err);
         } finally {

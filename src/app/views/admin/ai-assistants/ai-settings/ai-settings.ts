@@ -16,6 +16,15 @@ export class AiSettingsPage implements OnInit {
     editMode = false;
     selectedSetting: AiSetting | null = null;
 
+    // Datatable filter & pagination
+    filterText = '';
+    filteredItems: AiSetting[] = [];
+    pagedItems: AiSetting[] = [];
+    currentPage = 1;
+    pageSize = 10;
+    totalPages = 1;
+    totalPagesArray: number[] = [];
+
     form: any = {
         settingDescription: '',
         definition: '',
@@ -29,11 +38,38 @@ export class AiSettingsPage implements OnInit {
         this.loadSettings();
     }
 
+    onFilterChange(): void {
+        this.currentPage = 1;
+        this.applyFilterAndPaging();
+    }
+
+    setPage(page: number): void {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.applyFilterAndPaging();
+    }
+
+    applyFilterAndPaging(): void {
+        const filter = (this.filterText || '').toLowerCase();
+        this.filteredItems = this.settings.filter(item =>
+            (item.settingDescription || '').toLowerCase().includes(filter) ||
+            (item.definition || '').toLowerCase().includes(filter) ||
+            (item.value || '').toLowerCase().includes(filter)
+        );
+        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
+        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
+        const start = (this.currentPage - 1) * this.pageSize;
+        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+    }
+
     async loadSettings(): Promise<void> {
         this.loading = true;
         try {
             const response = await this.aiService.getSettings();
-            this.settings = this.extractArray(response);
+            const data = response?.data || response;
+            this.settings = this.extractArray(data?.items || data);
+            this.applyFilterAndPaging();
         } catch (err) {
             console.error('AiSettings load error:', err);
         } finally {

@@ -3,9 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { UsersService } from '@/app/core/services/users.service';
-import { Integration } from '@/app/core/models/integration/integration.models';
 import { User } from '@/app/core/models/user/user.models';
-import { IntegrationProperty } from '@/app/core/models/integration/integration-property.models';
+import {
+    IntegrationProperty,
+    CreateIntegrationPropertyRequest,
+    UpdateIntegrationPropertyRequest,
+} from '@/app/core/models/integration/integration-property.models';
+import { IntegrationUser } from '@/app/core/models/integration/integration-user.models';
 
 @Component({
     selector: 'app-integration-properties-page',
@@ -13,14 +17,19 @@ import { IntegrationProperty } from '@/app/core/models/integration/integration-p
     templateUrl: './integration-properties.html',
 })
 export class IntegrationPropertiesPage implements OnInit {
-    integrations: Integration[] = [];
+    integrationUsers: IntegrationUser[] = [];
     users: User[] = [];
     properties: IntegrationProperty[] = [];
     loading = false;
 
-    // Filtre
-    filterIntegrationId: string = '';
-    filterUserId: string = '';
+    // Datatable
+    filterText = '';
+    filteredItems: IntegrationProperty[] = [];
+    pagedItems: IntegrationProperty[] = [];
+    currentPage = 1;
+    pageSize = 10;
+    totalPages = 1;
+    totalPagesArray: number[] = [];
 
     // Modal
     showModal = false;
@@ -28,8 +37,9 @@ export class IntegrationPropertiesPage implements OnInit {
     selectedProperty: IntegrationProperty | null = null;
 
     form = {
-        integrationId: '',
         userId: '',
+        integrationUserId: '',
+        companyId: '',
         key: '',
         value: '',
     };
@@ -43,17 +53,43 @@ export class IntegrationPropertiesPage implements OnInit {
         this.loadData();
     }
 
+    onFilterChange(): void {
+        this.currentPage = 1;
+        this.applyFilterAndPaging();
+    }
+
+    setPage(page: number): void {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.applyFilterAndPaging();
+    }
+
+    applyFilterAndPaging(): void {
+        const q = (this.filterText || '').toLowerCase();
+        this.filteredItems = this.properties.filter(
+            p =>
+                p.key.toLowerCase().includes(q) ||
+                p.value.toLowerCase().includes(q) ||
+                this.getUserName(p.userId).toLowerCase().includes(q)
+        );
+        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
+        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        const start = (this.currentPage - 1) * this.pageSize;
+        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+    }
+
     async loadData(): Promise<void> {
         this.loading = true;
         try {
-            const [intResp, usersResp, propsResp] = await Promise.all([
-                this.integrationsService.getAll(),
+            const [usersResp, intUsersResp, propsResp] = await Promise.all([
                 this.usersService.getAll(),
+                this.integrationsService.getIntegrationUsers(),
                 this.integrationsService.getIntegrationProperties(),
             ]);
-            this.integrations = this.extractArray(intResp);
             this.users = this.extractArray(usersResp);
+            this.integrationUsers = this.extractArray(intUsersResp);
             this.properties = this.extractArray(propsResp);
+            this.applyFilterAndPaging();
         } catch (err) {
             console.error('LoadData error:', err);
         } finally {
@@ -70,33 +106,29 @@ export class IntegrationPropertiesPage implements OnInit {
         return [];
     }
 
-    // ── Filtre ──
-    get filteredProperties(): IntegrationProperty[] {
-        let result = this.properties;
-        if (this.filterIntegrationId) {
-            result = result.filter(p => p.integrationId === this.filterIntegrationId);
-        }
-        if (this.filterUserId) {
-            result = result.filter(p => p.userId === this.filterUserId);
-        }
-        return result;
-    }
-
     // ── Yardımcılar ──
-    getIntegrationName(integrationId: string): string {
-        return this.integrations.find(i => i.id === integrationId)?.integrationDescription ?? '-';
-    }
-
     getUserName(userId: string): string {
         const u = this.users.find(u => u.id === userId);
         return u ? `${u.name} ${u.lastName}` : '-';
+    }
+
+    getIntegrationUserName(integrationUserId: string): string {
+        const iu = this.integrationUsers.find(iu => iu.id === integrationUserId);
+        if (!iu) return '-';
+        return iu.integrationDescription || this.getUserName(iu.userId);
     }
 
     // ── Modal ──
     openCreate(): void {
         this.editMode = false;
         this.selectedProperty = null;
-        this.form = { integrationId: '', userId: '', key: '', value: '' };
+        this.form = {
+            userId: '',
+            integrationUserId: '',
+            companyId: localStorage.getItem('companyId') || '',
+            key: '',
+            value: '',
+        };
         this.showModal = true;
     }
 
@@ -104,8 +136,9 @@ export class IntegrationPropertiesPage implements OnInit {
         this.editMode = true;
         this.selectedProperty = prop;
         this.form = {
-            integrationId: prop.integrationId,
             userId: prop.userId,
+            integrationUserId: prop.integrationUserId || '',
+            companyId: prop.companyId || localStorage.getItem('companyId') || '',
             key: prop.key,
             value: prop.value,
         };
@@ -120,25 +153,38 @@ export class IntegrationPropertiesPage implements OnInit {
     async save(): Promise<void> {
         try {
             if (this.editMode && this.selectedProperty) {
-                await this.integrationsService.updateIntegrationProperty(this.selectedProperty.id, {
-                    integrationId: this.form.integrationId,
+                const req: UpdateIntegrationPropertyRequest = {
                     userId: this.form.userId,
+                    integrationUserId: this.form.integrationUserId || undefined,
+                    companyId: this.form.companyId,
                     key: this.form.key,
                     value: this.form.value,
                     isBlocked: this.selectedProperty.isBlocked ?? false,
-                });
+                };
+                console.log('Update request:', req);
+                const res = await this.integrationsService.updateIntegrationProperty(this.selectedProperty.id, req);
+                console.log('Update response:', res);
             } else {
-                await this.integrationsService.createIntegrationProperty({
-                    integrationId: this.form.integrationId,
+                const req: CreateIntegrationPropertyRequest = {
                     userId: this.form.userId,
+                    integrationUserId: this.form.integrationUserId || undefined,
+                    companyId: this.form.companyId,
                     key: this.form.key,
                     value: this.form.value,
-                });
+                };
+                console.log('Create request:', req);
+                const res = await this.integrationsService.createIntegrationProperty(req);
+                console.log('Create response:', res);
             }
             this.showModal = false;
             await this.refreshProperties();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Save error:', err);
+            const msg =
+                err.status === 0
+                    ? `Sunucuya bağlanılamadı (CORS veya ağ hatası).\nURL: ${err.url}\nMesaj: ${err.message}`
+                    : `Hata ${err.status}: ${err.error?.message || err.error?.title || JSON.stringify(err.error)}`;
+            alert('İşlem hatası:\n' + msg);
         }
     }
 
@@ -155,13 +201,15 @@ export class IntegrationPropertiesPage implements OnInit {
 
     async toggleBlock(prop: IntegrationProperty): Promise<void> {
         try {
-            await this.integrationsService.updateIntegrationProperty(prop.id, {
-                integrationId: prop.integrationId,
+            const req: UpdateIntegrationPropertyRequest = {
                 userId: prop.userId,
+                integrationUserId: prop.integrationUserId,
+                companyId: prop.companyId,
                 key: prop.key,
                 value: prop.value,
                 isBlocked: !prop.isBlocked,
-            });
+            };
+            await this.integrationsService.updateIntegrationProperty(prop.id, req);
             await this.refreshProperties();
         } catch (err) {
             console.error('Toggle error:', err);
@@ -172,6 +220,7 @@ export class IntegrationPropertiesPage implements OnInit {
         try {
             const resp = await this.integrationsService.getIntegrationProperties();
             this.properties = this.extractArray(resp);
+            this.applyFilterAndPaging();
         } catch (err) {
             console.error('Refresh error:', err);
         }

@@ -20,6 +20,15 @@ export class AiProviderSettingsPage implements OnInit {
     editMode = false;
     selectedProviderSetting: AiProviderSetting | null = null;
 
+    // Datatable filter & pagination
+    filterText = '';
+    filteredItems: AiProviderSetting[] = [];
+    pagedItems: AiProviderSetting[] = [];
+    currentPage = 1;
+    pageSize = 10;
+    totalPages = 1;
+    totalPagesArray: number[] = [];
+
     form: any = {
         aiProviderId: '',
         settingId: '',
@@ -33,11 +42,37 @@ export class AiProviderSettingsPage implements OnInit {
         this.loadSettings();
     }
 
+    onFilterChange(): void {
+        this.currentPage = 1;
+        this.applyFilterAndPaging();
+    }
+
+    setPage(page: number): void {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.applyFilterAndPaging();
+    }
+
+    applyFilterAndPaging(): void {
+        const filter = (this.filterText || '').toLowerCase();
+        this.filteredItems = this.providerSettings.filter(item =>
+            (item.providerFirmDescription || this.getProviderName(item.aiProviderId)).toLowerCase().includes(filter) ||
+            (item.settingDescription || this.getSettingName(item.settingId)).toLowerCase().includes(filter)
+        );
+        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
+        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
+        const start = (this.currentPage - 1) * this.pageSize;
+        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+    }
+
     async loadProviderSettings(): Promise<void> {
         this.loading = true;
         try {
             const response = await this.aiService.getProviderSettings();
-            this.providerSettings = this.extractArray(response);
+            const data = response?.data || response;
+            this.providerSettings = this.extractArray(data?.items || data);
+            this.applyFilterAndPaging();
         } catch (err) {
             console.error('AiProviderSettings load error:', err);
         } finally {
@@ -48,7 +83,8 @@ export class AiProviderSettingsPage implements OnInit {
     async loadProviders(): Promise<void> {
         try {
             const response = await this.aiService.getProviders();
-            this.providers = this.extractArray(response);
+            const data = response?.data || response;
+            this.providers = this.extractArray(data?.items || data);
         } catch (err) {
             console.error('Providers load error:', err);
         }
@@ -57,7 +93,8 @@ export class AiProviderSettingsPage implements OnInit {
     async loadSettings(): Promise<void> {
         try {
             const response = await this.aiService.getSettings();
-            this.settings = this.extractArray(response);
+            const data = response?.data || response;
+            this.settings = this.extractArray(data?.items || data);
         } catch (err) {
             console.error('Settings load error:', err);
         }

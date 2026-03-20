@@ -22,6 +22,15 @@ export class AiAssistantsPage implements OnInit {
     editMode = false;
     selectedAssistant: AiAssistant | null = null;
 
+    // Datatable filter & pagination
+    filterText = '';
+    filteredItems: AiAssistant[] = [];
+    pagedItems: AiAssistant[] = [];
+    currentPage = 1;
+    pageSize = 10;
+    totalPages = 1;
+    totalPagesArray: number[] = [];
+
     // Knowledge for selected assistant
     knowledgeList: AiKnowledge[] = [];
     newKnowledge: { prop: string; value: string }[] = [];
@@ -44,11 +53,38 @@ export class AiAssistantsPage implements OnInit {
         this.loadModels();
     }
 
+    onFilterChange(): void {
+        this.currentPage = 1;
+        this.applyFilterAndPaging();
+    }
+
+    setPage(page: number): void {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.applyFilterAndPaging();
+    }
+
+    applyFilterAndPaging(): void {
+        const filter = (this.filterText || '').toLowerCase();
+        this.filteredItems = this.assistants.filter(item =>
+            (item.name || '').toLowerCase().includes(filter) ||
+            (item.providerFirmDescription || '').toLowerCase().includes(filter) ||
+            (item.modelName || '').toLowerCase().includes(filter)
+        );
+        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
+        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
+        const start = (this.currentPage - 1) * this.pageSize;
+        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+    }
+
     async loadAssistants(): Promise<void> {
         this.loading = true;
         try {
             const response = await this.aiService.getAssistants();
-            this.assistants = this.extractArray(response);
+            const data = response?.data || response;
+            this.assistants = this.extractArray(data?.items || data);
+            this.applyFilterAndPaging();
         } catch (err) {
             console.error('AiAssistants load error:', err);
         } finally {
@@ -59,7 +95,8 @@ export class AiAssistantsPage implements OnInit {
     async loadProviders(): Promise<void> {
         try {
             const response = await this.aiService.getProviders();
-            this.providers = this.extractArray(response);
+            const data = response?.data || response;
+            this.providers = this.extractArray(data?.items || data);
         } catch (err) {
             console.error('Providers load error:', err);
         }
@@ -68,7 +105,8 @@ export class AiAssistantsPage implements OnInit {
     async loadModels(): Promise<void> {
         try {
             const response = await this.aiService.getModels();
-            this.models = this.extractArray(response);
+            const data = response?.data || response;
+            this.models = this.extractArray(data?.items || data);
             this.filteredModels = this.models;
         } catch (err) {
             console.error('Models load error:', err);

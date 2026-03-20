@@ -786,7 +786,8 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
         try {
             await this.conversationTagsService.create({
                 conversationId: this.selectedConversation.id,
-                tagId: tag.id
+                tagId: tag.id,
+                companyId: localStorage.getItem('companyId') || ''
             });
             await this.loadConversationTags(this.selectedConversation.id);
             this.showTagDropdown = false;
@@ -816,6 +817,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
             await this.conversationNotesService.create({
                 conversationId: this.selectedConversation.id,
                 userId: this.authStateService.profile?.userId || '',
+                companyId: localStorage.getItem('companyId') || '',
                 noteText: this.newNoteContent
             });
             await this.loadConversationNotes(this.selectedConversation.id);
@@ -861,7 +863,8 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
         try {
             await this.conversationSegmentsService.add({
                 conversationId: this.selectedConversation.id,
-                segmentId: segment.id
+                segmentId: segment.id,
+                companyId: localStorage.getItem('companyId') || ''
             });
             await this.loadConversationSegments(this.selectedConversation.id);
             this.showSegmentDropdown = false;

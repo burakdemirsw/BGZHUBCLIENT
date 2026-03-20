@@ -32,7 +32,7 @@
                                 @for (item of pagedItems; track item.id) {
                                     <tr>
                                         <td>
-                                            <span class="badge bg-light text-dark border font-monospace">{{ item.connectionTypeCode }}</span>
+                                            <span class="badge bg-light text-dark border font-monospace">{{ item.integrationTypeCode }}</span>
                                         </td>
                                         <td class="fw-semibold">{{ item.name }}</td>
                                         <td>
@@ -97,7 +97,7 @@
                     <form>
                         <div class="mb-3">
                             <label class="form-label">Tip Kodu</label>
-                            <input type="text" class="form-control" [(ngModel)]="form.connectionTypeCode" name="connectionTypeCode" required placeholder="ör: WHATSAPP, INSTAGRAM, FACEBOOK">
+                            <input type="text" class="form-control" [(ngModel)]="form.integrationTypeCode" name="integrationTypeCode" required placeholder="ör: WHATSAPP, INSTAGRAM, FACEBOOK">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Ad</label>
@@ -117,7 +117,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
-                    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!form.connectionTypeCode || !form.name || !form.description">
+                    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!form.integrationTypeCode || !form.name">
                         {{ editMode ? 'Güncelle' : 'Kaydet' }}
                     </button>
                 </div>

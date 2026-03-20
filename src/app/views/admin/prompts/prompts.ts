@@ -50,8 +50,10 @@ export class PromptsPage implements OnInit {
                 this.promptsService.getAll(),
                 this.promptTypesService.getAll(),
             ]);
-            this.prompts = this.extractArray(promptsResp);
-            this.promptTypes = this.extractArray(typesResp);
+            const promptsData = promptsResp?.data || promptsResp;
+            const typesData = typesResp?.data || typesResp;
+            this.prompts = this.extractArray(promptsData?.items || promptsData);
+            this.promptTypes = this.extractArray(typesData?.items || typesData);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('Prompts error:', err);

@@ -67,7 +67,8 @@ export class ShortcutTypesPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.shortcutTypesService.getAll();
-            this.items = this.extractArray(response);
+            const data = response?.data || response;
+            this.items = this.extractArray(data?.items || data);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('ShortcutTypes load error:', err);

@@ -98,6 +98,30 @@ private extractArray(response: any): any[] {
 - JWT token `localStorage.getItem('accessToken')` ile alınır
 - `authInterceptor` otomatik `Bearer` header ekler
 - 401 hatası → token sil, `/auth/sign-in`'e yönlendir
+
+## LocalStorage Kullanıcı Bilgileri
+
+**`localStorage.getItem('userProfile')`** içinde JSON olarak saklanır:
+```typescript
+interface UserProfile {
+    userId: string;      // "0fec2e64-a8fe-430f-bddc-033885489d4f"
+    companyId: string;   // "aca432f9-ec4b-41ad-87ef-22c946769bdf"
+    name: string;        // "burak"
+    surname: string;     // "demir"
+    lastLoginDate: string;
+}
+```
+
+**Kullanım:**
+```typescript
+// companyId almak için:
+const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+const companyId = profile.companyId || '';
+
+// veya AuthStateService kullan:
+this.authStateService.profile?.companyId
+this.authStateService.profile?.userId
+```
 - `AuthGuard` JWT expiry + menü bazlı yetki kontrolü yapar
 
 ## Build & Deploy

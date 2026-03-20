@@ -25,7 +25,7 @@ export class TagsPage implements OnInit {
     showModal = false;
     editMode = false;
     selectedItem: Tag | null = null;
-    form: any = { name: '', color: '#3b82f6', userId: '' };
+    form: any = { name: '', colorCode: '#3b82f6', userId: '' };
 
     constructor(private service: TagsService) {}
 
@@ -65,7 +65,7 @@ export class TagsPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedItem = null;
-        this.form = { name: '', color: '#3b82f6', userId: '' };
+        this.form = { name: '', colorCode: '#3b82f6', userId: '' };
         this.showModal = true;
     }
 
@@ -74,7 +74,7 @@ export class TagsPage implements OnInit {
         this.selectedItem = item;
         this.form = {
             name: item.name || '',
-            color: item.color || '#3b82f6',
+            colorCode: item.color || '#3b82f6',
             userId: item.userId || '',
         };
         this.showModal = true;
@@ -85,16 +85,16 @@ export class TagsPage implements OnInit {
             if (this.editMode && this.selectedItem) {
                 const req: UpdateTagRequest = {
                     name: this.form.name,
-                    color: this.form.color,
-                    userId: this.form.userId,
+                    colorCode: this.form.colorCode,
                     isBlocked: this.selectedItem.isBlocked || false,
                 };
                 await this.service.update(this.selectedItem.id, req);
             } else {
                 const req: CreateTagRequest = {
+                    userId: localStorage.getItem('userId') || '',
+                    companyId: localStorage.getItem('companyId') || '',
                     name: this.form.name,
-                    color: this.form.color,
-                    userId: this.form.userId,
+                    colorCode: this.form.colorCode,
                 };
                 await this.service.create(req);
             }

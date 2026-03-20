@@ -99,6 +99,7 @@ export class SegmentsPage implements OnInit {
             } else {
                 const req: CreateSegmentRequest = {
                     userId: this.authStateService.profile?.userId || '',
+                    companyId: localStorage.getItem('companyId') || '',
                     name: this.form.name,
                     description: this.form.description,
                     colorCode: this.form.colorCode

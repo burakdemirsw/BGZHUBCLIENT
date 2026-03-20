@@ -2,6 +2,7 @@ export interface Customer {
   id: string;
   userId?: string;
   socialMediaAccountId?: string;
+  companyId?: string;
   platformAccountId?: string;
   platformUsername?: string;
   platformName?: string;
@@ -25,6 +26,7 @@ export interface Customer {
 export interface CreateCustomerRequest {
   userId: string;
   socialMediaAccountId: string;
+  companyId: string;
   platformAccountId: string;
   platformUsername?: string;
   platformName?: string;
@@ -33,6 +35,7 @@ export interface CreateCustomerRequest {
 export interface UpdateCustomerRequest {
   userId: string;
   socialMediaAccountId: string;
+  companyId: string;
   platformAccountId: string;
   platformUsername?: string;
   platformName?: string;

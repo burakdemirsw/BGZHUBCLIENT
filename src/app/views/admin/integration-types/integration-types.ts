@@ -30,7 +30,7 @@ export class IntegrationTypesPage implements OnInit {
     totalPagesArray: number[] = [];
 
     form: any = {
-        connectionTypeCode: '',
+        integrationTypeCode: '',
         name: '',
         description: '',
         isBlocked: false,
@@ -58,7 +58,7 @@ export class IntegrationTypesPage implements OnInit {
         this.filteredItems = this.items.filter(
             i =>
                 i.name.toLowerCase().includes(q) ||
-                i.connectionTypeCode.toLowerCase().includes(q) ||
+                i.integrationTypeCode.toLowerCase().includes(q) ||
                 (i.description || '').toLowerCase().includes(q)
         );
         this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
@@ -72,7 +72,8 @@ export class IntegrationTypesPage implements OnInit {
         try {
             const response = await this.integrationTypesService.getAll();
             console.log('IntegrationTypes response:', response);
-            this.items = this.extractArray(response);
+            const data = response?.data || response;
+            this.items = this.extractArray(data?.items || data);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('IntegrationTypes error:', err);
@@ -84,8 +85,16 @@ export class IntegrationTypesPage implements OnInit {
     private extractArray(response: any): any[] {
         if (Array.isArray(response)) return response;
         if (response?.$values) return response.$values;
-        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
-        if (response?.items) return response.items;
+        if (response?.data) {
+            if (Array.isArray(response.data)) return response.data;
+            if (response.data?.$values) return response.data.$values;
+            return [response.data];
+        }
+        if (response?.items) {
+            if (Array.isArray(response.items)) return response.items;
+            if (response.items?.$values) return response.items.$values;
+            return response.items;
+        }
         if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
         return [];
     }
@@ -93,7 +102,7 @@ export class IntegrationTypesPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedItem = null;
-        this.form = { connectionTypeCode: '', name: '', description: '', isBlocked: false };
+        this.form = { integrationTypeCode: '', name: '', description: '', isBlocked: false };
         this.showModal = true;
     }
 
@@ -101,7 +110,7 @@ export class IntegrationTypesPage implements OnInit {
         this.editMode = true;
         this.selectedItem = item;
         this.form = {
-            connectionTypeCode: item.connectionTypeCode,
+            integrationTypeCode: item.integrationTypeCode,
             name: item.name,
             description: item.description || '',
             isBlocked: item.isBlocked ?? false,
@@ -113,7 +122,7 @@ export class IntegrationTypesPage implements OnInit {
         try {
             if (this.editMode && this.selectedItem) {
                 const req: UpdateIntegrationTypeRequest = {
-                    connectionTypeCode: this.form.connectionTypeCode,
+                    integrationTypeCode: this.form.integrationTypeCode,
                     name: this.form.name,
                     description: this.form.description,
                     isBlocked: this.form.isBlocked ?? false,
@@ -123,7 +132,7 @@ export class IntegrationTypesPage implements OnInit {
                 console.log('Update response:', res);
             } else {
                 const req: CreateIntegrationTypeRequest = {
-                    connectionTypeCode: this.form.connectionTypeCode,
+                    integrationTypeCode: this.form.integrationTypeCode,
                     name: this.form.name,
                     description: this.form.description,
                 };

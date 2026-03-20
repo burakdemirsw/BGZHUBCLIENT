@@ -9,14 +9,14 @@ export interface Tag {
 }
 
 export interface CreateTagRequest {
-    name: string;
-    color: string;
     userId: string;
+    companyId: string;
+    name: string;
+    colorCode: string;
 }
 
 export interface UpdateTagRequest {
     name: string;
-    color: string;
-    userId: string;
+    colorCode: string;
     isBlocked: boolean;
 }

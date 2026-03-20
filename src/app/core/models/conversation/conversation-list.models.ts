@@ -1,6 +1,7 @@
 export interface ConversationListDescription {
     id: string;
     userId: string;
+    companyId?: string;
     name: string;
     description: string;
     colorCode: string;
@@ -11,6 +12,7 @@ export interface ConversationListDescription {
 
 export interface CreateConversationListDescriptionRequest {
     userId: string;
+    companyId: string;
     name: string;
     description: string;
     colorCode: string;

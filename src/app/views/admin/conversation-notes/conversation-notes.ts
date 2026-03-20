@@ -81,6 +81,7 @@ export class ConversationNotesPage implements OnInit {
                 const req: CreateConversationNoteRequest = {
                     conversationId: this.form.conversationId,
                     userId: this.authStateService.profile?.userId || '',
+                    companyId: localStorage.getItem('companyId') || '',
                     noteText: this.form.noteText,
                 };
                 await this.service.create(req);

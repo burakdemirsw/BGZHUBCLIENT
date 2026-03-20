@@ -17,6 +17,12 @@ export class AiProvidersService {
     return this.http.get_new({ controller: 'AiProviders' });
   }
 
+  getProvidersPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+    let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
+    return this.http.get_new({ controller: 'AiProviders', action });
+  }
+
   getProviderById(id: string): Promise<any> {
     return this.http.get_new({ controller: 'AiProviders', action: id });
   }
@@ -38,6 +44,12 @@ export class AiProvidersService {
     return this.http.get_new({ controller: 'AiSettings' });
   }
 
+  getSettingsPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+    let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
+    return this.http.get_new({ controller: 'AiSettings', action });
+  }
+
   getSettingById(id: string): Promise<any> {
     return this.http.get_new({ controller: 'AiSettings', action: id });
   }
@@ -57,6 +69,12 @@ export class AiProvidersService {
   // ── AiProviderSettings ──
   getProviderSettings(): Promise<any> {
     return this.http.get_new({ controller: 'AiProviderSettings' });
+  }
+
+  getProviderSettingsPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+    let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
+    return this.http.get_new({ controller: 'AiProviderSettings', action });
   }
 
   getProviderSettingById(id: string): Promise<any> {
@@ -88,6 +106,12 @@ export class AiProvidersService {
     return this.http.get_new({ controller: 'AiModels' });
   }
 
+  getModelsPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+    let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
+    return this.http.get_new({ controller: 'AiModels', action });
+  }
+
   getModelById(id: string): Promise<any> {
     return this.http.get_new({ controller: 'AiModels', action: id });
   }
@@ -117,6 +141,12 @@ export class AiProvidersService {
     return this.http.get_new({ controller: 'AiAssistants' });
   }
 
+  getAssistantsPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+    let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
+    return this.http.get_new({ controller: 'AiAssistants', action });
+  }
+
   getAssistantById(id: string): Promise<any> {
     return this.http.get_new({ controller: 'AiAssistants', action: id });
   }
@@ -140,6 +170,12 @@ export class AiProvidersService {
   // ── AiKnowledge ──
   getKnowledge(): Promise<any> {
     return this.http.get_new({ controller: 'Ai', action: 'knowledge' });
+  }
+
+  getKnowledgePaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+    let action = `knowledge?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
+    return this.http.get_new({ controller: 'Ai', action });
   }
 
   getKnowledgeById(id: string): Promise<any> {

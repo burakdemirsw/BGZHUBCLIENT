@@ -56,6 +56,11 @@ export class IntegrationsService {
     return this.http.get_new({ controller: 'Integrations', action: `users/by-user/${userId}` });
   }
 
+  /** CompanyId'ye göre integration user'ları özet bilgilerle getirir */
+  getIntegrationUsersByCompany(companyId: string): Promise<any> {
+    return this.http.get_new({ controller: 'Integrations', action: `users/by-company/${companyId}` });
+  }
+
   createIntegrationUser(request: CreateIntegrationUserRequest): Promise<any> {
     return this.http.post({ controller: 'Integrations', action: 'users' }, request);
   }

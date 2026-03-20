@@ -1,22 +1,22 @@
 export interface IntegrationType {
   id: string;
-  connectionTypeCode: string;
+  integrationTypeCode: string;
   name: string;
-  description: string;
+  description?: string;
   isBlocked?: boolean;
   createdDate?: string;
   updatedDate?: string;
 }
 
 export interface CreateIntegrationTypeRequest {
-  connectionTypeCode: string;
+  integrationTypeCode: string;
   name: string;
-  description: string;
+  description?: string;
 }
 
 export interface UpdateIntegrationTypeRequest {
-  connectionTypeCode: string;
+  integrationTypeCode: string;
   name: string;
-  description: string;
+  description?: string;
   isBlocked: boolean;
 }

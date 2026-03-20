@@ -32,7 +32,7 @@ export class ConversationListDescriptionsPage implements OnInit {
     editMode = false;
     selectedItem: ConversationListDescription | null = null;
     form: any = {
-        userId: '', name: '', description: '', colorCode: '#6c757d'
+        userId: '', companyId: '', name: '', description: '', colorCode: '#6c757d'
     };
 
     constructor(
@@ -80,7 +80,7 @@ export class ConversationListDescriptionsPage implements OnInit {
     openAdd(): void {
         this.editMode = false;
         this.selectedItem = null;
-        this.form = { userId: '', name: '', description: '', colorCode: '#6c757d' };
+        this.form = { userId: '', companyId: localStorage.getItem('companyId') || '', name: '', description: '', colorCode: '#6c757d' };
         this.showModal = true;
     }
 
@@ -110,6 +110,7 @@ export class ConversationListDescriptionsPage implements OnInit {
             } else {
                 const req: CreateConversationListDescriptionRequest = {
                     userId: this.form.userId,
+                    companyId: this.form.companyId || localStorage.getItem('companyId') || '',
                     name: this.form.name,
                     description: this.form.description,
                     colorCode: this.form.colorCode,

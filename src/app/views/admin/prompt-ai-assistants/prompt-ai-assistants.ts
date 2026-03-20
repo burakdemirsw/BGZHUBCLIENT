@@ -50,8 +50,10 @@ export class PromptAiAssistantsPage implements OnInit {
                 this.promptsService.getAll(),
                 this.aiProvidersService.getAssistants(),
             ]);
-            this.prompts = this.extractArray(promptsResp);
-            this.assistants = this.extractArray(assistantsResp);
+            const promptsData = promptsResp?.data || promptsResp;
+            const assistantsData = assistantsResp?.data || assistantsResp;
+            this.prompts = this.extractArray(promptsData?.items || promptsData);
+            this.assistants = this.extractArray(assistantsData?.items || assistantsData);
         } catch (err) {
             console.error('LoadInitialData error:', err);
         } finally {

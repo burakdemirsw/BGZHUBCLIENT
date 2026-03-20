@@ -58,6 +58,9 @@ import { ShortcutsPage } from './shortcuts/shortcuts';
 import { OrderStatusesPage } from './order-statuses/order-statuses';
 import { PaymentStatusesPage } from './payment-statuses/payment-statuses';
 import { PaymentTypesPage } from './payment-types/payment-types';
+import { AdminNotesPage } from './admin-notes/admin-notes';
+import { UserTypesPage } from './user-types/user-types';
+import { OrderCreatePage } from './order-create/order-create';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -418,6 +421,30 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/payment-types',
         component: PaymentTypesPage,
         data: { title: 'Ödeme Tipleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/notes',
+        component: AdminNotesPage,
+        data: { title: 'Notlar' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/user-types',
+        component: UserTypesPage,
+        data: { title: 'Kullanıcı Türleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/orders/create',
+        component: OrderCreatePage,
+        data: { title: 'Sipariş Oluştur' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/orders/:id',
+        component: OrderCreatePage,
+        data: { title: 'Sipariş Detay' },
         canActivate: [AuthGuard],
     },
 ];

@@ -2,6 +2,7 @@ export interface IntegrationConnection {
   id: string;
   integrationId: string;
   connectionTypeId: string;
+  companyId: string;
   name: string;
   url: string;
   integrationName?: string;
@@ -14,6 +15,7 @@ export interface IntegrationConnection {
 export interface CreateIntegrationConnectionRequest {
   integrationId: string;
   connectionTypeId: string;
+  companyId: string;
   name: string;
   url: string;
 }
@@ -21,6 +23,7 @@ export interface CreateIntegrationConnectionRequest {
 export interface UpdateIntegrationConnectionRequest {
   integrationId: string;
   connectionTypeId: string;
+  companyId: string;
   name: string;
   url: string;
   isBlocked: boolean;

@@ -20,6 +20,12 @@ export class TeamsService {
     return this.http.get_new({ controller: 'Teams' });
   }
 
+  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+    let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
+    return this.http.get_new({ controller: 'Teams', action });
+  }
+
   getById(id: string): Promise<any> {
     return this.http.get_new({ controller: 'Teams' }, id);
   }
