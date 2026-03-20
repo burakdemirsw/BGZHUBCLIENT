@@ -17,7 +17,7 @@
                     [class.active]="theme() === option.layoutTheme"
                 >
                     <lucide-angular [img]="option.icon" class="me-2 fs-16"></lucide-angular>
-                    <span class="flex-grow-1">{{ toTitleCase(option.layoutTheme) }}</span>
+                    <span class="flex-grow-1">{{ option.label }}</span>
                     <input
                         type="radio"
                         class="form-check-input ms-auto"

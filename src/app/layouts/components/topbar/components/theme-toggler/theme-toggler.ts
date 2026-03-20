@@ -13,10 +13,10 @@ import {NgbDropdownModule} from '@ng-bootstrap/ng-bootstrap';
 export class ThemeToggler{
     theme = computed(() => this.layout.state().theme);
 
-    themeOptions: { layoutTheme: LayoutThemeType; icon: LucideIconData }[] = [
-        { layoutTheme: 'light', icon: LucideSun },
-        { layoutTheme: 'dark', icon: LucideMoon },
-        { layoutTheme: 'system', icon: LucideMonitorCog },
+    themeOptions: { layoutTheme: LayoutThemeType; icon: LucideIconData; label: string }[] = [
+        { layoutTheme: 'light', icon: LucideSun, label: 'Açık' },
+        { layoutTheme: 'dark', icon: LucideMoon, label: 'Koyu' },
+        { layoutTheme: 'system', icon: LucideMonitorCog, label: 'Sistem' },
     ];
   constructor(public layout: LayoutStoreService) {
   }
