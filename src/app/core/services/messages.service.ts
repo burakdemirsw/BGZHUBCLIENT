@@ -40,23 +40,54 @@ export class MessagesService {
     messageContent: string;
     source?: string;
     platformMessageId?: string | null;
-    file?: string | null;
-    fileType?: string | null;
+    file?: File | null;
     storyUrl?: string | null;
     createdUserId?: string | null;
   }): Promise<any> {
+    const formData = new FormData();
+    formData.append('ConversationId', request.conversationId);
+    formData.append('MessageContent', request.messageContent);
+    formData.append('Source', request.source ?? 'agent');
+    if (request.platformMessageId) formData.append('PlatformMessageId', request.platformMessageId);
+    if (request.storyUrl) formData.append('StoryUrl', request.storyUrl);
+    if (request.createdUserId) formData.append('CreatedUserId', request.createdUserId);
+    if (request.file) formData.append('File', request.file, request.file.name);
+
     return await this.httpClientService.post(
       { controller: 'Messages' },
-      {
-        conversationId: request.conversationId,
-        messageContent: request.messageContent,
-        source: request.source ?? 'agent',
-        platformMessageId: request.platformMessageId ?? null,
-        file: request.file ?? null,
-        fileType: request.fileType ?? null,
-        storyUrl: request.storyUrl ?? null,
-        createdUserId: request.createdUserId ?? null,
-      }
+      formData
+    );
+  }
+
+  async sendMessageWithFile(request: {
+    conversationId: string;
+    messageContent: string;
+    file: File;
+    source?: string;
+    createdUserId?: string | null;
+  }): Promise<any> {
+    const formData = new FormData();
+    formData.append('ConversationId', request.conversationId);
+    formData.append('MessageContent', request.messageContent);
+    formData.append('File', request.file, request.file.name);
+    formData.append('Source', request.source ?? 'agent');
+    if (request.createdUserId) formData.append('CreatedUserId', request.createdUserId);
+
+    return await this.httpClientService.post(
+      { controller: 'Messages', action: 'with-file' },
+      formData
+    );
+  }
+
+  async testAiChat(request: {
+    conversationId: string;
+    companyId: string;
+    message: string;
+    userId?: string;
+  }): Promise<any> {
+    return await this.httpClientService.post(
+      { controller: 'Webhook', action: 'test/ai-chat' },
+      request
     );
   }
 

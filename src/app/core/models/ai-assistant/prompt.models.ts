@@ -1,23 +1,32 @@
 export interface Prompt {
   id: string;
+  promtTypeId?: string;
   promptText?: string;
   order: number;
   isFirst: boolean;
+  userId?: string;
+  companyId?: string;
   isBlocked?: boolean;
   createdDate?: string;
   updatedDate?: string;
 }
 
 export interface CreatePromptRequest {
+  promtTypeId?: string;
   promptText: string;
   order: number;
   isFirst: boolean;
+  userId?: string;
+  companyId?: string;
 }
 
 export interface UpdatePromptRequest {
+  promtTypeId?: string;
   promptText: string;
   order: number;
   isFirst: boolean;
+  userId?: string;
+  companyId?: string;
 }
 
 // PromptAiAssistant junction tablosu
@@ -27,6 +36,8 @@ export interface PromptAiAssistant {
   aiAssistantId: string;
   order: number;
   isFirst: boolean;
+  userId?: string;
+  companyId?: string;
   isBlocked?: boolean;
   createdDate?: string;
   updatedDate?: string;
@@ -39,6 +50,8 @@ export interface CreatePromptAiAssistantRequest {
   aiAssistantId: string;
   order: number;
   isFirst: boolean;
+  userId?: string;
+  companyId?: string;
 }
 
 export interface UpdatePromptAiAssistantRequest {
@@ -46,4 +59,24 @@ export interface UpdatePromptAiAssistantRequest {
   aiAssistantId: string;
   order: number;
   isFirst: boolean;
+  userId?: string;
+  companyId?: string;
+}
+
+// PromptType
+export interface PromptType {
+  id: string;
+  type?: string;
+  isBlocked?: boolean;
+  createdDate?: string;
+  updatedDate?: string;
+}
+
+export interface CreatePromptTypeRequest {
+  type: string;
+}
+
+export interface UpdatePromptTypeRequest {
+  type: string;
+  isBlocked: boolean;
 }

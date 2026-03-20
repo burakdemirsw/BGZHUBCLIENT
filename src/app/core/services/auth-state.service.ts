@@ -5,6 +5,7 @@ export interface UserProfile {
   name: string;
   surname: string;
   lastLoginDate: string;
+  companyId: string;
 }
 
 const PROFILE_KEY = 'userProfile';

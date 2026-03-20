@@ -274,12 +274,25 @@
                         }
 
                         <!-- Agent message -->
-                        @if (msg.source === 'agent') {
+                        @if (msg.source === 'agent' || msg.source === 'user' || msg.source === 'assistant') {
                             <div class="message-row agent" @messageAnim>
                                 <div class="message-group agent-group">
                                     <div class="message-bubble agent-bubble">
-                                        <p class="mb-0" style="white-space: pre-line;">{{ msg.text }}</p>
+                                        @if (msg.text) {
+                                            <p class="mb-0" style="white-space: pre-line;">{{ msg.text }}</p>
+                                        }
                                     </div>
+                                    @if (msg.imageUrl) {
+                                        <div class="message-image agent-image">
+                                            <img [src]="msg.imageUrl" alt="Attached image" loading="lazy">
+                                        </div>
+                                    }
+                                    @if (msg.file && msg.fileType && !msg.fileType.startsWith('image/')) {
+                                        <div class="message-file-attachment">
+                                            <i [class]="getFileIcon(msg.fileType)" class="me-2"></i>
+                                            <span>Dosya eki</span>
+                                        </div>
+                                    }
                                     <span class="message-time">Seen · {{ msg.createdDate }}</span>
                                 </div>
                                 <div class="message-avatar agent-avatar">
@@ -348,6 +361,26 @@
                     }
                     <textarea class="chat-textarea" rows="3" placeholder="Mesajınızı yazın... ( / ile kısayol kullanın)"
                         [(ngModel)]="newMessage" (keydown)="onKeyDown($event)" (input)="onMessageInput()"></textarea>
+
+                    <!-- Pending file preview -->
+                    @if (pendingFile) {
+                        <div class="pending-file-bar">
+                            @if (pendingFile.preview) {
+                                <img [src]="pendingFile.preview" alt="Preview" class="pending-file-thumb">
+                            } @else {
+                                <div class="pending-file-icon">
+                                    <i [class]="getFileIcon(pendingFile.type)"></i>
+                                </div>
+                            }
+                            <div class="pending-file-info">
+                                <span class="pending-file-name">{{ pendingFile.name }}</span>
+                                <span class="pending-file-size">{{ formatFileSize(pendingFile.size) }}</span>
+                            </div>
+                            <button class="pending-file-remove" (click)="removePendingFile()" title="Kaldır">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    }
                 </div>
                 <div class="chat-input-footer">
                     <div class="chat-input-tools">
@@ -360,16 +393,30 @@
                         <button class="input-tool-btn" title="Emoji">
                             <i class="fa-regular fa-face-smile"></i>
                         </button>
-                        <button class="input-tool-btn" title="Dosya ekle">
+                        <button class="input-tool-btn" title="Dosya ekle" (click)="openFileInput()">
                             <i class="fa-solid fa-paperclip"></i>
                         </button>
-                        <button class="input-tool-btn" title="Görsel">
+                        <button class="input-tool-btn" title="Görsel" (click)="openImageInput()">
                             <i class="fa-solid fa-image"></i>
                         </button>
+                        <!-- Hidden file inputs -->
+                        <input type="file" #fileInput hidden (change)="onFileSelected($event, false)">
+                        <input type="file" #imageInput hidden accept="image/*" (change)="onFileSelected($event, true)">
                     </div>
                     <div class="chat-input-send">
                         <span class="shortcut-hint">/ ile kısayol kullanın</span>
-                        <button class="btn-send" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+                        <button class="btn btn-sm me-2"
+                                [class]="isLastMessageFromCustomer ? 'btn-soft-primary' : 'btn-outline-secondary'"
+                                (click)="sendAiChat()"
+                                [disabled]="!isLastMessageFromCustomer || isAiSending"
+                                title="Son müşteri mesajını AI ile yanıtla">
+                            @if (isAiSending) {
+                                <i class="fa-solid fa-spinner fa-spin me-1"></i>AI düşünüyor...
+                            } @else {
+                                <i class="fa-solid fa-robot me-1"></i>AI Yanıt
+                            }
+                        </button>
+                        <button class="btn-send" (click)="sendMessage()" [disabled]="!newMessage.trim() && !pendingFile">
                             Gönder
                             <i class="fa-solid fa-chevron-down ms-1 small"></i>
                         </button>

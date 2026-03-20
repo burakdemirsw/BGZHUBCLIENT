@@ -2,9 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { RequestParameters } from '../models/parameters/requestParameters';
+import { environment } from '../../../environments/environment';
 
-const BASE_URL = 'https://localhost:8991/api';
-// const BASE_URL = 'https://investment-merchant-api.com/api';
+const BASE_URL = environment.apiBaseUrl;
 @Injectable({  
   providedIn: 'root',  
 })  

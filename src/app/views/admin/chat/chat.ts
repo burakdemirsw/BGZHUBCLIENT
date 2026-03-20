@@ -183,6 +183,11 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
 
     private shouldScroll = false;
 
+    // File upload
+    @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+    @ViewChild('imageInput') imageInput!: ElementRef<HTMLInputElement>;
+    pendingFile: { file: File; name: string; type: string; size: number; preview?: string } | null = null;
+
     ngOnInit(): void {
         // content-page scroll'u engelle
         this.contentPageEl = document.querySelector('.content-page');
@@ -346,13 +351,122 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     isSending = false;
+    isAiSending = false;
+
+    /** Son mesaj müşteriden mi geldi? */
+    get isLastMessageFromCustomer(): boolean {
+        if (this.messages.length === 0) return false;
+        const last = this.messages[this.messages.length - 1];
+        return last.source === 'customer';
+    }
+
+    /** AI Chat butonuna basıldığında çalışır */
+    async sendAiChat(): Promise<void> {
+        if (!this.selectedConversation || !this.isLastMessageFromCustomer || this.isAiSending) return;
+
+        const lastCustomerMsg = [...this.messages].reverse().find(m => m.source === 'customer');
+        if (!lastCustomerMsg) return;
+
+        const conversationId = this.selectedConversation.id;
+        const companyId = this.authStateService.profile?.companyId || '';
+        const userId = this.authStateService.profile?.userId || '';
+
+        this.isAiSending = true;
+        try {
+            const response = await this.messagesService.testAiChat({
+                conversationId,
+                companyId,
+                message: lastCustomerMsg.text,
+                userId: userId || undefined,
+            });
+            console.log('✅ AI Chat yanıtı:', response);
+
+            // Mesajları yeniden yükle (AI yanıtı SignalR ile de gelebilir)
+            await this.loadMessages(conversationId);
+        } catch (err: any) {
+            console.error('❌ AI Chat hatası:', err);
+            const msg = err.status === 0
+                ? `Sunucuya bağlanılamadı.`
+                : `Hata ${err.status}: ${err.error?.message || err.error?.title || JSON.stringify(err.error)}`;
+            alert('AI Chat hatası:\n' + msg);
+        } finally {
+            this.isAiSending = false;
+        }
+    }
+
+    // ── File Upload ──
+    openFileInput(): void {
+        this.fileInput?.nativeElement?.click();
+    }
+
+    openImageInput(): void {
+        this.imageInput?.nativeElement?.click();
+    }
+
+    onFileSelected(event: Event, isImage: boolean = false): void {
+        const input = event.target as HTMLInputElement;
+        const selectedFile = input.files?.[0];
+        if (!selectedFile) return;
+
+        // 10MB limit
+        if (selectedFile.size > 10 * 1024 * 1024) {
+            alert('Dosya boyutu en fazla 10MB olabilir.');
+            input.value = '';
+            return;
+        }
+
+        if (selectedFile.type.startsWith('image/')) {
+            // Görsel ise önizleme için data URL oluştur
+            const reader = new FileReader();
+            reader.onload = () => {
+                this.pendingFile = {
+                    file: selectedFile,
+                    name: selectedFile.name,
+                    type: selectedFile.type,
+                    size: selectedFile.size,
+                    preview: reader.result as string
+                };
+            };
+            reader.readAsDataURL(selectedFile);
+        } else {
+            this.pendingFile = {
+                file: selectedFile,
+                name: selectedFile.name,
+                type: selectedFile.type,
+                size: selectedFile.size
+            };
+        }
+        input.value = ''; // aynı dosyanın tekrar seçilebilmesi için
+    }
+
+    removePendingFile(): void {
+        this.pendingFile = null;
+    }
+
+    getFileIcon(type: string): string {
+        if (type.startsWith('image/')) return 'fa-solid fa-image';
+        if (type.includes('pdf')) return 'fa-solid fa-file-pdf';
+        if (type.includes('word') || type.includes('document')) return 'fa-solid fa-file-word';
+        if (type.includes('excel') || type.includes('spreadsheet')) return 'fa-solid fa-file-excel';
+        if (type.includes('video')) return 'fa-solid fa-file-video';
+        if (type.includes('audio')) return 'fa-solid fa-file-audio';
+        if (type.includes('zip') || type.includes('rar') || type.includes('archive')) return 'fa-solid fa-file-zipper';
+        return 'fa-solid fa-file';
+    }
+
+    formatFileSize(bytes: number): string {
+        if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        if (bytes >= 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return bytes + ' B';
+    }
 
     async sendMessage(): Promise<void> {
-        if (!this.newMessage.trim() || !this.selectedConversation || this.isSending) return;
+        if ((!this.newMessage.trim() && !this.pendingFile) || !this.selectedConversation || this.isSending) return;
 
         const text = this.newMessage.trim();
         const conversationId = this.selectedConversation.id;
         const isNote = this.replyType === 'note';
+        const fileData = this.pendingFile;
 
         // Optimistic UI: mesajı hemen göster
         const tempId = 'temp_' + Date.now();
@@ -360,20 +474,24 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
             id: tempId,
             conversationId,
             source: 'agent',
-            text,
+            text: text || (fileData ? `📎 ${fileData.name}` : ''),
+            imageUrl: fileData?.preview || undefined,
+            fileType: fileData?.type || undefined,
             isNote,
             createdDate: new Date().toISOString(),
         };
         this.messages.push(optimisticMsg);
         this.newMessage = '';
+        this.pendingFile = null;
         this.shouldScroll = true;
         this.isSending = true;
 
         try {
             const response = await this.messagesService.sendMessage({
                 conversationId,
-                messageContent: text,
+                messageContent: text || (fileData ? fileData.name : ''),
                 source: isNote ? 'note' : 'agent',
+                file: fileData?.file || null,
             });
 
             // API'den dönen gerçek mesaj ID'sini güncelle

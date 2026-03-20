@@ -21,4 +21,5 @@ export interface AuthResponse {
   name: string;
   surname: string;
   lastLoginDate: string;
+  companyId: string;
 }

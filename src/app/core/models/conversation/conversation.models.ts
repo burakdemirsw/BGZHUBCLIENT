@@ -62,7 +62,7 @@ export interface ConversationListResponse {
 // Chat Message (Mesaj)
 // ========================
 
-export type MessageSource = 'customer' | 'agent' | 'system' | 'ai';
+export type MessageSource = 'customer' | 'agent' | 'system' | 'ai' | 'user' | 'assistant';
 
 export interface ChatMessage {
     id: string;
@@ -70,6 +70,8 @@ export interface ChatMessage {
     source: MessageSource;
     text: string;
     imageUrl?: string;
+    file?: string | null;
+    fileType?: string | null;
     isNote?: boolean;
     isRead?: boolean;
     createdDate?: string;

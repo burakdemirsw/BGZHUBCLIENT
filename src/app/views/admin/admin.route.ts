@@ -33,6 +33,7 @@ import { ImageSearchPage } from './image-search/image-search';
 import { IntegrationTypesPage } from './integration-types/integration-types';
 import { PromptsPage } from './prompts/prompts';
 import { PromptAiAssistantsPage } from './prompt-ai-assistants/prompt-ai-assistants';
+import { PromptTypesPage } from './prompt-types/prompt-types';
 import { ProductsPage } from './products/products';
 import { ChatPage } from './chat/chat';
 import { ContactTypesPage } from './contact-types/contact-types';
@@ -256,6 +257,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/prompt-ai-assistants',
         component: PromptAiAssistantsPage,
         data: { title: 'Prompt Asistan Atamaları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/prompt-types',
+        component: PromptTypesPage,
+        data: { title: 'Prompt Tipleri' },
         canActivate: [AuthGuard],
     },
     {

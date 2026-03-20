@@ -61,7 +61,8 @@ export class SignIn {
             const name = response?.name ?? response?.data?.name ?? '';
             const surname = response?.surname ?? response?.data?.surname ?? '';
             const lastLoginDate = response?.lastLoginDate ?? response?.data?.lastLoginDate ?? '';
-            this.authState.setProfile({ userId, name, surname, lastLoginDate });
+            const companyId = response?.companyId ?? response?.data?.companyId ?? '';
+            this.authState.setProfile({ userId, name, surname, lastLoginDate, companyId });
 
             // Kullanıcı menülerini yükle
             await this.userMenuService.loadUserMenus();

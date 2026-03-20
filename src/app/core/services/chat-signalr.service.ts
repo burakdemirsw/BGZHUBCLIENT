@@ -31,6 +31,7 @@ export interface NewConversationEvent {
 }
 
 const HUB_URL = 'https://localhost:8991/hubs/chat';
+//const HUB_URL = 'https://investment-merchant-api.com:8991/hubs/chat';
 
 @Injectable({ providedIn: 'root' })
 export class ChatSignalRService implements OnDestroy {

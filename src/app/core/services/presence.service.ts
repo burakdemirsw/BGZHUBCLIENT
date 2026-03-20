@@ -63,8 +63,9 @@ export class PresenceService implements OnDestroy {
     private async fetchOnlineTeamMembers(): Promise<void> {
         if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) return;
         try {
-            const members = await this.connection.invoke<any[]>('GetOnlineTeamMembers');
-            const users: OnlineUser[] = (members || []).map((m: any) => ({
+            const response = await this.connection.invoke<any>('GetOnlineTeamMembers');
+            const members = this.extractArray(response);
+            const users: OnlineUser[] = members.map((m: any) => ({
                 id: m.id || m.Id,
                 name: m.name || m.Name,
                 initials: m.initials || m.Initials || this.getInitials(m.name || m.Name),
@@ -136,6 +137,16 @@ export class PresenceService implements OnDestroy {
     private getInitials(name: string): string {
         if (!name) return '??';
         return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    }
+
+    /** API response'u diziye çevir */
+    private extractArray(response: any): any[] {
+        if (Array.isArray(response)) return response;
+        if (response?.$values) return response.$values;
+        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
+        if (response?.items) return response.items;
+        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
+        return [];
     }
 
     /** İsimden tutarlı renk üret */

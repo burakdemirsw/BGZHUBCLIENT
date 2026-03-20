@@ -243,22 +243,6 @@ paths:
           description: OK
       security:
         - Bearer: []
-  /api/Ai/messages/by-user/{userId}:
-    get:
-      tags:
-        - Ai
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
   /api/Ai/messages/by-conversation/{conversationId}:
     get:
       tags:
@@ -304,22 +288,6 @@ paths:
       security:
         - Bearer: []
   /api/Ai/delete/messages/{id}:
-    post:
-      tags:
-        - Ai
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-      security:
-        - Bearer: []
-  /api/Ai/messages/{id}/mark-read:
     post:
       tags:
         - Ai
@@ -884,6 +852,95 @@ paths:
     post:
       tags:
         - Prompts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/PromptTypes:
+    get:
+      tags:
+        - PromptTypes
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+    post:
+      tags:
+        - PromptTypes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePromptTypeRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreatePromptTypeRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreatePromptTypeRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/PromptTypes/{id}:
+    get:
+      tags:
+        - PromptTypes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/PromptTypes/update/{id}:
+    post:
+      tags:
+        - PromptTypes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePromptTypeRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePromptTypeRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdatePromptTypeRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/PromptTypes/delete/{id}:
+    post:
+      tags:
+        - PromptTypes
       parameters:
         - name: id
           in: path
@@ -2413,15 +2470,26 @@ paths:
         - Messages
       requestBody:
         content:
-          application/json:
+          application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/CreateMessageRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/CreateMessageRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/CreateMessageRequest"
+              type: object
+              properties:
+                ConversationId:
+                  type: string
+                  format: uuid
+                PlatformMessageId:
+                  type: string
+                MessageContent:
+                  type: string
+                File:
+                  $ref: "#/components/schemas/IFormFile"
+                StoryUrl:
+                  type: string
+                Source:
+                  type: string
+                CreatedUserId:
+                  type: string
+                  format: uuid
         required: true
       responses:
         "200":
@@ -2471,6 +2539,34 @@ paths:
           schema:
             type: string
             format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/Messages/with-file:
+    post:
+      tags:
+        - Messages
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                ConversationId:
+                  type: string
+                  format: uuid
+                MessageContent:
+                  type: string
+                File:
+                  $ref: "#/components/schemas/IFormFile"
+                Source:
+                  type: string
+                CreatedUserId:
+                  type: string
+                  format: uuid
+        required: true
       responses:
         "200":
           description: OK
@@ -4116,6 +4212,105 @@ paths:
           schema:
             type: string
             format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/FileUpload/upload:
+    post:
+      tags:
+        - FileUpload
+      parameters:
+        - name: folderId
+          in: query
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  $ref: "#/components/schemas/IFormFile"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/FileUpload/upload-multiple:
+    post:
+      tags:
+        - FileUpload
+      parameters:
+        - name: folderId
+          in: query
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/IFormFile"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/FileUpload/upload-base64:
+    post:
+      tags:
+        - FileUpload
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Base64UploadRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/Base64UploadRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/Base64UploadRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/FileUpload/delete/{fileId}:
+    post:
+      tags:
+        - FileUpload
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+  /api/FileUpload/folder/{folderId}/files:
+    get:
+      tags:
+        - FileUpload
+      parameters:
+        - name: folderId
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: OK
@@ -6176,6 +6371,27 @@ paths:
           description: OK
       security:
         - Bearer: []
+  /api/Webhook/test/ai-chat:
+    post:
+      tags:
+        - Webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestAiChatRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/TestAiChatRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/TestAiChatRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
   /api/Webhook/test/push:
     post:
       tags:
@@ -7882,6 +8098,25 @@ components:
         segmentId:
           type: string
           format: uuid
+    Base64UploadRequest:
+      required:
+        - base64Data
+      type: object
+      properties:
+        base64Data:
+          type: string
+        fileName:
+          type:
+            - "null"
+            - string
+        contentType:
+          type:
+            - "null"
+            - string
+        folderId:
+          type:
+            - "null"
+            - string
     BatchIndexRequest:
       required:
         - productIds
@@ -7949,15 +8184,12 @@ components:
             - string
     CreateAiMessageRequest:
       required:
-        - userId
+        - messageId
         - assistantId
         - conversationId
         - role
-        - messageContent
-        - toolCallId
         - toolName
         - toolArgs
-        - model
         - responseId
         - inputTokens
         - outputTokens
@@ -7966,7 +8198,7 @@ components:
         - source
       type: object
       properties:
-        userId:
+        messageId:
           type: string
           format: uuid
         assistantId:
@@ -7981,23 +8213,11 @@ components:
           type:
             - "null"
             - string
-        messageContent:
-          type:
-            - "null"
-            - string
-        toolCallId:
-          type:
-            - "null"
-            - string
         toolName:
           type:
             - "null"
             - string
         toolArgs:
-          type:
-            - "null"
-            - string
-        model:
           type:
             - "null"
             - string
@@ -8723,52 +8943,6 @@ components:
             - integer
             - string
           format: int32
-    CreateMessageRequest:
-      required:
-        - conversationId
-        - platformMessageId
-        - messageContent
-        - file
-        - fileType
-        - storyUrl
-        - source
-        - createdUserId
-      type: object
-      properties:
-        conversationId:
-          type:
-            - "null"
-            - string
-          format: uuid
-        platformMessageId:
-          type:
-            - "null"
-            - string
-        messageContent:
-          type:
-            - "null"
-            - string
-        file:
-          type:
-            - "null"
-            - string
-        fileType:
-          type:
-            - "null"
-            - string
-        storyUrl:
-          type:
-            - "null"
-            - string
-        source:
-          type:
-            - "null"
-            - string
-        createdUserId:
-          type:
-            - "null"
-            - string
-          format: uuid
     CreateNetGsmSettingRequest:
       required:
         - userName
@@ -9081,6 +9255,8 @@ components:
         - aiAssistantId
         - order
         - isFirst
+        - userId
+        - companyId
       type: object
       properties:
         promptId:
@@ -9097,13 +9273,31 @@ components:
           format: int32
         isFirst:
           type: boolean
+        userId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        companyId:
+          type:
+            - "null"
+            - string
+          format: uuid
     CreatePromptRequest:
       required:
+        - promtTypeId
         - promptText
         - order
         - isFirst
+        - userId
+        - companyId
       type: object
       properties:
+        promtTypeId:
+          type:
+            - "null"
+            - string
+          format: uuid
         promptText:
           type:
             - "null"
@@ -9116,6 +9310,25 @@ components:
           format: int32
         isFirst:
           type: boolean
+        userId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        companyId:
+          type:
+            - "null"
+            - string
+          format: uuid
+    CreatePromptTypeRequest:
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type:
+            - "null"
+            - string
     CreateRequestCategoryRequest:
       required:
         - name
@@ -9865,12 +10078,16 @@ components:
     SyncFeedRequest:
       required:
         - feedUrl
+        - companyId
       type: object
       properties:
         feedUrl:
           type:
             - "null"
             - string
+        companyId:
+          type: string
+          format: uuid
         integrationId:
           type:
             - "null"
@@ -9908,6 +10125,26 @@ components:
         isDefault:
           type: boolean
           default: true
+    TestAiChatRequest:
+      required:
+        - conversationId
+        - companyId
+        - message
+      type: object
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        message:
+          type: string
+        userId:
+          type:
+            - "null"
+            - string
+          format: uuid
     TestContactItem:
       required:
         - contactTypeId
@@ -10078,26 +10315,21 @@ components:
             - string
     UpdateAiMessageRequest:
       required:
-        - userId
+        - messageId
         - assistantId
         - conversationId
         - role
-        - messageContent
-        - toolCallId
         - toolName
         - toolArgs
-        - model
         - responseId
         - inputTokens
         - outputTokens
         - totalTokens
         - costUsd
         - source
-        - isRead
-        - isBlocked
       type: object
       properties:
-        userId:
+        messageId:
           type: string
           format: uuid
         assistantId:
@@ -10112,23 +10344,11 @@ components:
           type:
             - "null"
             - string
-        messageContent:
-          type:
-            - "null"
-            - string
-        toolCallId:
-          type:
-            - "null"
-            - string
         toolName:
           type:
             - "null"
             - string
         toolArgs:
-          type:
-            - "null"
-            - string
-        model:
           type:
             - "null"
             - string
@@ -10168,10 +10388,6 @@ components:
           type:
             - "null"
             - string
-        isRead:
-          type: boolean
-        isBlocked:
-          type: boolean
     UpdateAiModelRequest:
       required:
         - aiProviderId
@@ -11196,6 +11412,8 @@ components:
         - aiAssistantId
         - order
         - isFirst
+        - userId
+        - companyId
       type: object
       properties:
         promptId:
@@ -11212,13 +11430,31 @@ components:
           format: int32
         isFirst:
           type: boolean
+        userId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        companyId:
+          type:
+            - "null"
+            - string
+          format: uuid
     UpdatePromptRequest:
       required:
+        - promtTypeId
         - promptText
         - order
         - isFirst
+        - userId
+        - companyId
       type: object
       properties:
+        promtTypeId:
+          type:
+            - "null"
+            - string
+          format: uuid
         promptText:
           type:
             - "null"
@@ -11230,6 +11466,28 @@ components:
             - string
           format: int32
         isFirst:
+          type: boolean
+        userId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        companyId:
+          type:
+            - "null"
+            - string
+          format: uuid
+    UpdatePromptTypeRequest:
+      required:
+        - type
+        - isBlocked
+      type: object
+      properties:
+        type:
+          type:
+            - "null"
+            - string
+        isBlocked:
           type: boolean
     UpdateRequestCategoryRequest:
       required:
@@ -11776,6 +12034,7 @@ tags:
   - name: AiSettings
   - name: PromptAiAssistants
   - name: Prompts
+  - name: PromptTypes
   - name: Auth
   - name: Menus
   - name: RoleMenus
@@ -11799,6 +12058,7 @@ tags:
   - name: CustomerDescriptions
   - name: Customers
   - name: CustomerTypes
+  - name: FileUpload
   - name: IntegrationConnections
   - name: IntegrationConnectionTypes
   - name: Integrations

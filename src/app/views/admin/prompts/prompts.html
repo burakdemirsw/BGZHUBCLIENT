@@ -22,6 +22,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>#</th>
+                                    <th>Prompt Tipi</th>
                                     <th>Prompt</th>
                                     <th class="text-center">Sıra</th>
                                     <th class="text-center">İlk Prompt</th>
@@ -35,6 +36,9 @@
                                     <tr>
                                         <td>
                                             <span class="badge bg-primary-subtle text-primary">{{ (currentPage - 1) * pageSize + idx + 1 }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info-subtle text-info">{{ getPromptTypeName(item.promtTypeId) }}</span>
                                         </td>
                                         <td>
                                             <span class="text-truncate d-inline-block" style="max-width:400px" [title]="item.promptText || ''">{{ item.promptText ? (item.promptText.length > 80 ? item.promptText.substring(0, 80) + '...' : item.promptText) : '-' }}</span>
@@ -67,7 +71,7 @@
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="7" class="text-center text-muted">Prompt bulunamadı.</td></tr>
+                                    <tr><td colspan="8" class="text-center text-muted">Prompt bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -107,6 +111,15 @@
                 </div>
                 <div class="modal-body">
                     <form>
+                        <div class="mb-3">
+                            <label class="form-label">Prompt Tipi</label>
+                            <select class="form-select" [(ngModel)]="promptForm.promtTypeId" name="promtTypeId">
+                                <option value="">Seçiniz...</option>
+                                @for (pt of promptTypes; track pt.id) {
+                                    <option [value]="pt.id">{{ pt.type }}</option>
+                                }
+                            </select>
+                        </div>
                         <div class="mb-3">
                             <label class="form-label">Prompt Metni</label>
                             <textarea class="form-control" [(ngModel)]="promptForm.promptText" name="promptText" rows="8" placeholder="Prompt metnini giriniz..."></textarea>

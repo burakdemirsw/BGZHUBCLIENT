@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { PromptAiAssistantsService } from '@/app/core/services/prompt-ai-assistants.service';
 import { PromptsService } from '@/app/core/services/prompts.service';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { Prompt, PromptAiAssistant, CreatePromptAiAssistantRequest, UpdatePromptAiAssistantRequest } from '@/app/core/models/ai-assistant/prompt.models';
 import { AiAssistant } from '@/app/core/models/ai-assistant/ai-assistant.models';
 
@@ -35,6 +36,7 @@ export class PromptAiAssistantsPage implements OnInit {
         private promptAiAssistantsService: PromptAiAssistantsService,
         private promptsService: PromptsService,
         private aiProvidersService: AiProvidersService,
+        private authState: AuthStateService,
     ) {}
 
     ngOnInit(): void {
@@ -151,12 +153,14 @@ export class PromptAiAssistantsPage implements OnInit {
     async assignPrompts(): Promise<void> {
         if (!this.selectedAssistantId || this.assignPromptIds.length === 0) return;
         try {
+            const userId = this.authState.profile?.userId || undefined;
             for (const promptId of this.assignPromptIds) {
                 const req: CreatePromptAiAssistantRequest = {
                     promptId: promptId,
                     aiAssistantId: this.selectedAssistantId,
                     order: this.assignForm.order,
                     isFirst: this.assignForm.isFirst,
+                    userId,
                 };
                 await this.promptAiAssistantsService.create(req);
             }
@@ -185,11 +189,13 @@ export class PromptAiAssistantsPage implements OnInit {
     async saveEdit(): Promise<void> {
         if (!this.editingItem) return;
         try {
+            const userId = this.authState.profile?.userId || undefined;
             const req: UpdatePromptAiAssistantRequest = {
                 promptId: this.editingItem.promptId,
                 aiAssistantId: this.selectedAssistantId,
                 order: this.editForm.order,
                 isFirst: this.editForm.isFirst,
+                userId,
             };
             await this.promptAiAssistantsService.update(this.editingItem.id, req);
             this.showEditModal = false;
