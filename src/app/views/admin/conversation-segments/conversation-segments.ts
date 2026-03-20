@@ -51,11 +51,13 @@ export class ConversationSegmentsPage implements OnInit {
     async loadLookups(): Promise<void> {
         try {
             const [segRes, convRes] = await Promise.all([
-                this.segmentsService.getAll(),
+                this.segmentsService.getPaged(1, 1000, ''),
                 this.http.get_new({ controller: 'Conversations' }),
             ]);
-            this.segments = this.extractArray(segRes);
-            this.conversations = this.extractArray(convRes);
+            const segData = segRes?.data || segRes;
+            const convData = convRes?.data || convRes;
+            this.segments = this.extractArray(segData?.items || segData);
+            this.conversations = this.extractArray(convData?.items || convData);
         } catch (err) {
             console.error('Lookup load error:', err);
         }

@@ -61,15 +61,16 @@ export class IntegrationsPage implements OnInit {
     }
 
     setPage(page: number): void {
-        if (page < 1 || page > this.totalPages) return;
+        if (page < 1 || page > this.totalPages) return;   
         this.currentPage = page;
         this.applyFilterAndPaging();
     }
 
     applyFilterAndPaging(): void {
         const q = (this.filterText || '').toLowerCase();
-        this.filteredItems = this.integrations.filter(i =>
-            i.integrationDescription.toLowerCase().includes(q)
+        this.filteredItems = this.integrations.filter((i: any) =>
+            i.integrationDescription.toLowerCase().includes(q) ||
+            (i.integrationTypeName || '').toLowerCase().includes(q)
         );
         this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
         this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
@@ -80,9 +81,9 @@ export class IntegrationsPage implements OnInit {
     async loadIntegrations(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.integrationService.getAll();
-            console.log('Integrations response:', response);
-            this.integrations = this.extractArray(response);
+            const response = await this.integrationService.getPaged(1, 1000);
+            const pagedData = response?.data || response;
+            this.integrations = this.extractArray(pagedData?.items || pagedData);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('Integrations error:', err);

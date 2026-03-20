@@ -8,8 +8,9 @@ import { CreateRequestPriorityRequest, UpdateRequestPriorityRequest } from '../m
 export class RequestPrioritiesService {
     constructor(private http: HttpClientService) {}
 
-    getAll(): Promise<any> {
-        return this.http.get_new({ controller: 'RequestPriorities' });
+    getPaged(page: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+        const params = `?PageNumber=${page}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`;
+        return this.http.get_new({ controller: 'RequestPriorities', action: params });
     }
 
     getById(id: string): Promise<any> {

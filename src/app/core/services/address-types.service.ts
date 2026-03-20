@@ -8,8 +8,11 @@ import { CreateAddressTypeRequest, UpdateAddressTypeRequest } from '../models/cu
 export class AddressTypesService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Promise<any> {
-    return this.http.get_new({ controller: 'AddressTypes' });
+  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+    return this.http.get_new({
+      controller: 'AddressTypes',
+      action: `?PageNumber=${pageNumber}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`
+    });
   }
 
   getById(id: string): Promise<any> {

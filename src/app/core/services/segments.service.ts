@@ -6,8 +6,10 @@ import { CreateSegmentRequest, UpdateSegmentRequest } from '../models/customer/s
 export class SegmentsService {
     constructor(private http: HttpClientService) {}
 
-    getAll(): Promise<any> {
-        return this.http.get_new({ controller: 'Segments' });
+    getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+        let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+        if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
+        return this.http.get_new({ controller: 'Segments', action });
     }
 
     getById(id: string): Promise<any> {

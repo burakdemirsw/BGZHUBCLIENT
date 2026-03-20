@@ -14,13 +14,12 @@ export class SegmentsPage implements OnInit {
     items: Segment[] = [];
     loading = false;
 
-    // Datatable
-    filterText = '';
-    filteredItems: Segment[] = [];
-    pagedItems: Segment[] = [];
+    // Server-side pagination
+    searchTerm = '';
     currentPage = 1;
     pageSize = 10;
     totalPages = 1;
+    totalCount = 0;
     totalPagesArray: number[] = [];
 
     // Modal
@@ -40,12 +39,28 @@ export class SegmentsPage implements OnInit {
         this.loadItems();
     }
 
+    onSearchChange(): void {
+        this.currentPage = 1;
+        this.loadItems();
+    }
+
+    setPage(page: number): void {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.loadItems();
+    }
+
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getAll();
-            this.items = this.extractArray(response);
-            this.applyFilterAndPaging();
+            const response = await this.service.getPaged(this.currentPage, this.pageSize, this.searchTerm);
+            console.log('Segments response:', response);
+            
+            const data = response?.data || response;
+            this.items = this.extractArray(data?.items || data);
+            this.totalCount = data?.totalCount || data?.total || this.items.length;
+            this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('Segments load error:', err);
         } finally {
@@ -114,31 +129,6 @@ export class SegmentsPage implements OnInit {
                 console.error('Delete error:', err);
             }
         }
-    }
-
-    // ────── Datatable ──────
-    onFilterChange(): void {
-        this.currentPage = 1;
-        this.applyFilterAndPaging();
-    }
-
-    setPage(page: number): void {
-        if (page < 1 || page > this.totalPages) return;
-        this.currentPage = page;
-        this.applyFilterAndPaging();
-    }
-
-    applyFilterAndPaging(): void {
-        const q = (this.filterText || '').toLowerCase();
-        this.filteredItems = this.items.filter(
-            i =>
-                (i.name || '').toLowerCase().includes(q) ||
-                (i.description || '').toLowerCase().includes(q)
-        );
-        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
-        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        const start = (this.currentPage - 1) * this.pageSize;
-        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
     }
 
     private extractArray(response: any): any[] {

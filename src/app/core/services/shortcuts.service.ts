@@ -8,8 +8,10 @@ import { CreateShortcutRequest, UpdateShortcutRequest } from '../models/shortcut
 export class ShortcutsService {
     constructor(private http: HttpClientService) {}
 
-    getAll(): Promise<any> {
-        return this.http.get_new({ controller: 'Shortcut' });
+    getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+        let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+        if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
+        return this.http.get_new({ controller: 'Shortcut', action });
     }
 
     getById(id: string): Promise<any> {

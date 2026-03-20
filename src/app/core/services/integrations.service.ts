@@ -15,6 +15,10 @@ export class IntegrationsService {
     return this.http.get_new({ controller: 'Integrations' });
   }
 
+  getPaged(page: number = 1, pageSize: number = 1000): Promise<any> {
+    return this.http.get_new({ controller: 'Integrations', action: `paged?page=${page}&pageSize=${pageSize}` });
+  }
+
   getById(id: string): Promise<any> {
     return this.http.get_new({ controller: 'Integrations', action: `${id}` });
   }
@@ -34,6 +38,10 @@ export class IntegrationsService {
   // ── Integration Users ──
   getIntegrationUsers(): Promise<any> {
     return this.http.get_new({ controller: 'Integrations', action: 'users' });
+  }
+
+  getIntegrationUsersPaged(page: number = 1, pageSize: number = 10): Promise<any> {
+    return this.http.get_new({ controller: 'Integrations', action: `users/paged?page=${page}&pageSize=${pageSize}` });
   }
 
   getIntegrationUserById(id: string): Promise<any> {

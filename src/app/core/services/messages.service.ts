@@ -26,6 +26,13 @@ export interface AiMessageDto {
 export class MessagesService {
   constructor(private httpClientService: HttpClientService) {}
 
+  async getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+    return await this.httpClientService.get_new({
+      controller: 'Messages',
+      action: `?PageNumber=${pageNumber}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`
+    });
+  }
+
   async getMessagesByConversation(conversationId: string): Promise<AiMessageDto[]> {
     const response = await this.httpClientService.get_new({
       controller: 'Ai',

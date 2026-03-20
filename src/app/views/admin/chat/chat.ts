@@ -750,8 +750,8 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
 
     async loadShortcuts(): Promise<void> {
         try {
-            const response = await this.shortcutsService.getAll();
-            this.shortcuts = this.extractArray(response).filter((s: Shortcut) => !s.isBlocked);
+            const response = await this.shortcutsService.getPaged(1, 1000, '');
+            this.shortcuts = this.extractArray(response?.items || response).filter((s: Shortcut) => !s.isBlocked);
         } catch (err) {
             console.error('Kısayollar yüklenemedi:', err);
             this.shortcuts = [];
@@ -761,8 +761,8 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     // ── Tag Methods ──
     async loadAllTags(): Promise<void> {
         try {
-            const res = await this.tagsService.getAll();
-            this.allTags = this.extractArray(res).filter((t: Tag) => !t.isBlocked);
+            const res = await this.tagsService.getPaged(1, 1000, '');
+            this.allTags = this.extractArray(res?.items || res).filter((t: Tag) => !t.isBlocked);
         } catch { this.allTags = []; }
     }
 
@@ -836,8 +836,8 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     // ── Segment Methods ──
     async loadAllSegments(): Promise<void> {
         try {
-            const res = await this.segmentsService.getAll();
-            this.allSegments = this.extractArray(res).filter((s: Segment) => !s.isBlocked);
+            const res = await this.segmentsService.getPaged(1, 1000, '');
+            this.allSegments = this.extractArray(res?.items || res).filter((s: Segment) => !s.isBlocked);
         } catch { this.allSegments = []; }
     }
 

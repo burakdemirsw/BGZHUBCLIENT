@@ -6,6 +6,12 @@ import { AddConversationToSegmentRequest, AddConversationsToSegmentRequest } fro
 export class ConversationSegmentsService {
     constructor(private http: HttpClientService) {}
 
+    getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+        let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+        if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
+        return this.http.get_new({ controller: 'ConversationSegments', action });
+    }
+
     getByConversation(conversationId: string): Promise<any> {
         return this.http.get_new({ controller: 'ConversationSegments', action: `by-conversation/${conversationId}` });
     }

@@ -6,8 +6,11 @@ import { CreateConversationTagRequest } from '../models/conversation-tag/convers
 export class ConversationTagsService {
     constructor(private http: HttpClientService) {}
 
-    getAll(): Promise<any> {
-        return this.http.get_new({ controller: 'ConversationTags' });
+    getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+        return this.http.get_new({
+            controller: 'ConversationTags',
+            action: `?PageNumber=${pageNumber}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`
+        });
     }
 
     getById(id: string): Promise<any> {

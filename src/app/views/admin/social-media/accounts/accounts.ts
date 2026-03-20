@@ -15,19 +15,18 @@ import {
     templateUrl: './accounts.html',
 })
 export class SocialMediaAccountsPage implements OnInit, OnDestroy {
-    accounts: SocialMediaAccount[] = [];
+    items: SocialMediaAccount[] = [];
     loading = false;
     showModal = false;
     editMode = false;
     selectedAccount: SocialMediaAccount | null = null;
 
-    // Datatable
-    filterText = '';
-    filteredItems: SocialMediaAccount[] = [];
-    pagedItems: SocialMediaAccount[] = [];
+    // Server-side pagination
+    searchTerm = '';
     currentPage = 1;
     pageSize = 10;
     totalPages = 1;
+    totalCount = 0;
     totalPagesArray: number[] = [];
 
     form: any = {
@@ -50,7 +49,7 @@ export class SocialMediaAccountsPage implements OnInit, OnDestroy {
         if (event.origin !== window.location.origin) return;
         if (event.data?.type === 'facebook-callback' && event.data?.success) {
             console.log('Facebook callback data received via postMessage:', event.data.data);
-            this.loadAccounts();
+            this.loadItems();
         }
     };
 
@@ -62,7 +61,7 @@ export class SocialMediaAccountsPage implements OnInit, OnDestroy {
     async ngOnInit(): Promise<void> {
         window.addEventListener('message', this.messageListener);
         await this.facebookLoginService.initFacebookSdk(this.fbConfig);
-        this.loadAccounts();
+        this.loadItems();
     }
 
     ngOnDestroy(): void {
@@ -75,7 +74,7 @@ export class SocialMediaAccountsPage implements OnInit, OnDestroy {
             console.log('Facebook code:', code);
             const result = await this.facebookLoginService.sendFacebookCode(code);
             console.log('Facebook backend response:', result);
-            await this.loadAccounts();
+            await this.loadItems();
         } catch (err) {
             console.error('Facebook connect error:', err);
         }
@@ -87,41 +86,34 @@ export class SocialMediaAccountsPage implements OnInit, OnDestroy {
             console.log('WhatsApp code:', code);
             const result = await this.facebookLoginService.sendWhatsappCode(code);
             console.log('WhatsApp backend response:', result);
-            await this.loadAccounts();
+            await this.loadItems();
         } catch (err) {
             console.error('WhatsApp connect error:', err);
         }
     }
 
-    onFilterChange(): void {
+    onSearchChange(): void {
         this.currentPage = 1;
-        this.applyFilterAndPaging();
+        this.loadItems();
     }
 
     setPage(page: number): void {
         if (page < 1 || page > this.totalPages) return;
         this.currentPage = page;
-        this.applyFilterAndPaging();
+        this.loadItems();
     }
 
-    applyFilterAndPaging(): void {
-        const q = (this.filterText || '').toLowerCase();
-        this.filteredItems = this.accounts.filter(a =>
-            a.name.toLowerCase().includes(q)
-        );
-        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
-        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        const start = (this.currentPage - 1) * this.pageSize;
-        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
-    }
-
-    async loadAccounts(): Promise<void> {
+    async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.socialMediaService.getAccounts();
+            const response = await this.socialMediaService.getAccountsPaged(this.currentPage, this.pageSize, this.searchTerm);
             console.log('SocialMedia Accounts response:', response);
-            this.accounts = this.extractArray(response);
-            this.applyFilterAndPaging();
+            
+            const data = response?.data || response;
+            this.items = this.extractArray(data?.items || data);
+            this.totalCount = data?.totalCount || data?.total || this.items.length;
+            this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('SocialMedia Accounts error:', err);
         } finally {
@@ -173,7 +165,7 @@ export class SocialMediaAccountsPage implements OnInit, OnDestroy {
                 await this.socialMediaService.createAccount(req);
             }
             this.showModal = false;
-            await this.loadAccounts();
+            await this.loadItems();
         } catch (err) {
             console.error('Save error:', err);
         }
@@ -183,7 +175,7 @@ export class SocialMediaAccountsPage implements OnInit, OnDestroy {
         if (confirm(`"${account.name}" hesabını silmek istediğinize emin misiniz?`)) {
             try {
                 await this.socialMediaService.deleteAccount(account.id);
-                await this.loadAccounts();
+                await this.loadItems();
             } catch (err) {
                 console.error('Delete error:', err);
             }

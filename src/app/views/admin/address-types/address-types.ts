@@ -13,12 +13,11 @@ export class AddressTypesPage implements OnInit {
     items: AddressType[] = [];
     loading = false;
 
-    // Datatable
-    filterText = '';
-    filteredItems: AddressType[] = [];
-    pagedItems: AddressType[] = [];
+    // Server-side pagination
+    searchTerm = '';
     currentPage = 1;
     pageSize = 10;
+    totalCount = 0;
     totalPages = 1;
     totalPagesArray: number[] = [];
 
@@ -37,9 +36,12 @@ export class AddressTypesPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getAll();
-            this.items = this.extractArray(response);
-            this.applyFilterAndPaging();
+            const response = await this.service.getPaged(this.currentPage, this.pageSize, this.searchTerm);
+            const data = response?.data || response;
+            this.items = this.extractArray(data?.items || data);
+            this.totalCount = data?.totalCount ?? data?.total ?? this.items.length;
+            this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('AddressTypes load error:', err);
         } finally {
@@ -96,29 +98,16 @@ export class AddressTypesPage implements OnInit {
         }
     }
 
-    // ────── Datatable ──────
-    onFilterChange(): void {
+    // ────── Server-side Pagination ──────
+    onSearchChange(): void {
         this.currentPage = 1;
-        this.applyFilterAndPaging();
+        this.loadItems();
     }
 
     setPage(page: number): void {
         if (page < 1 || page > this.totalPages) return;
         this.currentPage = page;
-        this.applyFilterAndPaging();
-    }
-
-    applyFilterAndPaging(): void {
-        const q = (this.filterText || '').toLowerCase();
-        this.filteredItems = this.items.filter(
-            i =>
-                (i.name || '').toLowerCase().includes(q) ||
-                (i.description || '').toLowerCase().includes(q)
-        );
-        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
-        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        const start = (this.currentPage - 1) * this.pageSize;
-        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+        this.loadItems();
     }
 
     private extractArray(response: any): any[] {

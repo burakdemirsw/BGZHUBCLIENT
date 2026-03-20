@@ -8,8 +8,9 @@ import { CreateRequestStatusRequest, UpdateRequestStatusRequest } from '../model
 export class RequestStatusesService {
     constructor(private http: HttpClientService) {}
 
-    getAll(): Promise<any> {
-        return this.http.get_new({ controller: 'RequestStatuses' });
+    getPaged(page: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+        const params = `?PageNumber=${page}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`;
+        return this.http.get_new({ controller: 'RequestStatuses', action: params });
     }
 
     getById(id: string): Promise<any> {

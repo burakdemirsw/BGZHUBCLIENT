@@ -74,8 +74,9 @@ export class UserRequestsPage implements OnInit {
     async loadRequests(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.requestService.getAll();
-            this.requests = this.extractArray(response);
+            const response = await this.requestService.getPaged(1, 1000, '');
+            const data = response?.data || response;
+            this.requests = this.extractArray(data?.items || data);
             this.applyFilters();
         } catch (err) {
             console.error('UserRequests load error:', err);
@@ -86,8 +87,9 @@ export class UserRequestsPage implements OnInit {
 
     async loadCategories(): Promise<void> {
         try {
-            const response = await this.categoryService.getAll();
-            this.categories = this.extractArray(response);
+            const response = await this.categoryService.getPaged(1, 1000, '');
+            const data = response?.data || response;
+            this.categories = this.extractArray(data?.items || data);
         } catch (err) {
             console.error('Categories load error:', err);
         }
@@ -95,9 +97,10 @@ export class UserRequestsPage implements OnInit {
 
     async loadPriorities(): Promise<void> {
         try {
-            const response = await this.priorityService.getAll();
+            const response = await this.priorityService.getPaged(1, 1000, '');
             console.log('RequestPriorities API response:', response);
-            this.priorities = this.extractArray(response);
+            const data = response?.data || response;
+            this.priorities = this.extractArray(data?.items || data);
             console.log('Extracted priorities:', this.priorities);
         } catch (err) {
             console.error('Priorities load error:', err);
@@ -106,8 +109,9 @@ export class UserRequestsPage implements OnInit {
 
     async loadStatuses(): Promise<void> {
         try {
-            const response = await this.statusService.getAll();
-            this.statuses = this.extractArray(response);
+            const response = await this.statusService.getPaged(1, 1000, '');
+            const data = response?.data || response;
+            this.statuses = this.extractArray(data?.items || data);
         } catch (err) {
             console.error('Statuses load error:', err);
         }

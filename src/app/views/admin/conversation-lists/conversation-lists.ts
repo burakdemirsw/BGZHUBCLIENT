@@ -51,10 +51,10 @@ export class ConversationListsPage implements OnInit {
     async loadLookups(): Promise<void> {
         try {
             const [listRes, convRes] = await Promise.all([
-                this.listDescService.getAll(),
+                this.listDescService.getPaged(1, 1000, ''),
                 this.http.get_new({ controller: 'Conversations' }),
             ]);
-            this.lists = this.extractArray(listRes);
+            this.lists = this.extractArray(listRes?.items || listRes);
             this.conversations = this.extractArray(convRes);
         } catch (err) {
             console.error('Lookup load error:', err);

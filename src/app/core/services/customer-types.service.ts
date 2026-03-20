@@ -8,8 +8,11 @@ import { CreateCustomerTypeRequest, UpdateCustomerTypeRequest } from '../models/
 export class CustomerTypesService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Promise<any> {
-    return this.http.get_new({ controller: 'CustomerTypes' });
+  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+    return this.http.get_new({
+      controller: 'CustomerTypes',
+      action: `?PageNumber=${pageNumber}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`
+    });
   }
 
   getById(id: string): Promise<any> {

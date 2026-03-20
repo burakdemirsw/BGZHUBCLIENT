@@ -85,8 +85,9 @@ export class UserRequestDetailPage implements OnInit {
 
     async loadCategories(): Promise<void> {
         try {
-            const response = await this.categoryService.getAll();
-            this.categories = this.extractArray(response);
+            const response = await this.categoryService.getPaged(1, 1000, '');
+            const data = response?.data || response;
+            this.categories = this.extractArray(data?.items || data);
         } catch (err) {
             console.error('Categories load error:', err);
         }
@@ -94,8 +95,9 @@ export class UserRequestDetailPage implements OnInit {
 
     async loadPriorities(): Promise<void> {
         try {
-            const response = await this.priorityService.getAll();
-            this.priorities = this.extractArray(response);
+            const response = await this.priorityService.getPaged(1, 1000, '');
+            const data = response?.data || response;
+            this.priorities = this.extractArray(data?.items || data);
         } catch (err) {
             console.error('Priorities load error:', err);
         }
@@ -103,8 +105,9 @@ export class UserRequestDetailPage implements OnInit {
 
     async loadStatuses(): Promise<void> {
         try {
-            const response = await this.statusService.getAll();
-            this.statuses = this.extractArray(response);
+            const response = await this.statusService.getPaged(1, 1000, '');
+            const data = response?.data || response;
+            this.statuses = this.extractArray(data?.items || data);
         } catch (err) {
             console.error('Statuses load error:', err);
         }

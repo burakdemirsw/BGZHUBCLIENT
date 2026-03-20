@@ -19,13 +19,12 @@ export class ShortcutsPage implements OnInit {
     editMode = false;
     selectedItem: Shortcut | null = null;
 
-    // Datatable filter & pagination
-    filterText = '';
-    filteredItems: Shortcut[] = [];
-    pagedItems: Shortcut[] = [];
+    // Server-side pagination
+    searchTerm = '';
     currentPage = 1;
     pageSize = 10;
     totalPages = 1;
+    totalCount = 0;
     totalPagesArray: number[] = [];
 
     form: any = {
@@ -51,38 +50,28 @@ export class ShortcutsPage implements OnInit {
         await Promise.all([this.loadItems(), this.loadTypes()]);
     }
 
-    onFilterChange(): void {
+    onSearchChange(): void {
         this.currentPage = 1;
-        this.applyFilterAndPaging();
+        this.loadItems();
     }
 
     setPage(page: number): void {
         if (page < 1 || page > this.totalPages) return;
         this.currentPage = page;
-        this.applyFilterAndPaging();
-    }
-
-    applyFilterAndPaging(): void {
-        const filter = (this.filterText || '').toLowerCase();
-        this.filteredItems = this.items.filter(item =>
-            (item.name || '').toLowerCase().includes(filter) ||
-            (item.shortCode || '').toLowerCase().includes(filter) ||
-            (item.content || '').toLowerCase().includes(filter) ||
-            this.getTypeName(item.shortcutTypeId).toLowerCase().includes(filter)
-        );
-        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
-        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
-        const start = (this.currentPage - 1) * this.pageSize;
-        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+        this.loadItems();
     }
 
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.shortcutsService.getAll();
-            this.items = this.extractArray(response);
-            this.applyFilterAndPaging();
+            const response = await this.shortcutsService.getPaged(this.currentPage, this.pageSize, this.searchTerm);
+            console.log('Shortcuts response:', response);
+            
+            const data = response?.data || response;
+            this.items = this.extractArray(data?.items || data);
+            this.totalCount = data?.totalCount || data?.total || this.items.length;
+            this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('Shortcuts load error:', err);
         } finally {

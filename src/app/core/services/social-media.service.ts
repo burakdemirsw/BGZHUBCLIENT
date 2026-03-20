@@ -16,8 +16,10 @@ export class SocialMediaService {
   constructor(private http: HttpClientService) {}
 
   // === Accounts ===
-  getAccounts(): Promise<any> {
-    return this.http.get_new({ controller: 'SocialMedia', action: 'accounts' });
+  getAccountsPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+    let action = `accounts?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
+    return this.http.get_new({ controller: 'SocialMedia', action });
   }
 
   getAccountById(id: string): Promise<any> {

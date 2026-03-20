@@ -55,8 +55,9 @@ export class UserSocialMediaAccountsPage implements OnInit {
 
     async loadAccounts(): Promise<void> {
         try {
-            const response = await this.socialMediaService.getAccounts();
-            this.accounts = this.extractArray(response);
+            const response = await this.socialMediaService.getAccountsPaged(1, 1000, '');
+            const data = response?.data || response;
+            this.accounts = this.extractArray(data?.items || data);
         } catch (err) {
             console.error('Accounts error:', err);
         }
@@ -74,7 +75,8 @@ export class UserSocialMediaAccountsPage implements OnInit {
                 response = await this.socialMediaService.getUserAccounts();
             }
             console.log('User Accounts response:', response);
-            this.userAccounts = this.extractArray(response);
+            const data = response?.data || response;
+            this.userAccounts = this.extractArray(data?.items || data);
             this.applyFilters();
         } catch (err) {
             console.error('User Accounts error:', err);

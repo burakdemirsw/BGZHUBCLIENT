@@ -2,6 +2,7 @@ export interface Integration {
   id: string;
   integrationDescription: string;
   integrationTypeId?: string;
+  integrationTypeName?: string;
   photoUrl?: string;
   isBlocked?: boolean;
 }

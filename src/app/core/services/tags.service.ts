@@ -6,8 +6,10 @@ import { CreateTagRequest, UpdateTagRequest } from '../models/tag/tag.models';
 export class TagsService {
     constructor(private http: HttpClientService) {}
 
-    getAll(): Promise<any> {
-        return this.http.get_new({ controller: 'Tags' });
+    getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+        let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+        if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
+        return this.http.get_new({ controller: 'Tags', action });
     }
 
     getById(id: string): Promise<any> {

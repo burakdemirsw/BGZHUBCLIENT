@@ -39,12 +39,8 @@
                                         </td>
                                         <td>{{ item.integrationDescription }}</td>
                                         <td>
-                                            @if (item.integrationTypeId) {
-                                                @for (type of integrationTypes; track type.id) {
-                                                    @if (type.id === item.integrationTypeId) {
-                                                        <span class="badge bg-info-subtle text-info">{{ type.name }}</span>
-                                                    }
-                                                }
+                                            @if (item.integrationTypeName) {
+                                                <span class="badge bg-info-subtle text-info">{{ item.integrationTypeName }}</span>
                                             } @else {
                                                 <span class="text-muted">-</span>
                                             }

@@ -5,9 +5,11 @@ import { MenusPage } from './menus/menus';
 import { MailSettingsPage } from './mail-settings/mail-settings';
 import { NetGsmSettingsPage } from './netgsm-settings/netgsm-settings';
 import { CountriesPage } from './countries/countries';
-import { CitiesPage } from './cities/cities';
+import { CitiesPage } from './cities/cities';  
 import { DistrictsPage } from './districts/districts';
 import { IntegrationsPage } from './integrations/integrations';
+import { IntegrationConnectionsPage } from './integration-connections/integration-connections';
+import { IntegrationConnectionTypesPage } from './integration-connection-types/integration-connection-types';
 import { RoleAssignmentsPage } from './role-assignments/role-assignments';
 import { RoleMenusPage } from './role-menus/role-menus';
 import { SocialMediaAccountsPage } from './social-media/accounts/accounts';
@@ -31,6 +33,7 @@ import { TeamInvitationsPage } from './teams/team-invitations/team-invitations';
 import { TeamSettingsPage } from './teams/team-settings/team-settings';
 import { ImageSearchPage } from './image-search/image-search';
 import { IntegrationTypesPage } from './integration-types/integration-types';
+import { IntegrationSocialMediaAccountsPage } from './integration-social-media-accounts/integration-social-media-accounts';
 import { PromptsPage } from './prompts/prompts';
 import { PromptAiAssistantsPage } from './prompt-ai-assistants/prompt-ai-assistants';
 import { PromptTypesPage } from './prompt-types/prompt-types';
@@ -52,6 +55,9 @@ import { ConversationListDescriptionsPage } from './conversation-list-descriptio
 import { ConversationListsPage } from './conversation-lists/conversation-lists';
 import { ShortcutTypesPage } from './shortcut-types/shortcut-types';
 import { ShortcutsPage } from './shortcuts/shortcuts';
+import { OrderStatusesPage } from './order-statuses/order-statuses';
+import { PaymentStatusesPage } from './payment-statuses/payment-statuses';
+import { PaymentTypesPage } from './payment-types/payment-types';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -125,6 +131,24 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/integration-properties',
         component: IntegrationPropertiesPage,
         data: { title: 'Entegrasyon Özellikleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/integration-connections',
+        component: IntegrationConnectionsPage,
+        data: { title: 'Entegrasyon Bağlantıları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/integration-connection-types',
+        component: IntegrationConnectionTypesPage,
+        data: { title: 'Entegrasyon Bağlantı Tipleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/integration-social-media-accounts',
+        component: IntegrationSocialMediaAccountsPage,
+        data: { title: 'Entegrasyon Sosyal Medya Hesapları' },
         canActivate: [AuthGuard],
     },
     {
@@ -376,6 +400,24 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/shortcuts',
         component: ShortcutsPage,
         data: { title: 'Kısayollar' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/order-statuses',
+        component: OrderStatusesPage,
+        data: { title: 'Sipariş Durumları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/payment-statuses',
+        component: PaymentStatusesPage,
+        data: { title: 'Ödeme Durumları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/payment-types',
+        component: PaymentTypesPage,
+        data: { title: 'Ödeme Tipleri' },
         canActivate: [AuthGuard],
     },
 ];

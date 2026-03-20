@@ -3,6 +3,8 @@ export interface Customer {
   userId?: string;
   socialMediaAccountId?: string;
   platformAccountId?: string;
+  platformUsername?: string;
+  platformName?: string;
   fullName?: string;
   firstName?: string;
   lastName?: string;
@@ -24,12 +26,16 @@ export interface CreateCustomerRequest {
   userId: string;
   socialMediaAccountId: string;
   platformAccountId: string;
+  platformUsername?: string;
+  platformName?: string;
 }
 
 export interface UpdateCustomerRequest {
   userId: string;
   socialMediaAccountId: string;
   platformAccountId: string;
+  platformUsername?: string;
+  platformName?: string;
   status: number;
   isBlocked: boolean;
 }

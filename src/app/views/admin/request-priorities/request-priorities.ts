@@ -17,6 +17,14 @@ export class RequestPrioritiesPage implements OnInit {
     editMode = false;
     selectedPriority: RequestPriority | null = null;
 
+    // Server-side pagination
+    searchTerm = '';
+    currentPage = 1;
+    pageSize = 10;
+    totalCount = 0;
+    totalPages = 1;
+    totalPagesArray: number[] = [];
+
     form: any = {
         name: '',
         description: '',
@@ -34,15 +42,30 @@ export class RequestPrioritiesPage implements OnInit {
     async loadPriorities(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.priorityService.getAll();
-            this.priorities = this.extractArray(response);
+            const response = await this.priorityService.getPaged(this.currentPage, this.pageSize, this.searchTerm);
+            const data = response?.data || response;
+            this.priorities = this.extractArray(data?.items || data);
             // Seviyeye göre sırala
             this.priorities.sort((a, b) => a.level - b.level);
+            this.totalCount = data?.totalCount ?? data?.total ?? this.priorities.length;
+            this.totalPages = data?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('RequestPriorities load error:', err);
         } finally {
             this.loading = false;
         }
+    }
+
+    onSearchChange(): void {
+        this.currentPage = 1;
+        this.loadPriorities();
+    }
+
+    setPage(page: number): void {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.loadPriorities();
     }
 
     private extractArray(response: any): any[] {

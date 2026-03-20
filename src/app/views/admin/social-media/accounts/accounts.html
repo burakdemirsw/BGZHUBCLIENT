@@ -17,7 +17,7 @@
             </div>
             <div class="card-body">
                 <div class="d-flex mb-3 gap-2">
-                    <input type="text" class="form-control form-control-sm w-auto" placeholder="Hesap ara..." [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+                    <input type="text" class="form-control form-control-sm w-auto" placeholder="Hesap ara..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()">
                 </div>
                 @if (loading) {
                     <div class="text-center py-4">
@@ -36,7 +36,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (account of pagedItems; track $index) {
+                                @for (account of items; track $index) {
                                     <tr>
                                         <td>
                                             @if (account.photoUrl) {
@@ -63,7 +63,7 @@
                         </table>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mt-2">
-                        <div class="small text-muted">Toplam: {{ filteredItems.length }} kayıt</div>
+                        <div class="small text-muted">Toplam: {{ totalCount }} kayıt</div>
                         <nav>
                             <ul class="pagination pagination-sm mb-0">
                                 <li class="page-item" [class.disabled]="currentPage === 1">

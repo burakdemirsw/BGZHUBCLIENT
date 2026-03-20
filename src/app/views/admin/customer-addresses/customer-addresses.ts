@@ -25,12 +25,11 @@ export class CustomerAddressesPage implements OnInit {
     filteredDistricts: District[] = [];
     loading = false;
 
-    // Datatable
-    filterText = '';
-    filteredItems: CustomerAddress[] = [];
-    pagedItems: CustomerAddress[] = [];
+    // Server-side pagination
+    searchTerm = '';
     currentPage = 1;
     pageSize = 10;
+    totalCount = 0;
     totalPages = 1;
     totalPagesArray: number[] = [];
 
@@ -58,16 +57,18 @@ export class CustomerAddressesPage implements OnInit {
         try {
             const [custRes, atRes, countryRes, cityRes, districtRes] = await Promise.all([
                 this.http.get_new({ controller: 'Customers' }),
-                this.addressTypesService.getAll(),
-                this.http.get_new({ controller: 'Countries' }),
-                this.http.get_new({ controller: 'Cities' }),
-                this.http.get_new({ controller: 'Districts' }),
+                this.addressTypesService.getPaged(1, 1000, ''),
+                this.http.get_new({ controller: 'Addresses', action: 'countries' }),
+                this.http.get_new({ controller: 'Addresses', action: 'cities' }),
+                this.http.get_new({ controller: 'Addresses', action: 'districts' }),
             ]);
-            this.customers = this.extractArray(custRes);
-            this.addressTypes = this.extractArray(atRes);
-            this.countries = this.extractArray(countryRes);
-            this.cities = this.extractArray(cityRes);
-            this.districts = this.extractArray(districtRes);
+            const custData = custRes?.data || custRes;
+            const atData = atRes?.data || atRes;
+            this.customers = this.extractArray(custData?.items || custData);
+            this.addressTypes = this.extractArray(atData?.items || atData);
+            this.countries = this.extractArray(countryRes?.data || countryRes);
+            this.cities = this.extractArray(cityRes?.data || cityRes);
+            this.districts = this.extractArray(districtRes?.data || districtRes);
         } catch (err) {
             console.error('Lookup load error:', err);
         }
@@ -76,9 +77,12 @@ export class CustomerAddressesPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getAll();
-            this.items = this.extractArray(response);
-            this.applyFilterAndPaging();
+            const response = await this.service.getPaged(this.currentPage, this.pageSize, this.searchTerm);
+            const data = response?.data || response;
+            this.items = this.extractArray(data?.items || data);
+            this.totalCount = data?.totalCount ?? data?.total ?? this.items.length;
+            this.totalPages = data?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('CustomerAddresses load error:', err);
         } finally {
@@ -209,31 +213,16 @@ export class CustomerAddressesPage implements OnInit {
         }
     }
 
-    // ────── Datatable ──────
-    onFilterChange(): void {
+    // ────── Server-side Pagination ──────
+    onSearchChange(): void {
         this.currentPage = 1;
-        this.applyFilterAndPaging();
+        this.loadItems();
     }
 
     setPage(page: number): void {
         if (page < 1 || page > this.totalPages) return;
         this.currentPage = page;
-        this.applyFilterAndPaging();
-    }
-
-    applyFilterAndPaging(): void {
-        const q = (this.filterText || '').toLowerCase();
-        this.filteredItems = this.items.filter(
-            i =>
-                (i.addressLine || '').toLowerCase().includes(q) ||
-                (i.postalCode || '').toLowerCase().includes(q) ||
-                this.getCustomerName(i.customerId).toLowerCase().includes(q) ||
-                this.getAddressTypeName(i.addressTypeId).toLowerCase().includes(q)
-        );
-        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
-        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        const start = (this.currentPage - 1) * this.pageSize;
-        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+        this.loadItems();
     }
 
     private extractArray(response: any): any[] {

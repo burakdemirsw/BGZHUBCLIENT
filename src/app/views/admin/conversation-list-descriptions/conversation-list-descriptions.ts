@@ -19,12 +19,11 @@ export class ConversationListDescriptionsPage implements OnInit {
     users: any[] = [];
     loading = false;
 
-    // Datatable
-    filterText = '';
-    filteredItems: ConversationListDescription[] = [];
-    pagedItems: ConversationListDescription[] = [];
+    // Server-side pagination
+    searchTerm = '';
     currentPage = 1;
     pageSize = 10;
+    totalCount = 0;
     totalPages = 1;
     totalPagesArray: number[] = [];
 
@@ -49,7 +48,8 @@ export class ConversationListDescriptionsPage implements OnInit {
     async loadLookups(): Promise<void> {
         try {
             const res = await this.http.get_new({ controller: 'Users' });
-            this.users = this.extractArray(res);
+            const data = res?.data || res;
+            this.users = this.extractArray(data?.items || data);
         } catch (err) {
             console.error('Users load error:', err);
         }
@@ -58,9 +58,12 @@ export class ConversationListDescriptionsPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const res = await this.service.getAll();
-            this.items = this.extractArray(res);
-            this.applyFilterAndPaging();
+            const res = await this.service.getPaged(this.currentPage, this.pageSize, this.searchTerm);
+            const data = res?.data || res;
+            this.items = this.extractArray(data?.items || data);
+            this.totalCount = data?.totalCount ?? data?.total ?? this.items.length;
+            this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('Load error:', err);
         } finally {
@@ -136,31 +139,16 @@ export class ConversationListDescriptionsPage implements OnInit {
         this.showModal = false;
     }
 
-    // ────── Datatable ──────
-    onFilterChange(): void {
+    // ────── Server-side Pagination ──────
+    onSearchChange(): void {
         this.currentPage = 1;
-        this.applyFilterAndPaging();
+        this.loadItems();
     }
 
     setPage(page: number): void {
         if (page < 1 || page > this.totalPages) return;
         this.currentPage = page;
-        this.applyFilterAndPaging();
-    }
-
-    applyFilterAndPaging(): void {
-        const q = (this.filterText || '').toLowerCase();
-        this.filteredItems = this.items.filter(
-            i =>
-                (i.name || '').toLowerCase().includes(q) ||
-                (i.description || '').toLowerCase().includes(q) ||
-                this.getUserName(i.userId).toLowerCase().includes(q)
-        );
-        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
-        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
-        const start = (this.currentPage - 1) * this.pageSize;
-        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+        this.loadItems();
     }
 
     private extractArray(response: any): any[] {

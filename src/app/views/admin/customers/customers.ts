@@ -16,12 +16,11 @@ export class CustomersPage implements OnInit {
     socialMediaAccounts: any[] = [];
     loading = false;
 
-    // Datatable
-    filterText = '';
-    filteredItems: Customer[] = [];
-    pagedItems: Customer[] = [];
+    // Server-side pagination
+    searchTerm = '';
     currentPage = 1;
     pageSize = 10;
+    totalCount = 0;
     totalPages = 1;
     totalPagesArray: number[] = [];
 
@@ -45,10 +44,10 @@ export class CustomersPage implements OnInit {
         try {
             const [usersRes, smaRes] = await Promise.all([
                 this.http.get_new({ controller: 'Users' }),
-                this.http.get_new({ controller: 'SocialMediaAccounts' }),
+                this.http.get_new({ controller: 'SocialMedia', action: 'accounts?PageNumber=1&PageSize=1000' }),
             ]);
-            this.users = this.extractArray(usersRes);
-            this.socialMediaAccounts = this.extractArray(smaRes);
+            this.users = this.extractArray(usersRes?.items || usersRes);
+            this.socialMediaAccounts = this.extractArray(smaRes?.items || smaRes);
         } catch (err) {
             console.error('Lookup load error:', err);
         }
@@ -57,9 +56,12 @@ export class CustomersPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getAll();
-            this.items = this.extractArray(response);
-            this.applyFilterAndPaging();
+            const response = await this.service.getPaged(this.currentPage, this.pageSize, this.searchTerm);
+            const data = response?.data || response;
+            this.items = this.extractArray(data?.items || data);
+            this.totalCount = data?.totalCount ?? data?.total ?? this.items.length;
+            this.totalPages = data?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('Customers load error:', err);
         } finally {
@@ -79,7 +81,7 @@ export class CustomersPage implements OnInit {
         const u = this.users.find((x: any) => x.id === userId);
         return u ? (u.fullName || u.userName || u.email || '-') : userId.substring(0, 8) + '...';
     }
-
+  
     getSocialMediaAccountName(id?: string): string {
         if (!id) return '-';
         const s = this.socialMediaAccounts.find((x: any) => x.id === id);
@@ -89,7 +91,7 @@ export class CustomersPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedItem = null;
-        this.form = { userId: '', socialMediaAccountId: '', platformAccountId: '' };
+        this.form = { userId: '', socialMediaAccountId: '', platformAccountId: '', platformUsername: '', platformName: '' };
         this.showModal = true;
     }
 
@@ -100,6 +102,8 @@ export class CustomersPage implements OnInit {
             userId: item.userId || '',
             socialMediaAccountId: item.socialMediaAccountId || '',
             platformAccountId: item.platformAccountId || '',
+            platformUsername: item.platformUsername || '',
+            platformName: item.platformName || '',
             status: item.status ?? 0
         };
         this.showModal = true;
@@ -112,6 +116,8 @@ export class CustomersPage implements OnInit {
                     userId: this.form.userId,
                     socialMediaAccountId: this.form.socialMediaAccountId,
                     platformAccountId: this.form.platformAccountId,
+                    platformUsername: this.form.platformUsername,
+                    platformName: this.form.platformName,
                     status: this.form.status ?? 0,
                     isBlocked: this.selectedItem.isBlocked || false
                 };
@@ -120,7 +126,9 @@ export class CustomersPage implements OnInit {
                 const req: CreateCustomerRequest = {
                     userId: this.form.userId,
                     socialMediaAccountId: this.form.socialMediaAccountId,
-                    platformAccountId: this.form.platformAccountId
+                    platformAccountId: this.form.platformAccountId,
+                    platformUsername: this.form.platformUsername,
+                    platformName: this.form.platformName
                 };
                 await this.service.create(req);
             }
@@ -150,33 +158,16 @@ export class CustomersPage implements OnInit {
         }
     }
 
-    // ────── Datatable ──────
-    onFilterChange(): void {
+    // ────── Server-side Pagination ──────
+    onSearchChange(): void {
         this.currentPage = 1;
-        this.applyFilterAndPaging();
+        this.loadItems();
     }
 
     setPage(page: number): void {
         if (page < 1 || page > this.totalPages) return;
         this.currentPage = page;
-        this.applyFilterAndPaging();
-    }
-
-    applyFilterAndPaging(): void {
-        const q = (this.filterText || '').toLowerCase();
-        this.filteredItems = this.items.filter(
-            i =>
-                this.getDisplayName(i).toLowerCase().includes(q) ||
-                (i.email || '').toLowerCase().includes(q) ||
-                (i.phoneNumber || '').toLowerCase().includes(q) ||
-                (i.companyName || '').toLowerCase().includes(q) ||
-                (i.customerCode || '').toLowerCase().includes(q) ||
-                (i.platformAccountId || '').toLowerCase().includes(q)
-        );
-        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
-        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        const start = (this.currentPage - 1) * this.pageSize;
-        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+        this.loadItems();
     }
 
     private extractArray(response: any): any[] {
