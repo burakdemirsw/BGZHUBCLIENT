@@ -1,44 +1,42 @@
-<section class="bg-light bg-opacity-50 border-top border-light position-relative" id="home">
+﻿<section class="landing-hero" id="home">
+    <div class="hero-glow glow-1"></div>
+    <div class="hero-glow glow-2"></div>
 
-    <div class="container pt-5 position-relative">
+    <div class="container position-relative" style="z-index: 1;">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8 text-center">
 
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center">
+                <div class="mb-4">
+                    <span class="section-label">Yapay Zeka Destekli Mesajlaşma Platformu</span>
+                </div>
 
-
-                <h1 class="my-4 fs-36 fw-bold lh-base">
-                    Yapay Zeka Destekli <span class="text-primary">Müşteri İletişim</span> Platformu —
-                    <span class="text-muted">Tüm Kanallar, Tek Panel</span>
+                <h1 class="hero-title mb-4">
+                    Müşterilerinizle <span class="gradient-text">Her Kanalda,</span><br>
+                    Her An Konuşun
                 </h1>
 
-
-                <p class="mb-4 fs-md text-muted lh-lg">
-                    SellenticAI ile müşterilerinize WhatsApp, SMS, e-posta ve web chat üzerinden anında ulaşın.
-                    AI chatbot, otomasyon ve gerçek zamanlı analitik ile müşteri deneyimini bir üst seviyeye taşıyın.
+                <p class="hero-subtitle mb-5">
+                    SellenticAI, WhatsApp, Instagram, web chat ve telefon üzerinden
+                    gelen tüm mesajları tek bir ekranda toplar. AI destekli yanıt önerileri
+                    ve otomasyon araçlarıyla ekibiniz daha hızlı, daha tutarlı iletişim kurar.
                 </p>
 
-
-                <div class="d-flex gap-1 gap-sm-2 flex-wrap justify-content-center">
-                    <a class="btn btn-primary py-2 fw-semibold" routerLink="/auth/sign-up">
-                        <ng-icon name="tablerRocket" class="fs-xl me-2"></ng-icon>Ücretsiz Başla
+                <div class="d-flex gap-3 flex-wrap justify-content-center mb-5">
+                    <a class="btn btn-landing btn-lg px-4" routerLink="/auth/sign-up">
+                        <ng-icon name="tablerRocket" class="me-2"></ng-icon>Ücretsiz Deneyin
                     </a>
-                    <a class="btn btn-outline-secondary py-2 fw-semibold" (click)="scrollToSection('features')" href="javascript:void(0)">
-                        <ng-icon name="tablerPlayerPlay" class="fs-xl me-2"></ng-icon>Nasıl Çalışır?
+                    <a class="btn btn-landing-outline btn-lg px-4" (click)="scrollToSection('features')" href="javascript:void(0)">
+                        <ng-icon name="tablerPlayerPlay" class="me-2"></ng-icon>Nasıl Çalışır?
                     </a>
                 </div>
-            </div>
-        </div>
 
-
-        <div class="container position-relative">
-
-            <div class="row">
-                <div class="col-md-10 mx-auto position-relative">
-
-
-                    <img src="assets/images/dashboard.png" class="rounded-top-4 img-fluid mt-5" alt="SellenticAI Dashboard">
-
+                <div class="position-relative mx-auto" style="max-width: 900px;">
+                    <img src="assets/images/dashboard.png"
+                         class="img-fluid rounded-4"
+                         alt="SellenticAI Dashboard"
+                         style="box-shadow: 0 20px 60px rgba(102, 88, 221, 0.12), 0 0 0 1px rgba(0,0,0,0.04);">
                 </div>
+
             </div>
         </div>
     </div>

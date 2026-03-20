@@ -1,43 +1,34 @@
-<header>
-
+﻿<header>
     <nav class="navbar navbar-expand-lg py-2 sticky-top {{isSticky ? 'top-scroll-up top-fixed': ''}}"
          id="landing-navbar">
         <div class="container">
-            <div class="auth-brand mb-0">
-                <a routerLink="/" class="logo-dark">
-                    <img [src]="logoWhite" alt="SellenticAI logo" height="24">
-                </a>
-                <a routerLink="/" class="logo-light">
-                    <img [src]="logoColor" alt="SellenticAI logo" height="24">
-                </a>
-            </div>
+            <a routerLink="/home" class="navbar-brand d-flex align-items-center gap-2 text-decoration-none">
+                <span class="landing-logo-icon">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </span>
+                <span class="landing-logo-text">Sellentic<span class="landing-logo-highlight">AI</span></span>
+            </a>
 
-            <button class="navbar-toggler" type="button" (click)="isCollapsed = !isCollapsed"
+            <button class="navbar-toggler border-0" type="button" (click)="isCollapsed = !isCollapsed"
                     [attr.aria-expanded]="!isCollapsed" aria-controls="navbarSupportedContent"
                     aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+                <ng-icon name="tablerMenu2" class="fs-22" style="color: #1e293b;"></ng-icon>
             </button>
 
             <div [ngbCollapse]="isCollapsed" class="navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav fw-medium gap-2 fs-sm mx-auto mt-2 mt-lg-0" id="navbar-example">
+                <ul class="navbar-nav gap-1 mx-auto mt-3 mt-lg-0" id="navbar-example">
                     @for (item of navItems; track $index) {
                         <li class="nav-item">
-                            <a class="nav-link text-uppercase fs-xs"
+                            <a class="nav-link text-uppercase"
                                [class.active]="scroll.activeSection === (item.toLowerCase())"
-                               (click)="scroll.scrollTo(item)" href="javascript:void(0)">{{
-                                    item
-                                }}
-                            </a>
+                               (click)="scroll.scrollTo(item)" href="javascript:void(0)">{{item}}</a>
                         </li>
                     }
                 </ul>
 
-                <div>
-                    <button class="btn btn-link btn-icon fw-semibold text-body me-2" type="button" (click)="toggleTheme()">
-                        <ng-icon name="tablerContrast" class="fs-22"></ng-icon>
-                    </button>
-                    <a routerLink="/auth/sign-in" class="btn btn-sm btn-outline-light me-1">Giriş Yap</a>
-                    <a routerLink="/auth/sign-up" class="btn btn-sm btn-primary">Ücretsiz Dene</a>
+                <div class="d-flex align-items-center gap-2">
+                    <a routerLink="/auth/sign-in" class="btn btn-sm btn-landing-outline">Giriş Yap</a>
+                    <a routerLink="/auth/sign-up" class="btn btn-sm btn-landing">Ücretsiz Dene</a>
                 </div>
             </div>
         </div>

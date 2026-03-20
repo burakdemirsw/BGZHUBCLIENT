@@ -4,14 +4,12 @@ import { Features } from "./components/features/features";
 import { Header } from "./components/header/header";
 import { PricingPlans } from "./components/pricing-plans/pricing-plans";
 import { Services } from "./components/services/services";
-import { Testimonials } from "./components/testimonials/testimonials";
-import { Contact } from "./components/contact/contact";
 import { Footer } from "./components/footer/footer";
 import {Hero} from '@/app/views/landing/components/hero/hero';
 
 @Component({
   selector: 'app-landing',
-  imports: [Header, Hero, Services, Features, PricingPlans, Cta, Testimonials, Contact, Footer],
+  imports: [Header, Hero, Services, Features, PricingPlans, Cta, Footer],
   templateUrl: './landing.html',
   styles: ``
 })

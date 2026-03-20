@@ -18,33 +18,33 @@ export class Services {
 
     services: ServiceType[] = [
         {
-            name: "AI Chatbot",
-            description: "Akıllı yapay zeka destekli chatbot ile müşterilerinize 7/24 anında yanıt verin. Doğal dil işleme ile insan benzeri konuşma deneyimi sunun.",
+            name: "Akıllı Sohbet Asistanı",
+            description: "Müşterilerinizin sorularını anlayan, bağlama uygun yanıtlar üreten ve gerektiğinde canlı temsilciye aktaran yapay zeka asistanı.",
             icon: "tablerMessageChatbot",
         },
         {
-            name: "Çok Kanallı Mesajlaşma",
-            description: "WhatsApp, SMS, e-posta ve web chat kanallarını tek bir panelden yönetin. Tüm müşteri iletişiminizi merkezi bir noktada toplayın.",
+            name: "Birleşik Mesaj Kutusu",
+            description: "WhatsApp, Instagram DM, web chat ve e-posta — tüm kanallardan gelen mesajlar tek bir gelen kutusunda. Kanal değiştirmeye son.",
             icon: "tablerMessages",
         },
         {
-            name: "Otomasyon & İş Akışları",
-            description: "Tekrarlayan görevleri otomatikleştirin, akıllı iş akışları oluşturun ve ekibinizin verimliliğini artırın.",
+            name: "Akış Tasarımcısı",
+            description: "Sürükle-bırak mantığıyla otomatik yanıt akışları oluşturun. Sık sorulan sorular, sipariş takibi ve randevu hatırlatmalarını otomatikleştirin.",
             icon: "tablerSettingsAutomation",
         },
         {
-            name: "Gerçek Zamanlı Analitik",
-            description: "Mesaj performansını, müşteri memnuniyetini ve ekip verimliliğini gerçek zamanlı panolarla takip edin.",
+            name: "Canlı Gösterge Paneli",
+            description: "Yanıt süreleri, çözüm oranları ve temsilci performansını anlık takip edin. Karar almak için gereken veriye anında ulaşın.",
             icon: "tablerChartBar",
         },
         {
-            name: "Ekip İşbirliği",
-            description: "Ekip üyeleriniz arasında sorunsuz iş birliği sağlayın. Mesajları atayın, notlar ekleyin ve birlikte çalışın.",
+            name: "Takım Çalışma Alanı",
+            description: "Mesajları ekip arkadaşlarınıza atayın, dahili notlar ekleyin ve konuşma geçmişini paylaşın. Hiçbir müşteri talebi kaybolmasın.",
             icon: "tablerUsersGroup",
         },
         {
-            name: "Güvenlik & Uyumluluk",
-            description: "Uçtan uca şifreleme, KVKK uyumluluğu ve kurumsal düzeyde güvenlik altyapısıyla verilerinizi koruyun.",
+            name: "Veri Koruma",
+            description: "Uçtan uca şifreleme, rol bazlı erişim kontrolü ve KVKK uyumlu altyapı. Müşteri verileriniz her zaman güvende.",
             icon: "tablerShieldCheck",
         },
     ];

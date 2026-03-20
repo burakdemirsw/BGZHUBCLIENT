@@ -1,59 +1,90 @@
-<section class="section-custom bg-light bg-opacity-30 border-top border-light border-bottom" id="features">
-    <div class="container">
+﻿<section id="features">
 
-        <div class="row">
-            <div class="col-12 text-center">
-                <span class="text-muted rounded-3 d-inline-block">🚀 Performans ve Ölçeklenebilirlik için Tasarlandı</span>
-                <h2 class="mt-3 fw-bold mb-5"><span class="text-primary">SellenticAI</span> Temel Özelliklerini Keşfedin</h2>
-            </div>
-        </div>
-
-        <div class="row align-items-center pb-5">
-            <div class="col-lg-6 col-xl-5 py-3">
-                <div class="text-center">
-                    <img src="https://illustrations.popsy.co/violet/paper-plane.svg" class="rounded-3 img-fluid" alt="AI Mesajlaşma">
+    <!-- Feature 1: Birleşik Gelen Kutusu -->
+    <div class="feature-showcase">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6 order-2 order-lg-1">
+                    <span class="showcase-badge">Birleşik Gelen Kutusu</span>
+                    <h2>Tüm Kanallar, <span class="gradient-text">Tek Ekran</span></h2>
+                    <p class="showcase-text mb-4">
+                        Müşterileriniz WhatsApp'tan yazsın, Instagram'dan mesaj atsın ya da web sitenizden
+                        soru sorsun — hepsi aynı gelen kutusuna düşer. Temsilcileriniz sekme değiştirmeden,
+                        hangi kanaldan geldiğini görerek tek noktadan yanıt verir. Konuşma geçmişi
+                        kanal değişse bile korunur.
+                    </p>
+                    <div class="d-flex flex-wrap gap-4">
+                        @for (stat of stats1; track $index) {
+                            <div class="stat-item">
+                                <h3><span [countUp]="stat.value" [options]="{decimalPlaces: stat.suffix === '%' || stat.suffix === 'x' ? 1 : 0}">0</span><span>{{stat.suffix}}</span></h3>
+                                <p>{{stat.label}}</p>
+                            </div>
+                        }
+                    </div>
                 </div>
-            </div>
-
-            <div class="col-lg-5 ms-auto py-3">
-                <h3 class="mb-3 fs-xl lh-base">AI Destekli Akıllı Mesajlaşma</h3>
-                <p class="mb-2 lead">SellenticAI, doğal dil işleme teknolojisi ile müşterilerinize insan benzeri yanıtlar sunan akıllı bir mesajlaşma platformudur.</p>
-                <p class="text-muted fs-sm mb-4">İş akışlarınızı otomatikleştirin, temel metrikleri takip edin ve verilerinizi sorunsuz yönetin.</p>
-                <a routerLink="/auth/sign-up" class="btn btn-primary mb-4">Hemen Başla</a>
-
-                <div class="d-flex flex-wrap justify-content-between gap-4 mt-4">
-                    @for (stat of stats1; track $index) {
-                        <div>
-                            <h3 class="mb-2"><span [countUp]="stat.value" [options]="{decimalPlaces: stat.suffix === '%' || stat.suffix === 'x' ? 1 : 0}">0</span><span class="text-primary">{{stat.suffix}}</span></h3>
-                            <p class="text-muted mb-0">{{stat.label}}</p>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-
-        <div class="row align-items-center">
-            <div class="col-lg-5 py-3 order-2 order-lg-1">
-                <h2 class="mb-3 fs-xl lh-base">Tüm Kanalları Tek Panelden Yönetin</h2>
-                <p class="mb-2 lead">SellenticAI, WhatsApp, SMS, e-posta ve web chat kanallarını merkezi bir panelde birleştirerek ekibinize tam kontrol sağlar.</p>
-                <p class="text-muted fs-sm mb-4">Performansı takip edin, görevleri otomatikleştirin ve veriye dayalı kararlar alın — güvenli ve ölçeklenebilir altyapımızla.</p>
-                <a routerLink="/auth/sign-up" class="btn btn-primary mb-4">Platformu Keşfet</a>
-
-                <div class="d-flex flex-wrap gap-4 mt-4">
-                    @for (stat of stats2; track $index) {
-                        <div>
-                            <h3 class="mb-2"><span [countUp]="stat.value" [options]="{decimalPlaces: stat.suffix === '%' || stat.suffix === 'x' ? 1 : 0}">0</span><span class="text-primary">{{stat.suffix}}</span></h3>
-                            <p class="text-muted mb-0">{{stat.label}}</p>
-                        </div>
-                    }
-                </div>
-            </div>
-
-            <div class="col-lg-6 col-xl-5 ms-auto py-3 order-1 order-lg-2">
-                <div class="text-center">
-                    <img src="https://illustrations.popsy.co/violet/success.svg" class="rounded-3 img-fluid" alt="Çok Kanallı Yönetim">
+                <div class="col-lg-6 order-1 order-lg-2">
+                    <img src="assets/images/dashboard.png" class="showcase-img w-100" alt="Birleşik Gelen Kutusu">
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Feature 2: AI Yanıt Önerileri -->
+    <div class="feature-showcase">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6">
+                    <img src="assets/images/dashboard.png" class="showcase-img w-100" alt="AI Yanıt Önerileri">
+                </div>
+                <div class="col-lg-6">
+                    <span class="showcase-badge">Akıllı Yanıt Motoru</span>
+                    <h2>Doğru Yanıtı <span class="gradient-text">AI Hazırlasın</span></h2>
+                    <p class="showcase-text mb-4">
+                        Gelen mesajın bağlamını anlayan AI, temsilcinize hazır yanıt önerileri sunar.
+                        Sık tekrarlanan sorular otomatik cevaplanırken karmaşık talepler doğru kişiye
+                        yönlendirilir. Temsilcileriniz sıfırdan yazmak yerine önerilen yanıtı
+                        onaylayıp gönderir — hem hız artar hem tutarlılık sağlanır.
+                    </p>
+                    <div class="d-flex flex-wrap gap-4">
+                        @for (stat of stats2; track $index) {
+                            <div class="stat-item">
+                                <h3><span [countUp]="stat.value" [options]="{decimalPlaces: stat.suffix === '%' || stat.suffix === 'x' ? 1 : 0}">0</span><span>{{stat.suffix}}</span></h3>
+                                <p>{{stat.label}}</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature 3: Otomasyon -->
+    <div class="feature-showcase">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6 order-2 order-lg-1">
+                    <span class="showcase-badge">Otomatik İş Akışları</span>
+                    <h2>Tekrarlayan İşleri <span class="gradient-text">Otomasyona Bırakın</span></h2>
+                    <p class="showcase-text mb-4">
+                        Sipariş onayı, kargo bildirimi, randevu hatırlatma gibi rutin mesajlar
+                        için kurallar tanımlayın; sistem bunları sizin yerinize göndersin.
+                        Mesai saatleri dışında gelen mesajlara otomatik karşılama yapın,
+                        acil talepleri anında ilgili ekibe iletin.
+                    </p>
+                    <div class="d-flex flex-wrap gap-4">
+                        @for (stat of stats3; track $index) {
+                            <div class="stat-item">
+                                <h3><span [countUp]="stat.value" [options]="{decimalPlaces: stat.suffix === '%' || stat.suffix === 'x' ? 1 : 0}">0</span><span>{{stat.suffix}}</span></h3>
+                                <p>{{stat.label}}</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-lg-6 order-1 order-lg-2">
+                    <img src="assets/images/dashboard.png" class="showcase-img w-100" alt="Otomatik İş Akışları">
+                </div>
+            </div>
+        </div>
+    </div>
+
 </section>

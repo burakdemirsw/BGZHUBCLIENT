@@ -6,24 +6,24 @@ import {NgIcon} from '@ng-icons/core';
 type footerLinksType = {
     title: string;
     links: {
-        name: string
+        name: string;
         url: string;
         badge?: {
             title: string;
-            variant: string
-        }
-    }[],
+            variant: string;
+        };
+    }[];
 }
 
 type socialLinksType = {
     title: string;
     icon: string;
-    url: string
+    url: string;
 }
 
 @Component({
     selector: 'app-footer',
-    imports: [ RouterLink, NgIcon],
+    imports: [RouterLink, NgIcon],
     templateUrl: './footer.html',
     styles: ``
 })

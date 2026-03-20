@@ -1,56 +1,94 @@
-import {Component} from '@angular/core';
-import {PricingPlanCard} from "../pricing-plan-card/pricing-plan-card";
+﻿import {Component} from '@angular/core';
+import {NgIcon} from '@ng-icons/core';
+import {RouterLink} from '@angular/router';
+
+type PlanFeature = { text: string; included: boolean; };
+type Plan = {
+    name: string;
+    description: string;
+    price: number | null;
+    priceLabel?: string;
+    period: string;
+    highlight: string;
+    features: PlanFeature[];
+    isPopular?: boolean;
+    btnText: string;
+    btnLink: string;
+};
 
 @Component({
     selector: 'app-pricing-plans',
-    imports: [PricingPlanCard],
+    imports: [NgIcon, RouterLink],
     templateUrl: './pricing-plans.html',
     styles: ``
 })
 export class PricingPlans {
-    plans = [
+    plans: Plan[] = [
         {
-            name: "Başlangıç",
-            description: "Küçük işletmeler ve bireysel kullanım",
-            price: 299,
-            highlight: "Aylık 1.000 mesaj",
+            name: "Starter",
+            description: "Platforma ilk adım",
+            price: 0,
+            period: "/ ay",
+            highlight: "Ayda 25 sohbete kadar",
             features: [
-                { text: "1 kanal (Web Chat)", included: true },
-                { text: "AI Chatbot (temel)", included: true },
-                { text: "E-posta destek", included: true },
-                { text: "Ekip işbirliği", included: false },
-                { text: "Özel entegrasyonlar", included: false }
+                { text: "1 Bağlı Kanal", included: true },
+                { text: "1 Kullanıcı", included: true },
+                { text: "50 Ürüne Kadar", included: true },
+                { text: "Tüm Entegrasyonlar", included: true },
+                { text: "Ekip İşbirliği", included: false },
             ],
-            btnClass: "btn-outline-primary"
+            btnText: "Ücretsiz Başla",
+            btnLink: "/auth/sign-up"
         },
         {
-            name: "Profesyonel",
-            description: "Büyüyen ekipler ve KOBİ'ler için",
-            price: 799,
-            highlight: "Aylık 10.000 mesaj",
+            name: "Standard",
+            description: "Aktif satış ekipleri için",
+            price: 159,
+            period: "/ ay",
+            highlight: "Ayda 650 sohbete kadar",
             features: [
-                { text: "3 kanal (Web, WhatsApp, SMS)", included: true },
-                { text: "AI Chatbot (gelişmiş)", included: true },
-                { text: "Ekip işbirliği (5 kullanıcı)", included: true },
-                { text: "Öncelikli destek", included: true },
-                { text: "Özel entegrasyonlar", included: false }
+                { text: "3 Bağlı Kanal", included: true },
+                { text: "3 Kullanıcı", included: true },
+                { text: "1.000 Ürüne Kadar", included: true },
+                { text: "WhatsApp Kampanyaları", included: true },
+                { text: "Temel Destek", included: true },
             ],
-            btnClass: "btn-light",
-            isPopular: true
+            isPopular: true,
+            btnText: "Paketi Seç",
+            btnLink: "/auth/sign-up"
         },
         {
-            name: "Kurumsal",
-            description: "Büyük ölçekli işletmeler için",
-            price: 1999,
-            highlight: "Sınırsız mesaj",
+            name: "Pro",
+            description: "Çok kanallı operasyonlar için",
+            price: 499,
+            period: "/ ay",
+            highlight: "Ayda 2.500 sohbete kadar",
             features: [
-                { text: "Tüm kanallar (sınırsız)", included: true },
-                { text: "AI Chatbot (özel eğitimli)", included: true },
-                { text: "Sınırsız ekip üyesi", included: true },
-                { text: "7/24 öncelikli destek", included: true },
-                { text: "Özel API & entegrasyonlar", included: true }
+                { text: "10 Bağlı Kanal", included: true },
+                { text: "10 Kullanıcı", included: true },
+                { text: "Sınırsız Ürün", included: true },
+                { text: "Birebir Kullanım Eğitimi", included: true },
+                { text: "Özel Müşteri Temsilcisi", included: true },
             ],
-            btnClass: "btn-dark"
+            btnText: "Paketi Seç",
+            btnLink: "/auth/sign-up"
+        },
+        {
+            name: "Enterprise",
+            description: "Özel ihtiyaçlara özel çözüm",
+            price: null,
+            priceLabel: "Özel Fiyat",
+            period: "",
+            highlight: "Sınırsız kullanım",
+            features: [
+                { text: "Kurumsal Güvenlik", included: true },
+                { text: "Özel API Entegrasyonları", included: true },
+                { text: "Özel SLA", included: true },
+                { text: "Tüm Pro Özellikleri", included: true },
+                { text: "Dedicated Altyapı", included: true },
+            ],
+            btnText: "İletişime Geç",
+            btnLink: "/auth/sign-up"
         }
     ];
 }
