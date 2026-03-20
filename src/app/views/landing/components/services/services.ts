@@ -1,6 +1,5 @@
 import {Component} from '@angular/core';
 import {NgIcon} from '@ng-icons/core';
-import {RouterLink} from '@angular/router';
 
 type ServiceType = {
     name: string,
@@ -10,7 +9,7 @@ type ServiceType = {
 
 @Component({
     selector: 'app-services',
-    imports: [NgIcon, RouterLink],
+    imports: [NgIcon],
     templateUrl: './services.html',
     styles: ``
 })
