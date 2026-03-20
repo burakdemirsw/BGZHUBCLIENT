@@ -20,8 +20,8 @@
                     @for (item of navItems; track $index) {
                         <li class="nav-item">
                             <a class="nav-link text-uppercase"
-                               [class.active]="scroll.activeSection === (item.toLowerCase())"
-                               (click)="scroll.scrollTo(item)" href="javascript:void(0)">{{item}}</a>
+                               [class.active]="scroll.activeSection === item.id"
+                               (click)="scroll.scrollTo(item.id)" href="javascript:void(0)">{{item.label}}</a>
                         </li>
                     }
                 </ul>

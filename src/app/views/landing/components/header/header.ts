@@ -17,7 +17,14 @@ export class Header {
     public scroll = inject(ScrollService)
     public layout = inject(LayoutStoreService)
 
-    navItems = ['Home', 'Services', 'Features', 'Plans', 'Reviews', 'Contact'];
+    navItems = [
+        { label: 'Ana Sayfa', id: 'home' },
+        { label: 'Hizmetler', id: 'services' },
+        { label: 'Özellikler', id: 'features' },
+        { label: 'Planlar', id: 'plans' },
+        { label: 'Yorumlar', id: 'reviews' },
+        { label: 'İletişim', id: 'contact' },
+    ];
     appName = 'SellenticAI';
 
     @HostListener('window:scroll', [])
