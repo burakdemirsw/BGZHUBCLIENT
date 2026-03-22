@@ -17,7 +17,8 @@
 
 // Chat sayfası aktifken content-page scroll'u engelle
 .content-page.chat-page-active {
-    height: calc(100vh - 71px);
+    height: 100vh;
+    max-height: 100vh;
     min-height: unset !important;
     overflow: hidden;
     padding: 0 !important;
