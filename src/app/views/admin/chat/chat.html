@@ -254,6 +254,26 @@
                             </div>
                         }
 
+                        <!-- User message (sol taraf) -->
+                        @if (msg.source === 'user') {
+                            <div class="message-row customer" @messageAnim>
+                                <div class="message-avatar" [style.background-color]="selectedConversation.customerAvatarColor">
+                                    {{ selectedConversation.customerInitials }}
+                                </div>
+                                <div class="message-group">
+                                    <div class="message-bubble customer-bubble">
+                                        <p class="mb-0">{{ msg.text }}</p>
+                                    </div>
+                                    @if (msg.imageUrl) {
+                                        <div class="message-image">
+                                            <img [src]="msg.imageUrl" alt="Attached image" loading="lazy">
+                                        </div>
+                                    }
+                                    <span class="message-time">{{ msg.createdDate }}</span>
+                                </div>
+                            </div>
+                        }
+
                         <!-- AI / System message -->
                         @if (msg.source === 'system' || msg.source === 'ai') {
                             <div class="message-row system-msg" @messageAnim>
@@ -273,8 +293,8 @@
                             </div>
                         }
 
-                        <!-- Agent message -->
-                        @if (msg.source === 'agent' || msg.source === 'user' || msg.source === 'assistant') {
+                        <!-- Agent / Assistant message (sağ taraf) -->
+                        @if ( msg.source === 'assistant') {
                             <div class="message-row agent" @messageAnim>
                                 <div class="message-group agent-group">
                                     <div class="message-bubble agent-bubble">
@@ -406,9 +426,20 @@
                     <div class="chat-input-send">
                         <span class="shortcut-hint">/ ile kısayol kullanın</span>
                         <button class="btn btn-sm me-2"
+                                [class]="autoAiMode ? 'btn-success' : 'btn-outline-secondary'"
+                                (click)="autoAiMode = !autoAiMode"
+                                title="Otomatik AI Yanıt Modu">
+                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i>
+                            @if (autoAiMode) {
+                                Oto AI: Açık
+                            } @else {
+                                Oto AI: Kapalı
+                            }
+                        </button>
+                        <button class="btn btn-sm me-2"
                                 [class]="isLastMessageFromCustomer ? 'btn-soft-primary' : 'btn-outline-secondary'"
                                 (click)="sendAiChat()"
-                                [disabled]="!isLastMessageFromCustomer || isAiSending"
+                      
                                 title="Son müşteri mesajını AI ile yanıtla">
                             @if (isAiSending) {
                                 <i class="fa-solid fa-spinner fa-spin me-1"></i>AI düşünüyor...
@@ -416,7 +447,10 @@
                                 <i class="fa-solid fa-robot me-1"></i>AI Yanıt
                             }
                         </button>
-                        <button class="btn-send" (click)="sendMessage()" [disabled]="!newMessage.trim() && !pendingFile">
+                        <button class="btn btn-sm btn-outline-secondary me-2" (click)="sendMessage('user')" [disabled]="!newMessage.trim() && !pendingFile" title="User olarak gönder">
+                            <i class="fa-solid fa-user me-1"></i>User Gönder
+                        </button>
+                        <button class="btn-send" (click)="sendMessage('assistant')" [disabled]="!newMessage.trim() && !pendingFile">
                             Gönder
                             <i class="fa-solid fa-chevron-down ms-1 small"></i>
                         </button>
@@ -442,6 +476,9 @@
                     <button class="details-tab" [class.active]="detailsActiveTab === 'copilot'"
                         (click)="detailsActiveTab = 'copilot'">Copilot</button>
                 </div>
+                <button class="panel-add-btn" (click)="refreshConversationDetails()" [disabled]="isRefreshing" title="Yenile">
+                    <i class="fa-solid fa-arrows-rotate" [class.fa-spin]="isRefreshing"></i>
+                </button>
             </div>
 
             <!-- Customer Info -->

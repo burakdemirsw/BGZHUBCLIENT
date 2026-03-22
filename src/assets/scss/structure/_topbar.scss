@@ -9,7 +9,7 @@
     background: $topbar-bg;
     box-shadow: $card-box-shadow;
     height: $topbar-height;
-    margin-left: $sidenav-width;
+    margin-left: 0; // Mobilde sidebar offcanvas, margin yok
     transition: margin-left .25s ease-in-out;
 
     .topbar-menu {

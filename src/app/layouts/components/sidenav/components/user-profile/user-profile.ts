@@ -1,10 +1,12 @@
-import {Component, CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import {Component, computed, CUSTOM_ELEMENTS_SCHEMA, OnInit} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {NgbCollapseModule, NgbDropdown, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
 import {NgIcon} from '@ng-icons/core';
 import {userDropdownItems} from '@layouts/components/data';
 import {AuthStateService} from '@/app/core/services/auth-state.service';
 import {UserService} from '@/app/core/services/user.service';
+import {LayoutStoreService} from '@core/services/layout-store.service';
+import {NotificationsService} from '@core/services/notifications.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -20,10 +22,49 @@ import {UserService} from '@/app/core/services/user.service';
   templateUrl: './user-profile.html',
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class UserProfile {
-  menuItems = userDropdownItems
+export class UserProfile implements OnInit {
+  menuItems = userDropdownItems;
+  unreadCount = 0;
+  theme = computed(() => this.layout.state().theme);
 
-  constructor(public authState: AuthStateService, private userService: UserService) {}
+  constructor(
+    public authState: AuthStateService,
+    private userService: UserService,
+    public layout: LayoutStoreService,
+    private notificationsService: NotificationsService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadUnreadCount();
+  }
+
+  async loadUnreadCount(): Promise<void> {
+    try {
+      const userId = this.authState.profile?.userId;
+      if (!userId) return;
+      const response = await this.notificationsService.getUnreadCount(userId);
+      if (typeof response === 'number') {
+        this.unreadCount = response;
+      } else if (response?.count !== undefined) {
+        this.unreadCount = response.count;
+      } else if (response?.data !== undefined) {
+        this.unreadCount = response.data;
+      } else {
+        this.unreadCount = 0;
+      }
+    } catch {
+      this.unreadCount = 0;
+    }
+  }
+
+  toggleTheme(): void {
+    const current = this.layout.theme;
+    this.layout.setTheme(current === 'dark' ? 'light' : 'dark');
+  }
+
+  get isDark(): boolean {
+    return this.layout.theme === 'dark';
+  }
 
   onItemClick(item: any, event: Event): void {
     if (item.label === 'Çıkış Yap') {

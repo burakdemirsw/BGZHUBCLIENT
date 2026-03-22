@@ -12,6 +12,8 @@ import { OrderStatusesService } from '@/app/core/services/order-statuses.service
 import { PaymentTypesService } from '@/app/core/services/payment-types.service';
 import { PaymentStatusesService } from '@/app/core/services/payment-statuses.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
+import { CustomerAddressesService } from '@/app/core/services/customer-addresses.service';
+import { CustomerAddress } from '@/app/core/models/customer/customer-address.models';
 
 import { Order, CreateOrderRequest, CreateOrderItemRequest, CreateOrderPaymentRequest, UpdateOrderRequest } from '@/app/core/models/order/order.models';
 import { Product } from '@/app/core/models/product/product.models';
@@ -68,7 +70,7 @@ interface CartItem {
     totalPrice: number;
 }
 
-type OrderStep = 'integration' | 'customer' | 'products' | 'payment' | 'summary';
+type OrderStep = 'integration' | 'customer' | 'address' | 'products' | 'payment' | 'summary';
 
 @Component({
     selector: 'app-order-create-page',
@@ -107,6 +109,7 @@ export class OrderCreatePage implements OnInit {
     steps: { key: OrderStep; label: string; icon: string }[] = [
         { key: 'integration', label: 'Entegrasyon', icon: 'fa-plug' },
         { key: 'customer', label: 'Müşteri', icon: 'fa-user' },
+        { key: 'address', label: 'Adres', icon: 'fa-location-dot' },
         { key: 'products', label: 'Ürünler', icon: 'fa-box' },
         { key: 'payment', label: 'Ödeme', icon: 'fa-credit-card' },
         { key: 'summary', label: 'Özet', icon: 'fa-check-circle' }
@@ -132,6 +135,11 @@ export class OrderCreatePage implements OnInit {
     customerPage = 1;
     customerPageSize = 20;
     customerTotalCount = 0;
+
+    // Step 2.5: Customer Addresses
+    customerAddresses: CustomerAddress[] = [];
+    selectedAddress: CustomerAddress | null = null;
+    loadingAddresses = false;
 
     // Step 3: Products
     products: Product[] = [];
@@ -197,7 +205,8 @@ export class OrderCreatePage implements OnInit {
         private orderStatusesService: OrderStatusesService,
         private paymentTypesService: PaymentTypesService,
         private paymentStatusesService: PaymentStatusesService,
-        private authStateService: AuthStateService
+        private authStateService: AuthStateService,
+        private customerAddressesService: CustomerAddressesService
     ) {}
 
     ngOnInit(): void {
@@ -315,8 +324,55 @@ export class OrderCreatePage implements OnInit {
 
     selectCustomer(customer: CustomerSummary): void {
         this.selectedCustomer = customer;
+        this.selectedAddress = null;
+        this.goToStep('address');
+        this.loadCustomerAddresses();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // STEP 2.5: CUSTOMER ADDRESSES
+    // ═══════════════════════════════════════════════════════════════
+    async loadCustomerAddresses(): Promise<void> {
+        if (!this.selectedCustomer) return;
+        this.loadingAddresses = true;
+        try {
+            const response = await this.customerAddressesService.getByCustomerId(this.selectedCustomer.id);
+            this.customerAddresses = this.extractArray(response?.data || response);
+            // Varsayılan adresi otomatik seç
+            const defaultAddr = this.customerAddresses.find(a => a.isDefault);
+            if (defaultAddr) {
+                this.selectedAddress = defaultAddr;
+            }
+        } catch (err) {
+            console.error('Customer addresses load error:', err);
+        } finally {
+            this.loadingAddresses = false;
+        }
+    }
+
+    selectAddress(address: CustomerAddress): void {
+        this.selectedAddress = address;
+    }
+
+    skipAddressSelection(): void {
+        this.selectedAddress = null;
         this.goToStep('products');
         this.loadProducts();
+    }
+
+    confirmAddressAndContinue(): void {
+        this.goToStep('products');
+        this.loadProducts();
+    }
+
+    getFullAddress(address: CustomerAddress): string {
+        const parts: string[] = [];
+        if (address.addressLine) parts.push(address.addressLine);
+        if (address.districtName) parts.push(address.districtName);
+        if (address.cityName) parts.push(address.cityName);
+        if (address.countryName) parts.push(address.countryName);
+        if (address.postalCode) parts.push(`(${address.postalCode})`);
+        return parts.join(', ') || '-';
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -437,6 +493,7 @@ export class OrderCreatePage implements OnInit {
         // İleriye gitme kuralları
         switch (step) {
             case 'customer': return !!this.selectedIntegrationUser;
+            case 'address': return !!this.selectedIntegrationUser && !!this.selectedCustomer;
             case 'products': return !!this.selectedIntegrationUser && !!this.selectedCustomer;
             case 'payment': return this.cartItems.length > 0;
             case 'summary': return this.cartItems.length > 0 && !!this.selectedOrderStatusId;
@@ -500,6 +557,7 @@ export class OrderCreatePage implements OnInit {
                 customerId: this.selectedCustomer.id,
                 orderStatusId: this.selectedOrderStatusId,
                 paymentTypeId: this.selectedPaymentTypeId || undefined,
+                addressId: this.selectedAddress?.id || undefined,
                 orderDate,
                 orderTime,
                 description: this.orderDescription,

@@ -61,6 +61,7 @@ import { PaymentTypesPage } from './payment-types/payment-types';
 import { AdminNotesPage } from './admin-notes/admin-notes';
 import { UserTypesPage } from './user-types/user-types';
 import { OrderCreatePage } from './order-create/order-create';
+import { OrdersPage } from './orders/orders';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -433,6 +434,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/user-types',
         component: UserTypesPage,
         data: { title: 'Kullanıcı Türleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/orders',
+        component: OrdersPage,
+        data: { title: 'Siparişler' },
         canActivate: [AuthGuard],
     },
     {

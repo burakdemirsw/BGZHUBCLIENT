@@ -1,9 +1,18 @@
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px 0 0;
+  height: 70px;
+}
+
 .logo-brand {
   padding: 0 20px;
   height: 70px;
   display: flex;
   align-items: center;
   overflow: hidden;
+  flex: 1;
 
   .logo-brand-link {
     display: flex;
@@ -63,8 +72,55 @@
   }
 }
 
+.sidebar-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--ct-sidenav-menu-item-color, #6c757d);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--ct-primary, #3762ea);
+  }
+
+  .toggle-icon {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+  }
+}
+
 :host-context(html[data-sidenav-size="condensed"]) {
   .logo-brand-version {
+    display: none;
+  }
+  
+  .logo-wrapper {
+    padding: 0;
+    flex-direction: column;
+    height: auto;
+    padding-top: 12px;
+    gap: 8px;
+  }
+  
+  .logo-brand {
+    padding: 0;
+    justify-content: center;
+    height: auto;
+  }
+  
+  .sidebar-toggle-btn {
+    transform: rotate(180deg);
+  }
+  
+  .logo-brand-text-wrapper {
     display: none;
   }
 }

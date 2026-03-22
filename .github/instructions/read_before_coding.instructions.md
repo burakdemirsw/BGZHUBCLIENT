@@ -86,6 +86,7 @@ private extractArray(response: any): any[] {
 
 ## UI Kuralları
 
+- **Arka plan rengi:** Beyaz alanları kırmak için `#f7f7f9` (off-white) kullan — içerik alanları, step paneller, form arka planları gibi yerlerde saf beyaz (`#fff`) yerine bu renk tercih edilir
 - Bootstrap 5 sınıfları kullan (`card`, `table`, `btn`, `badge`, `form-control` vb.)
 - Butonlar: `btn-soft-primary`, `btn-soft-danger` (düzenle/sil)
 - Durum badge: `bg-success-subtle text-success` (Aktif) / `bg-danger-subtle text-danger` (Engelli/Pasif)

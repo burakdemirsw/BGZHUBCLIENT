@@ -14,9 +14,19 @@
     flex-direction: column;
     position: relative;
     margin-left: $sidenav-width;
-    min-height: calc(100vh - #{calc($topbar-height + 1px)});
+    min-height: 100vh;
     transition: $transition-base;
     padding: 0 calc($grid-gutter-width * 0.5);
+    
+    // lg ve üstü ekranlarda topbar gizli olduğu için min-height %100
+    @include media-breakpoint-up(lg) {
+        min-height: 100vh;
+    }
+    
+    // lg altında topbar görünür, min-height ayarla
+    @include media-breakpoint-down(lg) {
+        min-height: calc(100vh - #{calc($topbar-height + 1px)});
+    }
 }
 
 // Page Head

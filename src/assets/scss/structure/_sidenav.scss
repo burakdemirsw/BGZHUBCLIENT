@@ -12,9 +12,12 @@
     box-shadow: var(--#{$prefix}box-shadow-sm);
     border-right: $card-border-width solid $sidenav-border-color;
     transition: width .25s ease-in-out;
+    display: flex;
+    flex-direction: column;
 
     [data-simplebar] {
-        height: calc(100% - $topbar-height - 50px);
+        flex: 1;
+        min-height: 0;
     }
 }
 
@@ -265,20 +268,37 @@
 
 // sidenav user (bottom fixed)
 .sidenav-user-bottom {
-    display: none;
-    padding: 16px 20px;
+    display: block;
+    padding: 12px 16px;
     border-top: 1px solid $sidenav-border-color;
     color: $sidenav-item-color;
     background: $sidenav-bg;
-}
+    margin-top: auto;
+    flex-shrink: 0;
 
-html[data-sidenav-user="true"] {
-    .sidenav-user-bottom {
-        display: block;
+    .sidenav-action-btn {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: background-color 0.2s;
+        position: relative;
+        color: $sidenav-item-color;
+
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.06);
+        }
     }
 
-    .sidenav-scrollbar {
-        height: calc(100% - $topbar-height - 50px - 75px) !important;
+    .sidenav-notif-badge {
+        top: 2px;
+        right: 0px;
+        font-size: 9px;
+        padding: 2px 5px;
+        line-height: 1;
+        min-width: 16px;
     }
 }
 
@@ -481,10 +501,24 @@ html[data-sidenav-size="condensed"] {
 
     .side-nav-link::before,
     .sidenav-user,
-    .sidenav-user-bottom,
     .sidenav-search,
     .side-nav-title {
         display: none;
+    }
+
+    .sidenav-user-bottom {
+        padding: 12px 0;
+        display: flex;
+        justify-content: center;
+
+        .sidenav-profile-text,
+        .sidenav-profile-actions {
+            display: none !important;
+        }
+
+        .sidenav-profile-avatar {
+            margin: 0 auto;
+        }
     }
 }
 
@@ -597,10 +631,24 @@ html[data-sidenav-size="on-hover"] {
 
         .button-on-hover,
         .sidenav-user,
-        .sidenav-user-bottom,
         .sidenav-search,
         .menu-text {
             display: none;
+        }
+
+        .sidenav-user-bottom {
+            padding: 12px 0;
+            display: flex;
+            justify-content: center;
+
+            .sidenav-profile-text,
+            .sidenav-profile-actions {
+                display: none !important;
+            }
+
+            .sidenav-profile-avatar {
+                margin: 0 auto;
+            }
         }
 
         .sub-menu {

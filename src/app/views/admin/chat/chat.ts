@@ -339,6 +339,24 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
         }
     }
 
+    isRefreshing = false;
+
+    async refreshConversationDetails(): Promise<void> {
+        if (!this.selectedConversation || this.isRefreshing) return;
+        this.isRefreshing = true;
+        const id = this.selectedConversation.id;
+        try {
+            await Promise.all([
+                this.loadMessages(id),
+                this.loadConversationTags(id),
+                this.loadConversationNotes(id),
+                this.loadConversationSegments(id),
+            ]);
+        } finally {
+            this.isRefreshing = false;
+        }
+    }
+
     async loadMessages(conversationId: string): Promise<void> {
         try {
             const response = await this.conversationsService.getMessages(conversationId);
@@ -352,19 +370,20 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
 
     isSending = false;
     isAiSending = false;
+    autoAiMode = false;
 
     /** Son mesaj müşteriden mi geldi? */
     get isLastMessageFromCustomer(): boolean {
         if (this.messages.length === 0) return false;
         const last = this.messages[this.messages.length - 1];
-        return last.source === 'customer';
+        return last.source === 'user';
     }
 
     /** AI Chat butonuna basıldığında çalışır */
     async sendAiChat(): Promise<void> {
-        if (!this.selectedConversation || !this.isLastMessageFromCustomer || this.isAiSending) return;
+        if (!this.selectedConversation  ) return;
 
-        const lastCustomerMsg = [...this.messages].reverse().find(m => m.source === 'customer');
+        const lastCustomerMsg = [...this.messages].reverse().find(m => m.source === 'user');
         if (!lastCustomerMsg) return;
 
         const conversationId = this.selectedConversation.id;
@@ -460,7 +479,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
         return bytes + ' B';
     }
 
-    async sendMessage(): Promise<void> {
+    async sendMessage(source: 'user' | 'assistant' = 'assistant'): Promise<void> {
         if ((!this.newMessage.trim() && !this.pendingFile) || !this.selectedConversation || this.isSending) return;
 
         const text = this.newMessage.trim();
@@ -473,7 +492,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
         const optimisticMsg: ChatMessage = {
             id: tempId,
             conversationId,
-            source: 'agent',
+            source: source,
             text: text || (fileData ? `📎 ${fileData.name}` : ''),
             imageUrl: fileData?.preview || undefined,
             fileType: fileData?.type || undefined,
@@ -490,7 +509,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
             const response = await this.messagesService.sendMessage({
                 conversationId,
                 messageContent: text || (fileData ? fileData.name : ''),
-                source: isNote ? 'note' : 'agent',
+                source: isNote ? 'note' : source,
                 file: fileData?.file || null,
             });
 
@@ -508,6 +527,11 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
             }
 
             console.log('✅ Mesaj gönderildi:', response);
+
+            // Otomatik AI modu: user olarak gönderildiyse AI yanıt tetikle
+            if (this.autoAiMode && source === 'user' && !this.isAiSending) {
+                setTimeout(() => this.sendAiChat(), 500);
+            }
         } catch (err) {
             console.error('❌ Mesaj gönderilemedi:', err);
 
@@ -531,7 +555,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
         if (alreadyExists) return;
 
         // Optimistic mesajla eşleşme: agent kendi gönderdiği mesajın gerçek ID'si geldi
-        if (msg.source === 'agent' && msg.conversationId === this.activeConversationId) {
+        if (msg.source === 'assistant' && msg.conversationId === this.activeConversationId) {
             const tempIdx = this.messages.findIndex(m =>
                 m.id.startsWith('temp_') &&
                 m.conversationId === msg.conversationId &&
@@ -551,8 +575,13 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
             this.typingUser = null;
 
             // Mesajı okundu olarak işaretle
-            if (msg.source !== 'agent') {
+            if (msg.source !== 'assistant') {
                 this.chatSignalR.markAsRead(msg.conversationId, msg.id);
+            }
+
+            // Otomatik AI modu: user mesajı geldiğinde AI yanıt gönder
+            if (this.autoAiMode && msg.source === 'user' && !this.isAiSending) {
+                setTimeout(() => this.sendAiChat(), 500);
             }
         }
 
@@ -707,7 +736,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
 
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
-            this.sendMessage();
+            this.sendMessage(this.autoAiMode ? 'user' : 'assistant');
         }
     }
 

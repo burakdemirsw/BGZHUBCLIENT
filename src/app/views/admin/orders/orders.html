@@ -1,0 +1,230 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-cart-shopping me-2"></i>Siparişler</h4>
+                <button class="btn btn-primary btn-sm" (click)="goToCreate()">
+                    <i class="fa-solid fa-plus me-1"></i>Yeni Sipariş
+                </button>
+            </div>
+            <div class="card-body">
+                <!-- Filters -->
+                <div class="row g-2 mb-3">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control form-control-sm" placeholder="Sipariş no, müşteri ara..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()">
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select form-select-sm" [(ngModel)]="filterOrderStatusId" (ngModelChange)="onFilterChange()">
+                            <option value="">Tüm Durumlar</option>
+                            @for (status of orderStatuses; track status.id) {
+                                <option [value]="status.id">{{ status.name || status.statusName }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select form-select-sm" [(ngModel)]="filterPaymentTypeId" (ngModelChange)="onFilterChange()">
+                            <option value="">Tüm Ödeme Tipleri</option>
+                            @for (pt of paymentTypes; track pt.id) {
+                                <option [value]="pt.id">{{ pt.name || pt.typeName }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select form-select-sm" [(ngModel)]="filterIsCompleted" (ngModelChange)="onFilterChange()">
+                            <option value="">Tamamlanma</option>
+                            <option value="true">Tamamlandı</option>
+                            <option value="false">Tamamlanmadı</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select form-select-sm" [(ngModel)]="filterIsCancel" (ngModelChange)="onFilterChange()">
+                            <option value="">İptal Durumu</option>
+                            <option value="true">İptal Edildi</option>
+                            <option value="false">Aktif</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-outline-secondary btn-sm w-100" (click)="clearFilters()" title="Filtreleri Temizle">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-3">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">Başlangıç</span>
+                            <input type="date" class="form-control" [(ngModel)]="filterStartDate" (ngModelChange)="onFilterChange()">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">Bitiş</span>
+                            <input type="date" class="form-control" [(ngModel)]="filterEndDate" (ngModelChange)="onFilterChange()">
+                        </div>
+                    </div>
+                </div>
+
+                @if (loading) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Sipariş No</th>
+                                    <th>Müşteri</th>
+                                    <th>Sipariş Tarihi</th>
+                                    <th>Tutar</th>
+                                    <th>Ödeme Tipi</th>
+                                    <th>Durum</th>
+                                    <th class="text-center">Tamamlandı</th>
+                                    <th class="text-center">İptal</th>
+                                    <th class="text-end">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of items; track item.id; let idx = $index) {
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">{{ (currentPage - 1) * pageSize + idx + 1 }}</span>
+                                        </td>
+                                        <td>
+                                            <a href="javascript:void(0)" class="fw-medium text-primary" (click)="goToDetail(item)">
+                                                {{ item.integrationOrderNo || item.id.substring(0, 8) + '...' }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span class="fw-medium">{{ getCustomerName(item) }}</span>
+                                        </td>
+                                        <td class="small text-muted">
+                                            {{ formatDate(item.orderDate) }}
+                                            @if (item.orderTime) {
+                                                <span class="text-muted"> {{ item.orderTime }}</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="fw-semibold text-success">{{ formatCurrency(item.totalAmount, item.currencyCode) }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info-subtle text-info">{{ getPaymentTypeName(item.paymentTypeId) }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary-subtle text-secondary">{{ getOrderStatusName(item.orderStatusId) }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (item.isCompleted) {
+                                                <span class="badge bg-success-subtle text-success"><i class="fa-solid fa-check"></i></span>
+                                            } @else {
+                                                <span class="badge bg-warning-subtle text-warning"><i class="fa-solid fa-clock"></i></span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            @if (item.isCancel) {
+                                                <span class="badge bg-danger-subtle text-danger"><i class="fa-solid fa-times"></i></span>
+                                            } @else {
+                                                <span class="badge bg-success-subtle text-success"><i class="fa-solid fa-check"></i></span>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            <button class="btn btn-soft-info btn-sm me-1" (click)="goToDetail(item)" title="Detay">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(item)" title="Düzenle">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </button>
+                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteItem(item)" title="Sil">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="10" class="text-center text-muted">Sipariş bulunamadı.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="small text-muted">Toplam: {{ totalCount }} kayıt</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track $index) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+@if (showModal) {
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sipariş Düzenle</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Sipariş Durumu</label>
+                            <select class="form-select" [(ngModel)]="form.orderStatusId" name="orderStatusId">
+                                <option value="">Durum seçiniz...</option>
+                                @for (status of orderStatuses; track status.id) {
+                                    <option [value]="status.id">{{ status.name || status.statusName }}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ödeme Tipi</label>
+                            <select class="form-select" [(ngModel)]="form.paymentTypeId" name="paymentTypeId">
+                                <option value="">Ödeme tipi seçiniz...</option>
+                                @for (pt of paymentTypes; track pt.id) {
+                                    <option [value]="pt.id">{{ pt.name || pt.typeName }}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Açıklama</label>
+                            <textarea class="form-control" [(ngModel)]="form.description" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="isCompleted" [(ngModel)]="form.isCompleted" name="isCompleted">
+                                    <label class="form-check-label" for="isCompleted">Tamamlandı</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="isCancel" [(ngModel)]="form.isCancel" name="isCancel">
+                                    <label class="form-check-label" for="isCancel">İptal Edildi</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" (click)="save()">Güncelle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
