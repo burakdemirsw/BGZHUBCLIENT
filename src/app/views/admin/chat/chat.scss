@@ -26,18 +26,19 @@ $radius-md: 12px;
 $radius-lg: 18px;
 
 :host {
-    display: block;
+    display: flex;
     height: 100%;
+    width: 100%;
     overflow: hidden;
 }
 
 .chat-dashboard {
     display: flex;
+    flex: 1;
     height: 100%;
+    width: 100%;
     background: $bg-page;
-    border-radius: $radius-sm;
     overflow: hidden;
-    box-shadow: $shadow-md;
 }
 
 /* ---- LEFT SIDEBAR ---- */

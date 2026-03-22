@@ -5,6 +5,7 @@ import { IntegrationSocialMediaAccountsService } from '@/app/core/services/integ
 import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { SocialMediaService } from '@/app/core/services/social-media.service';
 import { UsersService } from '@/app/core/services/users.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 import {
     IntegrationSocialMediaAccount,
     CreateIntegrationSocialMediaAccountRequest,
@@ -34,6 +35,8 @@ export class IntegrationSocialMediaAccountsPage implements OnInit {
     totalCount = 0;
     totalPagesArray: number[] = [];
 
+    companyId = '';
+
     form: any = {
         integrationId: '',
         socialMediaAccountId: '',
@@ -44,10 +47,12 @@ export class IntegrationSocialMediaAccountsPage implements OnInit {
         private service: IntegrationSocialMediaAccountsService,
         private integrationsService: IntegrationsService,
         private socialMediaService: SocialMediaService,
-        private usersService: UsersService
+        private usersService: UsersService,
+        private authStateService: AuthStateService
     ) {}
 
     ngOnInit(): void {
+        this.companyId = this.authStateService.profile?.companyId || '';
         this.loadLookups();
         this.loadItems();
     }
@@ -81,7 +86,7 @@ export class IntegrationSocialMediaAccountsPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getAll(this.currentPage, this.pageSize, this.searchTerm);
+            const response = await this.service.getAll(this.currentPage, this.pageSize, this.searchTerm, this.companyId);
             console.log('IntegrationSocialMediaAccounts response:', response);
             
             const data = response?.data || response;
@@ -146,6 +151,7 @@ export class IntegrationSocialMediaAccountsPage implements OnInit {
         try {
             if (this.editMode && this.selectedItem) {
                 const req: UpdateIntegrationSocialMediaAccountRequest = {
+                    companyId: this.companyId,
                     integrationId: this.form.integrationId,
                     socialMediaAccountId: this.form.socialMediaAccountId,
                     userId: this.form.userId,
@@ -155,6 +161,7 @@ export class IntegrationSocialMediaAccountsPage implements OnInit {
                 console.log('Update response:', res);
             } else {
                 const req: CreateIntegrationSocialMediaAccountRequest = {
+                    companyId: this.companyId,
                     integrationId: this.form.integrationId,
                     socialMediaAccountId: this.form.socialMediaAccountId,
                     userId: this.form.userId,

@@ -11,8 +11,15 @@ import {
 export class IntegrationSocialMediaAccountsService {
     constructor(private http: HttpClientService) {}
 
-    getAll(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+    getAll(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = '', companyId: string = ''): Promise<any> {
         let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+        if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
+        if (companyId) action += `&CompanyId=${encodeURIComponent(companyId)}`;
+        return this.http.get_new({ controller: 'IntegrationSocialMediaAccounts', action });
+    }
+
+    getByCompany(companyId: string, pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+        let action = `by-company/${companyId}?PageNumber=${pageNumber}&PageSize=${pageSize}`;
         if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
         return this.http.get_new({ controller: 'IntegrationSocialMediaAccounts', action });
     }
