@@ -213,7 +213,7 @@ export class OrderCreatePage implements OnInit {
         // userProfile'dan companyId al
         const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
         this.companyId = profile.companyId || '';
-        console.log('CompanyId:', this.companyId);
+        //console.log('CompanyId:', this.companyId);
         
         // Route'dan order id kontrolü
         this.route.params.subscribe(params => {
@@ -240,9 +240,9 @@ export class OrderCreatePage implements OnInit {
                 this.paymentTypesService.getAll(),
                 this.paymentStatusesService.getAll()
             ]);
-            this.orderStatuses = this.extractArray(statusRes);
-            this.paymentTypes = this.extractArray(paymentTypeRes);
-            this.paymentStatuses = this.extractArray(paymentStatusRes);
+            this.orderStatuses = this.extractArray(statusRes?.data);
+            this.paymentTypes = this.extractArray(paymentTypeRes?.data);
+            this.paymentStatuses = this.extractArray(paymentStatusRes?.data);
 
             // Default seçimler
             if (this.orderStatuses.length > 0) {
@@ -266,11 +266,11 @@ export class OrderCreatePage implements OnInit {
         }
         this.loadingIntegrations = true;
         try {
-            console.log('Loading integration users for companyId:', this.companyId);
+            //console.log('Loading integration users for companyId:', this.companyId);
             const response = await this.integrationsService.getIntegrationUsersByCompany(this.companyId);
-            console.log('Integration users response:', response);
-            this.integrationUsers = this.extractArray(response);
-            console.log('Extracted integration users:', this.integrationUsers);
+            //console.log('Integration users response:', response);
+            this.integrationUsers = this.extractArray(response?.data);
+            //console.log('Extracted integration users:', this.integrationUsers);
         } catch (err) {
             console.error('Integration users load error:', err);
         } finally {
@@ -307,9 +307,9 @@ export class OrderCreatePage implements OnInit {
                 pageSize: this.customerPageSize,
                 searchTerm: this.customerSearchText
             });
-            const data = response?.data || response;
-            this.customers = this.extractArray(data?.items || data);
-            this.customerTotalCount = data?.totalCount || this.customers.length;
+            const paged = response?.data;
+            this.customers = paged?.items ?? [];
+            this.customerTotalCount = paged?.totalCount || this.customers.length;
         } catch (err) {
             console.error('Customers load error:', err);
         } finally {
@@ -337,7 +337,7 @@ export class OrderCreatePage implements OnInit {
         this.loadingAddresses = true;
         try {
             const response = await this.customerAddressesService.getByCustomerId(this.selectedCustomer.id);
-            this.customerAddresses = this.extractArray(response?.data || response);
+            this.customerAddresses = this.extractArray(response?.data);
             // Varsayılan adresi otomatik seç
             const defaultAddr = this.customerAddresses.find(a => a.isDefault);
             if (defaultAddr) {
@@ -394,9 +394,9 @@ export class OrderCreatePage implements OnInit {
                 isActive: true,
                 integrationUserId: this.selectedIntegrationUser?.id
             });
-            const data = response?.data || response;
-            this.products = this.extractArray(data?.items || data);
-            this.productTotalCount = data?.totalCount || this.products.length;
+            const paged = response?.data;
+            this.products = paged?.items ?? [];
+            this.productTotalCount = paged?.totalCount || this.products.length;
         } catch (err) {
             console.error('Products load error:', err);
         } finally {
@@ -602,7 +602,7 @@ export class OrderCreatePage implements OnInit {
         this.loading = true;
         try {
             const response = await this.ordersService.getById(this.orderId);
-            this.existingOrder = response?.data || response;
+            this.existingOrder = response?.data ?? null;
             
             if (this.existingOrder) {
                 // Mevcut verileri set et

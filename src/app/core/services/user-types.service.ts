@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateUserTypeRequest, UpdateUserTypeRequest } from '../models/user/user-type.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({
   providedIn: 'root',
@@ -8,26 +10,26 @@ import { CreateUserTypeRequest, UpdateUserTypeRequest } from '../models/user/use
 export class UserTypesService {
   constructor(private http: HttpClientService) {}
 
-  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-    return this.http.get_new({
+  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.http.get<PagedResult<any>>({
       controller: 'UserTypes',
-      action: `?PageNumber=${pageNumber}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`
+      action: buildPaginationQuery(req)
     });
   }
 
-  getById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'UserTypes', action: `${id}` });
+  getById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'UserTypes', action: `${id}` });
   }
 
-  create(request: CreateUserTypeRequest): Promise<any> {
-    return this.http.post({ controller: 'UserTypes' }, request);
+  create(request: CreateUserTypeRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'UserTypes' }, request);
   }
 
-  update(id: string, request: UpdateUserTypeRequest): Promise<any> {
-    return this.http.post({ controller: 'UserTypes', action: `update/${id}` }, request);
+  update(id: string, request: UpdateUserTypeRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'UserTypes', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Promise<any> {
-    return this.http.post({ controller: 'UserTypes', action: `delete/${id}` }, {});
+  delete(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'UserTypes', action: `delete/${id}` }, {});
   }
 }

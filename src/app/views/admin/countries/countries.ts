@@ -33,7 +33,7 @@ export class CountriesPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.addressesService.getCountries();
-            console.log('Countries response:', response);
+            //console.log('Countries response:', response);
             this.countries = this.extractArray(response);
         } catch (err) {
             console.error('Countries error:', err);

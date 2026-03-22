@@ -8,6 +8,8 @@ import {
   CreateTeamSettingRequest,
   UpdateTeamSettingRequest,
 } from '../models/team/team.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({
   providedIn: 'root',
@@ -16,87 +18,85 @@ export class TeamsService {
   constructor(private http: HttpClientService) {}
 
   // ── Teams ──
-  getAll(): Promise<any> {
-    return this.http.get_new({ controller: 'Teams' });
+  getAll(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Teams' });
   }
 
-  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-    let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
-    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-    return this.http.get_new({ controller: 'Teams', action });
+  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.http.get<PagedResult<any>>({ controller: 'Teams', action: buildPaginationQuery(req) });
   }
 
-  getById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'Teams' }, id);
+  getById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Teams' }, id);
   }
 
-  getByCreator(creatorId: string): Promise<any> {
-    return this.http.get_new({ controller: 'Teams', action: `by-creator/${creatorId}` });
+  getByCreator(creatorId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Teams', action: `by-creator/${creatorId}` });
   }
 
-  create(request: CreateTeamRequest): Promise<any> {
-    return this.http.post({ controller: 'Teams' }, request);
+  create(request: CreateTeamRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Teams' }, request);
   }
 
-  update(id: string, request: UpdateTeamRequest): Promise<any> {
-    return this.http.post({ controller: 'Teams', action: `update/${id}` }, request);
+  update(id: string, request: UpdateTeamRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Teams', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Promise<any> {
-    return this.http.post({ controller: 'Teams', action: `delete/${id}` }, {});
+  delete(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Teams', action: `delete/${id}` }, {});
   }
 
   // ── Team Invitations ──
-  getInvitations(): Promise<any> {
-    return this.http.get_new({ controller: 'Teams', action: 'invitations' });
+  getInvitations(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Teams', action: 'invitations' });
   }
 
-  getInvitationById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'Teams', action: `invitations/${id}` });
+  getInvitationById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Teams', action: `invitations/${id}` });
   }
 
-  getInvitationsByTeam(teamId: string): Promise<any> {
-    return this.http.get_new({ controller: 'Teams', action: `${teamId}/invitations` });
+  getInvitationsByTeam(teamId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Teams', action: `${teamId}/invitations` });
   }
 
-  getInvitationsByUser(userId: string): Promise<any> {
-    return this.http.get_new({ controller: 'Teams', action: `invitations/by-invited-user/${userId}` });
+  getInvitationsByUser(userId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Teams', action: `invitations/by-invited-user/${userId}` });
   }
 
-  createInvitation(request: CreateTeamInvitationRequest): Promise<any> {
-    return this.http.post({ controller: 'Teams', action: 'invitations' }, request);
+  createInvitation(request: CreateTeamInvitationRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Teams', action: 'invitations' }, request);
   }
 
-  updateInvitation(id: string, request: UpdateTeamInvitationRequest): Promise<any> {
-    return this.http.post({ controller: 'Teams', action: `invitations/update/${id}` }, request);
+  updateInvitation(id: string, request: UpdateTeamInvitationRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Teams', action: `invitations/update/${id}` }, request);
   }
 
-  deleteInvitation(id: string): Promise<any> {
-    return this.http.post({ controller: 'Teams', action: `invitations/delete/${id}` }, {});
+  deleteInvitation(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Teams', action: `invitations/delete/${id}` }, {});
   }
 
   // ── Team Settings ──
-  getSettings(): Promise<any> {
-    return this.http.get_new({ controller: 'Teams', action: 'settings' });
+  getSettings(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Teams', action: 'settings' });
   }
 
-  getSettingById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'Teams', action: `settings/${id}` });
+  getSettingById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Teams', action: `settings/${id}` });
   }
 
-  getSettingsByTeam(teamId: string): Promise<any> {
-    return this.http.get_new({ controller: 'Teams', action: `${teamId}/settings` });
+  getSettingsByTeam(teamId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Teams', action: `${teamId}/settings` });
   }
 
-  createSetting(request: CreateTeamSettingRequest): Promise<any> {
-    return this.http.post({ controller: 'Teams', action: 'settings' }, request);
+  createSetting(request: CreateTeamSettingRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Teams', action: 'settings' }, request);
   }
 
-  updateSetting(id: string, request: UpdateTeamSettingRequest): Promise<any> {
-    return this.http.post({ controller: 'Teams', action: `settings/update/${id}` }, request);
+  updateSetting(id: string, request: UpdateTeamSettingRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Teams', action: `settings/update/${id}` }, request);
   }
 
-  deleteSetting(id: string): Promise<any> {
-    return this.http.post({ controller: 'Teams', action: `settings/delete/${id}` }, {});
+  deleteSetting(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Teams', action: `settings/delete/${id}` }, {});
   }
 }

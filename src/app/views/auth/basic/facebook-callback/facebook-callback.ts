@@ -27,14 +27,14 @@ export class FacebookCallbackPage implements OnInit {
             const fragment = this.parseFragment(window.location.hash);
             const queryParams = this.route.snapshot.queryParams;
 
-            console.log('=== Facebook/WhatsApp Callback ===');
-            console.log('URL:', window.location.href);
-            console.log('Fragment params:', fragment);
-            console.log('Query params:', queryParams);
+            //console.log('=== Facebook/WhatsApp Callback ===');
+            //console.log('URL:', window.location.href);
+            //console.log('Fragment params:', fragment);
+            //console.log('Query params:', queryParams);
 
             const code = fragment['code'] || queryParams['code'];
 
-            console.log('Parsed code:', code);
+            //console.log('Parsed code:', code);
 
             if (!code) {
                 this.processing = false;
@@ -43,7 +43,7 @@ export class FacebookCallbackPage implements OnInit {
                 return;
             }
 
-            console.log('Sending code to backend...');
+            //console.log('Sending code to backend...');
             // platform query param ile hangi servise gideceğini belirle
             const platform = queryParams['platform'] || 'facebook';
             let result;
@@ -52,7 +52,7 @@ export class FacebookCallbackPage implements OnInit {
             } else {
                 result = await this.facebookLoginService.sendFacebookCode(code);
             }
-            console.log('Backend response:', result);
+            //console.log('Backend response:', result);
 
             this.processing = false;
             this.success = true;

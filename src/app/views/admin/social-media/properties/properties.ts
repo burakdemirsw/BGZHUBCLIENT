@@ -45,9 +45,9 @@ export class SocialMediaPropertiesPage implements OnInit {
 
     async loadAccounts(): Promise<void> {
         try {
-            const response = await this.socialMediaService.getAccountsPaged(1, 1000, '');
-            const data = response?.data || response;
-            this.accounts = this.extractArray(data?.items || data);
+            const response = await this.socialMediaService.getAccountsPaged({ pageNumber: 1, pageSize: 1000 });
+            const paged = response?.data;
+            this.accounts = paged?.items ?? [];
         } catch (err) {
             console.error('Accounts error:', err);
         }
@@ -56,8 +56,7 @@ export class SocialMediaPropertiesPage implements OnInit {
     async loadUserAccounts(): Promise<void> {
         try {
             const response = await this.socialMediaService.getUserAccounts();
-            const data = response?.data || response;
-            this.userAccounts = this.extractArray(data?.items || data);
+            this.userAccounts = this.extractArray(response?.data);
         } catch (err) {
             console.error('User Accounts error:', err);
         }  
@@ -72,9 +71,8 @@ export class SocialMediaPropertiesPage implements OnInit {
             } else {
                 response = await this.socialMediaService.getProperties();
             }
-            console.log('Properties response:', response);
-            const data = response?.data || response;
-            this.properties = this.extractArray(data?.items || data);
+            //console.log('Properties response:', response);
+            this.properties = this.extractArray(response?.data);
         } catch (err) {
             console.error('Properties error:', err);
         } finally {

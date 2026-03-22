@@ -174,8 +174,9 @@ export class ChatCard implements AfterViewInit, OnInit, OnChanges {
             }
 
             this.currentConversationId = conversationId;
-            const payload = await this.messagesService.getMessagesByConversation(conversationId);
-            this.messages = payload.map((message) => this.mapMessage(message));
+            const response = await this.messagesService.getMessagesByConversation(conversationId);
+            const payload = response.data ?? [];
+            this.messages = payload.map((message: AiMessageDto) => this.mapMessage(message));
         } catch (error) {
             console.error('Messages error:', error);
             this.errorMessage = 'Mesajlar yüklenemedi.';

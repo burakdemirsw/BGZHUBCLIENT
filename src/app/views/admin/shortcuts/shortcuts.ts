@@ -64,12 +64,12 @@ export class ShortcutsPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.shortcutsService.getPaged(this.currentPage, this.pageSize, this.searchTerm);
-            console.log('Shortcuts response:', response);
+            const response = await this.shortcutsService.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            //console.log('Shortcuts response:', response);
             
-            const data = response?.data || response;
-            this.items = this.extractArray(data?.items || data);
-            this.totalCount = data?.totalCount || data?.total || this.items.length;
+            const paged = response?.data;
+            this.items = paged?.items ?? [];
+            this.totalCount = paged?.totalCount ?? this.items.length;
             this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
             this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
@@ -82,7 +82,7 @@ export class ShortcutsPage implements OnInit {
     async loadTypes(): Promise<void> {
         try {
             const response = await this.shortcutTypesService.getAll();
-            this.shortcutTypes = this.extractArray(response);
+            this.shortcutTypes = this.extractArray(response?.data);
         } catch (err) {
             console.error('ShortcutTypes load error:', err);
         }

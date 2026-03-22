@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreatePromptAiAssistantRequest, UpdatePromptAiAssistantRequest } from '../models/ai-assistant/prompt.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({
   providedIn: 'root',
@@ -8,37 +10,35 @@ import { CreatePromptAiAssistantRequest, UpdatePromptAiAssistantRequest } from '
 export class PromptAiAssistantsService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Promise<any> {
-    return this.http.get_new({ controller: 'PromptAiAssistants' });
+  getAll(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'PromptAiAssistants' });
   }
 
-  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-    let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
-    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-    return this.http.get_new({ controller: 'PromptAiAssistants', action });
+  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.http.get<PagedResult<any>>({ controller: 'PromptAiAssistants', action: buildPaginationQuery(req) });
   }
 
-  getById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'PromptAiAssistants', action: `${id}` });
+  getById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'PromptAiAssistants', action: `${id}` });
   }
 
-  getByPrompt(promptId: string): Promise<any> {
-    return this.http.get_new({ controller: 'PromptAiAssistants', action: `by-prompt/${promptId}` });
+  getByPrompt(promptId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'PromptAiAssistants', action: `by-prompt/${promptId}` });
   }
 
-  getByAssistant(aiAssistantId: string): Promise<any> {
-    return this.http.get_new({ controller: 'PromptAiAssistants', action: `by-assistant/${aiAssistantId}` });
+  getByAssistant(aiAssistantId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'PromptAiAssistants', action: `by-assistant/${aiAssistantId}` });
   }
 
-  create(request: CreatePromptAiAssistantRequest): Promise<any> {
-    return this.http.post({ controller: 'PromptAiAssistants' }, request);
+  create(request: CreatePromptAiAssistantRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'PromptAiAssistants' }, request);
   }
 
-  update(id: string, request: UpdatePromptAiAssistantRequest): Promise<any> {
-    return this.http.post({ controller: 'PromptAiAssistants', action: `update/${id}` }, request);
+  update(id: string, request: UpdatePromptAiAssistantRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'PromptAiAssistants', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Promise<any> {
-    return this.http.post({ controller: 'PromptAiAssistants', action: `delete/${id}` }, {});
+  delete(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'PromptAiAssistants', action: `delete/${id}` }, {});
   }
 }

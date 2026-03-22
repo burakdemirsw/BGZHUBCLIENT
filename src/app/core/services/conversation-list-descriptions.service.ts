@@ -4,6 +4,8 @@ import {
     CreateConversationListDescriptionRequest,
     UpdateConversationListDescriptionRequest,
 } from '../models/conversation/conversation-list.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({ providedIn: 'root' })
 export class ConversationListDescriptionsService {
@@ -11,30 +13,30 @@ export class ConversationListDescriptionsService {
 
     constructor(private http: HttpClientService) {}
 
-    getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-        return this.http.get_new({
+    getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+        return this.http.get<PagedResult<any>>({
             controller: this.controller,
-            action: `descriptions?PageNumber=${pageNumber}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`
+            action: `descriptions${buildPaginationQuery(req)}`
         });
     }
 
-    getById(id: string): Promise<any> {
-        return this.http.get_new({ controller: this.controller, action: `descriptions/${id}` });
+    getById(id: string): Promise<ApiResponse<any>> {
+        return this.http.get<any>({ controller: this.controller, action: `descriptions/${id}` });
     }
 
-    getByUser(userId: string): Promise<any> {
-        return this.http.get_new({ controller: this.controller, action: `descriptions/by-user/${userId}` });
+    getByUser(userId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: this.controller, action: `descriptions/by-user/${userId}` });
     }
 
-    create(body: CreateConversationListDescriptionRequest): Promise<any> {
-        return this.http.post({ controller: this.controller, action: 'descriptions' }, body);
+    create(body: CreateConversationListDescriptionRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: this.controller, action: 'descriptions' }, body);
     }
 
-    update(id: string, body: UpdateConversationListDescriptionRequest): Promise<any> {
-        return this.http.post({ controller: this.controller, action: `descriptions/update/${id}` }, body);
+    update(id: string, body: UpdateConversationListDescriptionRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: this.controller, action: `descriptions/update/${id}` }, body);
     }
 
-    delete(id: string): Promise<any> {
-        return this.http.post({ controller: this.controller, action: `descriptions/delete/${id}` }, {});
+    delete(id: string): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: this.controller, action: `descriptions/delete/${id}` }, {});
     }
 }

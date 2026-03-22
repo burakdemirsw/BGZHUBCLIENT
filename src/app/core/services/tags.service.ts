@@ -1,34 +1,34 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateTagRequest, UpdateTagRequest } from '../models/tag/tag.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({ providedIn: 'root' })
 export class TagsService {
     constructor(private http: HttpClientService) {}
 
-    getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-        let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
-        if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-        return this.http.get_new({ controller: 'Tags', action });
+    getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+        return this.http.get<PagedResult<any>>({ controller: 'Tags', action: buildPaginationQuery(req) });
     }
 
-    getById(id: string): Promise<any> {
-        return this.http.get_new({ controller: 'Tags', action: `${id}` });
+    getById(id: string): Promise<ApiResponse<any>> {
+        return this.http.get<any>({ controller: 'Tags', action: `${id}` });
     }
 
-    getByUser(userId: string): Promise<any> {
-        return this.http.get_new({ controller: 'Tags', action: `by-user/${userId}` });
+    getByUser(userId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'Tags', action: `by-user/${userId}` });
     }
 
-    create(request: CreateTagRequest): Promise<any> {
-        return this.http.post({ controller: 'Tags' }, request);
+    create(request: CreateTagRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'Tags' }, request);
     }
 
-    update(id: string, request: UpdateTagRequest): Promise<any> {
-        return this.http.post({ controller: 'Tags', action: `update/${id}` }, request);
+    update(id: string, request: UpdateTagRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'Tags', action: `update/${id}` }, request);
     }
 
-    delete(id: string): Promise<any> {
-        return this.http.post({ controller: 'Tags', action: `delete/${id}` }, {});
+    delete(id: string): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'Tags', action: `delete/${id}` }, {});
     }
 }

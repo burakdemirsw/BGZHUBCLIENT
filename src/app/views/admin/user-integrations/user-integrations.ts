@@ -60,9 +60,9 @@ export class UserIntegrationsPage implements OnInit {
         this.loading = true;
         try {
             // Tüm veriyi çekmek için büyük pageSize kullan
-            const resp = await this.integrationsService.getIntegrationUsersPaged(1, 1000);
-            const pagedData = resp?.data || resp;
-            this.integrationUsers = this.extractArray(pagedData?.items || pagedData);
+            const resp = await this.integrationsService.getIntegrationUsersPaged({ pageNumber: 1, pageSize: 1000 });
+            const paged = resp?.data;
+            this.integrationUsers = paged?.items ?? [];
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('LoadData error:', err);

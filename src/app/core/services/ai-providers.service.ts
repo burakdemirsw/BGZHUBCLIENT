@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
+import { ApiResponse } from '../models/api-response.model';
 import { CreateAiProviderRequest, UpdateAiProviderRequest } from '../models/ai-assistant/ai-provider.models';
 import { CreateAiSettingRequest, UpdateAiSettingRequest } from '../models/ai-assistant/ai-setting.models';
 import { CreateAiProviderSettingRequest, UpdateAiProviderSettingRequest } from '../models/ai-assistant/ai-provider-setting.models';
@@ -13,188 +14,188 @@ export class AiProvidersService {
   constructor(private http: HttpClientService) {}
 
   // ── AiProviders ──
-  getProviders(): Promise<any> {
-    return this.http.get_new({ controller: 'AiProviders' });
+  getProviders(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'AiProviders' });
   }
 
-  getProvidersPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+  getProvidersPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<ApiResponse<any>> {
     let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
     if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-    return this.http.get_new({ controller: 'AiProviders', action });
+    return this.http.get<any>({ controller: 'AiProviders', action });
   }
 
-  getProviderById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiProviders', action: id });
+  getProviderById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'AiProviders', action: id });
   }
 
-  createProvider(request: CreateAiProviderRequest): Promise<any> {
-    return this.http.post({ controller: 'AiProviders' }, request);
+  createProvider(request: CreateAiProviderRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiProviders' }, request);
   }
 
-  updateProvider(id: string, request: UpdateAiProviderRequest): Promise<any> {
-    return this.http.post({ controller: 'AiProviders', action: id }, request);
+  updateProvider(id: string, request: UpdateAiProviderRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiProviders', action: id }, request);
   }
 
-  deleteProvider(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiProviders', action: id });
+  deleteProvider(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'AiProviders', action: id });
   }
 
   // ── AiSettings ──
-  getSettings(): Promise<any> {
-    return this.http.get_new({ controller: 'AiSettings' });
+  getSettings(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'AiSettings' });
   }
 
-  getSettingsPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+  getSettingsPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<ApiResponse<any>> {
     let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
     if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-    return this.http.get_new({ controller: 'AiSettings', action });
+    return this.http.get<any>({ controller: 'AiSettings', action });
   }
 
-  getSettingById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiSettings', action: id });
+  getSettingById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'AiSettings', action: id });
   }
 
-  createSetting(request: CreateAiSettingRequest): Promise<any> {
-    return this.http.post({ controller: 'AiSettings' }, request);
+  createSetting(request: CreateAiSettingRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiSettings' }, request);
   }
 
-  updateSetting(id: string, request: UpdateAiSettingRequest): Promise<any> {
-    return this.http.post({ controller: 'AiSettings', action: id }, request);
+  updateSetting(id: string, request: UpdateAiSettingRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiSettings', action: id }, request);
   }
 
-  deleteSetting(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiSettings', action: id });
+  deleteSetting(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'AiSettings', action: id });
   }
 
   // ── AiProviderSettings ──
-  getProviderSettings(): Promise<any> {
-    return this.http.get_new({ controller: 'AiProviderSettings' });
+  getProviderSettings(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'AiProviderSettings' });
   }
 
-  getProviderSettingsPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+  getProviderSettingsPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<ApiResponse<any>> {
     let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
     if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-    return this.http.get_new({ controller: 'AiProviderSettings', action });
+    return this.http.get<any>({ controller: 'AiProviderSettings', action });
   }
 
-  getProviderSettingById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiProviderSettings', action: id });
+  getProviderSettingById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'AiProviderSettings', action: id });
   }
 
-  getProviderSettingsByProvider(providerId: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiProviderSettings', action: `by-provider/${providerId}` });
+  getProviderSettingsByProvider(providerId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'AiProviderSettings', action: `by-provider/${providerId}` });
   }
 
-  getProviderSettingsBySetting(settingId: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiProviderSettings', action: `by-setting/${settingId}` });
+  getProviderSettingsBySetting(settingId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'AiProviderSettings', action: `by-setting/${settingId}` });
   }
 
-  createProviderSetting(request: CreateAiProviderSettingRequest): Promise<any> {
-    return this.http.post({ controller: 'AiProviderSettings' }, request);
+  createProviderSetting(request: CreateAiProviderSettingRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiProviderSettings' }, request);
   }
 
-  updateProviderSetting(id: string, request: UpdateAiProviderSettingRequest): Promise<any> {
-    return this.http.post({ controller: 'AiProviderSettings', action: id }, request);
+  updateProviderSetting(id: string, request: UpdateAiProviderSettingRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiProviderSettings', action: id }, request);
   }
 
-  deleteProviderSetting(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiProviderSettings', action: id });
+  deleteProviderSetting(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'AiProviderSettings', action: id });
   }
 
   // ── AiModels ──
-  getModels(): Promise<any> {
-    return this.http.get_new({ controller: 'AiModels' });
+  getModels(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'AiModels' });
   }
 
-  getModelsPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+  getModelsPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<ApiResponse<any>> {
     let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
     if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-    return this.http.get_new({ controller: 'AiModels', action });
+    return this.http.get<any>({ controller: 'AiModels', action });
   }
 
-  getModelById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiModels', action: id });
+  getModelById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'AiModels', action: id });
   }
 
-  getModelsByProvider(providerId: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiModels', action: `by-provider/${providerId}` });
+  getModelsByProvider(providerId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'AiModels', action: `by-provider/${providerId}` });
   }
 
-  getModelByCode(modelCode: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiModels', action: `by-code/${modelCode}` });
+  getModelByCode(modelCode: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'AiModels', action: `by-code/${modelCode}` });
   }
 
-  createModel(request: CreateAiModelRequest): Promise<any> {
-    return this.http.post({ controller: 'AiModels' }, request);
+  createModel(request: CreateAiModelRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiModels' }, request);
   }
 
-  updateModel(id: string, request: UpdateAiModelRequest): Promise<any> {
-    return this.http.post({ controller: 'AiModels', action: id }, request);
+  updateModel(id: string, request: UpdateAiModelRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiModels', action: id }, request);
   }
 
-  deleteModel(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiModels', action: id });
+  deleteModel(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'AiModels', action: id });
   }
 
   // ── AiAssistants ──
-  getAssistants(): Promise<any> {
-    return this.http.get_new({ controller: 'AiAssistants' });
+  getAssistants(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'AiAssistants' });
   }
 
-  getAssistantsPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+  getAssistantsPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<ApiResponse<any>> {
     let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
     if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-    return this.http.get_new({ controller: 'AiAssistants', action });
+    return this.http.get<any>({ controller: 'AiAssistants', action });
   }
 
-  getAssistantById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiAssistants', action: id });
+  getAssistantById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'AiAssistants', action: id });
   }
 
-  getAssistantsByUser(userId: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiAssistants', action: `by-user/${userId}` });
+  getAssistantsByUser(userId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'AiAssistants', action: `by-user/${userId}` });
   }
 
-  createAssistant(request: CreateAiAssistantRequest): Promise<any> {
-    return this.http.post({ controller: 'AiAssistants' }, request);
+  createAssistant(request: CreateAiAssistantRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiAssistants' }, request);
   }
 
-  updateAssistant(id: string, request: UpdateAiAssistantRequest): Promise<any> {
-    return this.http.post({ controller: 'AiAssistants', action: id }, request);
+  updateAssistant(id: string, request: UpdateAiAssistantRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiAssistants', action: id }, request);
   }
 
-  deleteAssistant(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'AiAssistants', action: id });
+  deleteAssistant(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'AiAssistants', action: id });
   }
 
   // ── AiKnowledge ──
-  getKnowledge(): Promise<any> {
-    return this.http.get_new({ controller: 'Ai', action: 'knowledge' });
+  getKnowledge(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Ai', action: 'knowledge' });
   }
 
-  getKnowledgePaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
+  getKnowledgePaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<ApiResponse<any>> {
     let action = `knowledge?PageNumber=${pageNumber}&PageSize=${pageSize}`;
     if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-    return this.http.get_new({ controller: 'Ai', action });
+    return this.http.get<any>({ controller: 'Ai', action });
   }
 
-  getKnowledgeById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'Ai', action: `knowledge/${id}` });
+  getKnowledgeById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Ai', action: `knowledge/${id}` });
   }
 
-  getKnowledgeByAssistant(assistantId: string): Promise<any> {
-    return this.http.get_new({ controller: 'Ai', action: `knowledge/by-assistant/${assistantId}` });
+  getKnowledgeByAssistant(assistantId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Ai', action: `knowledge/by-assistant/${assistantId}` });
   }
 
-  createKnowledge(request: any): Promise<any> {
-    return this.http.post({ controller: 'Ai', action: 'knowledge' }, request);
+  createKnowledge(request: any): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Ai', action: 'knowledge' }, request);
   }
 
-  updateKnowledge(id: string, request: any): Promise<any> {
-    return this.http.post({ controller: 'Ai', action: `update/knowledge/${id}` }, request);
+  updateKnowledge(id: string, request: any): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Ai', action: `update/knowledge/${id}` }, request);
   }
 
-  deleteKnowledge(id: string): Promise<any> {
-    return this.http.post({ controller: 'Ai', action: `delete/knowledge/${id}` }, {});
+  deleteKnowledge(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Ai', action: `delete/knowledge/${id}` }, {});
   }
 }

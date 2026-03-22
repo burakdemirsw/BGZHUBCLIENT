@@ -40,13 +40,13 @@ export class AdminNotesPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged(this.currentPage, this.pageSize, this.searchTerm);
+            const response = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             console.log('Notes API response:', response);
-            const data = response?.data || response;
-            this.items = this.extractArray(data?.items || data);
+            const paged = response?.data;
+            this.items = paged?.items ?? [];
             console.log('Extracted items:', this.items);
-            this.totalCount = data?.totalCount ?? data?.total ?? this.items.length;
-            this.totalPages = data?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.totalCount = paged?.totalCount ?? this.items.length;
+            this.totalPages = paged?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
             this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('Notes load error:', err);

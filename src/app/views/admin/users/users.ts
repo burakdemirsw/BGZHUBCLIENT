@@ -84,12 +84,12 @@ export class UsersPage implements OnInit {
     async loadUsers(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.usersService.getAll(this.currentPage, this.pageSize);
-            console.log('Users response:', response);
-            const data = response?.data ?? response;
-            this.users = this.extractItems(data);
-            this.totalPages = data?.totalPages ?? 1;
-            this.totalCount = data?.totalCount ?? this.users.length;
+            const response = await this.usersService.getAll({ pageNumber: this.currentPage, pageSize: this.pageSize });
+            //console.log('Users response:', response);
+            const paged = response?.data;
+            this.users = this.extractItems(paged);
+            this.totalPages = paged?.totalPages ?? 1;
+            this.totalCount = paged?.totalCount ?? this.users.length;
             this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
             this.applyFilterAndPaging();
         } catch (err) {
@@ -118,7 +118,7 @@ export class UsersPage implements OnInit {
     async loadCompanies(): Promise<void> {
         try {
             const res = await this.companiesService.getAll();
-            this.companies = this.extractArray(res);
+            this.companies = this.extractArray(res?.data);
         } catch (err) {
             console.error('Companies load error:', err);
         }

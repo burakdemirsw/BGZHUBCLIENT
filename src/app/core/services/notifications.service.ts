@@ -5,54 +5,54 @@ import {
   UpdateNotificationRequest,
   SendNotificationRequest,
 } from '../models/notification/notification.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationsService {
   constructor(private http: HttpClientService) {}
 
-  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-    let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
-    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-    return this.http.get_new({ controller: 'Notifications', action });
+  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.http.get<PagedResult<any>>({ controller: 'Notifications', action: buildPaginationQuery(req) });
   }
 
-  getById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'Notifications' }, id);
+  getById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Notifications' }, id);
   }
 
-  getByUser(userId: string): Promise<any> {
-    return this.http.get_new({ controller: 'Notifications', action: `by-user/${userId}` });
+  getByUser(userId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Notifications', action: `by-user/${userId}` });
   }
 
-  getUnread(userId: string): Promise<any> {
-    return this.http.get_new({ controller: 'Notifications', action: `unread/${userId}` });
+  getUnread(userId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Notifications', action: `unread/${userId}` });
   }
 
-  getUnreadCount(userId: string): Promise<any> {
-    return this.http.get_new({ controller: 'Notifications', action: `unread-count/${userId}` });
+  getUnreadCount(userId: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Notifications', action: `unread-count/${userId}` });
   }
 
-  create(request: CreateNotificationRequest): Promise<any> {
-    return this.http.post({ controller: 'Notifications' }, request);
+  create(request: CreateNotificationRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Notifications' }, request);
   }
 
-  update(id: string, request: UpdateNotificationRequest): Promise<any> {
-    return this.http.post({ controller: 'Notifications', action: `update/${id}` }, request);
+  update(id: string, request: UpdateNotificationRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Notifications', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Promise<any> {
-    return this.http.post({ controller: 'Notifications', action: `delete/${id}` }, {});
+  delete(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Notifications', action: `delete/${id}` }, {});
   }
 
-  sendToUsers(request: SendNotificationRequest): Promise<any> {
-    return this.http.post({ controller: 'Notifications', action: 'send-to-users' }, request);
+  sendToUsers(request: SendNotificationRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Notifications', action: 'send-to-users' }, request);
   }
 
-  markAsRead(notificationUserId: string): Promise<any> {
-    return this.http.post({ controller: 'Notifications', action: `mark-as-read/${notificationUserId}` }, {});
+  markAsRead(notificationUserId: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Notifications', action: `mark-as-read/${notificationUserId}` }, {});
   }
 
-  markAllAsRead(userId: string): Promise<any> {
-    return this.http.post({ controller: 'Notifications', action: `mark-all-as-read/${userId}` }, {});
+  markAllAsRead(userId: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Notifications', action: `mark-all-as-read/${userId}` }, {});
   }
 }

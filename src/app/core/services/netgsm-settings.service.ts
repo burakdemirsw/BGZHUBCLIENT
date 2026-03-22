@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
+import { ApiResponse } from '../models/api-response.model';
 import { CreateNetGsmSettingRequest, UpdateNetGsmSettingRequest } from '../models/netgsm/netgsm.models';
 
 @Injectable({
@@ -8,27 +9,27 @@ import { CreateNetGsmSettingRequest, UpdateNetGsmSettingRequest } from '../model
 export class NetGsmSettingsService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Promise<any> {
-    return this.http.get_new({ controller: 'NetGsmSettings' });
+  getAll(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'NetGsmSettings' });
   }
 
-  getById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'NetGsmSettings' }, id);
+  getById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'NetGsmSettings' }, id);
   }
 
-  getByApplication(applicationId: string): Promise<any> {
-    return this.http.get_new({ controller: 'NetGsmSettings', action: 'by-application' }, applicationId);
+  getByApplication(applicationId: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'NetGsmSettings', action: 'by-application' }, applicationId);
   }
 
-  create(request: CreateNetGsmSettingRequest): Promise<any> {
-    return this.http.post({ controller: 'NetGsmSettings' }, request);
+  create(request: CreateNetGsmSettingRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'NetGsmSettings' }, request);
   }
 
-  update(id: string, request: UpdateNetGsmSettingRequest): Promise<any> {
-    return this.http.post({ controller: 'NetGsmSettings', action: `update/${id}` }, request);
+  update(id: string, request: UpdateNetGsmSettingRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'NetGsmSettings', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Promise<any> {
-    return this.http.post({ controller: 'NetGsmSettings', action: `delete/${id}` }, {});
+  delete(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'NetGsmSettings', action: `delete/${id}` }, {});
   }
 }

@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateCustomerDescriptionRequest, UpdateCustomerDescriptionRequest } from '../models/customer/customer-description.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({
   providedIn: 'root',
@@ -8,30 +10,30 @@ import { CreateCustomerDescriptionRequest, UpdateCustomerDescriptionRequest } fr
 export class CustomerDescriptionsService {
   constructor(private http: HttpClientService) {}
 
-  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-    return this.http.get_new({
+  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.http.get<PagedResult<any>>({
       controller: 'CustomerDescriptions',
-      action: `?PageNumber=${pageNumber}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`
+      action: buildPaginationQuery(req)
     });
   }
 
-  getById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'CustomerDescriptions', action: `${id}` });
+  getById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'CustomerDescriptions', action: `${id}` });
   }
 
-  getByCustomerId(customerId: string): Promise<any> {
-    return this.http.get_new({ controller: 'CustomerDescriptions', action: `by-customer/${customerId}` });
+  getByCustomerId(customerId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'CustomerDescriptions', action: `by-customer/${customerId}` });
   }
 
-  create(request: CreateCustomerDescriptionRequest): Promise<any> {
-    return this.http.post({ controller: 'CustomerDescriptions' }, request);
+  create(request: CreateCustomerDescriptionRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'CustomerDescriptions' }, request);
   }
 
-  update(id: string, request: UpdateCustomerDescriptionRequest): Promise<any> {
-    return this.http.post({ controller: 'CustomerDescriptions', action: `update/${id}` }, request);
+  update(id: string, request: UpdateCustomerDescriptionRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'CustomerDescriptions', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Promise<any> {
-    return this.http.post({ controller: 'CustomerDescriptions', action: `delete/${id}` }, {});
+  delete(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'CustomerDescriptions', action: `delete/${id}` }, {});
   }
 }

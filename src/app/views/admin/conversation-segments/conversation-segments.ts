@@ -51,13 +51,12 @@ export class ConversationSegmentsPage implements OnInit {
     async loadLookups(): Promise<void> {
         try {
             const [segRes, convRes] = await Promise.all([
-                this.segmentsService.getPaged(1, 1000, ''),
-                this.http.get_new({ controller: 'Conversations' }),
+                this.segmentsService.getPaged({ pageNumber: 1, pageSize: 1000 }),
+                this.http.get({ controller: 'Conversations' }),
             ]);
-            const segData = segRes?.data || segRes;
-            const convData = convRes?.data || convRes;
-            this.segments = this.extractArray(segData?.items || segData);
-            this.conversations = this.extractArray(convData?.items || convData);
+            const segPaged = segRes?.data;
+            this.segments = segPaged?.items ?? [];
+            this.conversations = this.extractArray(convRes?.data);
         } catch (err) {
             console.error('Lookup load error:', err);
         }
@@ -72,7 +71,7 @@ export class ConversationSegmentsPage implements OnInit {
         this.loading = true;
         try {
             const res = await this.service.getBySegment(this.selectedSegmentId);
-            this.segmentConversations = this.extractArray(res);
+            this.segmentConversations = this.extractArray(res?.data);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('Segment conversations load error:', err);

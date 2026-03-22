@@ -83,7 +83,7 @@ export class IntegrationPropertiesPage implements OnInit {
         try {
             const [usersResp, intUsersResp, propsResp] = await Promise.all([
                 this.usersService.getAll(),
-                this.integrationsService.getIntegrationUsers(),
+                this.integrationsService.getIntegrationUsersPaged({ pageNumber: 1, pageSize: 1000 }),
                 this.integrationsService.getIntegrationProperties(),
             ]);
             this.users = this.extractArray(usersResp);
@@ -161,9 +161,9 @@ export class IntegrationPropertiesPage implements OnInit {
                     value: this.form.value,
                     isBlocked: this.selectedProperty.isBlocked ?? false,
                 };
-                console.log('Update request:', req);
+                //console.log('Update request:', req);
                 const res = await this.integrationsService.updateIntegrationProperty(this.selectedProperty.id, req);
-                console.log('Update response:', res);
+                //console.log('Update response:', res);
             } else {
                 const req: CreateIntegrationPropertyRequest = {
                     userId: this.form.userId,
@@ -172,9 +172,9 @@ export class IntegrationPropertiesPage implements OnInit {
                     key: this.form.key,
                     value: this.form.value,
                 };
-                console.log('Create request:', req);
+                //console.log('Create request:', req);
                 const res = await this.integrationsService.createIntegrationProperty(req);
-                console.log('Create response:', res);
+                //console.log('Create response:', res);
             }
             this.showModal = false;
             await this.refreshProperties();

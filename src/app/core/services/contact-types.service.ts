@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateContactTypeRequest, UpdateContactTypeRequest } from '../models/customer/contact-type.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({
   providedIn: 'root',
@@ -8,26 +10,26 @@ import { CreateContactTypeRequest, UpdateContactTypeRequest } from '../models/cu
 export class ContactTypesService {
   constructor(private http: HttpClientService) {}
 
-  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-    return this.http.get_new({
+  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.http.get<PagedResult<any>>({
       controller: 'ContactTypes',
-      action: `?PageNumber=${pageNumber}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`
+      action: buildPaginationQuery(req)
     });
   }
 
-  getById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'ContactTypes', action: `${id}` });
+  getById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'ContactTypes', action: `${id}` });
   }
 
-  create(request: CreateContactTypeRequest): Promise<any> {
-    return this.http.post({ controller: 'ContactTypes' }, request);
+  create(request: CreateContactTypeRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'ContactTypes' }, request);
   }
 
-  update(id: string, request: UpdateContactTypeRequest): Promise<any> {
-    return this.http.post({ controller: 'ContactTypes', action: `update/${id}` }, request);
+  update(id: string, request: UpdateContactTypeRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'ContactTypes', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Promise<any> {
-    return this.http.post({ controller: 'ContactTypes', action: `delete/${id}` }, {});
+  delete(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'ContactTypes', action: `delete/${id}` }, {});
   }
 }

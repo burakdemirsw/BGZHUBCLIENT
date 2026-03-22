@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateIntegrationTypeRequest, UpdateIntegrationTypeRequest } from '../models/integration/integration-type.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({
   providedIn: 'root',
@@ -8,33 +10,31 @@ import { CreateIntegrationTypeRequest, UpdateIntegrationTypeRequest } from '../m
 export class IntegrationTypesService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Promise<any> {
-    return this.http.get_new({ controller: 'IntegrationTypes' });
+  getAll(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'IntegrationTypes' });
   }
 
-  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-    let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
-    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-    return this.http.get_new({ controller: 'IntegrationTypes', action });
+  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.http.get<PagedResult<any>>({ controller: 'IntegrationTypes', action: buildPaginationQuery(req) });
   }
 
-  getById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'IntegrationTypes', action: `${id}` });
+  getById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'IntegrationTypes', action: `${id}` });
   }
 
-  getByCode(code: string): Promise<any> {
-    return this.http.get_new({ controller: 'IntegrationTypes', action: `code/${code}` });
+  getByCode(code: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'IntegrationTypes', action: `code/${code}` });
   }
 
-  create(request: CreateIntegrationTypeRequest): Promise<any> {
-    return this.http.post({ controller: 'IntegrationTypes' }, request);
+  create(request: CreateIntegrationTypeRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'IntegrationTypes' }, request);
   }
 
-  update(id: string, request: UpdateIntegrationTypeRequest): Promise<any> {
-    return this.http.post({ controller: 'IntegrationTypes', action: `update/${id}` }, request);
+  update(id: string, request: UpdateIntegrationTypeRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'IntegrationTypes', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Promise<any> {
-    return this.http.post({ controller: 'IntegrationTypes', action: `delete/${id}` }, {});
+  delete(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'IntegrationTypes', action: `delete/${id}` }, {});
   }
 }

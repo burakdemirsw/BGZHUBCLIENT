@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateCustomerRequest, UpdateCustomerRequest } from '../models/customer/customer.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({
   providedIn: 'root',
@@ -8,23 +10,23 @@ import { CreateCustomerRequest, UpdateCustomerRequest } from '../models/customer
 export class CustomersService {
   constructor(private http: HttpClientService) {}
 
-  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-    return this.http.get_new({
+  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.http.get<PagedResult<any>>({
       controller: 'Customers',
-      action: `?PageNumber=${pageNumber}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`
+      action: buildPaginationQuery(req)
     });
   }
 
-  getById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'Customers', action: `${id}` });
+  getById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Customers', action: `${id}` });
   }
 
-  getByUserId(userId: string): Promise<any> {
-    return this.http.get_new({ controller: 'Customers', action: `by-user/${userId}` });
+  getByUserId(userId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Customers', action: `by-user/${userId}` });
   }
 
-  getByAccountId(accountId: string): Promise<any> {
-    return this.http.get_new({ controller: 'Customers', action: `by-account/${accountId}` });
+  getByAccountId(accountId: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Customers', action: `by-account/${accountId}` });
   }
 
   /** Şirkete ait müşterileri sayfalanmış ve filtrelenmiş olarak getirir */
@@ -39,7 +41,7 @@ export class CustomersService {
     socialMediaAccountId?: string;
     sortBy?: string;
     sortDescending?: boolean;
-  }): Promise<any> {
+  }): Promise<ApiResponse<any>> {
     const parts: string[] = [];
     if (params) {
       if (params.pageNumber != null) parts.push(`PageNumber=${params.pageNumber}`);
@@ -54,18 +56,18 @@ export class CustomersService {
       if (params.sortDescending != null) parts.push(`SortDescending=${params.sortDescending}`);
     }
     const qs = parts.length > 0 ? `?${parts.join('&')}` : '';
-    return this.http.get_new({ controller: 'Customers', action: `by-company/${companyId}${qs}` });
+    return this.http.get<any>({ controller: 'Customers', action: `by-company/${companyId}${qs}` });
   }
 
-  create(request: CreateCustomerRequest): Promise<any> {
-    return this.http.post({ controller: 'Customers' }, request);
+  create(request: CreateCustomerRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Customers' }, request);
   }
 
-  update(id: string, request: UpdateCustomerRequest): Promise<any> {
-    return this.http.post({ controller: 'Customers', action: `update/${id}` }, request);
+  update(id: string, request: UpdateCustomerRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Customers', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Promise<any> {
-    return this.http.post({ controller: 'Customers', action: `delete/${id}` }, {});
+  delete(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Customers', action: `delete/${id}` }, {});
   }
 }

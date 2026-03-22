@@ -257,7 +257,7 @@ export const stackedAreaChart: () => ApexOptions = () => ({
     chart: {
         height: 422, type: 'area', stacked: true, toolbar: {show: false}, events: {
             selection: function (chart, e) {
-                console.log(new Date(e.xaxis.min));
+                //console.log(new Date(e.xaxis.min));
             }
         }
     }, colors: [getColor('primary'), getColor('secondary'), getColor('gray')], dataLabels: {

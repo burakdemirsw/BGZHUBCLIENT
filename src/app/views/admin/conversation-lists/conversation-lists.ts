@@ -51,11 +51,11 @@ export class ConversationListsPage implements OnInit {
     async loadLookups(): Promise<void> {
         try {
             const [listRes, convRes] = await Promise.all([
-                this.listDescService.getPaged(1, 1000, ''),
-                this.http.get_new({ controller: 'Conversations' }),
+                this.listDescService.getPaged({ pageNumber: 1, pageSize: 1000 }),
+                this.http.get({ controller: 'Conversations' }),
             ]);
-            this.lists = this.extractArray(listRes?.items || listRes);
-            this.conversations = this.extractArray(convRes);
+            this.lists = this.extractArray(listRes?.data?.items ?? listRes?.data);
+            this.conversations = this.extractArray(convRes?.data);
         } catch (err) {
             console.error('Lookup load error:', err);
         }
@@ -70,7 +70,7 @@ export class ConversationListsPage implements OnInit {
         this.loading = true;
         try {
             const res = await this.service.getByList(this.selectedListId);
-            this.listConversations = this.extractArray(res);
+            this.listConversations = this.extractArray(res?.data);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('List conversations load error:', err);

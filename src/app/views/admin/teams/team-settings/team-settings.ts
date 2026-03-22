@@ -40,7 +40,7 @@ export class TeamSettingsPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.teamsService.getSettings();
-            console.log('Team settings response:', response);
+            //console.log('Team settings response:', response);
             this.settings = this.extractArray(response);
         } catch (err) {
             console.error('Team settings error:', err);

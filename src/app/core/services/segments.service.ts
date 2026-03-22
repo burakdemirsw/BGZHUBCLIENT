@@ -1,34 +1,34 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateSegmentRequest, UpdateSegmentRequest } from '../models/customer/segment.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({ providedIn: 'root' })
 export class SegmentsService {
     constructor(private http: HttpClientService) {}
 
-    getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-        let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
-        if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-        return this.http.get_new({ controller: 'Segments', action });
+    getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+        return this.http.get<PagedResult<any>>({ controller: 'Segments', action: buildPaginationQuery(req) });
     }
 
-    getById(id: string): Promise<any> {
-        return this.http.get_new({ controller: 'Segments', action: id });
+    getById(id: string): Promise<ApiResponse<any>> {
+        return this.http.get<any>({ controller: 'Segments', action: id });
     }
 
-    getByUser(userId: string): Promise<any> {
-        return this.http.get_new({ controller: 'Segments', action: `by-user/${userId}` });
+    getByUser(userId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'Segments', action: `by-user/${userId}` });
     }
 
-    create(request: CreateSegmentRequest): Promise<any> {
-        return this.http.post({ controller: 'Segments' }, request);
+    create(request: CreateSegmentRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'Segments' }, request);
     }
 
-    update(id: string, request: UpdateSegmentRequest): Promise<any> {
-        return this.http.post({ controller: 'Segments', action: `update/${id}` }, request);
+    update(id: string, request: UpdateSegmentRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'Segments', action: `update/${id}` }, request);
     }
 
-    delete(id: string): Promise<any> {
-        return this.http.post({ controller: 'Segments', action: `delete/${id}` }, {});
+    delete(id: string): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'Segments', action: `delete/${id}` }, {});
     }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
+import { ApiResponse } from '../models/api-response.model';
 import { CreateRoleRequest, UpdateRoleRequest } from '../models/role/role.models';
 import { RoleUser, CreateRoleUserRequest, CreateBulkRoleUserRequest } from '../models/role/role.models';
 
@@ -10,48 +11,48 @@ export class RolesService {
   constructor(private http: HttpClientService) {}
 
   // Roles
-  getAll(): Promise<any> {
-    return this.http.get_new({ controller: 'Roles' });
+  getAll(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Roles' });
   }
 
-  getById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'Roles' }, id);
+  getById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Roles' }, id);
   }
 
-  create(request: CreateRoleRequest): Promise<any> {
-    return this.http.post({ controller: 'Roles' }, request);
+  create(request: CreateRoleRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Roles' }, request);
   }
 
-  update(id: string, request: UpdateRoleRequest): Promise<any> {
-    return this.http.post({ controller: 'Roles', action: `update/${id}` }, request);
+  update(id: string, request: UpdateRoleRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Roles', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Promise<any> {
-    return this.http.post({ controller: 'Roles', action: `delete/${id}` }, {});
+  delete(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Roles', action: `delete/${id}` }, {});
   }
 
   // Role-Users
-  getRoleUsers(): Promise<any> {
-    return this.http.get_new({ controller: 'RoleUsers' });
+  getRoleUsers(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'RoleUsers' });
   }
 
-  getUsersByRole(roleId: string): Promise<any> {
-    return this.http.get_new({ controller: 'RoleUsers', action: 'by-role' }, roleId);
+  getUsersByRole(roleId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'RoleUsers', action: 'by-role' }, roleId);
   }
 
-  getRolesByUser(userId: string): Promise<any> {
-    return this.http.get_new({ controller: 'RoleUsers', action: 'by-user' }, userId);
+  getRolesByUser(userId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'RoleUsers', action: 'by-user' }, userId);
   }
 
-  assignRole(request: CreateRoleUserRequest): Promise<any> {
-    return this.http.post({ controller: 'RoleUsers' }, request);
+  assignRole(request: CreateRoleUserRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'RoleUsers' }, request);
   }
 
-  bulkAssignRoles(request: CreateBulkRoleUserRequest): Promise<any> {
-    return this.http.post({ controller: 'RoleUsers', action: 'bulk' }, request);
+  bulkAssignRoles(request: CreateBulkRoleUserRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'RoleUsers', action: 'bulk' }, request);
   }
 
-  removeRoleUser(id: string): Promise<any> {
-    return this.http.post({ controller: 'RoleUsers', action: `delete/${id}` }, {});
+  removeRoleUser(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'RoleUsers', action: `delete/${id}` }, {});
   }
 }

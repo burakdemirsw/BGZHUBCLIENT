@@ -74,8 +74,7 @@ export class AiModelsPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.aiService.getModels();
-            const data = response?.data || response;
-            this.models = this.extractArray(data?.items || data);
+            this.models = this.extractArray(response?.data);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('AiModels load error:', err);
@@ -87,8 +86,7 @@ export class AiModelsPage implements OnInit {
     async loadProviders(): Promise<void> {
         try {
             const response = await this.aiService.getProviders();
-            const data = response?.data || response;
-            this.providers = this.extractArray(data?.items || data);
+            this.providers = this.extractArray(response?.data);
         } catch (err) {
             console.error('Providers load error:', err);
         }

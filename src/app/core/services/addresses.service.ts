@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
+import { ApiResponse } from '../models/api-response.model';
 
 @Injectable({
   providedIn: 'root',
@@ -8,73 +9,73 @@ export class AddressesService {
   constructor(private http: HttpClientService) {}
 
   // Countries
-  getCountries(): Promise<any> {
-    return this.http.get_new({ controller: 'Addresses', action: 'countries' });
+  getCountries(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Addresses', action: 'countries' });
   }
 
-  getCountryById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'Addresses', action: `countries/${id}` });
+  getCountryById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Addresses', action: `countries/${id}` });
   }
 
-  createCountry(request: any): Promise<any> {
-    return this.http.post({ controller: 'Addresses', action: 'countries' }, request);
+  createCountry(request: any): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Addresses', action: 'countries' }, request);
   }
 
-  updateCountry(id: string, request: any): Promise<any> {
-    return this.http.post({ controller: 'Addresses', action: `update/countries/${id}` }, request);
+  updateCountry(id: string, request: any): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Addresses', action: `update/countries/${id}` }, request);
   }
 
-  deleteCountry(id: string): Promise<any> {
-    return this.http.post({ controller: 'Addresses', action: `delete/countries/${id}` }, {});
+  deleteCountry(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Addresses', action: `delete/countries/${id}` }, {});
   }
 
   // Cities
-  getCities(): Promise<any> {
-    return this.http.get_new({ controller: 'Addresses', action: 'cities' });
+  getCities(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Addresses', action: 'cities' });
   }
 
-  getCityById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'Addresses', action: `cities/${id}` });
+  getCityById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Addresses', action: `cities/${id}` });
   }
 
-  getCitiesByCountry(countryId: string): Promise<any> {
-    return this.http.get_new({ controller: 'Addresses', action: `countries/${countryId}/cities` });
+  getCitiesByCountry(countryId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Addresses', action: `countries/${countryId}/cities` });
   }
 
-  createCity(request: any): Promise<any> {
-    return this.http.post({ controller: 'Addresses', action: 'cities' }, request);
+  createCity(request: any): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Addresses', action: 'cities' }, request);
   }
 
-  updateCity(id: string, request: any): Promise<any> {
-    return this.http.post({ controller: 'Addresses', action: `update/cities/${id}` }, request);
+  updateCity(id: string, request: any): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Addresses', action: `update/cities/${id}` }, request);
   }
 
-  deleteCity(id: string): Promise<any> {
-    return this.http.post({ controller: 'Addresses', action: `delete/cities/${id}` }, {});
+  deleteCity(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Addresses', action: `delete/cities/${id}` }, {});
   }
 
   // Districts
-  getDistricts(): Promise<any> {
-    return this.http.get_new({ controller: 'Addresses', action: 'districts' });
+  getDistricts(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Addresses', action: 'districts' });
   }
 
-  getDistrictById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'Addresses', action: `districts/${id}` });
+  getDistrictById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Addresses', action: `districts/${id}` });
   }
 
-  getDistrictsByCity(cityId: string): Promise<any> {
-    return this.http.get_new({ controller: 'Addresses', action: `cities/${cityId}/districts` });
+  getDistrictsByCity(cityId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Addresses', action: `cities/${cityId}/districts` });
   }
 
-  createDistrict(request: any): Promise<any> {
-    return this.http.post({ controller: 'Addresses', action: 'districts' }, request);
+  createDistrict(request: any): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Addresses', action: 'districts' }, request);
   }
 
-  updateDistrict(id: string, request: any): Promise<any> {
-    return this.http.post({ controller: 'Addresses', action: `update/districts/${id}` }, request);
+  updateDistrict(id: string, request: any): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Addresses', action: `update/districts/${id}` }, request);
   }
 
-  deleteDistrict(id: string): Promise<any> {
-    return this.http.post({ controller: 'Addresses', action: `delete/districts/${id}` }, {});
+  deleteDistrict(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Addresses', action: `delete/districts/${id}` }, {});
   }
 }

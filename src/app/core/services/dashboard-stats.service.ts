@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
+import { ApiResponse } from '../models/api-response.model';
 import { AuthStateService } from './auth-state.service';
 
 export interface DashboardStatsDto {
@@ -39,14 +40,15 @@ export class DashboardStatsService {
 
   private async fetchItems(controller: string, action?: string): Promise<unknown[]> {
     try {
-      const response = await this.httpClientService.get_new({ controller, action });
+      const response = await this.httpClientService.get<any>({ controller, action });
       return this.normalize(response);
     } catch {
       return [];
     }
   }
 
-  private normalize(payload: unknown): unknown[] {
+  private normalize(response: ApiResponse<any>): unknown[] {
+    const payload = response.data;
     if (!payload) return [];
     if (Array.isArray(payload)) return payload;
     const value = payload as any;

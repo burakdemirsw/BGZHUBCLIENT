@@ -82,8 +82,7 @@ export class AiAssistantsPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.aiService.getAssistants();
-            const data = response?.data || response;
-            this.assistants = this.extractArray(data?.items || data);
+            this.assistants = this.extractArray(response?.data);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('AiAssistants load error:', err);
@@ -95,8 +94,7 @@ export class AiAssistantsPage implements OnInit {
     async loadProviders(): Promise<void> {
         try {
             const response = await this.aiService.getProviders();
-            const data = response?.data || response;
-            this.providers = this.extractArray(data?.items || data);
+            this.providers = this.extractArray(response?.data);
         } catch (err) {
             console.error('Providers load error:', err);
         }
@@ -105,8 +103,7 @@ export class AiAssistantsPage implements OnInit {
     async loadModels(): Promise<void> {
         try {
             const response = await this.aiService.getModels();
-            const data = response?.data || response;
-            this.models = this.extractArray(data?.items || data);
+            this.models = this.extractArray(response?.data);
             this.filteredModels = this.models;
         } catch (err) {
             console.error('Models load error:', err);
@@ -116,7 +113,7 @@ export class AiAssistantsPage implements OnInit {
     async loadKnowledge(assistantId: string): Promise<void> {
         try {
             const response = await this.aiService.getKnowledgeByAssistant(assistantId);
-            this.knowledgeList = this.extractArray(response);
+            this.knowledgeList = this.extractArray(response?.data);
         } catch (err) {
             console.error('Knowledge load error:', err);
             this.knowledgeList = [];
@@ -233,7 +230,7 @@ export class AiAssistantsPage implements OnInit {
                 };
                 try {
                     const res = await this.aiService.createAssistant(req);
-                    assistantId = res?.id ?? res?.data?.id ?? null;
+                    assistantId = res?.data?.id ?? null;
                 } catch (err: any) {
                     // Backend CreatedAtAction route hatası — kayıt oluşmuş olabilir
                     if (err.status === 400 && JSON.stringify(err.error)?.includes('No route matches')) {

@@ -1,35 +1,37 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateConversationTagRequest } from '../models/conversation-tag/conversation-tag.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({ providedIn: 'root' })
 export class ConversationTagsService {
     constructor(private http: HttpClientService) {}
 
-    getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-        return this.http.get_new({
+    getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+        return this.http.get<PagedResult<any>>({
             controller: 'ConversationTags',
-            action: `?PageNumber=${pageNumber}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`
+            action: buildPaginationQuery(req)
         });
     }
 
-    getById(id: string): Promise<any> {
-        return this.http.get_new({ controller: 'ConversationTags', action: `${id}` });
+    getById(id: string): Promise<ApiResponse<any>> {
+        return this.http.get<any>({ controller: 'ConversationTags', action: `${id}` });
     }
 
-    getByConversation(conversationId: string): Promise<any> {
-        return this.http.get_new({ controller: 'ConversationTags', action: `by-conversation/${conversationId}` });
+    getByConversation(conversationId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'ConversationTags', action: `by-conversation/${conversationId}` });
     }
 
-    getByTag(tagId: string): Promise<any> {
-        return this.http.get_new({ controller: 'ConversationTags', action: `by-tag/${tagId}` });
+    getByTag(tagId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'ConversationTags', action: `by-tag/${tagId}` });
     }
 
-    create(request: CreateConversationTagRequest): Promise<any> {
-        return this.http.post({ controller: 'ConversationTags' }, request);
+    create(request: CreateConversationTagRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'ConversationTags' }, request);
     }
 
-    delete(id: string): Promise<any> {
-        return this.http.post({ controller: 'ConversationTags', action: `delete/${id}` }, {});
+    delete(id: string): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'ConversationTags', action: `delete/${id}` }, {});
     }
 }

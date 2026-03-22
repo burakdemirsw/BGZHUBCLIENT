@@ -67,8 +67,7 @@ export class AiSettingsPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.aiService.getSettings();
-            const data = response?.data || response;
-            this.settings = this.extractArray(data?.items || data);
+            this.settings = this.extractArray(response?.data);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('AiSettings load error:', err);

@@ -45,7 +45,7 @@ applyTo: '**'
 ## Servis Kuralları
 
 - `@Injectable({ providedIn: 'root' })`
-- `HttpClientService` inject edilir, `get_new()` ve `post()` kullanılır
+- `HttpClientService` inject edilir, `get()` ve `post()` kullanılır
 - URL yapısı: `{ controller: 'XxxController', action: 'yyy' }` → `{baseUrl}/XxxController/yyy`
 - Update: `post({ controller, action: 'update/{id}' }, body)`
 - Delete: `post({ controller, action: 'delete/{id}' }, {})`

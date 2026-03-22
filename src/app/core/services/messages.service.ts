@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 export interface AiMessageDto {
   id?: string;
@@ -26,20 +28,18 @@ export interface AiMessageDto {
 export class MessagesService {
   constructor(private httpClientService: HttpClientService) {}
 
-  async getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-    return await this.httpClientService.get_new({
+  async getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.httpClientService.get<PagedResult<any>>({
       controller: 'Messages',
-      action: `?PageNumber=${pageNumber}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`
+      action: buildPaginationQuery(req)
     });
   }
 
-  async getMessagesByConversation(conversationId: string): Promise<AiMessageDto[]> {
-    const response = await this.httpClientService.get_new({
+  async getMessagesByConversation(conversationId: string): Promise<ApiResponse<AiMessageDto[]>> {
+    return this.httpClientService.get<AiMessageDto[]>({
       controller: 'Ai',
       action: `messages/by-conversation/${conversationId}`,
     });
-
-    return this.extractArray(response);
   }
 
   async sendMessage(request: {
@@ -50,7 +50,7 @@ export class MessagesService {
     file?: File | null;
     storyUrl?: string | null;
     createdUserId?: string | null;
-  }): Promise<any> {
+  }): Promise<ApiResponse<any>> {
     const formData = new FormData();
     formData.append('ConversationId', request.conversationId);
     formData.append('MessageContent', request.messageContent);
@@ -60,7 +60,7 @@ export class MessagesService {
     if (request.createdUserId) formData.append('CreatedUserId', request.createdUserId);
     if (request.file) formData.append('File', request.file, request.file.name);
 
-    return await this.httpClientService.post(
+    return await this.httpClientService.post<any>(
       { controller: 'Messages' },
       formData
     );
@@ -72,7 +72,7 @@ export class MessagesService {
     file: File;
     source?: string;
     createdUserId?: string | null;
-  }): Promise<any> {
+  }): Promise<ApiResponse<any>> {
     const formData = new FormData();
     formData.append('ConversationId', request.conversationId);
     formData.append('MessageContent', request.messageContent);
@@ -80,7 +80,7 @@ export class MessagesService {
     formData.append('Source', request.source ?? 'agent');
     if (request.createdUserId) formData.append('CreatedUserId', request.createdUserId);
 
-    return await this.httpClientService.post(
+    return await this.httpClientService.post<any>(
       { controller: 'Messages', action: 'with-file' },
       formData
     );
@@ -91,32 +91,10 @@ export class MessagesService {
     companyId: string;
     message: string;
     userId?: string;
-  }): Promise<any> {
-    return await this.httpClientService.post(
+  }): Promise<ApiResponse<any>> {
+    return await this.httpClientService.post<any>(
       { controller: 'Webhook', action: 'test/ai-chat' },
       request
     );
-  }
-
-  private extractArray(response: unknown): AiMessageDto[] {
-    if (!response) return [];
-    if (Array.isArray(response)) return response as AiMessageDto[];
-
-    const value = response as any;
-
-    if (value?.data) {
-      return (Array.isArray(value.data) ? value.data : [value.data]) as AiMessageDto[];
-    }
-    if (value?.items) {
-      return (Array.isArray(value.items) ? value.items : [value.items]) as AiMessageDto[];
-    }
-    if (value?.result) {
-      return (Array.isArray(value.result) ? value.result : [value.result]) as AiMessageDto[];
-    }
-    if (value?.$values) {
-      return (Array.isArray(value.$values) ? value.$values : [value.$values]) as AiMessageDto[];
-    }
-
-    return [];
   }
 }

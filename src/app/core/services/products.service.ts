@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
+import { ApiResponse } from '../models/api-response.model';
 import { CreateProductRequest, UpdateProductRequest } from '../models/product/product.models';
 
 @Injectable({
@@ -20,7 +21,7 @@ export class ProductsService {
         integrationId?: string;
         sortBy?: string;
         sortDescending?: boolean;
-    }): Promise<any> {
+    }): Promise<ApiResponse<any>> {
         let qs = '';
         if (params) {
             const parts: string[] = [];
@@ -37,19 +38,19 @@ export class ProductsService {
             if (params.sortDescending != null) parts.push(`SortDescending=${params.sortDescending}`);
             qs = parts.join('&');
         }
-        return this.http.get_new({ controller: 'Products', queryString: qs || undefined });
+        return this.http.get<any>({ controller: 'Products', queryString: qs || undefined });
     }
 
-    getById(id: string): Promise<any> {
-        return this.http.get_new({ controller: 'Products', action: `${id}` });
+    getById(id: string): Promise<ApiResponse<any>> {
+        return this.http.get<any>({ controller: 'Products', action: `${id}` });
     }
 
-    getByCode(productCode: string): Promise<any> {
-        return this.http.get_new({ controller: 'Products', action: `by-code/${productCode}` });
+    getByCode(productCode: string): Promise<ApiResponse<any>> {
+        return this.http.get<any>({ controller: 'Products', action: `by-code/${productCode}` });
     }
 
-    getByIntegration(integrationId: string): Promise<any> {
-        return this.http.get_new({ controller: 'Products', action: `by-integration/${integrationId}` });
+    getByIntegration(integrationId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'Products', action: `by-integration/${integrationId}` });
     }
 
     /** CompanyId'ye göre ürünleri sayfalı olarak listeler */
@@ -68,7 +69,7 @@ export class ProductsService {
         integrationUserId?: string;
         sortBy?: string;
         sortDescending?: boolean;
-    }): Promise<any> {
+    }): Promise<ApiResponse<any>> {
         const parts: string[] = [];
         if (params) {
             if (params.pageNumber != null) parts.push(`PageNumber=${params.pageNumber}`);
@@ -87,18 +88,18 @@ export class ProductsService {
             if (params.sortDescending != null) parts.push(`SortDescending=${params.sortDescending}`);
         }
         const qs = parts.length > 0 ? `?${parts.join('&')}` : '';
-        return this.http.get_new({ controller: 'Products', action: `by-company/${companyId}${qs}` });
+        return this.http.get<any>({ controller: 'Products', action: `by-company/${companyId}${qs}` });
     }
 
-    create(request: CreateProductRequest): Promise<any> {
-        return this.http.post({ controller: 'Products' }, request);
+    create(request: CreateProductRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'Products' }, request);
     }
 
-    update(id: string, request: UpdateProductRequest): Promise<any> {
-        return this.http.post({ controller: 'Products', action: `update/${id}` }, request);
+    update(id: string, request: UpdateProductRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'Products', action: `update/${id}` }, request);
     }
 
-    delete(id: string): Promise<any> {
-        return this.http.post({ controller: 'Products', action: `delete/${id}` }, {});
+    delete(id: string): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'Products', action: `delete/${id}` }, {});
     }
 }

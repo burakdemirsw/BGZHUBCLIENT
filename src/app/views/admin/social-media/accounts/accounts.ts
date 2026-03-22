@@ -48,7 +48,7 @@ export class SocialMediaAccountsPage implements OnInit, OnDestroy {
     private messageListener = (event: MessageEvent) => {
         if (event.origin !== window.location.origin) return;
         if (event.data?.type === 'facebook-callback' && event.data?.success) {
-            console.log('Facebook callback data received via postMessage:', event.data.data);
+            //console.log('Facebook callback data received via postMessage:', event.data.data);
             this.loadItems();
         }
     };
@@ -71,9 +71,9 @@ export class SocialMediaAccountsPage implements OnInit, OnDestroy {
     async connectFacebook(): Promise<void> {
         try {
             const code = await this.facebookLoginService.fbLogin(this.fbConfig.configId);
-            console.log('Facebook code:', code);
+            //console.log('Facebook code:', code);
             const result = await this.facebookLoginService.sendFacebookCode(code);
-            console.log('Facebook backend response:', result);
+            //console.log('Facebook backend response:', result);
             await this.loadItems();
         } catch (err) {
             console.error('Facebook connect error:', err);
@@ -83,9 +83,9 @@ export class SocialMediaAccountsPage implements OnInit, OnDestroy {
     async connectWhatsapp(): Promise<void> {
         try {
             const code = await this.facebookLoginService.fbLogin(this.waConfigId);
-            console.log('WhatsApp code:', code);
+            //console.log('WhatsApp code:', code);
             const result = await this.facebookLoginService.sendWhatsappCode(code);
-            console.log('WhatsApp backend response:', result);
+            //console.log('WhatsApp backend response:', result);
             await this.loadItems();
         } catch (err) {
             console.error('WhatsApp connect error:', err);
@@ -106,12 +106,12 @@ export class SocialMediaAccountsPage implements OnInit, OnDestroy {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.socialMediaService.getAccountsPaged(this.currentPage, this.pageSize, this.searchTerm);
-            console.log('SocialMedia Accounts response:', response);
+            const response = await this.socialMediaService.getAccountsPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            //console.log('SocialMedia Accounts response:', response);
             
-            const data = response?.data || response;
-            this.items = this.extractArray(data?.items || data);
-            this.totalCount = data?.totalCount || data?.total || this.items.length;
+            const paged = response?.data;
+            this.items = paged?.items ?? [];
+            this.totalCount = paged?.totalCount ?? this.items.length;
             this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
             this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {

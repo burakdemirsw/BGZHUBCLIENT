@@ -50,7 +50,7 @@ export class CitiesPage implements OnInit {
             } else {
                 response = await this.addressesService.getCities();
             }
-            console.log('Cities response:', response);
+            //console.log('Cities response:', response);
             this.cities = this.extractArray(response);
         } catch (err) {
             console.error('Cities error:', err);

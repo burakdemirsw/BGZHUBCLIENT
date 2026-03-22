@@ -63,7 +63,7 @@ export class AuthGuard {
       }
 
       const response = await this.menusService.isUserAuthorized(userId, cleanUrl);
-      const isAuthorized = response?.data ?? response?.result ?? response === true;
+      const isAuthorized = response?.data === true;
 
       if (!isAuthorized) {
         this.router.navigate(['/error/403']);

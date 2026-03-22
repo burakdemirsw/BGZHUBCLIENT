@@ -71,9 +71,8 @@ export class IntegrationTypesPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.integrationTypesService.getAll();
-            console.log('IntegrationTypes response:', response);
-            const data = response?.data || response;
-            this.items = this.extractArray(data?.items || data);
+            //console.log('IntegrationTypes response:', response);
+            this.items = this.extractArray(response?.data);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('IntegrationTypes error:', err);
@@ -127,18 +126,18 @@ export class IntegrationTypesPage implements OnInit {
                     description: this.form.description,
                     isBlocked: this.form.isBlocked ?? false,
                 };
-                console.log('Update request:', req);
+                //console.log('Update request:', req);
                 const res = await this.integrationTypesService.update(this.selectedItem.id, req);
-                console.log('Update response:', res);
+                //console.log('Update response:', res);
             } else {
                 const req: CreateIntegrationTypeRequest = {
                     integrationTypeCode: this.form.integrationTypeCode,
                     name: this.form.name,
                     description: this.form.description,
                 };
-                console.log('Create request:', req);
+                //console.log('Create request:', req);
                 const res = await this.integrationTypesService.create(req);
-                console.log('Create response:', res);
+                //console.log('Create response:', res);
             }
             this.showModal = false;
             await this.loadItems();

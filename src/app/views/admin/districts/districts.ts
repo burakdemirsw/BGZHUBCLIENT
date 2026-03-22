@@ -65,7 +65,7 @@ export class DistrictsPage implements OnInit {
             } else {
                 response = await this.addressesService.getDistricts();
             }
-            console.log('Districts response:', response);
+            //console.log('Districts response:', response);
             this.districts = this.extractArray(response);
         } catch (err) {
             console.error('Districts error:', err);

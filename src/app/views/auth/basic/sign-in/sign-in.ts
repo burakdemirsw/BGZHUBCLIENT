@@ -43,7 +43,7 @@ export class SignIn {
         try {
             const response: any = await this.userService.login(loginRequest);
             this.loading = false;
-            console.log('Login response:', response);
+            //console.log('Login response:', response);
 
             // Token'ları kaydet - farklı response yapılarını destekle
             const accessToken = response?.accessToken ?? response?.token?.accessToken ?? response?.data?.accessToken ?? response?.token;

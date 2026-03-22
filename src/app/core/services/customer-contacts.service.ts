@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateCustomerContactRequest, UpdateCustomerContactRequest } from '../models/customer/customer-contact.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({
   providedIn: 'root',
@@ -8,30 +10,30 @@ import { CreateCustomerContactRequest, UpdateCustomerContactRequest } from '../m
 export class CustomerContactsService {
   constructor(private http: HttpClientService) {}
 
-  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-    return this.http.get_new({
+  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.http.get<PagedResult<any>>({
       controller: 'CustomerContacts',
-      action: `?PageNumber=${pageNumber}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`
+      action: buildPaginationQuery(req)
     });
   }
 
-  getById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'CustomerContacts', action: `${id}` });
+  getById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'CustomerContacts', action: `${id}` });
   }
 
-  getByCustomerId(customerId: string): Promise<any> {
-    return this.http.get_new({ controller: 'CustomerContacts', action: `by-customer/${customerId}` });
+  getByCustomerId(customerId: string): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'CustomerContacts', action: `by-customer/${customerId}` });
   }
 
-  create(request: CreateCustomerContactRequest): Promise<any> {
-    return this.http.post({ controller: 'CustomerContacts' }, request);
+  create(request: CreateCustomerContactRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'CustomerContacts' }, request);
   }
 
-  update(id: string, request: UpdateCustomerContactRequest): Promise<any> {
-    return this.http.post({ controller: 'CustomerContacts', action: `update/${id}` }, request);
+  update(id: string, request: UpdateCustomerContactRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'CustomerContacts', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Promise<any> {
-    return this.http.post({ controller: 'CustomerContacts', action: `delete/${id}` }, {});
+  delete(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'CustomerContacts', action: `delete/${id}` }, {});
   }
 }

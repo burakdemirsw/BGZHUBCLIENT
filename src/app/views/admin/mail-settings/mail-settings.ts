@@ -36,7 +36,7 @@ export class MailSettingsPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.mailService.getAll();
-            console.log('MailSettings response:', response);
+            //console.log('MailSettings response:', response);
             this.settings = this.extractArray(response);
         } catch (err) {
             console.error('MailSettings error:', err);

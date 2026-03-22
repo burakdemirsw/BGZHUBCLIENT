@@ -74,9 +74,9 @@ export class UserRequestsPage implements OnInit {
     async loadRequests(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.requestService.getPaged(1, 1000, '');
-            const data = response?.data || response;
-            this.requests = this.extractArray(data?.items || data);
+            const response = await this.requestService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const paged = response?.data;
+            this.requests = paged?.items ?? [];
             this.applyFilters();
         } catch (err) {
             console.error('UserRequests load error:', err);
@@ -87,9 +87,9 @@ export class UserRequestsPage implements OnInit {
 
     async loadCategories(): Promise<void> {
         try {
-            const response = await this.categoryService.getPaged(1, 1000, '');
-            const data = response?.data || response;
-            this.categories = this.extractArray(data?.items || data);
+            const response = await this.categoryService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const paged = response?.data;
+            this.categories = paged?.items ?? [];
         } catch (err) {
             console.error('Categories load error:', err);
         }
@@ -97,11 +97,11 @@ export class UserRequestsPage implements OnInit {
 
     async loadPriorities(): Promise<void> {
         try {
-            const response = await this.priorityService.getPaged(1, 1000, '');
-            console.log('RequestPriorities API response:', response);
-            const data = response?.data || response;
-            this.priorities = this.extractArray(data?.items || data);
-            console.log('Extracted priorities:', this.priorities);
+            const response = await this.priorityService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            //console.log('RequestPriorities API response:', response);
+            const paged = response?.data;
+            this.priorities = paged?.items ?? [];
+            //console.log('Extracted priorities:', this.priorities);
         } catch (err) {
             console.error('Priorities load error:', err);
         }
@@ -109,9 +109,9 @@ export class UserRequestsPage implements OnInit {
 
     async loadStatuses(): Promise<void> {
         try {
-            const response = await this.statusService.getPaged(1, 1000, '');
-            const data = response?.data || response;
-            this.statuses = this.extractArray(data?.items || data);
+            const response = await this.statusService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const paged = response?.data;
+            this.statuses = paged?.items ?? [];
         } catch (err) {
             console.error('Statuses load error:', err);
         }
@@ -120,7 +120,7 @@ export class UserRequestsPage implements OnInit {
     async loadUsers(): Promise<void> {
         try {
             const response = await this.usersService.getAll();
-            this.users = this.extractArray(response);
+            this.users = this.extractArray(response?.data);
         } catch (err) {
             console.error('Users load error:', err);
         }

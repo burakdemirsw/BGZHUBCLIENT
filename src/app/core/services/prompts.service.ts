@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreatePromptRequest, UpdatePromptRequest } from '../models/ai-assistant/prompt.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({
   providedIn: 'root',
@@ -8,29 +10,27 @@ import { CreatePromptRequest, UpdatePromptRequest } from '../models/ai-assistant
 export class PromptsService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Promise<any> {
-    return this.http.get_new({ controller: 'Prompts' });
+  getAll(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Prompts' });
   }
 
-  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-    let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
-    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-    return this.http.get_new({ controller: 'Prompts', action });
+  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.http.get<PagedResult<any>>({ controller: 'Prompts', action: buildPaginationQuery(req) });
   }
 
-  getById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'Prompts', action: `${id}` });
+  getById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Prompts', action: `${id}` });
   }
 
-  create(request: CreatePromptRequest): Promise<any> {
-    return this.http.post({ controller: 'Prompts' }, request);
+  create(request: CreatePromptRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Prompts' }, request);
   }
 
-  update(id: string, request: UpdatePromptRequest): Promise<any> {
-    return this.http.post({ controller: 'Prompts', action: `update/${id}` }, request);
+  update(id: string, request: UpdatePromptRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Prompts', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Promise<any> {
-    return this.http.post({ controller: 'Prompts', action: `delete/${id}` }, {});
+  delete(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Prompts', action: `delete/${id}` }, {});
   }
 }

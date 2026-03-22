@@ -49,7 +49,7 @@ export class TeamInvitationsPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.teamsService.getInvitations();
-            console.log('Invitations response:', response);
+            //console.log('Invitations response:', response);
             this.invitations = this.extractArray(response);
         } catch (err) {
             console.error('Invitations error:', err);

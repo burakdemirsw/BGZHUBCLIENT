@@ -47,7 +47,7 @@ export class UserSocialMediaAccountsPage implements OnInit {
     async loadUsers(): Promise<void> {
         try {
             const response = await this.usersService.getAll();
-            this.users = this.extractArray(response);
+            this.users = this.extractArray(response?.data);
         } catch (err) {
             console.error('Users error:', err);
         }
@@ -55,9 +55,9 @@ export class UserSocialMediaAccountsPage implements OnInit {
 
     async loadAccounts(): Promise<void> {
         try {
-            const response = await this.socialMediaService.getAccountsPaged(1, 1000, '');
-            const data = response?.data || response;
-            this.accounts = this.extractArray(data?.items || data);
+            const response = await this.socialMediaService.getAccountsPaged({ pageNumber: 1, pageSize: 1000 });
+            const paged = response?.data;
+            this.accounts = paged?.items ?? [];
         } catch (err) {
             console.error('Accounts error:', err);
         }
@@ -74,9 +74,8 @@ export class UserSocialMediaAccountsPage implements OnInit {
             } else {
                 response = await this.socialMediaService.getUserAccounts();
             }
-            console.log('User Accounts response:', response);
-            const data = response?.data || response;
-            this.userAccounts = this.extractArray(data?.items || data);
+            //console.log('User Accounts response:', response);
+            this.userAccounts = this.extractArray(response?.data);
             this.applyFilters();
         } catch (err) {
             console.error('User Accounts error:', err);
@@ -176,10 +175,10 @@ export class UserSocialMediaAccountsPage implements OnInit {
         const accountName = this.getAccountName(userAccount.socialMediaAccountId);
         if (confirm(`"${userName}" kullanıcısının "${accountName}" hesap atamasını silmek istediğinize emin misiniz?`)) {
             try {
-                console.log('Deleting user account with ID:', userAccount.id);
-                console.log('API URL will be: /api/SocialMedia/delete/user-accounts/' + userAccount.id);
+                //console.log('Deleting user account with ID:', userAccount.id);
+                //console.log('API URL will be: /api/SocialMedia/delete/user-accounts/' + userAccount.id);
                 await this.socialMediaService.deleteUserAccount(userAccount.id);
-                console.log('Delete successful');
+                //console.log('Delete successful');
                 await this.loadUserAccounts();
             } catch (err: any) {
                 console.error('Delete error:', err);

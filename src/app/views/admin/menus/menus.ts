@@ -85,7 +85,7 @@ export class MenusPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.menusService.getAll();
-            console.log('Menus response:', response);
+            //console.log('Menus response:', response);
             this.menus = this.extractArray(response);
             this.applyFilterAndPaging();
         } catch (err) {

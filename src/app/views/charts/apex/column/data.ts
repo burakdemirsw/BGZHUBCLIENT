@@ -853,7 +853,7 @@ export const distributedColumnChart: () => ApexOptions = () => ({
             },
             events: {
                 click: function (chart, w, e) {
-                    console.log(chart, w, e)
+                    //console.log(chart, w, e)
                 }
             },
         },

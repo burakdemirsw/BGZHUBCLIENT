@@ -40,7 +40,7 @@ export class PresenceService implements OnDestroy {
         try {
             await this.connection.start();
             this.connectionStateSubject.next('connected');
-            console.log('✅ Presence Hub bağlantısı kuruldu.');
+            //console.log('✅ Presence Hub bağlantısı kuruldu.');
             await this.fetchOnlineTeamMembers();
         } catch (err) {
             console.error('❌ Presence Hub bağlantı hatası:', err);
@@ -118,18 +118,18 @@ export class PresenceService implements OnDestroy {
 
         this.connection.onreconnecting(() => {
             this.connectionStateSubject.next('reconnecting');
-            console.log('🔄 Presence Hub yeniden bağlanıyor...');
+            //console.log('🔄 Presence Hub yeniden bağlanıyor...');
         });
 
         this.connection.onreconnected(async () => {
             this.connectionStateSubject.next('connected');
-            console.log('✅ Presence Hub yeniden bağlandı.');
+            //console.log('✅ Presence Hub yeniden bağlandı.');
             await this.fetchOnlineTeamMembers();
         });
 
         this.connection.onclose(() => {
             this.connectionStateSubject.next('disconnected');
-            console.log('⚠️ Presence Hub bağlantısı kapandı.');
+            //console.log('⚠️ Presence Hub bağlantısı kapandı.');
         });
     }
 

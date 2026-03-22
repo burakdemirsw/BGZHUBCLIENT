@@ -43,12 +43,11 @@ export class UserProfile implements OnInit {
       const userId = this.authState.profile?.userId;
       if (!userId) return;
       const response = await this.notificationsService.getUnreadCount(userId);
-      if (typeof response === 'number') {
-        this.unreadCount = response;
-      } else if (response?.count !== undefined) {
-        this.unreadCount = response.count;
-      } else if (response?.data !== undefined) {
-        this.unreadCount = response.data;
+      const value = response?.data;
+      if (typeof value === 'number') {
+        this.unreadCount = value;
+      } else if ((value as any)?.count !== undefined) {
+        this.unreadCount = (value as any).count;
       } else {
         this.unreadCount = 0;
       }

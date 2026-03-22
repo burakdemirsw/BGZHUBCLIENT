@@ -78,7 +78,7 @@ export class Pickers {
     };
 
     onColorChange($event: any) {
-        console.log('Selected Color:', $event);
+        //console.log('Selected Color:', $event);
         this.color = $event.color;
     }
 }

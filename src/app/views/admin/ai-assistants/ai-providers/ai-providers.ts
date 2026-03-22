@@ -63,8 +63,7 @@ export class AiProvidersPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.aiService.getProviders();
-            const data = response?.data || response;
-            this.providers = this.extractArray(data?.items || data);
+            this.providers = this.extractArray(response?.data);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('AiProviders load error:', err);

@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateRequestCategoryRequest, UpdateRequestCategoryRequest } from '../models/request-category/request-category.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({
     providedIn: 'root',
@@ -8,24 +10,23 @@ import { CreateRequestCategoryRequest, UpdateRequestCategoryRequest } from '../m
 export class RequestCategoriesService {
     constructor(private http: HttpClientService) {}
 
-    getPaged(page: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-        const params = `?PageNumber=${page}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`;
-        return this.http.get_new({ controller: 'RequestCategories', action: params });
+    getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+        return this.http.get<PagedResult<any>>({ controller: 'RequestCategories', action: buildPaginationQuery(req) });
     }
 
-    getById(id: string): Promise<any> {
-        return this.http.get_new({ controller: 'RequestCategories', action: id });
+    getById(id: string): Promise<ApiResponse<any>> {
+        return this.http.get<any>({ controller: 'RequestCategories', action: id });
     }
 
-    create(request: CreateRequestCategoryRequest): Promise<any> {
-        return this.http.post({ controller: 'RequestCategories' }, request);
+    create(request: CreateRequestCategoryRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'RequestCategories' }, request);
     }
 
-    update(id: string, request: UpdateRequestCategoryRequest): Promise<any> {
-        return this.http.post({ controller: 'RequestCategories', action: `update/${id}` }, request);
+    update(id: string, request: UpdateRequestCategoryRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'RequestCategories', action: `update/${id}` }, request);
     }
 
-    delete(id: string): Promise<any> {
-        return this.http.post({ controller: 'RequestCategories', action: `delete/${id}` }, {});
+    delete(id: string): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'RequestCategories', action: `delete/${id}` }, {});
     }
 }

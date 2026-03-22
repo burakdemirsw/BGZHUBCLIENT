@@ -35,7 +35,7 @@ export class NetGsmSettingsPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.netGsmService.getAll();
-            console.log('NetGsmSettings response:', response);
+            //console.log('NetGsmSettings response:', response);
             this.settings = this.extractArray(response);
         } catch (err) {
             console.error('NetGsmSettings error:', err);

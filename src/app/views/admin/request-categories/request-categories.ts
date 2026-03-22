@@ -40,11 +40,11 @@ export class RequestCategoriesPage implements OnInit {
     async loadCategories(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.categoryService.getPaged(this.currentPage, this.pageSize, this.searchTerm);
-            const data = response?.data || response;
-            this.categories = this.extractArray(data?.items || data);
-            this.totalCount = data?.totalCount ?? data?.total ?? this.categories.length;
-            this.totalPages = data?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            const response = await this.categoryService.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const paged = response?.data;
+            this.categories = paged?.items ?? [];
+            this.totalCount = paged?.totalCount ?? this.categories.length;
+            this.totalPages = paged?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
             this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('RequestCategories load error:', err);

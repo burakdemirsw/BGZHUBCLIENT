@@ -30,7 +30,7 @@ export class RolesPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.rolesService.getAll();
-            console.log('Roles response:', response);
+            //console.log('Roles response:', response);
             this.roles = this.extractArray(response);
         } catch (err) {
             console.error('Roles error:', err);

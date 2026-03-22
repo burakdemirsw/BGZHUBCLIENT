@@ -33,7 +33,7 @@ import { TeamInvitationsPage } from './teams/team-invitations/team-invitations';
 import { TeamSettingsPage } from './teams/team-settings/team-settings';
 import { ImageSearchPage } from './image-search/image-search';
 import { IntegrationTypesPage } from './integration-types/integration-types';
-import { IntegrationSocialMediaAccountsPage } from './integration-social-media-accounts/integration-social-media-accounts';
+import { UserIntegrationUserSocialMediaAccountsPage } from './user-integration-user-social-media-accounts/user-integration-user-social-media-accounts';
 import { PromptsPage } from './prompts/prompts';
 import { PromptAiAssistantsPage } from './prompt-ai-assistants/prompt-ai-assistants';
 import { PromptTypesPage } from './prompt-types/prompt-types';
@@ -150,9 +150,9 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [AuthGuard],
     },
     {
-        path: 'admin/integration-social-media-accounts',
-        component: IntegrationSocialMediaAccountsPage,
-        data: { title: 'Entegrasyon Sosyal Medya Hesapları' },
+        path: 'admin/user-integration-user-social-media-accounts',
+        component: UserIntegrationUserSocialMediaAccountsPage,
+        data: { title: 'Kullanıcı Entegrasyon Sosyal Medya Hesapları' },
         canActivate: [AuthGuard],
     },
     {

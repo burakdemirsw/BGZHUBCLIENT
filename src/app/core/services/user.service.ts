@@ -1,6 +1,7 @@
 import { Injectable, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClientService } from './http-client.service';
+import { ApiResponse } from '../models/api-response.model';
 import { AuthStateService } from './auth-state.service';
 import { LoginRequest, RegisterRequest, RefreshTokenRequest } from '../models/auth/auth.models';
 
@@ -28,22 +29,22 @@ export class UserService {
     this.router.navigate(['/auth/sign-in']);
   }
 
-  login(loginRequest: LoginRequest): Promise<any> {
-    return this.httpClientService.post(
+  login(loginRequest: LoginRequest): Promise<ApiResponse<any>> {
+    return this.httpClientService.post<any>(
       { controller: 'Auth', action: 'login' },
       loginRequest
     );
   }
 
-  register(registerRequest: RegisterRequest): Promise<any> {
-    return this.httpClientService.post(
+  register(registerRequest: RegisterRequest): Promise<ApiResponse<any>> {
+    return this.httpClientService.post<any>(
       { controller: 'Auth', action: 'register' },
       registerRequest
     );
   }
 
-  refreshToken(refreshTokenRequest: RefreshTokenRequest): Promise<any> {
-    return this.httpClientService.post(
+  refreshToken(refreshTokenRequest: RefreshTokenRequest): Promise<ApiResponse<any>> {
+    return this.httpClientService.post<any>(
       { controller: 'Auth', action: 'refresh-token' },
       refreshTokenRequest
     );

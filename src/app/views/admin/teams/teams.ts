@@ -65,9 +65,8 @@ export class TeamsPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.teamsService.getAll();
-            console.log('Teams response:', response);
-            const data = response?.data || response;
-            this.teams = this.extractArray(data?.items || data);
+            //console.log('Teams response:', response);
+            this.teams = this.extractArray(response?.data);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('Teams error:', err);

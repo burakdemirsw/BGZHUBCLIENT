@@ -57,8 +57,8 @@ export class OrdersPage implements OnInit {
                 this.orderStatusesService.getAll(),
                 this.paymentTypesService.getAll(),
             ]);
-            this.orderStatuses = this.extractArray(statusRes?.items || statusRes);
-            this.paymentTypes = this.extractArray(paymentRes?.items || paymentRes);
+            this.orderStatuses = this.extractArray(statusRes?.data);
+            this.paymentTypes = this.extractArray(paymentRes?.data);
         } catch (err) {
             console.error('Lookup load error:', err);
         }
@@ -89,10 +89,10 @@ export class OrdersPage implements OnInit {
             };
 
             const response = await this.service.getByCompanyPaged(companyId, filter);
-            const data = response?.data || response;
-            this.items = this.extractArray(data?.items || data);
-            this.totalCount = data?.totalCount ?? data?.total ?? this.items.length;
-            this.totalPages = data?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            const paged = response?.data;
+            this.items = paged?.items ?? [];
+            this.totalCount = paged?.totalCount ?? this.items.length;
+            this.totalPages = paged?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
             this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('Orders load error:', err);

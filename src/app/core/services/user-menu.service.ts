@@ -50,11 +50,11 @@ export class UserMenuService {
     try {
       // 1) Tüm menüleri al (id, parentId, name, url, icon, orderIndex)
       const allMenusResp = await this.menusService.getAll();
-      const allMenus: Menu[] = this.extractArray(allMenusResp);
+      const allMenus: Menu[] = (allMenusResp.data as Menu[]) ?? [];
 
       // 2) Kullanıcının rollerine atanmış menüleri al
       const roleMenusResp = await this.menusService.getMenusByUser(userId);
-      const roleMenus: RoleMenu[] = this.extractArray(roleMenusResp);
+      const roleMenus: RoleMenu[] = (roleMenusResp.data as RoleMenu[]) ?? [];
 
       // 3) Kullanıcıya atanmış menü ID'leri
       const allowedMenuIds = new Set(
@@ -148,12 +148,4 @@ export class UserMenuService {
     this.loaded = false;
   }
 
-  private extractArray(response: any): any[] {
-    if (Array.isArray(response)) return response;
-    if (response?.$values) return response.$values;
-    if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
-    if (response?.items) return response.items;
-    if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
-    return [];
-  }
 }

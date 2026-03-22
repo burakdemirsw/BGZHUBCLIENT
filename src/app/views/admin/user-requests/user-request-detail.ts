@@ -63,7 +63,7 @@ export class UserRequestDetailPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.requestService.getById(this.requestId);
-            this.request = response?.data ?? response ?? null;
+            this.request = response?.data ?? null;
         } catch (err) {
             console.error('Request load error:', err);
         } finally {
@@ -75,7 +75,7 @@ export class UserRequestDetailPage implements OnInit {
         this.messagesLoading = true;
         try {
             const response = await this.requestService.getMessages(this.requestId);
-            this.messages = this.extractArray(response);
+            this.messages = this.extractArray(response?.data);
         } catch (err) {
             console.error('Messages load error:', err);
         } finally {
@@ -85,9 +85,9 @@ export class UserRequestDetailPage implements OnInit {
 
     async loadCategories(): Promise<void> {
         try {
-            const response = await this.categoryService.getPaged(1, 1000, '');
-            const data = response?.data || response;
-            this.categories = this.extractArray(data?.items || data);
+            const response = await this.categoryService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const paged = response?.data;
+            this.categories = paged?.items ?? [];
         } catch (err) {
             console.error('Categories load error:', err);
         }
@@ -95,9 +95,9 @@ export class UserRequestDetailPage implements OnInit {
 
     async loadPriorities(): Promise<void> {
         try {
-            const response = await this.priorityService.getPaged(1, 1000, '');
-            const data = response?.data || response;
-            this.priorities = this.extractArray(data?.items || data);
+            const response = await this.priorityService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const paged = response?.data;
+            this.priorities = paged?.items ?? [];
         } catch (err) {
             console.error('Priorities load error:', err);
         }
@@ -105,9 +105,9 @@ export class UserRequestDetailPage implements OnInit {
 
     async loadStatuses(): Promise<void> {
         try {
-            const response = await this.statusService.getPaged(1, 1000, '');
-            const data = response?.data || response;
-            this.statuses = this.extractArray(data?.items || data);
+            const response = await this.statusService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const paged = response?.data;
+            this.statuses = paged?.items ?? [];
         } catch (err) {
             console.error('Statuses load error:', err);
         }
@@ -116,7 +116,7 @@ export class UserRequestDetailPage implements OnInit {
     async loadUsers(): Promise<void> {
         try {
             const response = await this.usersService.getAll();
-            this.users = this.extractArray(response);
+            this.users = this.extractArray(response?.data);
         } catch (err) {
             console.error('Users load error:', err);
         }

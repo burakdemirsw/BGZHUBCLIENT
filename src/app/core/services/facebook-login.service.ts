@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
+import { ApiResponse } from '../models/api-response.model';
 
 declare const FB: any;
 
@@ -70,12 +71,12 @@ export class FacebookLoginService {
     return new Promise((resolve, reject) => {
       FB.login(
         (response: any) => {
-          console.log('FB.login full response:', response);
+          //console.log('FB.login full response:', response);
 
           if (response.status === 'connected' && response.authResponse) {
             const code = response.authResponse.code;
-            console.log('FB.login code:', code);
-            console.log('FB.login authResponse:', response.authResponse);
+            //console.log('FB.login code:', code);
+            //console.log('FB.login authResponse:', response.authResponse);
             resolve(code);
           } else {
             console.warn('FB.login failed or cancelled:', response);
@@ -91,15 +92,15 @@ export class FacebookLoginService {
     });
   }
 
-  sendFacebookCode(code: string): Promise<any> {
-    return this.http.post(
+  sendFacebookCode(code: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>(
       { controller: 'Auth', action: 'meta-login' },
       { code }
     );
   }
 
-  sendWhatsappCode(code: string): Promise<any> {
-    return this.http.post(
+  sendWhatsappCode(code: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>(
       { controller: 'Auth', action: 'whatsapp-login' },
       { code }
     );

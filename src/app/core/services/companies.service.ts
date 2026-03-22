@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateCompanyRequest, UpdateCompanyRequest } from '../models/customer/company.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({
   providedIn: 'root',
@@ -8,33 +10,31 @@ import { CreateCompanyRequest, UpdateCompanyRequest } from '../models/customer/c
 export class CompaniesService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Promise<any> {
-    return this.http.get_new({ controller: 'Companies' });
+  getAll(): Promise<ApiResponse<any[]>> {
+    return this.http.get<any[]>({ controller: 'Companies' });
   }
 
-  getPaged(pageNumber: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-    let action = `?PageNumber=${pageNumber}&PageSize=${pageSize}`;
-    if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-    return this.http.get_new({ controller: 'Companies', action });
+  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.http.get<PagedResult<any>>({ controller: 'Companies', action: buildPaginationQuery(req) });
   }
 
-  getById(id: string): Promise<any> {
-    return this.http.get_new({ controller: 'Companies', action: `${id}` });
+  getById(id: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Companies', action: `${id}` });
   }
 
-  getByTaxNumber(taxNumber: string): Promise<any> {
-    return this.http.get_new({ controller: 'Companies', action: `tax/${taxNumber}` });
+  getByTaxNumber(taxNumber: string): Promise<ApiResponse<any>> {
+    return this.http.get<any>({ controller: 'Companies', action: `tax/${taxNumber}` });
   }
 
-  create(request: CreateCompanyRequest): Promise<any> {
-    return this.http.post({ controller: 'Companies' }, request);
+  create(request: CreateCompanyRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Companies' }, request);
   }
 
-  update(id: string, request: UpdateCompanyRequest): Promise<any> {
-    return this.http.post({ controller: 'Companies', action: `update/${id}` }, request);
+  update(id: string, request: UpdateCompanyRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Companies', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Promise<any> {
-    return this.http.post({ controller: 'Companies', action: `delete/${id}` }, {});
+  delete(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'Companies', action: `delete/${id}` }, {});
   }
 }

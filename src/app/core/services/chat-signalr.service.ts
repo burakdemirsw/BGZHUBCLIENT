@@ -72,7 +72,7 @@ export class ChatSignalRService implements OnDestroy {
         try {
             await this.connection.start();
             this.connectionStateSubject.next('connected');
-            console.log('✅ Chat Hub bağlantısı kuruldu.');
+            //console.log('✅ Chat Hub bağlantısı kuruldu.');
         } catch (err) {
             console.error('❌ Chat Hub bağlantı hatası:', err);
             this.connectionStateSubject.next('disconnected');
@@ -105,7 +105,7 @@ export class ChatSignalRService implements OnDestroy {
         try {
             await this.connection.invoke('JoinConversation', conversationId);
             this.currentConversationId = conversationId;
-            console.log(`📥 Sohbete katıldı: ${conversationId}`);
+            //console.log(`📥 Sohbete katıldı: ${conversationId}`);
         } catch (err) {
             console.error('JoinConversation hatası:', err);
         }
@@ -119,7 +119,7 @@ export class ChatSignalRService implements OnDestroy {
             if (this.currentConversationId === conversationId) {
                 this.currentConversationId = null;
             }
-            console.log(`📤 Sohbetten ayrıldı: ${conversationId}`);
+            //console.log(`📤 Sohbetten ayrıldı: ${conversationId}`);
         } catch (err) {
             console.error('LeaveConversation hatası:', err);
         }
@@ -171,7 +171,7 @@ export class ChatSignalRService implements OnDestroy {
 
         // Yeni conversation geldi
         this.connection.on('NewConversation', (event: NewConversationEvent) => {
-            console.log('🆕 Yeni conversation:', event);
+            //console.log('🆕 Yeni conversation:', event);
             this.newConversationSubject.next(event);
 
             // Otomatik olarak yeni conversation grubuna katıl
@@ -185,12 +185,12 @@ export class ChatSignalRService implements OnDestroy {
 
         this.connection.onreconnecting(() => {
             this.connectionStateSubject.next('reconnecting');
-            console.log('🔄 Chat Hub yeniden bağlanıyor...');
+            //console.log('🔄 Chat Hub yeniden bağlanıyor...');
         });
 
         this.connection.onreconnected(async () => {
             this.connectionStateSubject.next('connected');
-            console.log('✅ Chat Hub yeniden bağlandı.');
+            //console.log('✅ Chat Hub yeniden bağlandı.');
 
             // Aktif sohbete tekrar katıl
             if (this.currentConversationId) {
@@ -200,7 +200,7 @@ export class ChatSignalRService implements OnDestroy {
 
         this.connection.onclose(() => {
             this.connectionStateSubject.next('disconnected');
-            console.log('⛔ Chat Hub bağlantısı kapandı.');
+            //console.log('⛔ Chat Hub bağlantısı kapandı.');
         });
     }
 

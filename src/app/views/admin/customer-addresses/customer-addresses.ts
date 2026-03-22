@@ -56,19 +56,18 @@ export class CustomerAddressesPage implements OnInit {
     async loadLookups(): Promise<void> {
         try {
             const [custRes, atRes, countryRes, cityRes, districtRes] = await Promise.all([
-                this.http.get_new({ controller: 'Customers' }),
-                this.addressTypesService.getPaged(1, 1000, ''),
-                this.http.get_new({ controller: 'Addresses', action: 'countries' }),
-                this.http.get_new({ controller: 'Addresses', action: 'cities' }),
-                this.http.get_new({ controller: 'Addresses', action: 'districts' }),
+                this.http.get({ controller: 'Customers' }),
+                this.addressTypesService.getPaged({ pageNumber: 1, pageSize: 1000 }),
+                this.http.get({ controller: 'Addresses', action: 'countries' }),
+                this.http.get({ controller: 'Addresses', action: 'cities' }),
+                this.http.get({ controller: 'Addresses', action: 'districts' }),
             ]);
-            const custData = custRes?.data || custRes;
-            const atData = atRes?.data || atRes;
-            this.customers = this.extractArray(custData?.items || custData);
-            this.addressTypes = this.extractArray(atData?.items || atData);
-            this.countries = this.extractArray(countryRes?.data || countryRes);
-            this.cities = this.extractArray(cityRes?.data || cityRes);
-            this.districts = this.extractArray(districtRes?.data || districtRes);
+            this.customers = this.extractArray(custRes?.data);
+            const atPaged = atRes?.data;
+            this.addressTypes = atPaged?.items ?? [];
+            this.countries = this.extractArray(countryRes?.data);
+            this.cities = this.extractArray(cityRes?.data);
+            this.districts = this.extractArray(districtRes?.data);
         } catch (err) {
             console.error('Lookup load error:', err);
         }
@@ -77,11 +76,11 @@ export class CustomerAddressesPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged(this.currentPage, this.pageSize, this.searchTerm);
-            const data = response?.data || response;
-            this.items = this.extractArray(data?.items || data);
-            this.totalCount = data?.totalCount ?? data?.total ?? this.items.length;
-            this.totalPages = data?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            const response = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const paged = response?.data;
+            this.items = paged?.items ?? [];
+            this.totalCount = paged?.totalCount ?? this.items.length;
+            this.totalPages = paged?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
             this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('CustomerAddresses load error:', err);

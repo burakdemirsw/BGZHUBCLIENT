@@ -5,6 +5,8 @@ import {
     UpdateUserRequestRequest,
     CreateUserRequestMessageRequest,
 } from '../models/user-request/user-request.models';
+import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
 @Injectable({
     providedIn: 'root',
@@ -13,49 +15,48 @@ export class UserRequestsService {
     constructor(private http: HttpClientService) {}
 
     // ── UserRequests ──
-    getPaged(page: number = 1, pageSize: number = 10, searchTerm: string = ''): Promise<any> {
-        const params = `?PageNumber=${page}&PageSize=${pageSize}&SearchTerm=${encodeURIComponent(searchTerm)}`;
-        return this.http.get_new({ controller: 'UserRequests', action: params });
+    getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+        return this.http.get<PagedResult<any>>({ controller: 'UserRequests', action: buildPaginationQuery(req) });
     }
 
-    getById(id: string): Promise<any> {
-        return this.http.get_new({ controller: 'UserRequests', action: id });
+    getById(id: string): Promise<ApiResponse<any>> {
+        return this.http.get<any>({ controller: 'UserRequests', action: id });
     }
 
-    getByUser(userId: string): Promise<any> {
-        return this.http.get_new({ controller: 'UserRequests', action: `by-user/${userId}` });
+    getByUser(userId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'UserRequests', action: `by-user/${userId}` });
     }
 
-    getByAssignedUser(assignedUserId: string): Promise<any> {
-        return this.http.get_new({ controller: 'UserRequests', action: `by-assigned-user/${assignedUserId}` });
+    getByAssignedUser(assignedUserId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'UserRequests', action: `by-assigned-user/${assignedUserId}` });
     }
 
-    getByStatus(statusId: string): Promise<any> {
-        return this.http.get_new({ controller: 'UserRequests', action: `by-status/${statusId}` });
+    getByStatus(statusId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'UserRequests', action: `by-status/${statusId}` });
     }
 
-    create(request: CreateUserRequestRequest): Promise<any> {
-        return this.http.post({ controller: 'UserRequests' }, request);
+    create(request: CreateUserRequestRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'UserRequests' }, request);
     }
 
-    update(id: string, request: UpdateUserRequestRequest): Promise<any> {
-        return this.http.post({ controller: 'UserRequests', action: `update/${id}` }, request);
+    update(id: string, request: UpdateUserRequestRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'UserRequests', action: `update/${id}` }, request);
     }
 
-    close(id: string): Promise<any> {
-        return this.http.post({ controller: 'UserRequests', action: `close/${id}` }, {});
+    close(id: string): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'UserRequests', action: `close/${id}` }, {});
     }
 
-    delete(id: string): Promise<any> {
-        return this.http.post({ controller: 'UserRequests', action: `delete/${id}` }, {});
+    delete(id: string): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'UserRequests', action: `delete/${id}` }, {});
     }
 
     // ── Messages ──
-    getMessages(requestId: string): Promise<any> {
-        return this.http.get_new({ controller: 'UserRequests', action: `${requestId}/messages` });
+    getMessages(requestId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'UserRequests', action: `${requestId}/messages` });
     }
 
-    createMessage(request: CreateUserRequestMessageRequest): Promise<any> {
-        return this.http.post({ controller: 'UserRequests', action: 'messages' }, request);
+    createMessage(request: CreateUserRequestMessageRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'UserRequests', action: 'messages' }, request);
     }
 }

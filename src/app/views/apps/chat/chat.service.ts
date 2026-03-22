@@ -71,7 +71,8 @@ export class ChatService {
   private async loadMessagesForConversation(chatId: string): Promise<MessageType[]> {
     try {
       const payload = await this.messagesService.getMessagesByConversation(chatId);
-      const mapped = payload.map(message => this.mapMessage(message));
+      const messages = payload?.data ?? [];
+      const mapped = messages.map((message: AiMessageDto) => this.mapMessage(message));
       this.messages[chatId] = mapped;
       return mapped;
     } catch (error) {

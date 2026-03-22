@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
+import { ApiResponse } from '../models/api-response.model';
 import { 
     CreateOrderRequest, 
     UpdateOrderRequest, 
@@ -13,19 +14,19 @@ export class OrdersService {
     constructor(private http: HttpClientService) {}
 
     // ── Orders ──
-    getAll(): Promise<any> {
-        return this.http.get_new({ controller: 'Orders' });
+    getAll(): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'Orders' });
     }
 
-    getById(id: string): Promise<any> {
-        return this.http.get_new({ controller: 'Orders', action: `${id}` });
+    getById(id: string): Promise<ApiResponse<any>> {
+        return this.http.get<any>({ controller: 'Orders', action: `${id}` });
     }
 
-    getByCompany(companyId: string): Promise<any> {
-        return this.http.get_new({ controller: 'Orders', action: `company/${companyId}` });
+    getByCompany(companyId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'Orders', action: `company/${companyId}` });
     }
 
-    getByCompanyPaged(companyId: string, filter?: OrderFilterRequest): Promise<any> {
+    getByCompanyPaged(companyId: string, filter?: OrderFilterRequest): Promise<ApiResponse<any>> {
         const parts: string[] = [];
         if (filter) {
             if (filter.pageNumber != null) parts.push(`PageNumber=${filter.pageNumber}`);
@@ -43,55 +44,55 @@ export class OrdersService {
             if (filter.sortDescending != null) parts.push(`SortDescending=${filter.sortDescending}`);
         }
         const qs = parts.length > 0 ? `?${parts.join('&')}` : '';
-        return this.http.get_new({ controller: 'Orders', action: `company/${companyId}/paged${qs}` });
+        return this.http.get<any>({ controller: 'Orders', action: `company/${companyId}/paged${qs}` });
     }
 
-    getByUser(userId: string): Promise<any> {
-        return this.http.get_new({ controller: 'Orders', action: `user/${userId}` });
+    getByUser(userId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'Orders', action: `user/${userId}` });
     }
 
-    getByCustomer(customerId: string): Promise<any> {
-        return this.http.get_new({ controller: 'Orders', action: `customer/${customerId}` });
+    getByCustomer(customerId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'Orders', action: `customer/${customerId}` });
     }
 
-    getByIntegrationUser(integrationUserId: string): Promise<any> {
-        return this.http.get_new({ controller: 'Orders', action: `integration-user/${integrationUserId}` });
+    getByIntegrationUser(integrationUserId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'Orders', action: `integration-user/${integrationUserId}` });
     }
 
-    getByStatus(statusId: string): Promise<any> {
-        return this.http.get_new({ controller: 'Orders', action: `status/${statusId}` });
+    getByStatus(statusId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'Orders', action: `status/${statusId}` });
     }
 
-    create(request: CreateOrderRequest): Promise<any> {
-        return this.http.post({ controller: 'Orders' }, request);
+    create(request: CreateOrderRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'Orders' }, request);
     }
 
-    update(id: string, request: UpdateOrderRequest): Promise<any> {
-        return this.http.post({ controller: 'Orders', action: `update/${id}` }, request);
+    update(id: string, request: UpdateOrderRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'Orders', action: `update/${id}` }, request);
     }
 
-    delete(id: string): Promise<any> {
-        return this.http.post({ controller: 'Orders', action: `delete/${id}` }, {});
+    delete(id: string): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'Orders', action: `delete/${id}` }, {});
     }
 
     // ── Order Payments ──
-    getPaymentsByOrder(orderId: string): Promise<any> {
-        return this.http.get_new({ controller: 'OrderPayments', action: `order/${orderId}` });
+    getPaymentsByOrder(orderId: string): Promise<ApiResponse<any[]>> {
+        return this.http.get<any[]>({ controller: 'OrderPayments', action: `order/${orderId}` });
     }
 
-    getPaymentById(id: string): Promise<any> {
-        return this.http.get_new({ controller: 'OrderPayments', action: `${id}` });
+    getPaymentById(id: string): Promise<ApiResponse<any>> {
+        return this.http.get<any>({ controller: 'OrderPayments', action: `${id}` });
     }
 
-    createPayment(request: CreateOrderPaymentRequest): Promise<any> {
-        return this.http.post({ controller: 'OrderPayments' }, request);
+    createPayment(request: CreateOrderPaymentRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'OrderPayments' }, request);
     }
 
-    updatePayment(id: string, request: UpdateOrderPaymentRequest): Promise<any> {
-        return this.http.post({ controller: 'OrderPayments', action: `update/${id}` }, request);
+    updatePayment(id: string, request: UpdateOrderPaymentRequest): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'OrderPayments', action: `update/${id}` }, request);
     }
 
-    deletePayment(id: string): Promise<any> {
-        return this.http.post({ controller: 'OrderPayments', action: `delete/${id}` }, {});
+    deletePayment(id: string): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'OrderPayments', action: `delete/${id}` }, {});
     }
 }

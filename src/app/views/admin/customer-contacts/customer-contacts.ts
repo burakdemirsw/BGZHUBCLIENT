@@ -47,13 +47,12 @@ export class CustomerContactsPage implements OnInit {
     async loadLookups(): Promise<void> {
         try {
             const [custRes, ctRes] = await Promise.all([
-                this.http.get_new({ controller: 'Customers' }),
-                this.contactTypesService.getPaged(1, 1000, ''),
+                this.http.get({ controller: 'Customers' }),
+                this.contactTypesService.getPaged({ pageNumber: 1, pageSize: 1000 }),
             ]);
-            const custData = custRes?.data || custRes;
-            const ctData = ctRes?.data || ctRes;
-            this.customers = this.extractArray(custData?.items || custData);
-            this.contactTypes = this.extractArray(ctData?.items || ctData);
+            this.customers = this.extractArray(custRes?.data);
+            const ctPaged = ctRes?.data;
+            this.contactTypes = ctPaged?.items ?? [];
         } catch (err) {
             console.error('Lookup load error:', err);
         }
@@ -62,11 +61,11 @@ export class CustomerContactsPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged(this.currentPage, this.pageSize, this.searchTerm);
-            const data = response?.data || response;
-            this.items = this.extractArray(data?.items || data);
-            this.totalCount = data?.totalCount ?? data?.total ?? this.items.length;
-            this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            const response = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const paged = response?.data;
+            this.items = paged?.items ?? [];
+            this.totalCount = paged?.totalCount ?? this.items.length;
+            this.totalPages = paged?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
             this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('CustomerContacts load error:', err);

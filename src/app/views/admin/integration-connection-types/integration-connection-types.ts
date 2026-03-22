@@ -71,7 +71,7 @@ export class IntegrationConnectionTypesPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.service.getAll();
-            console.log('IntegrationConnectionTypes response:', response);
+            //console.log('IntegrationConnectionTypes response:', response);
             this.items = this.extractArray(response);
             this.applyFilterAndPaging();
         } catch (err) {
@@ -118,18 +118,18 @@ export class IntegrationConnectionTypesPage implements OnInit {
                     description: this.form.description,
                     isBlocked: this.form.isBlocked ?? false,
                 };
-                console.log('Update request:', req);
+                //console.log('Update request:', req);
                 const res = await this.service.update(this.selectedItem.id, req);
-                console.log('Update response:', res);
+                //console.log('Update response:', res);
             } else {
                 const req: CreateIntegrationConnectionTypeRequest = {
                     connectionTypeCode: this.form.connectionTypeCode,
                     name: this.form.name,
                     description: this.form.description,
                 };
-                console.log('Create request:', req);
+                //console.log('Create request:', req);
                 const res = await this.service.create(req);
-                console.log('Create response:', res);
+                //console.log('Create response:', res);
             }
             this.showModal = false;
             await this.loadItems();

@@ -43,11 +43,11 @@ export class CustomersPage implements OnInit {
     async loadLookups(): Promise<void> {
         try {
             const [usersRes, smaRes] = await Promise.all([
-                this.http.get_new({ controller: 'Users' }),
-                this.http.get_new({ controller: 'SocialMedia', action: 'accounts?PageNumber=1&PageSize=1000' }),
+                this.http.get({ controller: 'Users' }),
+                this.http.get({ controller: 'SocialMedia', action: 'accounts?PageNumber=1&PageSize=1000' }),
             ]);
-            this.users = this.extractArray(usersRes?.items || usersRes);
-            this.socialMediaAccounts = this.extractArray(smaRes?.items || smaRes);
+            this.users = this.extractArray(usersRes?.data);
+            this.socialMediaAccounts = this.extractArray(smaRes?.data);
         } catch (err) {
             console.error('Lookup load error:', err);
         }
@@ -56,11 +56,11 @@ export class CustomersPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged(this.currentPage, this.pageSize, this.searchTerm);
-            const data = response?.data || response;
-            this.items = this.extractArray(data?.items || data);
-            this.totalCount = data?.totalCount ?? data?.total ?? this.items.length;
-            this.totalPages = data?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            const response = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const paged = response?.data;
+            this.items = paged?.items ?? [];
+            this.totalCount = paged?.totalCount ?? this.items.length;
+            this.totalPages = paged?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
             this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('Customers load error:', err);

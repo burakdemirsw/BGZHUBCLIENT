@@ -312,7 +312,7 @@ export class ImageSearchPage implements OnInit {
     }
 
     private processSearchResponse(response: any): void {
-        const data = response?.data || response;
+        const data = response?.data;
         this.totalFound = data?.totalFound || 0;
         this.searchDurationMs = data?.searchDurationMs || 0;
         this.searchResults = this.extractArray(data);

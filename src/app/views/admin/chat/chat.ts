@@ -288,7 +288,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     async loadSidebar(): Promise<void> {
         try {
             const response = await this.conversationsService.getSidebar();
-            const data = this.extractArray(response);
+            const data = this.extractArray(response?.data);
             data.forEach((item: any) => {
                 const sidebar = this.sidebarItems.find(s => s.path === item.type);
                 if (sidebar) {
@@ -303,14 +303,14 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     async loadConversations(): Promise<void> {
         try {
             const response = await this.conversationsService.getList(this.activeConversationType);
-            const body = response?.data ?? response;
+            const body = response?.data;
             if (body?.conversations) {
                 this.conversations = Array.isArray(body.conversations)
                     ? body.conversations
                     : (body.conversations?.$values ?? []);
                 this.totalConversationCount = body.totalCount ?? this.conversations.length;
             } else {
-                this.conversations = this.extractArray(response);
+                this.conversations = this.extractArray(body);
                 this.totalConversationCount = this.conversations.length;
             }
         } catch (err) {
@@ -360,7 +360,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     async loadMessages(conversationId: string): Promise<void> {
         try {
             const response = await this.conversationsService.getMessages(conversationId);
-            this.messages = this.extractArray(response);
+            this.messages = this.extractArray(response?.data);
             this.shouldScroll = true;
         } catch (err) {
             console.error('Mesajlar yüklenemedi:', err);
@@ -398,7 +398,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
                 message: lastCustomerMsg.text,
                 userId: userId || undefined,
             });
-            console.log('✅ AI Chat yanıtı:', response);
+            //console.log('✅ AI Chat yanıtı:', response);
 
             // Mesajları yeniden yükle (AI yanıtı SignalR ile de gelebilir)
             await this.loadMessages(conversationId);
@@ -515,8 +515,8 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
 
             // API'den dönen gerçek mesaj ID'sini güncelle
             const idx = this.messages.findIndex(m => m.id === tempId);
-            if (idx !== -1 && response?.id) {
-                this.messages[idx] = { ...this.messages[idx], id: response.id };
+            if (idx !== -1 && response?.data?.id) {
+                this.messages[idx] = { ...this.messages[idx], id: response.data.id };
             }
 
             // Sidebar'daki son mesajı güncelle
@@ -526,7 +526,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
                 conv.lastMessageDate = new Date().toISOString();
             }
 
-            console.log('✅ Mesaj gönderildi:', response);
+            //console.log('✅ Mesaj gönderildi:', response);
 
             // Otomatik AI modu: user olarak gönderildiyse AI yanıt tetikle
             if (this.autoAiMode && source === 'user' && !this.isAiSending) {
@@ -606,7 +606,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     private onNewConversation(evt: NewConversationEvent): void {
-        console.log('🆕 Yeni conversation alındı:', evt);
+        //console.log('🆕 Yeni conversation alındı:', evt);
 
         // Zaten listede var mı kontrol et
         const exists = this.conversations.some(c => c.id === evt.id);
@@ -779,8 +779,8 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
 
     async loadShortcuts(): Promise<void> {
         try {
-            const response = await this.shortcutsService.getPaged(1, 1000, '');
-            this.shortcuts = this.extractArray(response?.items || response).filter((s: Shortcut) => !s.isBlocked);
+            const response = await this.shortcutsService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            this.shortcuts = (response?.data?.items ?? []).filter((s: Shortcut) => !s.isBlocked);
         } catch (err) {
             console.error('Kısayollar yüklenemedi:', err);
             this.shortcuts = [];
@@ -790,15 +790,15 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     // ── Tag Methods ──
     async loadAllTags(): Promise<void> {
         try {
-            const res = await this.tagsService.getPaged(1, 1000, '');
-            this.allTags = this.extractArray(res?.items || res).filter((t: Tag) => !t.isBlocked);
+            const res = await this.tagsService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            this.allTags = (res?.data?.items ?? []).filter((t: Tag) => !t.isBlocked);
         } catch { this.allTags = []; }
     }
 
     async loadConversationTags(conversationId: string): Promise<void> {
         try {
             const res = await this.conversationTagsService.getByConversation(conversationId);
-            this.conversationTags = this.extractArray(res);
+            this.conversationTags = this.extractArray(res?.data);
         } catch { this.conversationTags = []; }
     }
 
@@ -836,7 +836,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     async loadConversationNotes(conversationId: string): Promise<void> {
         try {
             const res = await this.conversationNotesService.getByConversation(conversationId);
-            this.conversationNotes = this.extractArray(res);
+            this.conversationNotes = this.extractArray(res?.data);
         } catch { this.conversationNotes = []; }
     }
 
@@ -867,15 +867,15 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     // ── Segment Methods ──
     async loadAllSegments(): Promise<void> {
         try {
-            const res = await this.segmentsService.getPaged(1, 1000, '');
-            this.allSegments = this.extractArray(res?.items || res).filter((s: Segment) => !s.isBlocked);
+            const res = await this.segmentsService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            this.allSegments = (res?.data?.items ?? []).filter((s: Segment) => !s.isBlocked);
         } catch { this.allSegments = []; }
     }
 
     async loadConversationSegments(conversationId: string): Promise<void> {
         try {
             const res = await this.conversationSegmentsService.getByConversation(conversationId);
-            this.conversationSegments = this.extractArray(res);
+            this.conversationSegments = this.extractArray(res?.data);
         } catch { this.conversationSegments = []; }
     }
 
