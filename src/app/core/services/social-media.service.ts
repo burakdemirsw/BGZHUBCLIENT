@@ -43,8 +43,8 @@ export class SocialMediaService {
   }
     
   // === Properties ===
-  getProperties(): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'SocialMedia', action: 'properties' });
+  getPropertiesPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.http.get<PagedResult<any>>({ controller: 'SocialMedia', action: `properties${buildPaginationQuery(req)}` });
   }
   
   getPropertyById(id: string): Promise<ApiResponse<any>> {

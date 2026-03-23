@@ -18,6 +18,15 @@ export class RoleAssignmentsPage implements OnInit {
     roleUsers: RoleUser[] = [];
     loading = false;
 
+    // DataTable variables
+    filterText = '';
+    filteredItems: User[] = [];
+    pagedItems: User[] = [];
+    currentPage = 1;
+    pageSize = 10;
+    totalPages = 1;
+    totalPagesArray: number[] = [];
+
     // Atama modalı
     showAssignModal = false;
     selectedUser: User | null = null;
@@ -44,6 +53,8 @@ export class RoleAssignmentsPage implements OnInit {
 
             const ruResp = await this.rolesService.getRoleUsers();
             this.roleUsers = this.extractArray(ruResp);
+
+            this.applyFilterAndPaging();
         } catch (err) {
             console.error('LoadData error:', err);
         } finally {
@@ -51,10 +62,42 @@ export class RoleAssignmentsPage implements OnInit {
         }
     }
 
+    onFilterChange(): void {
+        this.currentPage = 1;
+        this.applyFilterAndPaging();
+    }
+
+    setPage(page: number): void {
+        if (page >= 1 && page <= this.totalPages) {
+            this.currentPage = page;
+            this.applyFilterAndPaging();
+        }
+    }
+
+    applyFilterAndPaging(): void {
+        const text = this.filterText.toLowerCase().trim();
+        this.filteredItems = this.users.filter(u =>
+            (u.name && u.name.toLowerCase().includes(text)) ||
+            (u.lastName && u.lastName.toLowerCase().includes(text)) ||
+            (u.email && u.email.toLowerCase().includes(text))
+        );
+
+        this.totalPages = Math.ceil(this.filteredItems.length / this.pageSize) || 1;
+        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+
+        if (this.currentPage > this.totalPages) {
+            this.currentPage = this.totalPages;
+        }
+
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        this.pagedItems = this.filteredItems.slice(startIndex, startIndex + this.pageSize);
+    }
+
     private extractArray(response: any): any[] {
         if (Array.isArray(response)) return response;
         if (response?.$values) return response.$values;
-        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
+        if (response?.data?.items) return response.data.items;
+        if (response?.data) return Array.isArray(response.data) ? response.data : (response.data.$values ? response.data.$values : [response.data]);
         if (response?.items) return response.items;
         if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
         return [];

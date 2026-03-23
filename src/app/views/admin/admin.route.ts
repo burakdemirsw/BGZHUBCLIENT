@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { AiRequestLogsPage } from './ai-request-logs/ai-request-logs';
+import { AiKnowledgePage } from './ai-knowledge/ai-knowledge';
 import { UsersPage } from './users/users';
 import { RolesPage } from './roles/roles';
 import { MenusPage } from './menus/menus';
@@ -62,6 +64,10 @@ import { AdminNotesPage } from './admin-notes/admin-notes';
 import { UserTypesPage } from './user-types/user-types';
 import { OrderCreatePage } from './order-create/order-create';
 import { OrdersPage } from './orders/orders';
+import { PlansPage } from './plans/plans';
+import { SubscriptionsPage } from './subscriptions/subscriptions';
+import { SubscriptionPaymentsPage } from './subscription-payments/subscription-payments';
+import { SubscriptionUsagesPage } from './subscription-usages/subscription-usages';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -452,6 +458,42 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/orders/:id',
         component: OrderCreatePage,
         data: { title: 'Sipariş Detay' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/ai-request-logs',
+        component: AiRequestLogsPage,
+        data: { title: 'AI İstek Logları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/ai-knowledge',
+        component: AiKnowledgePage,
+        data: { title: 'AI Bilgi Bankası' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/plans',
+        component: PlansPage,
+        data: { title: 'Planlar' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/subscriptions',
+        component: SubscriptionsPage,
+        data: { title: 'Abonelikler' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/subscription-payments',
+        component: SubscriptionPaymentsPage,
+        data: { title: 'Abonelik Ödemeleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/subscription-usages',
+        component: SubscriptionUsagesPage,
+        data: { title: 'Abonelik Kullanımları' },
         canActivate: [AuthGuard],
     },
 ];

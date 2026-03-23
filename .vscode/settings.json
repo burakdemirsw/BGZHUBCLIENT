@@ -1,3 +1,9 @@
 {
-    "compile-hero.disable-compile-files-on-did-save-code": false
+    "compile-hero.disable-compile-files-on-did-save-code": false,
+    "chat.tools.terminal.autoApprove": {
+        "/^powershell -Command \"Select-String -Path src/app/views/admin/integration-connections/integration-connections\\.ts -Pattern 'loadItems\\\\\\(' -Context 0,15\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
 }

@@ -100,10 +100,10 @@
     </div>
 </div>
 
-<!-- Prompt Modal -->
+<!-- Prompt Modal (Split: Editör | Önizleme) -->
 @if (showPromptModal) {
     <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog" style="max-width: 95%; width: 95%;">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ promptEditMode ? 'Prompt Düzenle' : 'Yeni Prompt' }}</h5>
@@ -111,29 +111,46 @@
                 </div>
                 <div class="modal-body">
                     <form>
-                        <div class="mb-3">
-                            <label class="form-label">Prompt Tipi</label>
-                            <select class="form-select" [(ngModel)]="promptForm.promtTypeId" name="promtTypeId">
-                                <option value="">Seçiniz...</option>
-                                @for (pt of promptTypes; track pt.id) {
-                                    <option [value]="pt.id">{{ pt.type }}</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Prompt Metni</label>
-                            <textarea class="form-control" [(ngModel)]="promptForm.promptText" name="promptText" rows="8" placeholder="Prompt metnini giriniz..."></textarea>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
+                        <!-- Üst ayarlar satırı -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Prompt Tipi</label>
+                                <select class="form-select" [(ngModel)]="promptForm.promtTypeId" name="promtTypeId">
+                                    <option value="">Seçiniz...</option>
+                                    @for (pt of promptTypes; track pt.id) {
+                                        <option [value]="pt.id">{{ pt.type }}</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label">Sıra (Order)</label>
                                 <input type="number" class="form-control" [(ngModel)]="promptForm.order" name="promptOrder" required min="0">
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4">
                                 <div class="form-check form-switch mt-4">
                                     <input class="form-check-input" type="checkbox" [(ngModel)]="promptForm.isFirst" name="promptIsFirst" id="promptIsFirstSwitch">
                                     <label class="form-check-label" for="promptIsFirstSwitch">İlk Prompt (isFirst)</label>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Split: Sol Editör | Sağ Önizleme -->
+                        <div class="row g-0">
+                            <!-- Editör -->
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center px-3 py-2 border" style="background-color: #f7f7f9; border-radius: 0.375rem 0 0 0;">
+                                    <i class="fa-solid fa-code me-2 text-muted"></i>
+                                    <span class="fw-semibold small text-muted">EDITÖR</span>
+                                </div>
+                                <textarea class="form-control prompt-editor" [(ngModel)]="promptForm.promptText" name="promptText" rows="22" placeholder="Prompt metnini Markdown formatında giriniz..." style="border-radius: 0 0 0 0.375rem; border-right: none;"></textarea>
+                            </div>
+                            <!-- Önizleme -->
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center px-3 py-2 border" style="background-color: #f7f7f9; border-radius: 0 0.375rem 0 0;">
+                                    <i class="fa-solid fa-eye me-2 text-muted"></i>
+                                    <span class="fw-semibold small text-muted">ÖNİZLEME</span>
+                                </div>
+                                <div class="markdown-preview p-3 border" style="border-radius: 0 0 0.375rem 0;" [innerHTML]="renderMarkdown(promptForm.promptText)"></div>
                             </div>
                         </div>
                     </form>

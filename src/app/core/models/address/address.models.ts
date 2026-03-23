@@ -57,3 +57,24 @@ export interface UpdateDistrictRequest {
   name: string;
   isBlocked: boolean;
 }
+
+export interface Neighbourhood {
+  id: string;
+  districtId: string;
+  name?: string;
+  isActive: boolean;
+  createdDate?: string;
+  updatedDate?: string;
+}
+
+export interface CreateNeighbourhoodRequest {
+  districtId: string;
+  name: string;
+  isActive?: boolean;
+}
+
+export interface UpdateNeighbourhoodRequest {
+  districtId: string;
+  name: string;
+  isActive: boolean;
+}

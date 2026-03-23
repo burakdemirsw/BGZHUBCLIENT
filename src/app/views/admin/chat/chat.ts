@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { trigger, transition, style, animate, query, stagger, state, group, animateChild } from '@angular/animations';
 import { CONVERSATION_TYPES, ConversationType, DEFAULT_CONVERSATION_TYPE, isValidConversationType } from '@/app/core/models/conversation/conversation-type.constants';
-import { ConversationHeader, ChatMessage, ConversationListResponse } from '@/app/core/models/conversation/conversation.models';
+import { ConversationHeader, ChatMessage, ConversationListResponse, ConversationMessagesResponse, ConversationCustomerDetail, ConversationOrderSummary, ConversationTagItem, ConversationNoteItem } from '@/app/core/models/conversation/conversation.models';
 import { ConversationsService } from '@/app/core/services/conversations.service';
 import { ShortcutsService } from '@/app/core/services/shortcuts.service';
 import { Shortcut } from '@/app/core/models/shortcut/shortcut.models';
@@ -141,6 +141,10 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     messages: ChatMessage[] = [];
     newMessage = '';
     replyType: 'reply' | 'note' = 'reply';
+
+    // Customer detail & orders (from ConversationMessagesResponse)
+    customerDetail: ConversationCustomerDetail | null = null;
+    conversationOrders: ConversationOrderSummary[] = [];
 
     // Right sidebar
     detailSections: SidebarSection[] = [];
@@ -305,9 +309,10 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
             const response = await this.conversationsService.getList(this.activeConversationType);
             const body = response?.data;
             if (body?.conversations) {
-                this.conversations = Array.isArray(body.conversations)
-                    ? body.conversations
-                    : (body.conversations?.$values ?? []);
+                const convRaw = body.conversations as any;
+                this.conversations = Array.isArray(convRaw)
+                    ? convRaw
+                    : (convRaw?.$values ?? []);
                 this.totalConversationCount = body.totalCount ?? this.conversations.length;
             } else {
                 this.conversations = this.extractArray(body);
@@ -326,8 +331,6 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
         this.typingUser = null;
         this.chatSignalR.joinConversation(conv.id);
         this.loadMessages(conv.id);
-        this.loadConversationTags(conv.id);
-        this.loadConversationNotes(conv.id);
         this.loadConversationSegments(conv.id);
 
         // URL'yi güncelle
@@ -348,8 +351,6 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
         try {
             await Promise.all([
                 this.loadMessages(id),
-                this.loadConversationTags(id),
-                this.loadConversationNotes(id),
                 this.loadConversationSegments(id),
             ]);
         } finally {
@@ -360,11 +361,43 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     async loadMessages(conversationId: string): Promise<void> {
         try {
             const response = await this.conversationsService.getMessages(conversationId);
-            this.messages = this.extractArray(response?.data);
+            const body = response?.data;
+
+            // Messages
+            if (body?.messages) {
+                this.messages = Array.isArray(body.messages)
+                    ? body.messages
+                    : (body.messages as any)?.$values ?? [];
+            } else {
+                this.messages = this.extractArray(body);
+            }
+
+            // Tags
+            this.conversationTags = body?.tags
+                ? (Array.isArray(body.tags) ? body.tags : (body.tags as any)?.$values ?? [])
+                : [];
+
+            // Notes
+            this.conversationNotes = body?.notes
+                ? (Array.isArray(body.notes) ? body.notes : (body.notes as any)?.$values ?? [])
+                : [];
+
+            // Orders
+            this.conversationOrders = body?.orders
+                ? (Array.isArray(body.orders) ? body.orders : (body.orders as any)?.$values ?? [])
+                : [];
+
+            // Customer detail
+            this.customerDetail = body?.customerDetail ?? null;
+
             this.shouldScroll = true;
         } catch (err) {
             console.error('Mesajlar yüklenemedi:', err);
             this.messages = [];
+            this.conversationTags = [];
+            this.conversationNotes = [];
+            this.conversationOrders = [];
+            this.customerDetail = null;
         }
     }
 
@@ -395,7 +428,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
             const response = await this.messagesService.testAiChat({
                 conversationId,
                 companyId,
-                message: lastCustomerMsg.text,
+                message: lastCustomerMsg.text || '',
                 userId: userId || undefined,
             });
             //console.log('✅ AI Chat yanıtı:', response);
@@ -495,8 +528,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
             source: source,
             text: text || (fileData ? `📎 ${fileData.name}` : ''),
             imageUrl: fileData?.preview || undefined,
-            fileType: fileData?.type || undefined,
-            isNote,
+            isRead: false,
             createdDate: new Date().toISOString(),
         };
         this.messages.push(optimisticMsg);
@@ -618,15 +650,13 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
             customerName: evt.customerName,
             customerInitials: evt.customerName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase(),
             customerAvatarColor: '#6c757d',
+            integrationPhotoUrl: evt.integrationPhotoUrl,
             lastMessage: undefined,
             lastMessageDate: evt.createdDate,
             unreadCount: 1,
             isBlocked: false,
             isArchived: false,
-            isPinned: false,
-            isLocked: false,
-            tags: [],
-            notes: []
+            isFavorite: false,
         };
 
         this.conversations.unshift(newConv);
@@ -687,6 +717,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     private extractArray(response: any): any[] {
         if (Array.isArray(response)) return response;
         if (response?.$values) return response.$values;
+        if (response?.messages) return Array.isArray(response.messages) ? response.messages : (response.messages.$values ?? []);
         if (response?.data?.items) return response.data.items;
         if (response?.data?.conversations) return response.data.conversations;
         if (response?.data?.messages) return response.data.messages;
@@ -927,29 +958,88 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
         this.closeContextMenu();
     }
 
-    toggleBlock(conv: ConversationHeader): void {
+    async toggleBlock(conv: ConversationHeader): Promise<void> {
         this.closeContextMenu();
-        conv.isBlocked = !conv.isBlocked;
+        const prev = conv.isBlocked;
+        conv.isBlocked = !prev;  // optimistic
+        try {
+            await (prev
+                ? this.conversationsService.unblock(conv.id)
+                : this.conversationsService.block(conv.id));
+        } catch (err) {
+            conv.isBlocked = prev;  // rollback
+            console.error('toggleBlock hatası:', err);
+        }
     }
 
-    toggleArchive(conv: ConversationHeader): void {
+    async toggleArchive(conv: ConversationHeader): Promise<void> {
         this.closeContextMenu();
-        conv.isArchived = !conv.isArchived;
+        const prev = conv.isArchived;
+        conv.isArchived = !prev;  // optimistic
+        try {
+            await (prev
+                ? this.conversationsService.unarchive(conv.id)
+                : this.conversationsService.archive(conv.id));
+
+            // Listeyi ve sidebar badge'lerini yeniden yükle
+            await Promise.all([this.loadConversations(), this.loadSidebar()]);
+
+            // Arşivlenen sohbet seçiliyse başka bir sohbet seç
+            if (this.selectedConversation?.id === conv.id) {
+                if (this.conversations.length > 0) {
+                    this.selectConversation(this.conversations[0], true);
+                } else {
+                    this.selectedConversation = null;
+                    this.activeConversationId = null;
+                    this.messages = [];
+                }
+            }
+        } catch (err) {
+            conv.isArchived = prev;  // rollback
+            console.error('toggleArchive hatası:', err);
+        }
     }
 
-    togglePin(conv: ConversationHeader): void {
+    async toggleFavorite(conv: ConversationHeader): Promise<void> {
         this.closeContextMenu();
-        conv.isPinned = !conv.isPinned;
-        this.conversations.sort((a, b) => {
-            if (a.isPinned && !b.isPinned) return -1;
-            if (!a.isPinned && b.isPinned) return 1;
-            return 0;
-        });
+        const prev = conv.isFavorite;
+        conv.isFavorite = !prev;  // optimistic
+        try {
+            await (prev
+                ? this.conversationsService.unfavorite(conv.id)
+                : this.conversationsService.favorite(conv.id));
+        } catch (err) {
+            conv.isFavorite = prev;  // rollback
+            console.error('toggleFavorite hatası:', err);
+        }
     }
 
-    toggleLock(conv: ConversationHeader): void {
+    async toggleLock(conv: ConversationHeader): Promise<void> {
         this.closeContextMenu();
-        conv.isLocked = !conv.isLocked;
+        const prev = conv.isLocked;
+        conv.isLocked = !prev;  // optimistic
+        try {
+            await (prev
+                ? this.conversationsService.unlock(conv.id)
+                : this.conversationsService.lock(conv.id));
+        } catch (err) {
+            conv.isLocked = prev;  // rollback
+            console.error('toggleLock hatası:', err);
+        }
+    }
+
+    async toggleEscalate(conv: ConversationHeader): Promise<void> {
+        this.closeContextMenu();
+        const prev = conv.isEscalateToHuman;
+        conv.isEscalateToHuman = !prev;  // optimistic
+        try {
+            await (prev
+                ? this.conversationsService.unescalate(conv.id)
+                : this.conversationsService.escalate(conv.id));
+        } catch (err) {
+            conv.isEscalateToHuman = prev;  // rollback
+            console.error('toggleEscalate hatası:', err);
+        }
     }
 
     getConversationCount(): number {

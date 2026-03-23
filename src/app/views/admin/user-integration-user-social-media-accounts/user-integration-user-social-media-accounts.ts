@@ -6,7 +6,7 @@ import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { SocialMediaService } from '@/app/core/services/social-media.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import {
-    UserIntegrationUserSocialMediaAccount,
+    UserIntegrationUserSocialMediaAccountResponse,
     CreateUserIntegrationUserSocialMediaAccountRequest,
     UpdateUserIntegrationUserSocialMediaAccountRequest,
 } from '@/app/core/models/integration/user-integration-user-social-media-account.models';
@@ -16,15 +16,14 @@ import {
     imports: [CommonModule, FormsModule],
     templateUrl: './user-integration-user-social-media-accounts.html',
 })
-export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
-    items: UserIntegrationUserSocialMediaAccount[] = [];
+export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {     
+    items: UserIntegrationUserSocialMediaAccountResponse[] = [];
     integrationUsers: any[] = [];
     socialMediaAccounts: any[] = [];
     loading = false;
     showModal = false;
     editMode = false;
-    selectedItem: UserIntegrationUserSocialMediaAccount | null = null;
-
+    selectedItem: UserIntegrationUserSocialMediaAccountResponse | null = null;
     // Server-side pagination
     searchTerm = '';
     currentPage = 1;
@@ -38,7 +37,7 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
 
     form: any = {
         integrationUserId: '',
-        socialMediaAccountId: '',
+        userSocialMediaAccountId: '',
     };
 
     constructor(
@@ -75,9 +74,9 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
             //console.log('intUsersRes:', intUsersRes);
             //console.log('smRes:', smRes);
             const intUsersPaged = intUsersRes?.data;
-            const smData = smRes?.data;
+            const smPaged = smRes?.data;
             this.integrationUsers = intUsersPaged?.items ?? [];
-            this.socialMediaAccounts = this.extractArray(smData);
+            this.socialMediaAccounts = smPaged?.items ?? this.extractArray(smPaged);
             //console.log('integrationUsers:', this.integrationUsers);
             //console.log('socialMediaAccounts:', this.socialMediaAccounts);
         } catch (err) {
@@ -121,7 +120,7 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
 
     getSocialMediaAccountName(id: string): string {
         const item = this.socialMediaAccounts.find(i => i.id === id);
-        return item?.accountName || item?.name || id || '-';
+        return item?.socialMediaAccountName || item?.accountName || item?.name || id || '-';
     }
 
     openCreate(): void {
@@ -129,17 +128,17 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
         this.selectedItem = null;
         this.form = {
             integrationUserId: '',
-            socialMediaAccountId: '',
+            userSocialMediaAccountId: '',
         };
         this.showModal = true;
     }
 
-    openEdit(item: UserIntegrationUserSocialMediaAccount): void {
+    openEdit(item: UserIntegrationUserSocialMediaAccountResponse): void {
         this.editMode = true;
         this.selectedItem = item;
         this.form = {
             integrationUserId: item.integrationUserId,
-            socialMediaAccountId: item.socialMediaAccountId,
+            userSocialMediaAccountId: item.userSocialMediaAccountId,
         };
         this.showModal = true;
     }
@@ -150,7 +149,7 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
                 const req: UpdateUserIntegrationUserSocialMediaAccountRequest = {
                     companyId: this.companyId,
                     integrationUserId: this.form.integrationUserId,
-                    socialMediaAccountId: this.form.socialMediaAccountId,
+                    userSocialMediaAccountId: this.form.userSocialMediaAccountId,
                     userId: this.userId,
                 };
                 //console.log('Update request:', req);
@@ -160,7 +159,7 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
                 const req: CreateUserIntegrationUserSocialMediaAccountRequest = {
                     companyId: this.companyId,
                     integrationUserId: this.form.integrationUserId,
-                    socialMediaAccountId: this.form.socialMediaAccountId,
+                    userSocialMediaAccountId: this.form.userSocialMediaAccountId,
                     userId: this.userId,
                 };
                 //console.log('Create request:', req);
@@ -179,8 +178,8 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
         }
     }
 
-    async deleteItem(item: UserIntegrationUserSocialMediaAccount): Promise<void> {
-        const name = this.getIntegrationUserName(item.integrationUserId) + ' - ' + this.getSocialMediaAccountName(item.socialMediaAccountId);
+    async deleteItem(item: UserIntegrationUserSocialMediaAccountResponse): Promise<void> {
+        const name = (item.integrationDescription || this.getIntegrationUserName(item.integrationUserId)) + ' - ' + (item.socialMediaAccountName || this.getSocialMediaAccountName(item.userSocialMediaAccountId));
         if (confirm(`"${name}" kaydını silmek istediğinize emin misiniz?`)) {
             try {
                 await this.service.delete(item.id);

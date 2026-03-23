@@ -23,8 +23,16 @@ export class SocialMediaPropertiesPage implements OnInit {
     showModal = false;
     editMode = false;
     selectedProperty: SocialMediaAccountProperty | null = null;
-    filterAccountId: string = '';
     filterUserAccountId: string = '';
+
+    // Server-side pagination
+    searchTerm = '';
+    currentPage = 1;
+    pageSize = 10;
+    totalPages = 1;
+    totalCount = 0;
+    totalPagesArray: number[] = [];
+    private allFilteredProperties: SocialMediaAccountProperty[] = [];
 
     form: any = {
         userSocialMediaAccountId: '',
@@ -65,19 +73,43 @@ export class SocialMediaPropertiesPage implements OnInit {
     async loadProperties(): Promise<void> {
         this.loading = true;
         try {
-            let response;
             if (this.filterUserAccountId) {
-                response = await this.socialMediaService.getPropertiesByAccount(this.filterUserAccountId);
+                const response = await this.socialMediaService.getPropertiesByAccount(this.filterUserAccountId);
+                this.allFilteredProperties = this.extractArray(response?.data);
+                this.applyClientPaging();
             } else {
-                response = await this.socialMediaService.getProperties();
+                const response = await this.socialMediaService.getPropertiesPaged({
+                    pageNumber: this.currentPage,
+                    pageSize: this.pageSize,
+                    searchTerm: this.searchTerm,
+                });
+                const paged = response?.data;
+                this.properties = paged?.items ?? [];
+                this.totalCount = paged?.totalCount ?? this.properties.length;
+                this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+                this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
             }
-            //console.log('Properties response:', response);
-            this.properties = this.extractArray(response?.data);
         } catch (err) {
             console.error('Properties error:', err);
         } finally {
             this.loading = false;
         }
+    }
+
+    private applyClientPaging(): void {
+        const q = (this.searchTerm || '').toLowerCase();
+        let filtered = this.allFilteredProperties;
+        if (q) {
+            filtered = filtered.filter(p =>
+                (p.key || '').toLowerCase().includes(q) ||
+                (p.value || '').toLowerCase().includes(q)
+            );
+        }
+        this.totalCount = filtered.length;
+        this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        const start = (this.currentPage - 1) * this.pageSize;
+        this.properties = filtered.slice(start, start + this.pageSize);
     }
 
     private extractArray(response: any): any[] {
@@ -90,7 +122,27 @@ export class SocialMediaPropertiesPage implements OnInit {
     }
 
     onFilterChange(): void {
+        this.currentPage = 1;
         this.loadProperties();
+    }
+
+    onSearchChange(): void {
+        this.currentPage = 1;
+        if (this.filterUserAccountId) {
+            this.applyClientPaging();
+        } else {
+            this.loadProperties();
+        }
+    }
+
+    setPage(page: number): void {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        if (this.filterUserAccountId) {
+            this.applyClientPaging();
+        } else {
+            this.loadProperties();
+        }
     }
 
     getAccountName(accountId: string): string {

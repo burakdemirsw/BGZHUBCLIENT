@@ -19,7 +19,8 @@
                             <option [value]="account.id">{{ account.name }}</option>
                         }
                     </select>
-                    <button class="btn btn-outline-secondary btn-sm" (click)="clearFilters()" [disabled]="!filterUserId && !filterAccountId">
+                    <input type="text" class="form-control form-control-sm" style="width: 200px;" placeholder="Ara..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()">
+                    <button class="btn btn-outline-secondary btn-sm" (click)="clearFilters()" [disabled]="!filterUserId && !filterAccountId && !searchTerm">
                         Temizle
                     </button>
                     <button class="btn btn-primary btn-sm" (click)="openCreate()">
@@ -64,6 +65,24 @@
                                 }
                             </tbody>
                         </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="small text-muted">Toplam: {{ totalCount }} kayıt</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track $index) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                 }
             </div>

@@ -4,12 +4,14 @@
 // ========================
 
 export interface ConversationTypeSidebarItem {
-    type: string;           // messages | archived-messages | locked-messages
+    type: string;           // messages | archived-messages | locked-messages | escalated-messages
     label: string;          // Gelen Mesajlar, Arşivlenenler, Kilitlenenler
     count: number;          // Badge sayısı
 }
 
-export type ConversationTypeSidebarResponse = ConversationTypeSidebarItem[];
+export interface ConversationSidebarResponse {
+    items: ConversationTypeSidebarItem[];
+}
 
 // ========================
 // Conversation Tag & Note Items
@@ -23,7 +25,7 @@ export interface ConversationTagItem {
 
 export interface ConversationNoteItem {
     id: string;
-    content: string;
+    noteText: string;
     createdDate?: string;
 }
 
@@ -38,15 +40,16 @@ export interface ConversationHeader {
     customerInitials: string;
     customerAvatarColor: string;
     socialMediaPhotoUrl?: string;
+    integrationPhotoUrl?: string;
     lastMessage?: string;
     lastMessageDate?: string;
+    lastMessageId?: string;
     unreadCount: number;
     isBlocked: boolean;
-    isArchived?: boolean;
+    isArchived: boolean;
+    isFavorite: boolean;
     isLocked?: boolean;
-    isPinned?: boolean;
-    tags: ConversationTagItem[];
-    notes: ConversationNoteItem[];
+    isEscalateToHuman?: boolean;
 }
 
 // ========================
@@ -62,20 +65,79 @@ export interface ConversationListResponse {
 // Chat Message (Mesaj)
 // ========================
 
-export type MessageSource = 'customer' | 'agent' | 'system' | 'ai' | 'user' | 'assistant';
+export type MessageSource = 'user' | 'assistant' | 'ai';
 
 export interface ChatMessage {
     id: string;
     conversationId: string;
-    source: MessageSource;
-    text: string;
+    source?: MessageSource;
+    text?: string;
     imageUrl?: string;
-    file?: string | null;
-    fileType?: string | null;
-    isNote?: boolean;
-    isRead?: boolean;
+    isRead: boolean;
     createdDate?: string;
 }
 
-export type ChatMessagesResponse = ChatMessage[];
+// ========================
+// Conversation Messages Response
+// Tek bir sohbetin mesajları + detayları
+// ========================
+
+export interface ConversationMessagesResponse {
+    conversationId: string;
+    customerDetail?: ConversationCustomerDetail;
+    messages: ChatMessage[];
+    tags: ConversationTagItem[];
+    notes: ConversationNoteItem[];
+    orders: ConversationOrderSummary[];
+    totalCount: number;
+}
+
+// ========================
+// Customer Detail
+// ========================
+
+export interface ConversationCustomerDetail {
+    customerId: string;
+    firstName?: string;
+    lastName?: string;
+    platformUsername: string;
+    platformName: string;
+    status: string;
+    isBlocked: boolean;
+    contacts: ConversationCustomerContact[];
+    addresses: ConversationCustomerAddress[];
+}
+
+export interface ConversationCustomerContact {
+    id: string;
+    contactTypeName: string;
+    value: string;
+    isDefault: boolean;
+}
+
+export interface ConversationCustomerAddress {
+    id: string;
+    cityName?: string;
+    districtName?: string;
+    addressLine: string;
+    isDefault: boolean;
+}
+
+// ========================
+// Order Summary
+// ========================
+
+export interface ConversationOrderSummary {
+    orderId: string;
+    integrationOrderNo?: string;
+    orderStatusName?: string;
+    paymentTypeName?: string;
+    orderDate: string;
+    currencyCode: string;
+    totalAmount: number;
+    itemCount: number;
+    isCompleted: boolean;
+    isCancel: boolean;
+    createdDate: string;
+}
 

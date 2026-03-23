@@ -1,8 +1,11 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0">Kullanıcı - Rol Atamaları</h4>
+                <div class="w-25">
+                    <input type="text" class="form-control" placeholder="Kullanıcı ara..." [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+                </div>
             </div>
             <div class="card-body">
                 @if (loading) {
@@ -22,7 +25,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (user of users; track $index) {
+                                @for (user of pagedItems; track $index) {
                                     <tr>
                                         <td>{{ user.name }} {{ user.lastName }}</td>
                                         <td>{{ user.email }}</td>
@@ -44,6 +47,25 @@
                                 }
                             </tbody>
                         </table>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="text-muted">Toplam {{ filteredItems.length }} kullanıcı listeleniyor. (Sayfa {{ currentPage }} / {{ totalPages }})</span>
+                        <nav>
+                            <ul class="pagination pagination-rounded mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">Önceki</button>
+                                </li>
+                                @for (p of totalPagesArray; track $index) {
+                                    <li class="page-item" [class.active]="p === currentPage">
+                                        <button class="page-link" (click)="setPage(p)">{{ p }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">Sonraki</button>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                 }
             </div>

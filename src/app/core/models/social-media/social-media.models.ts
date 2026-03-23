@@ -44,7 +44,11 @@ export interface UserSocialMediaAccount {
   id: string;
   userId: string;
   socialMediaAccountId: string;
+  socialMediaAccountName?: string;
+  socialMediaAccountPhotoUrl?: string;
   isBlocked?: boolean;
+  createdDate?: string;
+  updatedDate?: string;
 }
 
 export interface CreateUserSocialMediaAccountRequest {

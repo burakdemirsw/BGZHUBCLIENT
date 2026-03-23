@@ -1128,6 +1128,12 @@ $radius-lg: 18px;
     overflow: hidden;
 }
 
+.details-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 .details-header {
     border-bottom: 1px solid $border-color;
 }

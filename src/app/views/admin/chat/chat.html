@@ -106,21 +106,26 @@
         <div class="conversation-items">
             @for (conv of conversations; track conv.id) {
                 <div class="conversation-item" [class.active]="selectedConversation?.id === conv.id"
-                    [class.pinned]="conv.isPinned" [class.archived]="conv.isArchived"
+                    [class.archived]="conv.isArchived"
                     (click)="selectConversation(conv)" (contextmenu)="openContextMenu($event, conv)">
-                    @if (conv.socialMediaPhotoUrl) {
-                        <img class="conversation-avatar-img" [src]="conv.socialMediaPhotoUrl" [alt]="conv.customerName">
-                    } @else {
-                        <div class="conversation-avatar" [style.background-color]="conv.customerAvatarColor">
-                            <span>{{ conv.customerInitials }}</span>
-                        </div>
-                    }
+                    <div style="position: relative; display: inline-block;">
+                        @if (conv.socialMediaPhotoUrl) {
+                            <img class="conversation-avatar-img" [src]="conv.socialMediaPhotoUrl" [alt]="conv.customerName">
+                        } @else {
+                            <div class="conversation-avatar" [style.background-color]="conv.customerAvatarColor">
+                                <span>{{ conv.customerInitials }}</span>
+                            </div>
+                        }
+                        @if (conv.integrationPhotoUrl) {
+                            <img [src]="conv.integrationPhotoUrl" alt="Integration" style="position: absolute; bottom: -3px; right: -3px; width: 20px; height: 20px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                        }
+                    </div>
                     <div class="conversation-content">
                         <div class="conversation-header-row">
                             <span class="conversation-name" [class.fw-bold]="conv.unreadCount > 0">
                                 {{ conv.customerName }}
-                                @if (conv.isPinned) {
-                                    <i class="fa-solid fa-thumbtack text-warning ms-1 small" title="Sabitlendi"></i>
+                                @if (conv.isFavorite) {
+                                    <i class="fa-solid fa-star text-warning ms-1 small" title="Favori"></i>
                                 }
                                 @if (conv.isBlocked) {
                                     <i class="fa-solid fa-ban text-danger ms-1 small" title="Engelli"></i>
@@ -128,8 +133,8 @@
                                 @if (conv.isArchived) {
                                     <i class="fa-solid fa-box-archive text-secondary ms-1 small" title="Arşivlendi"></i>
                                 }
-                                @if (conv.isLocked) {
-                                    <i class="fa-solid fa-lock text-info ms-1 small" title="Kilitli"></i>
+                                @if (conv.isEscalateToHuman) {
+                                    <i class="fa-solid fa-headset text-success ms-1 small" title="İnsan temsilciye aktarıldı"></i>
                                 }
                             </span>
                             <div class="conversation-header-right">
@@ -140,13 +145,14 @@
                             </div>
                         </div>
                         <p class="conversation-preview" [class.fw-semibold]="conv.unreadCount > 0">{{ conv.lastMessage }}</p>
-                        @if (conv.tags && conv.tags.length > 0) {
-                            <div class="conversation-tags">
-                                @for (tag of conv.tags; track tag.id) {
-                                    <span class="badge rounded-pill me-1" [style.background-color]="tag.colorCode || '#6c757d'" style="font-size: 0.65rem;">{{ tag.name }}</span>
-                                }
+                        @if (conv.isEscalateToHuman) {
+                            <div class="mt-1">
+                                <span class="badge bg-success-subtle text-success" style="font-size: 0.65rem;">
+                                    <i class="fa-solid fa-headset me-1"></i>Temsilciye Aktarıldı
+                                </span>
                             </div>
                         }
+
                     </div>
                 </div>
             } @empty {
@@ -158,9 +164,9 @@
         @if (contextMenuConv) {
             <div class="conv-context-menu" [style.left.px]="contextMenuX" [style.top.px]="contextMenuY"
                  (click)="$event.stopPropagation()">
-                <button class="ctx-menu-item" (click)="togglePin(contextMenuConv!)">
-                    <i class="fa-solid" [class.fa-thumbtack]="!contextMenuConv!.isPinned" [class.fa-thumbtack-slash]="contextMenuConv!.isPinned"></i>
-                    {{ contextMenuConv!.isPinned ? 'Sabitlemeyi Kaldır' : 'Sabitle (Üste Taşı)' }}
+                <button class="ctx-menu-item" (click)="toggleFavorite(contextMenuConv!)">
+                    <i class="fa-solid" [class.fa-star]="!contextMenuConv!.isFavorite" [class.fa-star-half-stroke]="contextMenuConv!.isFavorite"></i>
+                    {{ contextMenuConv!.isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle' }}
                 </button>
                 <button class="ctx-menu-item" (click)="toggleBlock(contextMenuConv!)">
                     <i class="fa-solid" [class.fa-ban]="!contextMenuConv!.isBlocked" [class.fa-check-circle]="contextMenuConv!.isBlocked"></i>
@@ -169,10 +175,6 @@
                 <button class="ctx-menu-item" (click)="toggleArchive(contextMenuConv!)">
                     <i class="fa-solid" [class.fa-box-archive]="!contextMenuConv!.isArchived" [class.fa-box-open]="contextMenuConv!.isArchived"></i>
                     {{ contextMenuConv!.isArchived ? 'Arşivden Çıkar' : 'Arşivle' }}
-                </button>
-                <button class="ctx-menu-item" (click)="toggleLock(contextMenuConv!)">
-                    <i class="fa-solid" [class.fa-lock]="!contextMenuConv!.isLocked" [class.fa-lock-open]="contextMenuConv!.isLocked"></i>
-                    {{ contextMenuConv!.isLocked ? 'Kilidi Aç' : 'Kilitle' }}
                 </button>
             </div>
         }
@@ -192,6 +194,9 @@
                             {{ selectedConversation.customerName }}
                             @if (selectedConversation.isBlocked) {
                                 <span class="badge bg-danger-subtle text-danger ms-2" style="font-size: 0.7rem;">Engelli</span>
+                            }
+                            @if (selectedConversation.isEscalateToHuman) {
+                                <span class="badge bg-success-subtle text-success ms-2" style="font-size: 0.7rem;"><i class="fa-solid fa-headset me-1"></i>Temsilciye Aktarıldı</span>
                             }
                         </h6>
                         <span class="chat-hub-status">
@@ -216,10 +221,10 @@
                     <button class="header-action-btn" title="More">
                         <i class="fa-solid fa-ellipsis"></i>
                     </button>
-                    <button class="header-action-btn btn-close-conv" title="Close">
+                    <!-- <button class="header-action-btn btn-close-conv" title="Close">
                         <i class="fa-solid fa-circle-check"></i>
                         <span class="ms-1">Close</span>
-                    </button>
+                    </button> -->
                 </div>
             </div>
 
@@ -227,99 +232,65 @@
             <div class="chat-body" #chatBody>
 
                 @for (msg of messages; track msg.id) {
-                    <!-- System note -->
-                    @if (msg.isNote) {
-                        <div class="system-note" @messageAnim>
-                            <span class="system-note-text">{{ msg.text }}</span>
-                            <span class="system-note-time">{{ msg.createdDate }}</span>
+                    <!-- Customer message -->
+                    @if (msg.source === 'user') {
+                        <div class="message-row customer" @messageAnim>
+                            <div class="message-avatar" [style.background-color]="selectedConversation.customerAvatarColor">
+                                {{ selectedConversation.customerInitials }}
+                            </div>
+                            <div class="message-group">
+                                <div class="message-bubble customer-bubble">
+                                    <p class="mb-0">{{ msg.text }}</p>
+                                </div>
+                                @if (msg.imageUrl) {
+                                    <div class="message-image">
+                                        <img [src]="msg.imageUrl" alt="Attached image" loading="lazy">
+                                    </div>
+                                }
+                                <span class="message-time">{{ msg.createdDate }}</span>
+                            </div>
                         </div>
-                    } @else {
-                        <!-- Customer message -->
-                        @if (msg.source === 'customer') {
-                            <div class="message-row customer" @messageAnim>
-                                <div class="message-avatar" [style.background-color]="selectedConversation.customerAvatarColor">
-                                    {{ selectedConversation.customerInitials }}
-                                </div>
-                                <div class="message-group">
-                                    <div class="message-bubble customer-bubble">
-                                        <p class="mb-0">{{ msg.text }}</p>
-                                    </div>
-                                    @if (msg.imageUrl) {
-                                        <div class="message-image">
-                                            <img [src]="msg.imageUrl" alt="Attached image" loading="lazy">
-                                        </div>
-                                    }
-                                    <span class="message-time">{{ msg.createdDate }}</span>
-                                </div>
-                            </div>
-                        }
+                    }
 
-                        <!-- User message (sol taraf) -->
-                        @if (msg.source === 'user') {
-                            <div class="message-row customer" @messageAnim>
-                                <div class="message-avatar" [style.background-color]="selectedConversation.customerAvatarColor">
-                                    {{ selectedConversation.customerInitials }}
-                                </div>
-                                <div class="message-group">
-                                    <div class="message-bubble customer-bubble">
-                                        <p class="mb-0">{{ msg.text }}</p>
-                                    </div>
-                                    @if (msg.imageUrl) {
-                                        <div class="message-image">
-                                            <img [src]="msg.imageUrl" alt="Attached image" loading="lazy">
-                                        </div>
-                                    }
-                                    <span class="message-time">{{ msg.createdDate }}</span>
-                                </div>
+                    <!-- AI message -->
+                    @if (msg.source === 'ai') {
+                        <div class="message-row system-msg" @messageAnim>
+                            <div class="message-avatar ai-avatar">
+                                <i class="fa-solid fa-robot"></i>
                             </div>
-                        }
+                            <div class="message-group">
+                                <div class="message-sender-name">
+                                    <i class="fa-solid fa-wand-magic-sparkles me-1"></i>
+                                    AI Assistant
+                                </div>
+                                <div class="message-bubble system-bubble">
+                                    <p class="mb-0">{{ msg.text }}</p>
+                                </div>
+                                <span class="message-time">{{ msg.createdDate }}</span>
+                            </div>
+                        </div>
+                    }
 
-                        <!-- AI / System message -->
-                        @if (msg.source === 'system' || msg.source === 'ai') {
-                            <div class="message-row system-msg" @messageAnim>
-                                <div class="message-avatar ai-avatar">
-                                    <i class="fa-solid fa-robot"></i>
-                                </div>
-                                <div class="message-group">
-                                    <div class="message-sender-name">
-                                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i>
-                                        AI Assistant
-                                    </div>
-                                    <div class="message-bubble system-bubble">
-                                        <p class="mb-0">{{ msg.text }}</p>
-                                    </div>
-                                    <span class="message-time">Seen · {{ msg.createdDate }}</span>
-                                </div>
-                            </div>
-                        }
-
-                        <!-- Agent / Assistant message (sağ taraf) -->
-                        @if ( msg.source === 'assistant') {
-                            <div class="message-row agent" @messageAnim>
-                                <div class="message-group agent-group">
-                                    <div class="message-bubble agent-bubble">
-                                        @if (msg.text) {
-                                            <p class="mb-0" style="white-space: pre-line;">{{ msg.text }}</p>
-                                        }
-                                    </div>
-                                    @if (msg.imageUrl) {
-                                        <div class="message-image agent-image">
-                                            <img [src]="msg.imageUrl" alt="Attached image" loading="lazy">
-                                        </div>
+                    <!-- Assistant message (sağ taraf) -->
+                    @if (msg.source === 'assistant') {
+                        <div class="message-row agent" @messageAnim>
+                            <div class="message-group agent-group">
+                                <div class="message-bubble agent-bubble">
+                                    @if (msg.text) {
+                                        <p class="mb-0" style="white-space: pre-line;">{{ msg.text }}</p>
                                     }
-                                    @if (msg.file && msg.fileType && !msg.fileType.startsWith('image/')) {
-                                        <div class="message-file-attachment">
-                                            <i [class]="getFileIcon(msg.fileType)" class="me-2"></i>
-                                            <span>Dosya eki</span>
-                                        </div>
-                                    }
-                                    <span class="message-time">Seen · {{ msg.createdDate }}</span>
                                 </div>
-                                <div class="message-avatar agent-avatar">
-                                    <i class="fa-solid fa-headset"></i>
-                                </div>
+                                @if (msg.imageUrl) {
+                                    <div class="message-image agent-image">
+                                        <img [src]="msg.imageUrl" alt="Attached image" loading="lazy">
+                                    </div>
+                                }
+                                <span class="message-time">Seen · {{ msg.createdDate }}</span>
                             </div>
-                        }
+                            <div class="message-avatar agent-avatar">
+                                <i class="fa-solid fa-headset"></i>
+                            </div>
+                        </div>
                     }
                 }
 
@@ -447,8 +418,8 @@
                                 <i class="fa-solid fa-robot me-1"></i>AI Yanıt
                             }
                         </button>
-                        <button class="btn btn-sm btn-outline-secondary me-2" (click)="sendMessage('user')" [disabled]="!newMessage.trim() && !pendingFile" title="User olarak gönder">
-                            <i class="fa-solid fa-user me-1"></i>User Gönder
+                        <button class="btn btn-sm btn-outline-secondary me-2" (click)="sendMessage('user')" [disabled]="!newMessage.trim() && !pendingFile" title="Customer olarak gönder">
+                            <i class="fa-solid fa-user me-1"></i>Customer Gönder
                         </button>
                         <button class="btn-send" (click)="sendMessage('assistant')" [disabled]="!newMessage.trim() && !pendingFile">
                             Gönder
@@ -481,12 +452,81 @@
                 </button>
             </div>
 
+            <div class="details-body">
             <!-- Customer Info -->
             <div class="details-customer-info">
                 <div class="details-customer-bubble">
                     <p class="mb-1"><strong>{{ selectedConversation.customerName }}</strong></p>
+                    @if (customerDetail) {
+                        <p class="mb-0 text-muted small">{{ customerDetail.platformUsername }} · {{ customerDetail.platformName }}</p>
+                        @if (customerDetail.isBlocked) {
+                            <span class="badge bg-danger-subtle text-danger mt-1" style="font-size: 0.65rem;">Engelli</span>
+                        }
+                    }
                 </div>
             </div>
+
+            <!-- ═══ MÜŞTERİ DETAYLARI SECTION ═══ -->
+            @if (customerDetail) {
+                <div class="details-panel-section">
+                    <div class="panel-section-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-user text-muted" style="font-size: 13px;"></i>
+                            <span class="panel-section-title">Müşteri Bilgileri</span>
+                        </div>
+                    </div>
+                    <div class="panel-section-body">
+                        @if (customerDetail.firstName || customerDetail.lastName) {
+                            <div class="detail-row">
+                                <span class="detail-label">Ad Soyad</span>
+                                <span class="detail-value">{{ customerDetail.firstName }} {{ customerDetail.lastName }}</span>
+                            </div>
+                        }
+                        <div class="detail-row">
+                            <span class="detail-label">Platform</span>
+                            <span class="detail-value">{{ customerDetail.platformName }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Kullanıcı Adı</span>
+                            <span class="detail-value">{{ customerDetail.platformUsername }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Durum</span>
+                            <span class="detail-value">{{ customerDetail.status }}</span>
+                        </div>
+                        @if (customerDetail.contacts.length > 0) {
+                            <div class="mt-2">
+                                <span class="detail-label d-block mb-1">İletişim</span>
+                                @for (contact of customerDetail.contacts; track contact.id) {
+                                    <div class="d-flex align-items-center gap-1 mb-1">
+                                        <span class="badge bg-light text-muted" style="font-size: 10px;">{{ contact.contactTypeName }}</span>
+                                        <span class="small">{{ contact.value }}</span>
+                                        @if (contact.isDefault) {
+                                            <i class="fa-solid fa-circle-check text-success" style="font-size: 10px;" title="Varsayılan"></i>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                        @if (customerDetail.addresses.length > 0) {
+                            <div class="mt-2">
+                                <span class="detail-label d-block mb-1">Adres</span>
+                                @for (addr of customerDetail.addresses; track addr.id) {
+                                    <div class="mb-1 small">
+                                        @if (addr.cityName || addr.districtName) {
+                                            <span class="text-muted">{{ addr.cityName }}{{ addr.districtName ? ' / ' + addr.districtName : '' }} — </span>
+                                        }
+                                        {{ addr.addressLine }}
+                                        @if (addr.isDefault) {
+                                            <i class="fa-solid fa-circle-check text-success ms-1" style="font-size: 10px;" title="Varsayılan"></i>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
 
             <!-- ═══ TAGS SECTION ═══ -->
             <div class="details-panel-section">
@@ -652,6 +692,53 @@
                 </div>
             </div>
 
+            <!-- ═══ SİPARİŞLER SECTION ═══ -->
+            @if (conversationOrders.length > 0) {
+                <div class="details-panel-section">
+                    <div class="panel-section-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-bag-shopping text-muted" style="font-size: 13px;"></i>
+                            <span class="panel-section-title">Siparişler</span>
+                            <span class="badge bg-light text-muted" style="font-size: 10px;">{{ conversationOrders.length }}</span>
+                        </div>
+                    </div>
+                    <div class="panel-section-body">
+                        @for (order of conversationOrders; track order.orderId) {
+                            <div class="mb-2 p-2 rounded" style="background:#f7f7f9; border: 1px solid #e9ecef;">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-semibold small">#{{ order.integrationOrderNo || order.orderId }}</span>
+                                    @if (order.isCancel) {
+                                        <span class="badge bg-danger-subtle text-danger" style="font-size: 10px;">İptal</span>
+                                    } @else if (order.isCompleted) {
+                                        <span class="badge bg-success-subtle text-success" style="font-size: 10px;">Tamamlandı</span>
+                                    } @else {
+                                        <span class="badge bg-warning-subtle text-warning" style="font-size: 10px;">{{ order.orderStatusName || 'Bekliyor' }}</span>
+                                    }
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Tutar</span>
+                                    <span class="detail-value fw-semibold">{{ order.totalAmount | number:'1.2-2' }} {{ order.currencyCode }}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Ürün Sayısı</span>
+                                    <span class="detail-value">{{ order.itemCount }}</span>
+                                </div>
+                                @if (order.paymentTypeName) {
+                                    <div class="detail-row">
+                                        <span class="detail-label">Ödeme</span>
+                                        <span class="detail-value">{{ order.paymentTypeName }}</span>
+                                    </div>
+                                }
+                                <div class="detail-row">
+                                    <span class="detail-label">Tarih</span>
+                                    <span class="detail-value">{{ order.orderDate | date:'dd.MM.yyyy' }}</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
             <!-- Accordion Sections -->
             <div class="details-sections">
                 @for (section of detailSections; track section.title) {
@@ -673,6 +760,7 @@
                         }
                     </div>
                 }
+            </div>
             </div>
 
             <!-- Ask a question -->

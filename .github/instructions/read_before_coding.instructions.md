@@ -51,11 +51,39 @@ applyTo: '**'
 - Delete: `post({ controller, action: 'delete/{id}' }, {})`
 - Tüm methodlar `Promise<any>` döner
 
+## ⚠️ ZORUNLU: Tip Güvenliği (any Kullanma!)
+
+- API isteklerinde ve response'larda **`any` yerine mutlaka typed interface/class** kullan
+- API'nin ne döndüğünü öğrenmek için **`src/assets/api/v1.yaml`** dosyasına bak
+- `v1.yaml` içinde ilgili endpoint'in request body ve response schema'sını bul, ona göre model oluştur
+- Eğer `v1.yaml`'de ilgili schema **bulunamazsa**, o zaman `any` kullanılabilir — ama bu son çare olmalı
+- Servis methodları: `Promise<any>` yerine `Promise<XxxResponse>` veya `Promise<XxxResponse[]>` kullan
+- Component'lerde değişken tipleri: `items: any[] = []` yerine `items: XxxResponse[] = []` kullan
+- `extractArray` helper'ın dönüş tipi de mümkünse typed olmalı: `private extractArray(response: any): XxxResponse[]`
+
+**Örnek — Doğru kullanım:**
+```typescript
+// Servis
+async getIntegrations(): Promise<IntegrationResponse[]> { ... }
+
+// Component
+items: IntegrationResponse[] = [];
+filteredItems: IntegrationResponse[] = [];
+pagedItems: IntegrationResponse[] = [];
+```
+
+**Örnek — YANLIŞ kullanım (YAPMA):**
+```typescript
+async getIntegrations(): Promise<any> { ... }
+items: any[] = [];
+```
+
 ## Model Kuralları
 
 - Konum: `src/app/core/models/{domain}/{domain}.models.ts`
 - Her model dosyası export eder: entity interface + `CreateXxxRequest` + `UpdateXxxRequest`
 - `id: string`, `isBlocked?: boolean`, `createdDate?: string`, `updatedDate?: string` standart alanlar
+- **Model oluştururken `v1.yaml`'deki schema tanımlarını referans al** — property adları ve tipleri birebir eşleşmeli
 
 ## API Response İşleme
 

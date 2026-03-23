@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import {
+    IntegrationConnectionResponse,
     CreateIntegrationConnectionRequest,
     UpdateIntegrationConnectionRequest,
 } from '../models/integration/integration-connection.models';
@@ -13,35 +14,32 @@ import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/
 export class IntegrationConnectionsService {
     constructor(private http: HttpClientService) {}
 
-    getAll(): Promise<ApiResponse<any[]>> {
-        return this.http.get<any[]>({ controller: 'IntegrationConnections' });
+
+    getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<IntegrationConnectionResponse>>> {
+        return this.http.get<PagedResult<IntegrationConnectionResponse>>({ controller: 'IntegrationConnections', action: `paged${buildPaginationQuery(req)}` });
     }
 
-    getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-        return this.http.get<PagedResult<any>>({ controller: 'IntegrationConnections', action: `paged${buildPaginationQuery(req)}` });
+    getById(id: string): Promise<ApiResponse<IntegrationConnectionResponse>> {
+        return this.http.get<IntegrationConnectionResponse>({ controller: 'IntegrationConnections', action: `${id}` });
     }
 
-    getById(id: string): Promise<ApiResponse<any>> {
-        return this.http.get<any>({ controller: 'IntegrationConnections', action: `${id}` });
+    getByIntegrationUser(integrationUserId: string): Promise<ApiResponse<IntegrationConnectionResponse[]>> {
+        return this.http.get<IntegrationConnectionResponse[]>({ controller: 'IntegrationConnections', action: `by-integration-user/${integrationUserId}` });
     }
 
-    getByIntegration(integrationId: string): Promise<ApiResponse<any[]>> {
-        return this.http.get<any[]>({ controller: 'IntegrationConnections', action: `by-integration/${integrationId}` });
+    getByType(connectionTypeId: string): Promise<ApiResponse<IntegrationConnectionResponse[]>> {
+        return this.http.get<IntegrationConnectionResponse[]>({ controller: 'IntegrationConnections', action: `by-type/${connectionTypeId}` });
     }
 
-    getByType(connectionTypeId: string): Promise<ApiResponse<any[]>> {
-        return this.http.get<any[]>({ controller: 'IntegrationConnections', action: `by-type/${connectionTypeId}` });
+    create(request: CreateIntegrationConnectionRequest): Promise<ApiResponse<IntegrationConnectionResponse>> {
+        return this.http.post<IntegrationConnectionResponse>({ controller: 'IntegrationConnections' }, request);
     }
 
-    create(request: CreateIntegrationConnectionRequest): Promise<ApiResponse<any>> {
-        return this.http.post<any>({ controller: 'IntegrationConnections' }, request);
+    update(id: string, request: UpdateIntegrationConnectionRequest): Promise<ApiResponse<unknown>> {
+        return this.http.post<unknown>({ controller: 'IntegrationConnections', action: `update/${id}` }, request);
     }
 
-    update(id: string, request: UpdateIntegrationConnectionRequest): Promise<ApiResponse<any>> {
-        return this.http.post<any>({ controller: 'IntegrationConnections', action: `update/${id}` }, request);
-    }
-
-    delete(id: string): Promise<ApiResponse<any>> {
-        return this.http.post<any>({ controller: 'IntegrationConnections', action: `delete/${id}` }, {});
+    delete(id: string): Promise<ApiResponse<unknown>> {
+        return this.http.post<unknown>({ controller: 'IntegrationConnections', action: `delete/${id}` }, {});
     }
 }

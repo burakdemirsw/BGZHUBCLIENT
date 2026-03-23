@@ -5,7 +5,7 @@ import { IntegrationConnectionsService } from '@/app/core/services/integration-c
 import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { IntegrationConnectionTypesService } from '@/app/core/services/integration-connection-types.service';
 import {
-    IntegrationConnection,
+    IntegrationConnectionResponse,
     CreateIntegrationConnectionRequest,
     UpdateIntegrationConnectionRequest,
 } from '@/app/core/models/integration/integration-connection.models';
@@ -18,25 +18,25 @@ import { IntegrationConnectionType } from '@/app/core/models/integration/integra
     templateUrl: './integration-connections.html',
 })
 export class IntegrationConnectionsPage implements OnInit {
-    items: IntegrationConnection[] = [];
+    items: IntegrationConnectionResponse[] = [];
     integrations: Integration[] = [];
     connectionTypes: IntegrationConnectionType[] = [];
     loading = false;
     showModal = false;
     editMode = false;
-    selectedItem: IntegrationConnection | null = null;
+    selectedItem: IntegrationConnectionResponse | null = null;
 
     // Datatable
     filterText = '';
-    filteredItems: IntegrationConnection[] = [];
-    pagedItems: IntegrationConnection[] = [];
+    filteredItems: IntegrationConnectionResponse[] = [];
+    pagedItems: IntegrationConnectionResponse[] = [];
     currentPage = 1;
     pageSize = 10;
     totalPages = 1;
     totalPagesArray: number[] = [];
 
     form: any = {
-        integrationId: '',
+        integrationUserId: '',
         connectionTypeId: '',
         companyId: '',
         name: '',
@@ -72,8 +72,8 @@ export class IntegrationConnectionsPage implements OnInit {
             i =>
                 (i.name || '').toLowerCase().includes(q) ||
                 (i.url || '').toLowerCase().includes(q) ||
-                this.getIntegrationName(i.integrationId).toLowerCase().includes(q) ||
-                this.getConnectionTypeName(i.connectionTypeId).toLowerCase().includes(q)
+                (i.integrationDescription || '').toLowerCase().includes(q) ||
+                (i.connectionTypeName || '').toLowerCase().includes(q)
         );
         this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
         this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
@@ -97,7 +97,7 @@ export class IntegrationConnectionsPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getAll();
+            const response = await this.service.getPaged({ pageNumber: 1, pageSize: 1000 });
             //console.log('IntegrationConnections response:', response);
             this.items = this.extractArray(response);
             this.applyFilterAndPaging();
@@ -111,7 +111,12 @@ export class IntegrationConnectionsPage implements OnInit {
     private extractArray(response: any): any[] {
         if (Array.isArray(response)) return response;
         if (response?.$values) return response.$values;
-        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
+        if (response?.data) {
+            if (Array.isArray(response.data)) return response.data;
+            if (response.data?.items) return response.data.items;
+            if (response.data?.$values) return response.data.$values;
+            return [response.data];
+        }
         if (response?.items) return response.items;
         if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
         return [];
@@ -130,10 +135,14 @@ export class IntegrationConnectionsPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedItem = null;
+        
+        const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        const companyId = profile.companyId || '';
+
         this.form = {
-            integrationId: '',
+            integrationUserId: '',
             connectionTypeId: '',
-            companyId: localStorage.getItem('companyId') || '',
+            companyId: companyId,
             name: '',
             url: '',
             isBlocked: false,
@@ -141,13 +150,17 @@ export class IntegrationConnectionsPage implements OnInit {
         this.showModal = true;
     }
 
-    openEdit(item: IntegrationConnection): void {
+    openEdit(item: IntegrationConnectionResponse): void {
         this.editMode = true;
         this.selectedItem = item;
+        
+        const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        const companyId = profile.companyId || '';
+
         this.form = {
-            integrationId: item.integrationId,
+            integrationUserId: item.integrationUserId,
             connectionTypeId: item.connectionTypeId,
-            companyId: item.companyId || localStorage.getItem('companyId') || '',
+            companyId: item.companyId || companyId,
             name: item.name,
             url: item.url || '',
             isBlocked: item.isBlocked ?? false,
@@ -159,7 +172,7 @@ export class IntegrationConnectionsPage implements OnInit {
         try {
             if (this.editMode && this.selectedItem) {
                 const req: UpdateIntegrationConnectionRequest = {
-                    integrationId: this.form.integrationId,
+                    integrationUserId: this.form.integrationUserId,
                     connectionTypeId: this.form.connectionTypeId,
                     companyId: this.form.companyId,
                     name: this.form.name,
@@ -170,8 +183,10 @@ export class IntegrationConnectionsPage implements OnInit {
                 const res = await this.service.update(this.selectedItem.id, req);
                 //console.log('Update response:', res);
             } else {
+                const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
                 const req: CreateIntegrationConnectionRequest = {
-                    integrationId: this.form.integrationId,
+                    userId: profile.userId || '',
+                    integrationUserId: this.form.integrationUserId,
                     connectionTypeId: this.form.connectionTypeId,
                     companyId: this.form.companyId,
                     name: this.form.name,
@@ -193,8 +208,8 @@ export class IntegrationConnectionsPage implements OnInit {
         }
     }
 
-    async deleteItem(item: IntegrationConnection): Promise<void> {
-        const name = this.getIntegrationName(item.integrationId) + ' - ' + this.getConnectionTypeName(item.connectionTypeId);
+    async deleteItem(item: IntegrationConnectionResponse): Promise<void> {
+        const name = this.getIntegrationName(item.integrationUserId) + ' - ' + this.getConnectionTypeName(item.connectionTypeId);
         if (confirm(`"${name}" bağlantısını silmek istediğinize emin misiniz?`)) {
             try {
                 await this.service.delete(item.id);

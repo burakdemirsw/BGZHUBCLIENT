@@ -97,7 +97,8 @@
             align-items: center;
             gap: $sidenav-item-gap;
             position: relative;
-            white-space: nowrap;
+            white-space: normal;
+            word-wrap: break-word;
             color: $sidenav-item-color;
             background: transparent;
             border: transparent;
@@ -144,8 +145,7 @@
             }
 
             .menu-text {
-                text-overflow: ellipsis;
-                overflow: hidden;
+                word-break: break-word;
             }
 
             .badge {
@@ -185,9 +185,8 @@
                 font-family: $font-family-base;
                 color: $sidenav-item-color;
                 opacity: 0.85;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                white-space: normal;
+                word-wrap: break-word;
 
                 // Sub-menu ikonlarını küçük nokta olarak göster
                 .menu-icon.fa-circle {

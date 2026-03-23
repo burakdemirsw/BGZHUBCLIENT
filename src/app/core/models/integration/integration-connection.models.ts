@@ -1,19 +1,25 @@
-export interface IntegrationConnection {
+export interface IntegrationConnectionResponse {
   id: string;
-  integrationId: string;
-  connectionTypeId: string;
+  userId?: string;
+  userName?: string;
+  userLastName?: string;
   companyId: string;
+  companyName?: string;
+  integrationUserId: string;
+  integrationDescription?: string;
+  connectionTypeId: string;
+  connectionTypeName?: string;
+  connectionTypeCode?: string;
   name: string;
   url: string;
-  integrationName?: string;
-  connectionTypeName?: string;
-  isBlocked?: boolean;
-  createdDate?: string;
-  updatedDate?: string;
+  isBlocked: boolean;
+  createdDate: string;
+  updatedDate: string;
 }
 
 export interface CreateIntegrationConnectionRequest {
-  integrationId: string;
+  userId: string;
+  integrationUserId: string;
   connectionTypeId: string;
   companyId: string;
   name: string;
@@ -21,7 +27,7 @@ export interface CreateIntegrationConnectionRequest {
 }
 
 export interface UpdateIntegrationConnectionRequest {
-  integrationId: string;
+  integrationUserId: string;
   connectionTypeId: string;
   companyId: string;
   name: string;

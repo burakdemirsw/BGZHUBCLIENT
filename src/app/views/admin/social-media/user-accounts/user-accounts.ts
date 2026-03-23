@@ -16,7 +16,6 @@ import {
     templateUrl: './user-accounts.html',
 })
 export class UserSocialMediaAccountsPage implements OnInit {
-    userAccounts: UserSocialMediaAccount[] = [];
     filteredUserAccounts: UserSocialMediaAccount[] = [];
     accounts: SocialMediaAccount[] = [];
     users: any[] = [];
@@ -26,6 +25,15 @@ export class UserSocialMediaAccountsPage implements OnInit {
     selectedUserAccount: UserSocialMediaAccount | null = null;
     filterUserId: string = '';
     filterAccountId: string = '';
+
+    // Server-side pagination
+    searchTerm = '';
+    currentPage = 1;
+    pageSize = 10;
+    totalPages = 1;
+    totalCount = 0;
+    totalPagesArray: number[] = [];
+    private allUserAccounts: UserSocialMediaAccount[] = [];
 
     form: any = {
         userId: '',
@@ -66,22 +74,47 @@ export class UserSocialMediaAccountsPage implements OnInit {
     async loadUserAccounts(): Promise<void> {
         this.loading = true;
         try {
-            let response;
             if (this.filterUserId) {
-                response = await this.socialMediaService.getUserAccountsByUser(this.filterUserId);
+                const response = await this.socialMediaService.getUserAccountsByUser(this.filterUserId);
+                this.allUserAccounts = this.extractArray(response?.data);
+                this.applyClientPaging();
             } else if (this.filterAccountId) {
-                response = await this.socialMediaService.getUserAccountsByAccount(this.filterAccountId);
+                const response = await this.socialMediaService.getUserAccountsByAccount(this.filterAccountId);
+                this.allUserAccounts = this.extractArray(response?.data);
+                this.applyClientPaging();
             } else {
-                response = await this.socialMediaService.getUserAccounts();
+                const response = await this.socialMediaService.getUserAccounts({
+                    pageNumber: this.currentPage,
+                    pageSize: this.pageSize,
+                    searchTerm: this.searchTerm,
+                });
+                const paged = response?.data;
+                this.filteredUserAccounts = paged?.items ?? [];
+                this.totalCount = paged?.totalCount ?? this.filteredUserAccounts.length;
+                this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+                this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
             }
-            //console.log('User Accounts response:', response);
-            this.userAccounts = this.extractArray(response?.data);
-            this.applyFilters();
         } catch (err) {
             console.error('User Accounts error:', err);
         } finally {
             this.loading = false;
         }
+    }
+
+    private applyClientPaging(): void {
+        const q = (this.searchTerm || '').toLowerCase();
+        let filtered = this.allUserAccounts;
+        if (q) {
+            filtered = filtered.filter(ua =>
+                this.getUserName(ua.userId).toLowerCase().includes(q) ||
+                this.getAccountName(ua.socialMediaAccountId).toLowerCase().includes(q)
+            );
+        }
+        this.totalCount = filtered.length;
+        this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        const start = (this.currentPage - 1) * this.pageSize;
+        this.filteredUserAccounts = filtered.slice(start, start + this.pageSize);
     }
 
     private extractArray(response: any): any[] {
@@ -93,27 +126,35 @@ export class UserSocialMediaAccountsPage implements OnInit {
         return [];
     }
 
-    applyFilters(): void {
-        let result = [...this.userAccounts];
-        
-        if (this.filterUserId) {
-            result = result.filter(ua => ua.userId === this.filterUserId);
-        }
-        if (this.filterAccountId) {
-            result = result.filter(ua => ua.socialMediaAccountId === this.filterAccountId);
-        }
-        
-        this.filteredUserAccounts = result;
+    onFilterChange(): void {
+        this.currentPage = 1;
+        this.loadUserAccounts();
     }
 
-    onFilterChange(): void {
-        this.applyFilters();
+    onSearchChange(): void {
+        this.currentPage = 1;
+        if (this.filterUserId || this.filterAccountId) {
+            this.applyClientPaging();
+        } else {
+            this.loadUserAccounts();
+        }
+    }
+
+    setPage(page: number): void {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        if (this.filterUserId || this.filterAccountId) {
+            this.applyClientPaging();
+        } else {
+            this.loadUserAccounts();
+        }
     }
 
     clearFilters(): void {
         this.filterUserId = '';
         this.filterAccountId = '';
-        this.applyFilters();
+        this.currentPage = 1;
+        this.loadUserAccounts();
     }
 
     getUserName(userId: string): string {

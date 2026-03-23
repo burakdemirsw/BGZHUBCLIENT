@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import {
+    UserIntegrationUserSocialMediaAccountResponse,
     CreateUserIntegrationUserSocialMediaAccountRequest,
     UpdateUserIntegrationUserSocialMediaAccountRequest,
 } from '../models/integration/user-integration-user-social-media-account.models';
@@ -15,39 +16,39 @@ export class UserIntegrationUserSocialMediaAccountsService {
 
     constructor(private http: HttpClientService) {}
 
-    getAll(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-        return this.http.get<PagedResult<any>>({ controller: this.controller, action: buildPaginationQuery(req) });
+    getAll(req?: PaginationRequest): Promise<ApiResponse<PagedResult<UserIntegrationUserSocialMediaAccountResponse>>> {
+        return this.http.get<PagedResult<UserIntegrationUserSocialMediaAccountResponse>>({ controller: this.controller, action: buildPaginationQuery(req) });
     }
 
-    getById(id: string): Promise<ApiResponse<any>> {
-        return this.http.get<any>({ controller: this.controller, action: `${id}` });
+    getById(id: string): Promise<ApiResponse<UserIntegrationUserSocialMediaAccountResponse>> {
+        return this.http.get<UserIntegrationUserSocialMediaAccountResponse>({ controller: this.controller, action: `${id}` });
     }
 
-    getByIntegrationUser(integrationUserId: string): Promise<ApiResponse<any[]>> {
-        return this.http.get<any[]>({ controller: this.controller, action: `by-integration-user/${integrationUserId}` });
+    getByIntegrationUser(integrationUserId: string): Promise<ApiResponse<UserIntegrationUserSocialMediaAccountResponse[]>> {
+        return this.http.get<UserIntegrationUserSocialMediaAccountResponse[]>({ controller: this.controller, action: `by-integration-user/${integrationUserId}` });
     }
 
-    getBySocialMediaAccount(socialMediaAccountId: string): Promise<ApiResponse<any[]>> {
-        return this.http.get<any[]>({ controller: this.controller, action: `by-social-media-account/${socialMediaAccountId}` });
+    getBySocialMediaAccount(socialMediaAccountId: string): Promise<ApiResponse<UserIntegrationUserSocialMediaAccountResponse[]>> {
+        return this.http.get<UserIntegrationUserSocialMediaAccountResponse[]>({ controller: this.controller, action: `by-social-media-account/${socialMediaAccountId}` });
     }
 
-    getByUser(userId: string): Promise<ApiResponse<any[]>> {
-        return this.http.get<any[]>({ controller: this.controller, action: `by-user/${userId}` });
+    getByUser(userId: string): Promise<ApiResponse<UserIntegrationUserSocialMediaAccountResponse[]>> {
+        return this.http.get<UserIntegrationUserSocialMediaAccountResponse[]>({ controller: this.controller, action: `by-user/${userId}` });
     }
 
-    getByCompany(companyId: string, req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-        return this.http.get<PagedResult<any>>({ controller: this.controller, action: `by-company/${companyId}${buildPaginationQuery(req)}` });
+    getByCompany(companyId: string, req?: PaginationRequest): Promise<ApiResponse<PagedResult<UserIntegrationUserSocialMediaAccountResponse>>> {
+        return this.http.get<PagedResult<UserIntegrationUserSocialMediaAccountResponse>>({ controller: this.controller, action: `by-company/${companyId}${buildPaginationQuery(req)}` });
     }
 
-    create(request: CreateUserIntegrationUserSocialMediaAccountRequest): Promise<ApiResponse<any>> {
-        return this.http.post<any>({ controller: this.controller }, request);
+    create(request: CreateUserIntegrationUserSocialMediaAccountRequest): Promise<ApiResponse<UserIntegrationUserSocialMediaAccountResponse>> {
+        return this.http.post<UserIntegrationUserSocialMediaAccountResponse>({ controller: this.controller }, request);
     }
 
-    update(id: string, request: UpdateUserIntegrationUserSocialMediaAccountRequest): Promise<ApiResponse<any>> {
-        return this.http.post<any>({ controller: this.controller, action: `update/${id}` }, request);
+    update(id: string, request: UpdateUserIntegrationUserSocialMediaAccountRequest): Promise<ApiResponse<unknown>> {
+        return this.http.post<unknown>({ controller: this.controller, action: `update/${id}` }, request);
     }
 
-    delete(id: string): Promise<ApiResponse<any>> {
-        return this.http.post<any>({ controller: this.controller, action: `delete/${id}` }, {});
+    delete(id: string): Promise<ApiResponse<unknown>> {
+        return this.http.post<unknown>({ controller: this.controller, action: `delete/${id}` }, {});
     }
 }

@@ -2,6 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { ChatMessage } from '@/app/core/models/conversation/conversation.models';
+import { environment } from '@/environments/environment';
 
 export interface TypingEvent {
     conversationId: string;
@@ -28,10 +29,10 @@ export interface NewConversationEvent {
     customerName: string;
     customerPlatformUsername: string | null;
     createdDate: string;
+    integrationPhotoUrl?: string;
 }
 
-const HUB_URL = 'https://localhost:8991/hubs/chat';
-//const HUB_URL = 'https://investment-merchant-api.com:8991/hubs/chat';
+const HUB_URL = environment.apiBaseUrl.replace('/api', '') + '/hubs/chat';
 
 @Injectable({ providedIn: 'root' })
 export class ChatSignalRService implements OnDestroy {

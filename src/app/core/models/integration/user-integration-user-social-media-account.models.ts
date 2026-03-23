@@ -1,14 +1,14 @@
-export interface UserIntegrationUserSocialMediaAccount {
+export interface UserIntegrationUserSocialMediaAccountResponse {
     id: string;
     companyId: string;
-    integrationUserId: string;
-    socialMediaAccountId: string;
-    userId: string;
-    integrationUserName?: string;
-    socialMediaAccountName?: string;
-    userName?: string;
     companyName?: string;
-    isBlocked?: boolean;
+    integrationUserId: string;
+    integrationDescription?: string;
+    userSocialMediaAccountId: string;
+    socialMediaAccountName?: string;
+    userId: string;
+    userName?: string;
+    userLastName?: string;
     createdDate?: string;
     updatedDate?: string;
 }
@@ -16,13 +16,13 @@ export interface UserIntegrationUserSocialMediaAccount {
 export interface CreateUserIntegrationUserSocialMediaAccountRequest {
     companyId: string;
     integrationUserId: string;
-    socialMediaAccountId: string;
+    userSocialMediaAccountId: string;
     userId: string;
 }
 
 export interface UpdateUserIntegrationUserSocialMediaAccountRequest {
     companyId: string;
     integrationUserId: string;
-    socialMediaAccountId: string;
+    userSocialMediaAccountId: string;
     userId: string;
 }

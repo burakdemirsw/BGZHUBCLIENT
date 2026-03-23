@@ -24,6 +24,12 @@ export const CONVERSATION_TYPES: ConversationType[] = [
         icon: 'fa-solid fa-lock',
         path: 'locked-messages',
     },
+    {
+        key: 'escalated-messages',
+        label: 'Temsilciye Aktarılanlar',
+        icon: 'fa-solid fa-headset',
+        path: 'escalated-messages',
+    },
 ];
 
 export const DEFAULT_CONVERSATION_TYPE = 'messages';
