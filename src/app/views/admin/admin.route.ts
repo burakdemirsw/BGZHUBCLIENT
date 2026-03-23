@@ -68,6 +68,7 @@ import { PlansPage } from './plans/plans';
 import { SubscriptionsPage } from './subscriptions/subscriptions';
 import { SubscriptionPaymentsPage } from './subscription-payments/subscription-payments';
 import { SubscriptionUsagesPage } from './subscription-usages/subscription-usages';
+import { NeighbourhoodsPage } from './neighbourhoods/neighbourhoods';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -494,6 +495,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/subscription-usages',
         component: SubscriptionUsagesPage,
         data: { title: 'Abonelik Kullanımları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/neighbourhoods',
+        component: NeighbourhoodsPage,
+        data: { title: 'Mahalleler' },
         canActivate: [AuthGuard],
     },
 ];
