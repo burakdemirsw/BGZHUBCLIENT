@@ -1,0 +1,240 @@
+// ─── Welcome Splash Screen ───────────────────────────────────────────────────
+
+.splash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow: hidden;
+  animation: overlayIn 0.5s ease-out forwards;
+
+  &.fade-out {
+    animation: overlayOut 0.6s ease-in forwards;
+  }
+}
+
+// ─── Content container ───────────────────────────────────────────────────────
+.splash-content {
+  text-align: center;
+  color: #fff;
+  position: relative;
+  z-index: 2;
+}
+
+// ─── Waving hand icon ───────────────────────────────────────────────────────
+.splash-icon {
+  margin-bottom: 1.25rem;
+  opacity: 0;
+  animation: fadeSlideUp 0.6s ease-out 0.3s forwards;
+
+  .wave-emoji {
+    font-size: 4rem;
+    display: inline-block;
+    animation: wave 1.2s ease-in-out 0.8s 2;
+    transform-origin: 70% 70%;
+  }
+}
+
+// ─── Greeting text ──────────────────────────────────────────────────────────
+.splash-greeting {
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  opacity: 0;
+  animation: fadeSlideUp 0.6s ease-out 0.5s forwards;
+}
+
+// ─── User name ──────────────────────────────────────────────────────────────
+.splash-name {
+  font-size: 2.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  opacity: 0;
+  animation: fadeSlideUp 0.6s ease-out 0.7s forwards;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+}
+
+// ─── Divider ────────────────────────────────────────────────────────────────
+.splash-divider {
+  width: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.5);
+  margin: 0 auto 1.25rem;
+  border-radius: 2px;
+  animation: expandWidth 0.8s ease-out 0.9s forwards;
+}
+
+// ─── Last login ─────────────────────────────────────────────────────────────
+.splash-last-login {
+  font-size: 0.95rem;
+  opacity: 0;
+  color: rgba(255, 255, 255, 0.85);
+  animation: fadeSlideUp 0.5s ease-out 1.1s forwards;
+
+  i {
+    margin-right: 0.4rem;
+  }
+
+  strong {
+    color: #fff;
+  }
+}
+
+// ─── Loading dots ───────────────────────────────────────────────────────────
+.splash-loader {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  opacity: 0;
+  animation: fadeIn 0.4s ease-out 1.4s forwards;
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    animation: dotPulse 1.2s ease-in-out infinite;
+
+    &:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    &:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+  }
+}
+
+// ─── Background particles ───────────────────────────────────────────────────
+.particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+
+  .particle {
+    position: absolute;
+    bottom: -10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    animation: floatUp linear infinite;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// KEYFRAMES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlayOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes expandWidth {
+  from {
+    width: 0;
+  }
+  to {
+    width: 80px;
+  }
+}
+
+@keyframes wave {
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  30% {
+    transform: rotate(14deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes dotPulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) rotate(720deg);
+    opacity: 0;
+  }
+}

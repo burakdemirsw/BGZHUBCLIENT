@@ -33,6 +33,7 @@ import { UserRequestDetailPage } from './user-requests/user-request-detail';
 import { TeamsPage } from './teams/teams';
 import { TeamInvitationsPage } from './teams/team-invitations/team-invitations';
 import { TeamSettingsPage } from './teams/team-settings/team-settings';
+import { TeamUsersPage } from './team-users/team-users';
 import { ImageSearchPage } from './image-search/image-search';
 import { IntegrationTypesPage } from './integration-types/integration-types';
 import { UserIntegrationUserSocialMediaAccountsPage } from './user-integration-user-social-media-accounts/user-integration-user-social-media-accounts';
@@ -70,6 +71,7 @@ import { SubscriptionPaymentsPage } from './subscription-payments/subscription-p
 import { SubscriptionUsagesPage } from './subscription-usages/subscription-usages';
 import { NeighbourhoodsPage } from './neighbourhoods/neighbourhoods';
 import { CompanySettingsPage } from './company-settings/company-settings';
+import { AppsPage } from './apps/apps';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -269,6 +271,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/team-settings',
         component: TeamSettingsPage,
         data: { title: 'Takım Ayarları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/team-users',
+        component: TeamUsersPage,
+        data: { title: 'Takım Kullanıcıları' },
         canActivate: [AuthGuard],
     },
     {
@@ -508,6 +516,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/company-settings',
         component: CompanySettingsPage,
         data: { title: 'Şirket Ayarları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/apps',
+        component: AppsPage,
+        data: { title: 'Uygulamalar' },
         canActivate: [AuthGuard],
     },
 ];

@@ -56,11 +56,12 @@ export class ProductsPage implements OnInit {
     async loadProducts(): Promise<void> {
         this.loading = true;
         try {
-            const resp = await this.productsService.getAll({
+            const filter = {
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
                 searchTerm: this.filterText || undefined,
-            });
+            };
+            const resp = await this.productsService.getList(filter);
             const data = resp?.data || resp;
             this.items = this.extractArray(data);
             this.totalCount = data?.totalCount ?? this.items.length;

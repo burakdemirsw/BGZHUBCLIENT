@@ -2377,6 +2377,37 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfAuthResponse"
       security:
         - Bearer: []
+  /api/Auth/register-with-company:
+    post:
+      tags:
+        - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAuthResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAuthResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAuthResponse"
+      security:
+        - Bearer: []
   /api/Auth/refresh-token:
     post:
       tags:
@@ -2392,6 +2423,68 @@ paths:
           application/*+json:
             schema:
               $ref: "#/components/schemas/RefreshTokenRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAuthResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAuthResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAuthResponse"
+      security:
+        - Bearer: []
+  /api/Auth/send-register-invitation:
+    post:
+      tags:
+        - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendRegisterInvitationRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/SendRegisterInvitationRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/SendRegisterInvitationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfRegisterInvitationResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfRegisterInvitationResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfRegisterInvitationResponse"
+      security:
+        - Bearer: []
+  /api/Auth/register-with-invitation:
+    post:
+      tags:
+        - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterWithInvitationRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/RegisterWithInvitationRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/RegisterWithInvitationRequest"
         required: true
       responses:
         "200":
@@ -3134,7 +3227,12 @@ paths:
       tags:
         - Users
       parameters:
-        - name: Page
+        - name: CompanyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: PageNumber
           in: query
           schema:
             pattern: ^-?(?:0|[1-9]\d*)$
@@ -3150,14 +3248,18 @@ paths:
               - integer
               - string
             format: int32
-        - name: Skip
+        - name: SearchTerm
           in: query
           schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int32
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -3278,6 +3380,62 @@ paths:
           schema:
             type: string
             format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/Users/send-confirm-mail/{id}:
+    post:
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/Users/confirm-mail/{id}:
+    post:
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: token
+          in: query
+          schema:
+            type: string
       responses:
         "200":
           description: OK
@@ -13043,6 +13201,87 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
+  /api/Teams/invitations/check-user-exist:
+    get:
+      tags:
+        - Teams
+      parameters:
+        - name: email
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCheckUserExistByEmailResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCheckUserExistByEmailResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCheckUserExistByEmailResponse"
+      security:
+        - Bearer: []
+  /api/Teams/invitations/{id}/check-usable:
+    get:
+      tags:
+        - Teams
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCheckInvitationUsableResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCheckInvitationUsableResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCheckInvitationUsableResponse"
+      security:
+        - Bearer: []
+  /api/Teams/invitations/send-mail:
+    post:
+      tags:
+        - Teams
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInvitationMailRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateInvitationMailRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateInvitationMailRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSendMailResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSendMailResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSendMailResponse"
+      security:
+        - Bearer: []
   /api/Teams/settings:
     get:
       tags:
@@ -13220,6 +13459,231 @@ paths:
     post:
       tags:
         - Teams
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/TeamUsers:
+    get:
+      tags:
+        - TeamUsers
+      parameters:
+        - name: CompanyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfTeamUserResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfTeamUserResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfTeamUserResponse"
+      security:
+        - Bearer: []
+    post:
+      tags:
+        - TeamUsers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTeamUserRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateTeamUserRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateTeamUserRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTeamUserResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTeamUserResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTeamUserResponse"
+      security:
+        - Bearer: []
+  /api/TeamUsers/{id}:
+    get:
+      tags:
+        - TeamUsers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTeamUserResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTeamUserResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTeamUserResponse"
+      security:
+        - Bearer: []
+  /api/TeamUsers/by-team/{teamId}:
+    get:
+      tags:
+        - TeamUsers
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfTeamUserResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfTeamUserResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfTeamUserResponse"
+      security:
+        - Bearer: []
+  /api/TeamUsers/by-user/{userId}:
+    get:
+      tags:
+        - TeamUsers
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfTeamUserResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfTeamUserResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfTeamUserResponse"
+      security:
+        - Bearer: []
+  /api/TeamUsers/update/{id}:
+    post:
+      tags:
+        - TeamUsers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTeamUserRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTeamUserRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateTeamUserRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/TeamUsers/delete/{id}:
+    post:
+      tags:
+        - TeamUsers
       parameters:
         - name: id
           in: path
@@ -18597,6 +19061,70 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfCheckInvitationUsableResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/CheckInvitationUsableResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfCheckUserExistByEmailResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/CheckUserExistByEmailResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfCityResponse:
       type: object
       properties:
@@ -21589,6 +22117,40 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfListOfTeamUserResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/TeamUserResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfListOfUserCompanyResponse:
       type: object
       properties:
@@ -23838,6 +24400,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfPagedResultOfTeamUserResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/PagedResultOfTeamUserResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfPagedResultOfUserIntegrationUserSocialMediaAccountResponse:
       type: object
       properties:
@@ -24204,6 +24798,38 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/PromptTypeResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfRegisterInvitationResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/RegisterInvitationResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -24863,6 +25489,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfTeamUserResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TeamUserResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfTicimaxSaveCustomerResult:
       type: object
       properties:
@@ -25314,6 +25972,31 @@ components:
         createdDate:
           type: string
           format: date-time
+    CheckInvitationUsableResponse:
+      required:
+        - isUsable
+        - reason
+      type: object
+      properties:
+        isUsable:
+          type: boolean
+        reason:
+          type:
+            - "null"
+            - string
+    CheckUserExistByEmailResponse:
+      required:
+        - exists
+        - userId
+      type: object
+      properties:
+        exists:
+          type: boolean
+        userId:
+          type:
+            - "null"
+            - string
+          format: uuid
     CityResponse:
       required:
         - id
@@ -26842,6 +27525,18 @@ components:
             - "null"
             - string
           format: uuid
+    CreateInvitationMailRequest:
+      required:
+        - invitationId
+        - mailSettingId
+      type: object
+      properties:
+        invitationId:
+          type: string
+          format: uuid
+        mailSettingId:
+          type: string
+          format: uuid
     CreateItemRequest:
       required:
         - name
@@ -27756,6 +28451,7 @@ components:
         - invitingUserId
         - invitedUserId
         - invitationCode
+        - expiredDate
       type: object
       properties:
         teamId:
@@ -27774,6 +28470,11 @@ components:
           type:
             - "null"
             - string
+        expiredDate:
+          type:
+            - "null"
+            - string
+          format: date-time
     CreateTeamRequest:
       required:
         - creatorId
@@ -27814,6 +28515,22 @@ components:
           type:
             - "null"
             - string
+    CreateTeamUserRequest:
+      required:
+        - teamId
+        - userId
+        - companyId
+      type: object
+      properties:
+        teamId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
     CreateUserCompanyRequest:
       required:
         - userId
@@ -32403,6 +33120,51 @@ components:
           type: boolean
         hasNextPage:
           type: boolean
+    PagedResultOfTeamUserResponse:
+      required:
+        - items
+        - pageNumber
+        - pageSize
+        - totalCount
+        - totalPages
+        - hasPreviousPage
+        - hasNextPage
+      type: object
+      properties:
+        items:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/TeamUserResponse"
+        pageNumber:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalPages:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        hasPreviousPage:
+          type: boolean
+        hasNextPage:
+          type: boolean
     PagedResultOfUserIntegrationUserSocialMediaAccountResponse:
       required:
         - items
@@ -33019,6 +33781,52 @@ components:
       properties:
         refreshToken:
           type: string
+    RegisterInvitationResponse:
+      required:
+        - id
+        - companyId
+        - invitedByUserId
+        - email
+        - token
+        - isUsed
+        - usedDate
+        - expiredDate
+        - isActive
+        - createdDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        invitedByUserId:
+          type: string
+          format: uuid
+        email:
+          type:
+            - "null"
+            - string
+        token:
+          type:
+            - "null"
+            - string
+        isUsed:
+          type: boolean
+        usedDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        expiredDate:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+        createdDate:
+          type: string
+          format: date-time
     RegisterRequest:
       required:
         - name
@@ -33035,6 +33843,44 @@ components:
           type: string
         password:
           type: string
+        companyId:
+          type:
+            - "null"
+            - string
+          format: uuid
+    RegisterWithInvitationRequest:
+      required:
+        - name
+        - lastName
+        - email
+        - password
+        - companyId
+        - token
+      type: object
+      properties:
+        name:
+          type:
+            - "null"
+            - string
+        lastName:
+          type:
+            - "null"
+            - string
+        email:
+          type:
+            - "null"
+            - string
+        password:
+          type:
+            - "null"
+            - string
+        companyId:
+          type: string
+          format: uuid
+        token:
+          type:
+            - "null"
+            - string
     RequestCategoryResponse:
       required:
         - id
@@ -33329,6 +34175,34 @@ components:
           items:
             type: string
             format: uuid
+    SendRegisterInvitationRequest:
+      required:
+        - name
+        - lastName
+        - email
+        - password
+        - companyId
+      type: object
+      properties:
+        name:
+          type:
+            - "null"
+            - string
+        lastName:
+          type:
+            - "null"
+            - string
+        email:
+          type:
+            - "null"
+            - string
+        password:
+          type:
+            - "null"
+            - string
+        companyId:
+          type: string
+          format: uuid
     ShortcutResponse:
       required:
         - id
@@ -33861,6 +34735,7 @@ components:
         - invitationCode
         - status
         - respondedDate
+        - expiredDate
         - isBlocked
         - createdDate
         - updatedDate
@@ -33892,6 +34767,11 @@ components:
             - string
           format: uint8
         respondedDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        expiredDate:
           type:
             - "null"
             - string
@@ -33967,6 +34847,37 @@ components:
             - "null"
             - string
         isBlocked:
+          type: boolean
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+    TeamUserResponse:
+      required:
+        - id
+        - teamId
+        - userId
+        - companyId
+        - isActive
+        - createdDate
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        teamId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        isActive:
           type: boolean
         createdDate:
           type: string
@@ -35919,6 +36830,7 @@ components:
         - invitationCode
         - status
         - respondedDate
+        - expiredDate
         - isBlocked
       type: object
       properties:
@@ -35945,6 +36857,11 @@ components:
             - string
           format: uint8
         respondedDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        expiredDate:
           type:
             - "null"
             - string
@@ -35996,6 +36913,25 @@ components:
             - "null"
             - string
         isBlocked:
+          type: boolean
+    UpdateTeamUserRequest:
+      required:
+        - teamId
+        - userId
+        - companyId
+        - isActive
+      type: object
+      properties:
+        teamId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        isActive:
           type: boolean
     UpdateUserCompanyRequest:
       required:
@@ -36508,6 +37444,7 @@ components:
         - gender
         - lastLoginDate
         - isBlocked
+        - isMailConfirmed
         - createdDate
         - updatedDate
       type: object
@@ -36536,6 +37473,10 @@ components:
           format: date-time
         isBlocked:
           type: boolean
+        isMailConfirmed:
+          type:
+            - "null"
+            - boolean
         createdDate:
           type: string
           format: date-time
@@ -36761,6 +37702,7 @@ tags:
   - name: MailSettings
   - name: NetGsmSettings
   - name: Teams
+  - name: TeamUsers
   - name: UserTypes
   - name: Webhook
   - name: Ticimax

@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
-import { CreateUserRequest, UpdateUserRequest } from '../models/user/user.models';
+import { CreateUserRequest, UpdateUserRequest, UserResponse } from '../models/user/user.models';
 import { ApiResponse } from '../models/api-response.model';
 import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
+import { RegisterWithCompanyRequest } from '../models/auth/auth.models';
 
 @Injectable({
   providedIn: 'root',
@@ -10,23 +11,34 @@ import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/
 export class UsersService {
   constructor(private http: HttpClientService) {}
 
-  getAll(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-    return this.http.get<PagedResult<any>>({ controller: 'Users', action: buildPaginationQuery(req) });
+  getAll(req?: PaginationRequest): Promise<ApiResponse<PagedResult<UserResponse>>> {
+    return this.http.get<PagedResult<UserResponse>>({
+      controller: 'Users',
+      action: buildPaginationQuery(req),
+    });
   }
 
-  getById(id: string): Promise<ApiResponse<any>> {
-    return this.http.get<any>({ controller: 'Users' }, id);
+  getById(id: string): Promise<ApiResponse<UserResponse>> {
+    return this.http.get<UserResponse>({ controller: 'Users' }, id);
   }
 
-  create(request: CreateUserRequest): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'Users' }, request);
+  create(request: CreateUserRequest): Promise<ApiResponse<UserResponse>> {
+    return this.http.post<UserResponse>({ controller: 'Users' }, request);
   }
 
-  update(id: string, request: UpdateUserRequest): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'Users', action: `update/${id}` }, request);
+  registerWithCompany(request: RegisterWithCompanyRequest): Promise<ApiResponse<UserResponse>> {
+    return this.http.post<UserResponse>({ controller: 'Auth', action: 'register-with-company' }, request);
   }
 
-  delete(id: string): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'Users', action: `delete/${id}` }, {});
+  update(id: string, request: UpdateUserRequest): Promise<ApiResponse<object>> {
+    return this.http.post<object>({ controller: 'Users', action: `update/${id}` }, request);
+  }
+
+  delete(id: string): Promise<ApiResponse<object>> {
+    return this.http.post<object>({ controller: 'Users', action: `delete/${id}` }, {});
+  }
+
+  sendConfirmMail(id: string): Promise<ApiResponse<object>> {
+    return this.http.post<object>({ controller: 'Users', action: `send-confirm-mail/${id}` }, {});
   }
 }

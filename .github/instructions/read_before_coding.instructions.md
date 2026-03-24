@@ -122,6 +122,18 @@ private extractArray(response: any): any[] {
 - Tablo: `table table-centered table-hover mb-0` sınıfları, `table-responsive` wrapper
 - İnline CSS YAZMA — stil dosyasını (.scss) ayrı tut (budget limiti: 4kB)
 
+## ⚠️ ZORUNLU: Formlarda companyId / userId Kullanma!
+
+- Formlarda (create/update request body, form model, hidden input vb.) **asla `companyId` veya `userId` alanı bulundurma**
+- Bu değerler backend tarafından token'dan alınır veya frontend'de sadece `AuthStateService` üzerinden okunur
+- Form modeline `companyId` / `userId` ekleme — API'ye gönderilen request body'de de olmamalı
+- Eğer bir yerde `companyId` veya `userId` gerekiyorsa, `AuthStateService`'den al:
+  ```typescript
+  this.authStateService.profile?.companyId
+  this.authStateService.profile?.userId
+  ```
+- HTML template'te `companyId` / `userId` için `<input>` veya `[(ngModel)]` bağlaması YAPMA
+
 ## Auth Yapısı
 
 - JWT token `localStorage.getItem('accessToken')` ile alınır

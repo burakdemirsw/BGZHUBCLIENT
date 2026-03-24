@@ -1,0 +1,274 @@
+<!-- Hero Banner -->
+<div class="apps-hero-banner mb-4">
+    <div class="row align-items-center">
+        <div class="col-lg-7">
+            <h2 class="text-white mb-2">
+                <i class="fa-solid fa-puzzle-piece me-2"></i>Tüm Uygulamalar
+            </h2>
+            <p class="text-white-50 mb-3">
+                E-ticaret platformlarınızı, pazaryerlerinizi ve sosyal medya kanallarınızı SellenticAI ile
+                entegre edin. Tüm müşteri iletişimlerinizi tek bir yerden yönetin.
+            </p>
+            <div class="d-flex gap-2">
+                <span class="badge bg-white bg-opacity-25 text-white px-3 py-2">
+                    <i class="fa-solid fa-link me-1"></i> {{ channels.length }} Uygulama
+                </span>
+            </div>
+        </div>
+        <div class="col-lg-5 d-none d-lg-block text-end">
+            <div class="hero-icons">
+                <i class="fa-solid fa-globe hero-icon icon-1"></i>
+                <i class="fa-solid fa-store hero-icon icon-2"></i>
+                <i class="fa-brands fa-instagram hero-icon icon-3"></i>
+                <i class="fa-brands fa-whatsapp hero-icon icon-4"></i>
+                <i class="fa-solid fa-cart-shopping hero-icon icon-5"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search -->
+<div class="row mb-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+                <i class="fa-solid fa-search text-muted"></i>
+            </span>
+            <input
+                type="text"
+                class="form-control border-start-0 ps-0"
+                placeholder="Uygulama ara..."
+                [(ngModel)]="filterText"
+                (ngModelChange)="onFilterChange()"
+            />
+        </div>
+    </div>
+</div>
+
+<!-- Site Kanalları -->
+@if (siteChannels.length > 0) {
+<div class="mb-4">
+    <div class="d-flex align-items-center mb-3">
+        <div class="category-icon-wrapper bg-primary bg-opacity-10 me-2">
+            <i class="fa-solid fa-globe text-primary"></i>
+        </div>
+        <h5 class="mb-0 fw-semibold">Site</h5>
+        <span class="badge bg-primary-subtle text-primary ms-2">{{ siteChannels.length }}</span>
+    </div>
+    <div class="row g-3">
+        @for (channel of siteChannels; track channel.id) {
+        <div class="col-md-6 col-lg-4">
+            <div class="app-card card border-0 h-100" (click)="onChannelClick(channel)">
+                <div class="card-img-top-wrapper">
+                    <img [src]="channel.imageUrl" [alt]="channel.name" class="card-img-top" />
+                    <div class="card-img-overlay-gradient"></div>
+                    <span class="status-badge" [class.active]="channel.status === 'active'">
+                        <i class="fa-solid fa-circle me-1" style="font-size: 6px; vertical-align: middle;"></i>
+                        {{ channel.statusLabel }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="app-icon-wrapper me-3">
+                            <img [src]="channel.imageUrl" [alt]="channel.name" class="app-icon-img" />
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-semibold">{{ channel.name }}</h6>
+                            <small class="text-muted">{{ channel.categoryLabel }}</small>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">{{ channel.description }}</p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0">
+                    <button class="btn btn-sm btn-soft-primary w-100" (click)="onConnectClick($event, channel)">
+                        <i class="fa-solid fa-plug me-1"></i> Baglan
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</div>
+}
+
+<!-- Pazaryeri Kanallari -->
+@if (pazaryeriChannels.length > 0) {
+<div class="mb-4">
+    <div class="d-flex align-items-center mb-3">
+        <div class="category-icon-wrapper bg-warning bg-opacity-10 me-2">
+            <i class="fa-solid fa-store text-warning"></i>
+        </div>
+        <h5 class="mb-0 fw-semibold">Pazaryeri</h5>
+        <span class="badge bg-warning-subtle text-warning ms-2">{{ pazaryeriChannels.length }}</span>
+    </div>
+    <div class="row g-3">
+        @for (channel of pazaryeriChannels; track channel.id) {
+        <div class="col-md-6 col-lg-4">
+            <div class="app-card card border-0 h-100" (click)="onChannelClick(channel)">
+                <div class="card-img-top-wrapper">
+                    <img [src]="channel.imageUrl" [alt]="channel.name" class="card-img-top" />
+                    <div class="card-img-overlay-gradient"></div>
+                    <span class="status-badge" [class.active]="channel.status === 'active'">
+                        <i class="fa-solid fa-circle me-1" style="font-size: 6px; vertical-align: middle;"></i>
+                        {{ channel.statusLabel }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="app-icon-wrapper me-3">
+                            <img [src]="channel.imageUrl" [alt]="channel.name" class="app-icon-img" />
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-semibold">{{ channel.name }}</h6>
+                            <small class="text-muted">{{ channel.categoryLabel }}</small>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">{{ channel.description }}</p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0">
+                    <button class="btn btn-sm btn-soft-primary w-100">
+                        <i class="fa-solid fa-plug me-1"></i> Bağlan
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</div>
+}
+
+<!-- Sosyal Medya Kanalları -->
+@if (sosyalMedyaChannels.length > 0) {
+<div class="mb-4">
+    <div class="d-flex align-items-center mb-3">
+        <div class="category-icon-wrapper bg-danger bg-opacity-10 me-2">
+            <i class="fa-solid fa-share-nodes text-danger"></i>
+        </div>
+        <h5 class="mb-0 fw-semibold">Sosyal Medya</h5>
+        <span class="badge bg-danger-subtle text-danger ms-2">{{ sosyalMedyaChannels.length }}</span>
+    </div>
+    <div class="row g-3">
+        @for (channel of sosyalMedyaChannels; track channel.id) {
+        <div class="col-md-6 col-lg-4">
+            <div class="app-card card border-0 h-100" (click)="onChannelClick(channel)">
+                <div class="card-img-top-wrapper">
+                    <img [src]="channel.imageUrl" [alt]="channel.name" class="card-img-top" />
+                    <div class="card-img-overlay-gradient"></div>
+                    <span class="status-badge" [class.active]="channel.status === 'active'">
+                        <i class="fa-solid fa-circle me-1" style="font-size: 6px; vertical-align: middle;"></i>
+                        {{ channel.statusLabel }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="app-icon-wrapper me-3">
+                            <img [src]="channel.imageUrl" [alt]="channel.name" class="app-icon-img" />
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-semibold">{{ channel.name }}</h6>
+                            <small class="text-muted">{{ channel.categoryLabel }}</small>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">{{ channel.description }}</p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0">
+                    <button class="btn btn-sm btn-soft-primary w-100">
+                        <i class="fa-solid fa-plug me-1"></i> Bağlan
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</div>
+}
+
+<!-- Boş sonuç -->
+@if (filteredChannels.length === 0 && filterText) {
+<div class="text-center py-5">
+    <i class="fa-solid fa-search fa-3x text-muted mb-3 d-block"></i>
+    <h5 class="text-muted">Sonuç bulunamadı</h5>
+    <p class="text-muted">"{{ filterText }}" ile eşleşen uygulama bulunamadı.</p>
+    <button class="btn btn-sm btn-soft-primary" (click)="filterText = ''; onFilterChange()">
+        <i class="fa-solid fa-times me-1"></i> Filtreyi Temizle
+    </button>
+</div>
+}
+
+<!-- Ticimax Baglanti Modali -->
+@if (showTicimaxModal) {
+<div class="modal-backdrop-custom" (click)="closeTicimaxModal()"></div>
+<div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content connect-modal">
+            <div class="modal-header">
+                <div class="d-flex align-items-center">
+                    <div class="app-icon-wrapper me-3">
+                        <img src="assets/images/logos/ticimax_logo.svg" alt="Ticimax" class="app-icon-img" />
+                    </div>
+                    <div>
+                        <h5 class="modal-title mb-0">Ticimax Baglantisi</h5>
+                        <small class="text-muted">E-ticaret entegrasyon bilgilerini girin</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" (click)="closeTicimaxModal()"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-link me-1 text-primary"></i> Product XML URL
+                    </label>
+                    <input
+                        type="url"
+                        class="form-control"
+                        placeholder="https://www.siteadi.com/xml/?R=...&K=..."
+                        [(ngModel)]="ticimaxForm.productXmlUrl"
+                    />
+                    <small class="text-muted">Ticimax panelinizden aldiginiz urun XML adresi</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-key me-1 text-warning"></i> Web Servis Kodu
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Web servis kodunuzu girin"
+                        [(ngModel)]="ticimaxForm.webServisKodu"
+                    />
+                    <small class="text-muted">Ticimax yonetim panelindeki web servis erisim kodu</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-globe me-1 text-info"></i> Alan Adi
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        placeholder="www.siteadi.com"
+                        [(ngModel)]="ticimaxForm.alanAdi"
+                    />
+                    <small class="text-muted">Ticimax magazanizin alan adi (domain)</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" (click)="closeTicimaxModal()">
+                    Iptal
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    [disabled]="savingTicimax || !ticimaxForm.productXmlUrl || !ticimaxForm.webServisKodu || !ticimaxForm.alanAdi"
+                    (click)="saveTicimax()"
+                >
+                    @if (savingTicimax) {
+                        <span class="spinner-border spinner-border-sm me-1"></span> Kaydediliyor...
+                    } @else {
+                        <i class="fa-solid fa-plug me-1"></i> Baglan
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+}

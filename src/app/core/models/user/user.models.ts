@@ -4,7 +4,6 @@ export interface CreateUserRequest {
   email: string;
   password: string;
   gender: string;
-  companyId?: string;
 }
 
 export interface UpdateUserRequest {
@@ -13,18 +12,19 @@ export interface UpdateUserRequest {
   email: string;
   gender: string;
   isBlocked: boolean;
-  companyId?: string;
 }
 
-export interface User {
+export interface UserResponse {
   id: string;
   name: string;
   lastName: string;
   email: string;
   gender: string;
+  lastLoginDate?: string;
   isBlocked: boolean;
-  companyId?: string;
-  companyName?: string;
   createdDate?: string;
   updatedDate?: string;
 }
+
+/** @deprecated UserResponse kullanın */
+export type User = UserResponse;

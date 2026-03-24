@@ -10,6 +10,14 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface RegisterWithCompanyRequest {
+  name: string;
+  lastName: string;
+  email: string;
+  password: string;
+  companyId?: string;
+}
+
 export interface RefreshTokenRequest {
   refreshToken: string;
 }

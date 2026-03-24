@@ -91,6 +91,11 @@ export class ProductsService {
         return this.http.get<any>({ controller: 'Products', action: `by-company/${companyId}${qs}` });
     }
 
+    /** POST /api/Products/list - Filter ile ürünleri listeler */
+    getList(filter: any): Promise<ApiResponse<any>> {
+        return this.http.post<any>({ controller: 'Products', action: 'list' }, filter);
+    }
+
     create(request: CreateProductRequest): Promise<ApiResponse<any>> {
         return this.http.post<any>({ controller: 'Products' }, request);
     }

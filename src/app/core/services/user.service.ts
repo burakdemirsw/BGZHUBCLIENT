@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClientService } from './http-client.service';
 import { ApiResponse } from '../models/api-response.model';
 import { AuthStateService } from './auth-state.service';
-import { LoginRequest, RegisterRequest, RefreshTokenRequest } from '../models/auth/auth.models';
+import { LoginRequest, RegisterRequest, RegisterWithCompanyRequest, RefreshTokenRequest } from '../models/auth/auth.models';
 
 @Injectable({
   providedIn: 'root',
@@ -17,8 +17,8 @@ export class UserService {
   ) {}
 
   logout(): void {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    localStorage.clear();
+    sessionStorage.clear();
     this.authState.clearProfile();
     // Lazy import ile circular dependency'den kaçın
     try {
@@ -26,7 +26,7 @@ export class UserService {
       const userMenuService = this.injector.get<any>(mod.UserMenuService);
       userMenuService.clearMenus();
     } catch { /* ignore */ }
-    this.router.navigate(['/auth/sign-in']);
+    this.router.navigate(['/home']);
   }
 
   login(loginRequest: LoginRequest): Promise<ApiResponse<any>> {
@@ -39,6 +39,13 @@ export class UserService {
   register(registerRequest: RegisterRequest): Promise<ApiResponse<any>> {
     return this.httpClientService.post<any>(
       { controller: 'Auth', action: 'register' },
+      registerRequest
+    );
+  }
+
+  registerWithCompany(registerRequest: RegisterWithCompanyRequest): Promise<ApiResponse<any>> {
+    return this.httpClientService.post<any>(
+      { controller: 'Auth', action: 'register-with-company' },
       registerRequest
     );
   }

@@ -28,19 +28,17 @@
                                     <th>Ad</th>
                                     <th>Soyad</th>
                                     <th>E-posta</th>
-                                    <th>Şirket</th>
                                     <th>Cinsiyet</th>
                                     <th>Durum</th>
                                     <th class="text-end">İşlemler</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (user of pagedItems; track $index) {
+                                @for (user of pagedItems; track user.id) {
                                     <tr>
                                         <td>{{ user.name }}</td>
                                         <td>{{ user.lastName }}</td>
                                         <td>{{ user.email }}</td>
-                                        <td>{{ user.companyName || '—' }}</td>
                                         <td>{{ user.gender }}</td>
                                         <td>
                                             <span class="badge" [class]="user.isBlocked ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'">
@@ -48,12 +46,14 @@
                                             </span>
                                         </td>
                                         <td class="text-end">
-                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(user)">Düzenle</button>
-                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteUser(user)">Sil</button>
+                                            <button class="btn btn-soft-info btn-sm me-1" title="Onay Maili Gönder" (click)="sendConfirmMail(user)">
+                                                <i class="fa-solid fa-envelope"></i>
+                                            </button>
+                                            <button class="btn btn-soft-primary btn-sm" (click)="openEdit(user)">Düzenle</button>
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="7" class="text-center text-muted">Kullanıcı bulunamadı.</td></tr>
+                                    <tr><td colspan="6" class="text-center text-muted">Kullanıcı bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -123,15 +123,6 @@
                                 <input type="password" class="form-control" [(ngModel)]="form.password" name="password" required>
                             </div>
                         }
-                        <div class="mb-3">
-                            <label class="form-label">Şirket</label>
-                            <select class="form-select" [(ngModel)]="form.companyId" name="companyId">
-                                <option value="">— Şirket Seçiniz —</option>
-                                @for (c of companies; track c.id) {
-                                    <option [ngValue]="c.id">{{ c.name }}</option>
-                                }
-                            </select>
-                        </div>
                         <div class="mb-3">
                             <label class="form-label">Cinsiyet</label>
                             <select class="form-select" [(ngModel)]="form.gender" name="gender">

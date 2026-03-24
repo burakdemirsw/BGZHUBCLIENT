@@ -5,6 +5,7 @@ import { NgIcon } from '@ng-icons/core';
 import { Apexchart } from '@app/components/apexchart';
 import { ApexOptions } from 'ng-apexcharts';
 import { DashboardService } from '@core/services/dashboard.service';
+import { WelcomeSplash } from '@app/components/welcome-splash/welcome-splash';
 import {
   MonthlySummaryResponse,
   IntegrationCountsResponse,
@@ -24,7 +25,7 @@ interface SummaryCard {
 
 @Component({
   selector: 'app-dashboard-1',
-  imports: [CommonModule, CountUpModule, NgIcon, Apexchart],
+  imports: [CommonModule, CountUpModule, NgIcon, Apexchart, WelcomeSplash],
   templateUrl: './dashboard-1.html',
   styleUrl: './dashboard-1.scss',
 })
