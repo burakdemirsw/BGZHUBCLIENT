@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomersService } from '@/app/core/services/customers.service';
-import { Customer, CreateCustomerRequest, UpdateCustomerRequest } from '@/app/core/models/customer/customer.models';
-import { HttpClientService } from '@/app/core/services/http-client.service';
+import { CustomerDetailResponse } from '@/app/core/models/customer/customer.models';
 
 @Component({
     selector: 'app-customers-page',
@@ -11,9 +10,7 @@ import { HttpClientService } from '@/app/core/services/http-client.service';
     templateUrl: './customers.html',
 })
 export class CustomersPage implements OnInit {
-    items: Customer[] = [];
-    users: any[] = [];
-    socialMediaAccounts: any[] = [];
+    items: CustomerDetailResponse[] = [];
     loading = false;
 
     // Server-side pagination
@@ -24,33 +21,16 @@ export class CustomersPage implements OnInit {
     totalPages = 1;
     totalPagesArray: number[] = [];
 
-    // Modal
-    showModal = false;
-    editMode = false;
-    selectedItem: Customer | null = null;
-    form: any = { userId: '', socialMediaAccountId: '', companyId: '', platformAccountId: '' };
+    // Detail Modal
+    showDetailModal = false;
+    selectedItem: CustomerDetailResponse | null = null;
 
     constructor(
         private service: CustomersService,
-        private http: HttpClientService
     ) {}
 
     ngOnInit(): void {
-        this.loadLookups();
         this.loadItems();
-    }
-
-    async loadLookups(): Promise<void> {
-        try {
-            const [usersRes, smaRes] = await Promise.all([
-                this.http.get({ controller: 'Users' }),
-                this.http.get({ controller: 'SocialMedia', action: 'accounts?PageNumber=1&PageSize=1000' }),
-            ]);
-            this.users = this.extractArray(usersRes?.data);
-            this.socialMediaAccounts = this.extractArray(smaRes?.data);
-        } catch (err) {
-            console.error('Lookup load error:', err);
-        }
     }
 
     async loadItems(): Promise<void> {
@@ -69,103 +49,48 @@ export class CustomersPage implements OnInit {
         }
     }
 
-    getDisplayName(customer: Customer): string {
-        if (customer.fullName) return customer.fullName;
-        const combined = `${customer.firstName ?? ''} ${customer.lastName ?? ''}`.trim();
-        if (combined) return combined;
-        return customer.displayName ?? customer.customerCode ?? '-';
+    getDisplayName(customer: CustomerDetailResponse): string {
+        // Önce descriptions'dan al (ilk description'ın firstName + lastName)
+        if (customer.descriptions?.length) {
+            const desc = customer.descriptions[0];
+            const combined = `${desc.firstName ?? ''} ${desc.lastName ?? ''}`.trim();
+            if (combined) return combined;
+        }
+        // Sonra user bilgisinden
+        if (customer.user) {
+            const combined = `${customer.user.firstName ?? ''} ${customer.user.lastName ?? ''}`.trim();
+            if (combined) return combined;
+        }
+        return customer.platformUsername || '-';
     }
 
-    getUserName(userId?: string): string {
-        if (!userId) return '-';
-        const u = this.users.find((x: any) => x.id === userId);
-        return u ? (u.fullName || u.userName || u.email || '-') : userId.substring(0, 8) + '...';
-    }
-  
-    getSocialMediaAccountName(id?: string): string {
-        if (!id) return '-';
-        const s = this.socialMediaAccounts.find((x: any) => x.id === id);
-        return s ? (s.name || s.accountName || '-') : id.substring(0, 8) + '...';
+    getUserName(customer: CustomerDetailResponse): string {
+        if (customer.user) {
+            const name = `${customer.user.firstName ?? ''} ${customer.user.lastName ?? ''}`.trim();
+            return name || customer.user.email || '-';
+        }
+        return '-';
     }
 
-    openCreate(): void {
-        this.editMode = false;
-        this.selectedItem = null;
-        this.form = { 
-            userId: '', 
-            socialMediaAccountId: '', 
-            companyId: localStorage.getItem('companyId') || '', 
-            platformAccountId: '', 
-            platformUsername: '', 
-            platformName: '' 
-        };
-        this.showModal = true;
+    getSocialMediaAccountName(customer: CustomerDetailResponse): string {
+        if (customer.socialMediaAccount) {
+            return customer.socialMediaAccount.accountName || customer.socialMediaAccount.platform || '-';
+        }
+        return '-';
     }
 
-    openEdit(item: Customer): void {
-        this.editMode = true;
+    getCompanyName(customer: CustomerDetailResponse): string {
+        return customer.company?.name || '-';
+    }
+
+    openDetail(item: CustomerDetailResponse): void {
         this.selectedItem = item;
-        this.form = {
-            userId: item.userId || '',
-            socialMediaAccountId: item.socialMediaAccountId || '',
-            companyId: item.companyId || localStorage.getItem('companyId') || '',
-            platformAccountId: item.platformAccountId || '',
-            platformUsername: item.platformUsername || '',
-            platformName: item.platformName || '',
-            status: item.status ?? 0
-        };
-        this.showModal = true;
+        this.showDetailModal = true;
     }
 
-    async save(): Promise<void> {
-        try {
-            if (this.editMode && this.selectedItem) {
-                const req: UpdateCustomerRequest = {
-                    userId: this.form.userId,
-                    socialMediaAccountId: this.form.socialMediaAccountId,
-                    companyId: this.form.companyId || localStorage.getItem('companyId') || '',
-                    platformAccountId: this.form.platformAccountId,
-                    platformUsername: this.form.platformUsername,
-                    platformName: this.form.platformName,
-                    status: this.form.status ?? 0,
-                    isBlocked: this.selectedItem.isBlocked || false
-                };
-                await this.service.update(this.selectedItem.id, req);
-            } else {
-                const req: CreateCustomerRequest = {
-                    userId: this.form.userId,
-                    socialMediaAccountId: this.form.socialMediaAccountId,
-                    companyId: this.form.companyId || localStorage.getItem('companyId') || '',
-                    platformAccountId: this.form.platformAccountId,
-                    platformUsername: this.form.platformUsername,
-                    platformName: this.form.platformName
-                };
-                await this.service.create(req);
-            }
-            this.showModal = false;
-            await this.loadItems();
-        } catch (err: any) {
-            console.error('Save error:', err);
-            const msg = err.status === 0
-                ? `Sunucuya bağlanılamadı.\nURL: ${err.url}\nMesaj: ${err.message}`
-                : `Hata ${err.status}: ${err.error?.message || err.error?.title || JSON.stringify(err.error)}`;
-            alert('İşlem hatası:\n' + msg);
-        }
-    }
-
-    closeModal(): void {
-        this.showModal = false;
-    }
-
-    async deleteItem(item: Customer): Promise<void> {
-        if (confirm('Bu müşteriyi silmek istediğinize emin misiniz?')) {
-            try {
-                await this.service.delete(item.id);
-                await this.loadItems();
-            } catch (err) {
-                console.error('Delete error:', err);
-            }
-        }
+    closeDetailModal(): void {
+        this.showDetailModal = false;
+        this.selectedItem = null;
     }
 
     // ────── Server-side Pagination ──────

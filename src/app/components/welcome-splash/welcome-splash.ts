@@ -2,12 +2,6 @@ import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { AuthStateService } from '@core/services/auth-state.service';
 
-interface Particle {
-  x: number;
-  delay: number;
-  duration: number;
-}
-
 const SPLASH_SHOWN_KEY = 'welcomeSplashShownDate';
 
 @Component({
@@ -23,7 +17,6 @@ export class WelcomeSplash implements OnInit, OnDestroy {
   fadingOut = false;
   fullName = '';
   lastLoginFormatted = '';
-  particles: Particle[] = [];
 
   private dismissTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -45,13 +38,6 @@ export class WelcomeSplash implements OnInit, OnDestroy {
     // Populate data
     this.fullName = `${this.capitalize(profile.name)} ${this.capitalize(profile.surname)}`;
     this.lastLoginFormatted = this.formatDate(profile.lastLoginDate);
-
-    // Generate particles
-    this.particles = Array.from({ length: 20 }, () => ({
-      x: Math.random() * 100,
-      delay: Math.random() * 3,
-      duration: 4 + Math.random() * 6,
-    }));
 
     // Show splash
     this.visible = true;

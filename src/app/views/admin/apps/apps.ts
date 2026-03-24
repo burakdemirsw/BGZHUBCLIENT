@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -26,6 +26,7 @@ interface TicimaxForm {
     imports: [CommonModule, FormsModule],
     templateUrl: './apps.html',
     styleUrl: './apps.scss',
+    encapsulation: ViewEncapsulation.None,
 })
 export class AppsPage {
     filterText = '';

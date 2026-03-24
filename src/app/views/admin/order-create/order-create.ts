@@ -606,14 +606,18 @@ export class OrderCreatePage implements OnInit {
             
             if (this.existingOrder) {
                 // Mevcut verileri set et
-                this.selectedOrderStatusId = this.existingOrder.orderStatusId || '';
-                this.selectedPaymentTypeId = this.existingOrder.paymentTypeId || '';
+                this.selectedOrderStatusId = this.existingOrder.orderStatus?.id || '';
+                this.selectedPaymentTypeId = this.existingOrder.paymentType?.id || '';
                 this.orderDescription = this.existingOrder.description || '';
 
-                // Cart'ı doldur (eğer items varsa)
-                if (this.existingOrder.items?.length) {
-                    this.cartItems = this.existingOrder.items.map(item => ({
-                        product: item.product || { id: item.productId, name: 'Ürün' },
+                // Cart'ı doldur (eğer orderItems varsa)
+                if (this.existingOrder.orderItems?.length) {
+                    this.cartItems = this.existingOrder.orderItems.map(item => ({
+                        product: {
+                            id: item.productId,
+                            name: item.productName || 'Ürün',
+                            imageUrl: item.productImageUrl,
+                        } as Product,
                         quantity: item.quantity || 1,
                         unitPrice: item.unitPrice || 0,
                         discountRate: item.discountRate || 0,
@@ -640,7 +644,7 @@ export class OrderCreatePage implements OnInit {
             const request: UpdateOrderRequest = {
                 orderStatusId: this.selectedOrderStatusId,
                 paymentTypeId: this.selectedPaymentTypeId || undefined,
-                addressId: this.existingOrder.addressId || undefined,
+                addressId: this.existingOrder.address?.id || undefined,
                 description: this.orderDescription,
                 isCompleted: this.existingOrder.isCompleted || false,
                 isCancel: this.existingOrder.isCancel || false

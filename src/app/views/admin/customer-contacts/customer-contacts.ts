@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerContactsService } from '@/app/core/services/customer-contacts.service';
 import { CustomerContact, CreateCustomerContactRequest, UpdateCustomerContactRequest } from '@/app/core/models/customer/customer-contact.models';
-import { Customer } from '@/app/core/models/customer/customer.models';
+import { CustomerDetailResponse } from '@/app/core/models/customer/customer.models';
 import { ContactType } from '@/app/core/models/customer/contact-type.models';
 import { HttpClientService } from '@/app/core/services/http-client.service';
 import { ContactTypesService } from '@/app/core/services/contact-types.service';
@@ -15,7 +15,7 @@ import { ContactTypesService } from '@/app/core/services/contact-types.service';
 })
 export class CustomerContactsPage implements OnInit {
     items: CustomerContact[] = [];
-    customers: Customer[] = [];
+    customers: CustomerDetailResponse[] = [];
     contactTypes: ContactType[] = [];
     loading = false;
 
@@ -77,7 +77,7 @@ export class CustomerContactsPage implements OnInit {
     getCustomerName(customerId?: string): string {
         if (!customerId) return '-';
         const c = this.customers.find(x => x.id === customerId);
-        return c ? (c.fullName || c.displayName || `${c.firstName || ''} ${c.lastName || ''}`.trim() || '-') : customerId.substring(0, 8) + '...';
+        return c ? (c.descriptions?.[0] ? `${c.descriptions[0].firstName || ''} ${c.descriptions[0].lastName || ''}`.trim() : `${c.user?.firstName || ''} ${c.user?.lastName || ''}`.trim() || c.platformUsername || '-') : customerId.substring(0, 8) + '...';
     }
 
     getContactTypeName(id?: string): string {

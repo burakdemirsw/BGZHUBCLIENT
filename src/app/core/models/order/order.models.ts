@@ -1,34 +1,77 @@
-export interface Order {
+export interface OrderStatusSummary {
     id: string;
-    integrationUserId?: string;
-    companyId?: string;
-    userId?: string;
-    customerId?: string;
-    orderStatusId?: string;
-    paymentTypeId?: string;
-    addressId?: string;
+    name?: string;
+}
+
+export interface PaymentTypeSummary {
+    id: string;
+    name?: string;
+}
+
+export interface OrderCustomerSummary {
+    id: string;
+    platformAccountId: string;
+    platformUsername: string;
+    platformName: string;
+    isBlocked: boolean;
+}
+
+export interface OrderItemSummary {
+    id: string;
+    productId: string;
+    productName?: string;
+    productImageUrl?: string;
+    quantity: number;
+    unitPrice: number;
+    discountRate: number;
+    discountTotal: number;
+    taxRate: number;
+    taxTotal: number;
+    totalPrice: number;
+}
+
+export interface OrderPaymentSummary {
+    id: string;
+    paymentTypeId: string;
+    paymentTypeName?: string;
+    paymentStatusId: string;
+    paymentStatusName?: string;
+    amount: number;
+    currencyCode: string;
+    referenceNo?: string;
+    paymentDate: string;
+}
+
+export interface OrderAddressSummary {
+    id: string;
+    addressLine: string;
+    postalCode?: string;
+    isDefault: boolean;
+}
+
+export interface OrderWithCustomerResponse {
+    id: string;
     integrationOrderNo?: string;
     integrationOrderId?: string;
-    orderDate?: string;
-    orderTime?: string;
+    orderDate: string;
+    orderTime: string;
     description?: string;
-    currencyCode?: string;
-    isCreatedByAgent?: boolean;
-    isCompleted?: boolean;
-    isCancel?: boolean;
-    totalAmount?: number;
-    isBlocked?: boolean;
-    createdDate?: string;
-    updatedDate?: string;
-    // İlişkili veriler (response'dan gelebilir)
-    customer?: any;
-    orderStatus?: any;
-    paymentType?: any;
-    user?: any;
-    integrationUser?: any;
-    items?: OrderItem[];
-    payments?: OrderPayment[];
+    currencyCode: string;
+    isCompleted: boolean;
+    isCancel: boolean;
+    isCreatedByAgent: boolean;
+    itemCount: number;
+    totalAmount: number;
+    orderStatus?: OrderStatusSummary;
+    paymentType?: PaymentTypeSummary;
+    customer?: OrderCustomerSummary;
+    orderItems: OrderItemSummary[];
+    orderPayments: OrderPaymentSummary[];
+    address?: OrderAddressSummary;
 }
+
+// Geriye dönük uyumluluk
+export type Order = OrderWithCustomerResponse;
 
 export interface OrderItem {
     id: string;
@@ -117,6 +160,7 @@ export interface UpdateOrderPaymentRequest {
 }
 
 export interface OrderFilterRequest {
+    companyId: string;
     pageNumber?: number;
     pageSize?: number;
     searchTerm?: string;

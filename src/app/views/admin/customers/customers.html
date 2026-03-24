@@ -1,15 +1,12 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header">
                 <h4 class="card-title mb-0"><i class="fa-solid fa-users me-2"></i>Müşteriler</h4>
-                <button class="btn btn-primary btn-sm" (click)="openCreate()">
-                    <i class="fa-solid fa-plus me-1"></i>Yeni Müşteri
-                </button>
             </div>
             <div class="card-body">
                 <div class="d-flex mb-3">
-                    <input type="text" class="form-control form-control-sm w-auto" placeholder="Ad, e-posta, telefon veya firma ara..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()">
+                    <input type="text" class="form-control form-control-sm w-auto" placeholder="Ad, platform veya firma ara..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()">
                 </div>
                 @if (loading) {
                     <div class="text-center py-4">
@@ -22,13 +19,14 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>#</th>
-                                    <th>Kullanıcı Adı</th>
+                                    <th>Müşteri Adı</th>
                                     <th>Platform</th>
-                                    <th>Platform ID</th>
-                                    <th>Müşteri Kodu</th>
+                                    <th>Platform Kullanıcı</th>
+                                    <th>Firma</th>
+                                    <th>Sosyal Medya Hesabı</th>
                                     <th class="text-center">Durum</th>
                                     <th>Oluşturulma</th>
-                                    <th class="text-end">İşlemler</th>
+                                    <th class="text-end">Detay</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -37,39 +35,35 @@
                                         <td>
                                             <span class="badge bg-primary-subtle text-primary">{{ (currentPage - 1) * pageSize + idx + 1 }}</span>
                                         </td>
-                                        <td>{{ item.platformUsername || '-' }}</td>
+                                        <td class="fw-semibold">{{ getDisplayName(item) }}</td>
                                         <td>
                                             <span class="badge bg-secondary-subtle text-secondary">{{ item.platformName || '-' }}</span>
                                         </td>
-                                        <td class="small text-muted">{{ item.platformAccountId || '-' }}</td>
-                                        <td>
-                                            <span class="badge bg-info-subtle text-info">{{ item.customerCode || '-' }}</span>
-                                        </td>
+                                        <td class="small">{{ item.platformUsername || '-' }}</td>
+                                        <td>{{ getCompanyName(item) }}</td>
+                                        <td class="small text-muted">{{ getSocialMediaAccountName(item) }}</td>
                                         <td class="text-center">
                                             @if (item.isBlocked) {
-                                                <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                <span class="badge bg-danger-subtle text-danger">Engelli</span>
                                             } @else {
                                                 <span class="badge bg-success-subtle text-success">Aktif</span>
                                             }
                                         </td>
                                         <td class="small text-muted">{{ item.createdDate | date:'dd.MM.yyyy HH:mm' }}</td>
                                         <td class="text-end">
-                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(item)">
-                                                <i class="fa-solid fa-pen-to-square me-1"></i>Düzenle
-                                            </button>
-                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteItem(item)">
-                                                <i class="fa-solid fa-trash me-1"></i>Sil
+                                            <button class="btn btn-soft-primary btn-sm" (click)="openDetail(item)">
+                                                <i class="fa-solid fa-eye me-1"></i>Detay
                                             </button>
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="8" class="text-center text-muted">Müşteri bulunamadı.</td></tr>
+                                    <tr><td colspan="9" class="text-center text-muted">Müşteri bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mt-2">
-                        <div class="small text-muted">Toplam: {{ totalCount }} kayıt</div>
+                        <div class="small text-muted">Toplam: {{ totalCount }} kayıt | Sayfa {{ currentPage }} / {{ totalPages }}</div>
                         <nav>
                             <ul class="pagination pagination-sm mb-0">
                                 <li class="page-item" [class.disabled]="currentPage === 1">
@@ -92,60 +86,142 @@
     </div>
 </div>
 
-<!-- Modal -->
-@if (showModal) {
+<!-- Detay Modal -->
+@if (showDetailModal && selectedItem) {
     <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">{{ editMode ? 'Müşteri Düzenle' : 'Yeni Müşteri' }}</h5>
-                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                    <h5 class="modal-title"><i class="fa-solid fa-circle-info me-2"></i>Müşteri Detayı</h5>
+                    <button type="button" class="btn-close" (click)="closeDetailModal()"></button>
                 </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="mb-3">
-                            <label class="form-label">Kullanıcı</label>
-                            <select class="form-select" [(ngModel)]="form.userId" name="userId">
-                                <option value="">Kullanıcı seçiniz...</option>
-                                @for (u of users; track u.id) {
-                                    <option [value]="u.id">{{ u.fullName || u.userName || u.email }}</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Sosyal Medya Hesabı</label>
-                            <select class="form-select" [(ngModel)]="form.socialMediaAccountId" name="socialMediaAccountId">
-                                <option value="">Hesap seçiniz...</option>
-                                @for (s of socialMediaAccounts; track s.id) {
-                                    <option [value]="s.id">{{ s.name || s.accountName || s.id }}</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Platform Hesap ID</label>
-                            <input type="text" class="form-control" [(ngModel)]="form.platformAccountId" name="platformAccountId" placeholder="Platform hesap ID'si">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Kullanıcı Adı (Platform)</label>
-                            <input type="text" class="form-control" [(ngModel)]="form.platformUsername" name="platformUsername" placeholder="Platform kullanıcı adı">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Platform Adı</label>
-                            <input type="text" class="form-control" [(ngModel)]="form.platformName" name="platformName" placeholder="Platform adı (instagram, whatsapp vb.)">
-                        </div>
-                        @if (editMode) {
-                            <div class="mb-3">
-                                <label class="form-label">Durum (Status)</label>
-                                <input type="number" class="form-control" [(ngModel)]="form.status" name="status" min="0" max="255">
+                <div class="modal-body" style="background-color: #f7f7f9">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="card mb-0">
+                                <div class="card-body">
+                                    <h6 class="mb-3">Genel Bilgiler</h6>
+                                    <div class="row g-2 small">
+                                        <div class="col-md-6"><span class="text-muted">Platform:</span> {{ selectedItem.platformName || '-' }}</div>
+                                        <div class="col-md-6"><span class="text-muted">Platform Kullanıcı:</span> {{ selectedItem.platformUsername || '-' }}</div>
+                                        <div class="col-md-6"><span class="text-muted">Durum:</span>
+                                            @if (selectedItem.isBlocked) {
+                                                <span class="badge bg-danger-subtle text-danger ms-1">Engelli</span>
+                                            } @else {
+                                                <span class="badge bg-success-subtle text-success ms-1">Aktif</span>
+                                            }
+                                        </div>
+                                        <div class="col-md-6"><span class="text-muted">Oluşturulma:</span> {{ selectedItem.createdDate | date:'dd.MM.yyyy HH:mm' }}</div>
+                                        <div class="col-md-6"><span class="text-muted">Güncellenme:</span> {{ selectedItem.updatedDate | date:'dd.MM.yyyy HH:mm' }}</div>
+                                    </div>
+                                </div>
                             </div>
-                        }
-                    </form>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="card mb-0">
+                                <div class="card-body">
+                                    <h6 class="mb-2">Firma Detayı</h6>
+                                    <div class="small text-muted">Ad</div>
+                                    <div>{{ selectedItem.company?.name || '-' }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card mb-0">
+                                <div class="card-body">
+                                    <h6 class="mb-2">Sosyal Medya Hesabı Detayı</h6>
+                                    <div class="small text-muted">Hesap Adı</div>
+                                    <div class="mb-2">{{ selectedItem.socialMediaAccount?.accountName || '-' }}</div>
+                                    <div class="small text-muted">Platform</div>
+                                    <div>{{ selectedItem.socialMediaAccount?.platform || '-' }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="card mb-0">
+                                <div class="card-body">
+                                    <h6 class="mb-3">Adresler ({{ selectedItem.addresses.length || 0 }})</h6>
+                                    @if (selectedItem.addresses.length) {
+                                        <div class="list-group list-group-flush">
+                                            @for (address of selectedItem.addresses; track address.id) {
+                                                <div class="list-group-item px-0">
+                                                    <div class="fw-semibold">{{ address.addressLine }}</div>
+                                                    <div class="small text-muted">Posta Kodu: {{ address.postalCode || '-' }}</div>
+                                                    <div class="mt-1">
+                                                        @if (address.isDefault) {
+                                                            <span class="badge bg-success-subtle text-success me-1">Varsayılan</span>
+                                                        }
+                                                        @if (address.isBlocked) {
+                                                            <span class="badge bg-danger-subtle text-danger">Engelli</span>
+                                                        } @else {
+                                                            <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    } @else {
+                                        <div class="text-muted small">Kayıtlı adres yok.</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6">
+                            <div class="card mb-0">
+                                <div class="card-body">
+                                    <h6 class="mb-3">İletişim Kayıtları ({{ selectedItem.contacts.length || 0 }})</h6>
+                                    @if (selectedItem.contacts.length) {
+                                        <div class="list-group list-group-flush">
+                                            @for (contact of selectedItem.contacts; track contact.id) {
+                                                <div class="list-group-item px-0">
+                                                    <div class="fw-semibold">{{ contact.value }}</div>
+                                                    <div class="mt-1">
+                                                        @if (contact.isDefault) {
+                                                            <span class="badge bg-success-subtle text-success me-1">Varsayılan</span>
+                                                        }
+                                                        @if (contact.isBlocked) {
+                                                            <span class="badge bg-danger-subtle text-danger">Engelli</span>
+                                                        } @else {
+                                                            <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    } @else {
+                                        <div class="text-muted small">Kayıtlı iletişim yok.</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6">
+                            <div class="card mb-0">
+                                <div class="card-body">
+                                    <h6 class="mb-3">Açıklamalar ({{ selectedItem.descriptions.length || 0 }})</h6>
+                                    @if (selectedItem.descriptions.length) {
+                                        <div class="list-group list-group-flush">
+                                            @for (description of selectedItem.descriptions; track description.id) {
+                                                <div class="list-group-item px-0">
+                                                    <div class="fw-semibold">{{ description.firstName }} {{ description.lastName || '' }}</div>
+                                                    <div class="small text-muted mb-1">Dil: {{ description.langCode }}</div>
+                                                    <div class="small">{{ description.description || '-' }}</div>
+                                                </div>
+                                            }
+                                        </div>
+                                    } @else {
+                                        <div class="text-muted small">Kayıtlı açıklama yok.</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
-                    <button type="button" class="btn btn-primary" (click)="save()">
-                        {{ editMode ? 'Güncelle' : 'Kaydet' }}
-                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="closeDetailModal()">Kapat</button>
                 </div>
             </div>
         </div>

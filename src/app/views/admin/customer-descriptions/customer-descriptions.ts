@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerDescriptionsService } from '@/app/core/services/customer-descriptions.service';
 import { CustomerDescription, CreateCustomerDescriptionRequest, UpdateCustomerDescriptionRequest } from '@/app/core/models/customer/customer-description.models';
-import { Customer } from '@/app/core/models/customer/customer.models';
+import { CustomerDetailResponse } from '@/app/core/models/customer/customer.models';
 import { HttpClientService } from '@/app/core/services/http-client.service';
 
 @Component({
@@ -13,7 +13,7 @@ import { HttpClientService } from '@/app/core/services/http-client.service';
 })
 export class CustomerDescriptionsPage implements OnInit {
     items: CustomerDescription[] = [];
-    customers: Customer[] = [];
+    customers: CustomerDetailResponse[] = [];
     loading = false;
 
     // Server-side pagination
@@ -68,7 +68,7 @@ export class CustomerDescriptionsPage implements OnInit {
     getCustomerName(customerId?: string): string {
         if (!customerId) return '-';
         const c = this.customers.find(x => x.id === customerId);
-        return c ? (c.fullName || c.displayName || `${c.firstName || ''} ${c.lastName || ''}`.trim() || '-') : customerId.substring(0, 8) + '...';
+        return c ? (c.descriptions?.[0] ? `${c.descriptions[0].firstName || ''} ${c.descriptions[0].lastName || ''}`.trim() : `${c.user?.firstName || ''} ${c.user?.lastName || ''}`.trim() || c.platformUsername || '-') : customerId.substring(0, 8) + '...';
     }
 
     openCreate(): void {

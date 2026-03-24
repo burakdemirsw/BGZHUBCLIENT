@@ -8514,13 +8514,13 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfCustomerResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfCustomerDetailResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfCustomerResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfCustomerDetailResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfCustomerResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfCustomerDetailResponse"
       security:
         - Bearer: []
     post:
@@ -11217,104 +11217,7 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
-  /api/Products:
-    get:
-      tags:
-        - Products
-      parameters:
-        - name: PageNumber
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int32
-        - name: PageSize
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int32
-        - name: SearchTerm
-          in: query
-          schema:
-            type: string
-        - name: ItemCode
-          in: query
-          schema:
-            type: string
-        - name: Barcode
-          in: query
-          schema:
-            type: string
-        - name: Name
-          in: query
-          schema:
-            type: string
-        - name: Brand
-          in: query
-          schema:
-            type: string
-        - name: Category
-          in: query
-          schema:
-            type: string
-        - name: MinPrice
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
-            type:
-              - number
-              - string
-            format: double
-        - name: MaxPrice
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
-            type:
-              - number
-              - string
-            format: double
-        - name: IsActive
-          in: query
-          schema:
-            type: boolean
-        - name: IntegrationUserId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: CompanyId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: SortBy
-          in: query
-          schema:
-            type: string
-        - name: SortDescending
-          in: query
-          schema:
-            type: boolean
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfProductResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfProductResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfProductResponse"
-      security:
-        - Bearer: []
+  /api/Products/list:
     post:
       tags:
         - Products
@@ -11322,13 +11225,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateProductRequest"
+              $ref: "#/components/schemas/ProductFilterRequest"
           text/json:
             schema:
-              $ref: "#/components/schemas/CreateProductRequest"
+              $ref: "#/components/schemas/ProductFilterRequest"
           application/*+json:
             schema:
-              $ref: "#/components/schemas/CreateProductRequest"
+              $ref: "#/components/schemas/ProductFilterRequest"
         required: true
       responses:
         "200":
@@ -11336,13 +11239,13 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfProductResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfProductResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfProductResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfProductResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfProductResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfProductResponse"
       security:
         - Bearer: []
   /api/Products/{id}:
@@ -11433,84 +11336,18 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: PageNumber
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int32
-        - name: PageSize
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int32
-        - name: SearchTerm
-          in: query
-          schema:
-            type: string
-        - name: ItemCode
-          in: query
-          schema:
-            type: string
-        - name: Barcode
-          in: query
-          schema:
-            type: string
-        - name: Name
-          in: query
-          schema:
-            type: string
-        - name: Brand
-          in: query
-          schema:
-            type: string
-        - name: Category
-          in: query
-          schema:
-            type: string
-        - name: MinPrice
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
-            type:
-              - number
-              - string
-            format: double
-        - name: MaxPrice
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
-            type:
-              - number
-              - string
-            format: double
-        - name: IsActive
-          in: query
-          schema:
-            type: boolean
-        - name: IntegrationUserId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: CompanyId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: SortBy
-          in: query
-          schema:
-            type: string
-        - name: SortDescending
-          in: query
-          schema:
-            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductFilterRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/ProductFilterRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/ProductFilterRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -11524,6 +11361,37 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfPagedResultOfProductResponse"
+      security:
+        - Bearer: []
+  /api/Products:
+    post:
+      tags:
+        - Products
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateProductRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfProductResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfProductResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfProductResponse"
       security:
         - Bearer: []
   /api/Products/update/{id}:
@@ -15146,55 +15014,6 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
-  /api/Orders:
-    get:
-      tags:
-        - Orders
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfOrderListDto"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfOrderListDto"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfOrderListDto"
-      security:
-        - Bearer: []
-    post:
-      tags:
-        - Orders
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateOrderRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/CreateOrderRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/CreateOrderRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderDto"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderDto"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderDto"
-      security:
-        - Bearer: []
   /api/Orders/{id}:
     get:
       tags:
@@ -15273,83 +15092,22 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfListOfOrderListDto"
       security:
         - Bearer: []
-  /api/Orders/company/{companyId}/paged:
-    get:
+  /api/Orders/company/paged:
+    post:
       tags:
         - Orders
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: PageNumber
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int32
-        - name: PageSize
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int32
-        - name: SearchTerm
-          in: query
-          schema:
-            type: string
-        - name: OrderStatusId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: PaymentTypeId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: CustomerId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: UserId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: StartDate
-          in: query
-          schema:
-            type: string
-            format: date
-        - name: EndDate
-          in: query
-          schema:
-            type: string
-            format: date
-        - name: IsCompleted
-          in: query
-          schema:
-            type: boolean
-        - name: IsCancel
-          in: query
-          schema:
-            type: boolean
-        - name: SortBy
-          in: query
-          schema:
-            type: string
-        - name: SortDescending
-          in: query
-          schema:
-            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderFilterRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/OrderFilterRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/OrderFilterRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -15441,6 +15199,37 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfListOfOrderListDto"
+      security:
+        - Bearer: []
+  /api/Orders:
+    post:
+      tags:
+        - Orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfOrderDto"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfOrderDto"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfOrderDto"
       security:
         - Bearer: []
   /api/Orders/update/{id}:
@@ -23376,38 +23165,6 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfPagedResultOfCustomerResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/PagedResultOfCustomerResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
     ApiResponseOfPagedResultOfCustomerTypeResponse:
       type: object
       properties:
@@ -28778,6 +28535,30 @@ components:
         updatedDate:
           type: string
           format: date-time
+    CustomerAddressSummary:
+      required:
+        - id
+        - addressLine
+        - postalCode
+        - isDefault
+        - isBlocked
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        addressLine:
+          type:
+            - "null"
+            - string
+        postalCode:
+          type:
+            - "null"
+            - string
+        isDefault:
+          type: boolean
+        isBlocked:
+          type: boolean
     CustomerContactResponse:
       required:
         - id
@@ -28813,6 +28594,29 @@ components:
         updatedDate:
           type: string
           format: date-time
+    CustomerContactSummary:
+      required:
+        - id
+        - contactTypeId
+        - value
+        - isDefault
+        - isBlocked
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        contactTypeId:
+          type: string
+          format: uuid
+        value:
+          type:
+            - "null"
+            - string
+        isDefault:
+          type: boolean
+        isBlocked:
+          type: boolean
     CustomerDescriptionResponse:
       required:
         - id
@@ -28853,6 +28657,34 @@ components:
         updatedDate:
           type: string
           format: date-time
+    CustomerDescriptionSummary:
+      required:
+        - id
+        - langCode
+        - firstName
+        - lastName
+        - description
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        langCode:
+          type:
+            - "null"
+            - string
+        firstName:
+          type:
+            - "null"
+            - string
+        lastName:
+          type:
+            - "null"
+            - string
+        description:
+          type:
+            - "null"
+            - string
     CustomerDetailResponse:
       required:
         - id
@@ -28869,6 +28701,9 @@ components:
         - user
         - socialMediaAccount
         - company
+        - addresses
+        - contacts
+        - descriptions
       type: object
       properties:
         id:
@@ -28921,6 +28756,24 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/CompanySummary"
+        addresses:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/CustomerAddressSummary"
+        contacts:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/CustomerContactSummary"
+        descriptions:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/CustomerDescriptionSummary"
     CustomerResponse:
       required:
         - id
@@ -30500,6 +30353,77 @@ components:
             - array
           items:
             $ref: "#/components/schemas/OrderItemDto"
+    OrderFilterRequest:
+      required:
+        - companyId
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        pageNumber:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 1
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 20
+        searchTerm:
+          type:
+            - "null"
+            - string
+        orderStatusId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        paymentTypeId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        customerId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        userId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        startDate:
+          type:
+            - "null"
+            - string
+          format: date
+        endDate:
+          type:
+            - "null"
+            - string
+          format: date
+        isCompleted:
+          type:
+            - "null"
+            - boolean
+        isCancel:
+          type:
+            - "null"
+            - boolean
+        sortBy:
+          type:
+            - "null"
+            - string
+        sortDescending:
+          type: boolean
+          default: true
     OrderItemDto:
       required:
         - id
@@ -31652,51 +31576,6 @@ components:
             - array
           items:
             $ref: "#/components/schemas/CustomerDetailResponse"
-        pageNumber:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        pageSize:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        totalCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        totalPages:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        hasPreviousPage:
-          type: boolean
-        hasNextPage:
-          type: boolean
-    PagedResultOfCustomerResponse:
-      required:
-        - items
-        - pageNumber
-        - pageSize
-        - totalCount
-        - totalPages
-        - hasPreviousPage
-        - hasNextPage
-      type: object
-      properties:
-        items:
-          type:
-            - "null"
-            - array
-          items:
-            $ref: "#/components/schemas/CustomerResponse"
         pageNumber:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -33539,6 +33418,84 @@ components:
         updatedDate:
           type: string
           format: date-time
+    ProductFilterRequest:
+      required:
+        - companyId
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        pageNumber:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 1
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 20
+        searchTerm:
+          type:
+            - "null"
+            - string
+        itemCode:
+          type:
+            - "null"
+            - string
+        barcode:
+          type:
+            - "null"
+            - string
+        name:
+          type:
+            - "null"
+            - string
+        brand:
+          type:
+            - "null"
+            - string
+        category:
+          type:
+            - "null"
+            - string
+        minPrice:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+          type:
+            - "null"
+            - number
+            - string
+          format: double
+        maxPrice:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+          type:
+            - "null"
+            - number
+            - string
+          format: double
+        isActive:
+          type:
+            - "null"
+            - boolean
+        integrationUserId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        sortBy:
+          type:
+            - "null"
+            - string
+        sortDescending:
+          type:
+            - "null"
+            - boolean
+          default: false
     ProductResponse:
       required:
         - id

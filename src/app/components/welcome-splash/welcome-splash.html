@@ -1,13 +1,24 @@
 @if (visible) {
 <div class="splash-overlay" [class.fade-out]="fadingOut">
+
+  <!-- Floating brand shapes -->
+  <div class="floating-shapes">
+    <div class="shape shape-1"><i class="fa-brands fa-instagram"></i></div>
+    <div class="shape shape-2"><i class="fa-brands fa-whatsapp"></i></div>
+    <div class="shape shape-3"><i class="fa-solid fa-cart-shopping"></i></div>
+    <div class="shape shape-4"><i class="fa-solid fa-robot"></i></div>
+    <div class="shape shape-5"><i class="fa-solid fa-comments"></i></div>
+    <div class="shape shape-6"><i class="fa-solid fa-headset"></i></div>
+  </div>
+
   <div class="splash-content">
-    <!-- Animated greeting icon -->
-    <div class="splash-icon">
-      <span class="wave-emoji">👋</span>
+    <!-- Brand icon -->
+    <div class="splash-brand-icon">
+      <i class="fa-solid fa-bolt"></i>
     </div>
 
     <!-- Welcome text -->
-    <h1 class="splash-greeting">Hoş Geldiniz</h1>
+    <h1 class="splash-greeting">Hos Geldiniz</h1>
 
     <!-- User name -->
     <h2 class="splash-name">{{ fullName }}</h2>
@@ -19,23 +30,14 @@
     @if (lastLoginFormatted) {
     <p class="splash-last-login">
       <i class="fa-regular fa-clock"></i>
-      Son giriş: <strong>{{ lastLoginFormatted }}</strong>
+      Son giris: <strong>{{ lastLoginFormatted }}</strong>
     </p>
     }
 
-    <!-- Subtle loading dots -->
-    <div class="splash-loader">
-      <span class="dot"></span>
-      <span class="dot"></span>
-      <span class="dot"></span>
+    <!-- Loading bar -->
+    <div class="splash-progress">
+      <div class="splash-progress-bar"></div>
     </div>
-  </div>
-
-  <!-- Background particles -->
-  <div class="particles">
-    @for (p of particles; track p) {
-    <div class="particle" [style.left.%]="p.x" [style.animation-delay.s]="p.delay" [style.animation-duration.s]="p.duration"></div>
-    }
   </div>
 </div>
 }

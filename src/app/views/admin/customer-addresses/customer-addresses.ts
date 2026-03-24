@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerAddressesService } from '@/app/core/services/customer-addresses.service';
 import { CustomerAddress, CreateCustomerAddressRequest, UpdateCustomerAddressRequest } from '@/app/core/models/customer/customer-address.models';
-import { Customer } from '@/app/core/models/customer/customer.models';
+import { CustomerDetailResponse } from '@/app/core/models/customer/customer.models';
 import { AddressType } from '@/app/core/models/customer/address-type.models';
 import { Country, City, District } from '@/app/core/models/address/address.models';
 import { HttpClientService } from '@/app/core/services/http-client.service';
@@ -16,7 +16,7 @@ import { AddressTypesService } from '@/app/core/services/address-types.service';
 })
 export class CustomerAddressesPage implements OnInit {
     items: CustomerAddress[] = [];
-    customers: Customer[] = [];
+    customers: CustomerDetailResponse[] = [];
     addressTypes: AddressType[] = [];
     countries: Country[] = [];
     cities: City[] = [];
@@ -92,7 +92,7 @@ export class CustomerAddressesPage implements OnInit {
     getCustomerName(customerId?: string): string {
         if (!customerId) return '-';
         const c = this.customers.find(x => x.id === customerId);
-        return c ? (c.fullName || c.displayName || `${c.firstName || ''} ${c.lastName || ''}`.trim() || '-') : customerId.substring(0, 8) + '...';
+        return c ? (c.descriptions?.[0] ? `${c.descriptions[0].firstName || ''} ${c.descriptions[0].lastName || ''}`.trim() : `${c.user?.firstName || ''} ${c.user?.lastName || ''}`.trim() || c.platformUsername || '-') : customerId.substring(0, 8) + '...';
     }
 
     getAddressTypeName(id?: string): string {

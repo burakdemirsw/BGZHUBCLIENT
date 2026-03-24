@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { OrdersService } from '@/app/core/services/orders.service';
 import { OrderStatusesService } from '@/app/core/services/order-statuses.service';
 import { PaymentTypesService } from '@/app/core/services/payment-types.service';
-import { Order, OrderFilterRequest, UpdateOrderRequest } from '@/app/core/models/order/order.models';
+import { OrderWithCustomerResponse, OrderFilterRequest } from '@/app/core/models/order/order.models';
 
 @Component({
     selector: 'app-orders-page',
@@ -13,7 +13,7 @@ import { Order, OrderFilterRequest, UpdateOrderRequest } from '@/app/core/models
     templateUrl: './orders.html',
 })
 export class OrdersPage implements OnInit {
-    items: Order[] = [];
+    items: OrderWithCustomerResponse[] = [];
     orderStatuses: any[] = [];
     paymentTypes: any[] = [];
     loading = false;
@@ -34,10 +34,9 @@ export class OrdersPage implements OnInit {
     filterIsCompleted: string = '';
     filterIsCancel: string = '';
 
-    // Modal
-    showModal = false;
-    selectedItem: Order | null = null;
-    form: any = {};
+    // Detail Modal
+    showDetailModal = false;
+    selectedItem: OrderWithCustomerResponse | null = null;
 
     constructor(
         private service: OrdersService,
@@ -77,6 +76,7 @@ export class OrdersPage implements OnInit {
             }
 
             const filter: OrderFilterRequest = {
+                companyId,
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
                 searchTerm: this.searchTerm || undefined,
@@ -88,7 +88,7 @@ export class OrdersPage implements OnInit {
                 isCancel: this.filterIsCancel !== '' ? this.filterIsCancel === 'true' : undefined,
             };
 
-            const response = await this.service.getByCompanyPaged(companyId, filter);
+            const response = await this.service.getByCompanyPaged(filter);
             const paged = response?.data;
             this.items = paged?.items ?? [];
             this.totalCount = paged?.totalCount ?? this.items.length;
@@ -113,15 +113,16 @@ export class OrdersPage implements OnInit {
         return pt?.name || pt?.typeName || '-';
     }
 
-    getCustomerName(order: Order): string {
-        if (order.customer) {
-            const c = order.customer;
-            if (c.fullName) return c.fullName;
-            const combined = `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim();
-            if (combined) return combined;
-            return c.displayName ?? c.platformUsername ?? c.customerCode ?? '-';
-        }
-        return '-';
+    getCustomerName(order: OrderWithCustomerResponse): string {
+        return order.customer?.platformUsername || '-';
+    }
+
+    getOrderStatusLabel(order: OrderWithCustomerResponse): string {
+        return order.orderStatus?.name || '-';
+    }
+
+    getPaymentTypeLabel(order: OrderWithCustomerResponse): string {
+        return order.paymentType?.name || '-';
     }
 
     formatCurrency(amount?: number, code?: string): string {
@@ -146,50 +147,17 @@ export class OrdersPage implements OnInit {
         this.router.navigate(['/admin/orders/create']);
     }
 
-    goToDetail(order: Order): void {
-        this.router.navigate(['/admin/orders', order.id]);
-    }
-
-    openEdit(order: Order): void {
+    openDetail(order: OrderWithCustomerResponse): void {
         this.selectedItem = order;
-        this.form = {
-            orderStatusId: order.orderStatusId || '',
-            paymentTypeId: order.paymentTypeId || '',
-            description: order.description || '',
-            isCompleted: order.isCompleted || false,
-            isCancel: order.isCancel || false
-        };
-        this.showModal = true;
+        this.showDetailModal = true;
     }
 
-    async save(): Promise<void> {
-        if (!this.selectedItem) return;
-        try {
-            const req: UpdateOrderRequest = {
-                orderStatusId: this.form.orderStatusId,
-                paymentTypeId: this.form.paymentTypeId || undefined,
-                description: this.form.description || undefined,
-                isCompleted: this.form.isCompleted,
-                isCancel: this.form.isCancel
-            };
-            await this.service.update(this.selectedItem.id, req);
-            this.showModal = false;
-            await this.loadItems();
-        } catch (err: any) {
-            console.error('Save error:', err);
-            const msg = err.status === 0
-                ? `Sunucuya bağlanılamadı.\nURL: ${err.url}\nMesaj: ${err.message}`
-                : `Hata ${err.status}: ${err.error?.message || err.error?.title || JSON.stringify(err.error)}`;
-            alert('İşlem hatası:\n' + msg);
-        }
-    }
-
-    closeModal(): void {
-        this.showModal = false;
+    closeDetailModal(): void {
+        this.showDetailModal = false;
         this.selectedItem = null;
     }
 
-    async deleteItem(order: Order): Promise<void> {
+    async deleteItem(order: OrderWithCustomerResponse): Promise<void> {
         if (confirm('Bu siparişi silmek istediğinize emin misiniz?')) {
             try {
                 await this.service.delete(order.id);

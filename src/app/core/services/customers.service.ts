@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
-import { CreateCustomerRequest, UpdateCustomerRequest } from '../models/customer/customer.models';
+import { CreateCustomerRequest, UpdateCustomerRequest, CustomerDetailResponse } from '../models/customer/customer.models';
 import { ApiResponse } from '../models/api-response.model';
 import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
@@ -10,23 +10,23 @@ import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/
 export class CustomersService {
   constructor(private http: HttpClientService) {}
 
-  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-    return this.http.get<PagedResult<any>>({
+  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<CustomerDetailResponse>>> {
+    return this.http.get<PagedResult<CustomerDetailResponse>>({
       controller: 'Customers',
       action: buildPaginationQuery(req)
     });
   }
 
-  getById(id: string): Promise<ApiResponse<any>> {
-    return this.http.get<any>({ controller: 'Customers', action: `${id}` });
+  getById(id: string): Promise<ApiResponse<CustomerDetailResponse>> {
+    return this.http.get<CustomerDetailResponse>({ controller: 'Customers', action: `${id}` });
   }
 
-  getByUserId(userId: string): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'Customers', action: `by-user/${userId}` });
+  getByUserId(userId: string): Promise<ApiResponse<CustomerDetailResponse[]>> {
+    return this.http.get<CustomerDetailResponse[]>({ controller: 'Customers', action: `by-user/${userId}` });
   }
 
-  getByAccountId(accountId: string): Promise<ApiResponse<any>> {
-    return this.http.get<any>({ controller: 'Customers', action: `by-account/${accountId}` });
+  getByAccountId(accountId: string): Promise<ApiResponse<CustomerDetailResponse>> {
+    return this.http.get<CustomerDetailResponse>({ controller: 'Customers', action: `by-account/${accountId}` });
   }
 
   /** Şirkete ait müşterileri sayfalanmış ve filtrelenmiş olarak getirir */

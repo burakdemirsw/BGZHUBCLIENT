@@ -1,11 +1,8 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header">
                 <h4 class="card-title mb-0"><i class="fa-solid fa-file-contract me-2"></i>Abonelikler</h4>
-                <button class="btn btn-primary btn-sm" (click)="openCreateModal()">
-                    <i class="fa-solid fa-plus me-1"></i>Yeni Abonelik
-                </button>
             </div>
             <div class="card-body">
                 @if (loading) {
@@ -33,7 +30,6 @@
                                     <th class="text-center">Durum</th>
                                     <th class="text-center">İptal</th>
                                     <th>Oluşturulma</th>
-                                    <th class="text-end">İşlemler</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -59,22 +55,9 @@
                                             }
                                         </td>
                                         <td>{{ formatDate(item.createdDate) }}</td>
-                                        <td class="text-end">
-                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEditModal(item)" title="Düzenle">
-                                                <i class="fa-solid fa-pen-to-square"></i>
-                                            </button>
-                                            @if (!item.isCancelled) {
-                                                <button class="btn btn-soft-warning btn-sm me-1" (click)="cancelSubscription(item)" title="İptal Et">
-                                                    <i class="fa-solid fa-ban"></i>
-                                                </button>
-                                            }
-                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteItem(item)" title="Sil">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
-                                        </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="9" class="text-center text-muted">Abonelik bulunamadı.</td></tr>
+                                    <tr><td colspan="8" class="text-center text-muted">Abonelik bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -112,82 +95,3 @@
         </div>
     </div>
 </div>
-
-<!-- Abonelik Ekleme/Düzenleme Modalı -->
-@if (showModal) {
-    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fa-solid fa-file-contract me-2"></i>{{ isEditMode ? 'Abonelik Düzenle' : 'Yeni Abonelik' }}
-                    </h5>
-                    <button type="button" class="btn-close" (click)="closeModal()"></button>
-                </div>
-                <div class="modal-body" style="background-color: #f7f7f9">
-                    <form>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Şirket ID <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" [(ngModel)]="form.companyId" name="companyId" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Plan <span class="text-danger">*</span></label>
-                                <select class="form-select" [(ngModel)]="form.planId" name="planId" required>
-                                    <option value="">Seçin...</option>
-                                    @for (plan of plans; track plan.id) {
-                                        <option [value]="plan.id">{{ plan.name }}</option>
-                                    }
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Başlangıç Tarihi <span class="text-danger">*</span></label>
-                                <input type="datetime-local" class="form-control" [(ngModel)]="form.startDate" name="startDate" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Bitiş Tarihi <span class="text-danger">*</span></label>
-                                <input type="datetime-local" class="form-control" [(ngModel)]="form.endDate" name="endDate" required>
-                            </div>
-                        </div>
-                        @if (isEditMode) {
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <div class="form-check form-switch mt-4">
-                                        <input class="form-check-input" type="checkbox" [(ngModel)]="form.isActive" name="isActive" id="isActive">
-                                        <label class="form-check-label" for="isActive">Aktif</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <div class="form-check form-switch mt-4">
-                                        <input class="form-check-input" type="checkbox" [(ngModel)]="form.isCancelled" name="isCancelled" id="isCancelled">
-                                        <label class="form-check-label" for="isCancelled">İptal Edildi</label>
-                                    </div>
-                                </div>
-                            </div>
-                            @if (form.isCancelled) {
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">İptal Tarihi</label>
-                                        <input type="datetime-local" class="form-control" [(ngModel)]="form.cancelledDate" name="cancelledDate">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">İptal Eden Kullanıcı ID</label>
-                                        <input type="text" class="form-control" [(ngModel)]="form.cancelledUserId" name="cancelledUserId">
-                                    </div>
-                                </div>
-                            }
-                        }
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary btn-sm" (click)="closeModal()">İptal</button>
-                    <button class="btn btn-primary btn-sm" (click)="save()">
-                        <i class="fa-solid fa-floppy-disk me-1"></i>{{ isEditMode ? 'Güncelle' : 'Kaydet' }}
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-}

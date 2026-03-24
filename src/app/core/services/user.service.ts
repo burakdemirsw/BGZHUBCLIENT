@@ -22,6 +22,8 @@ export class UserService {
     this.authState.clearProfile();
     // Lazy import ile circular dependency'den kaçın
     try {
+      localStorage.clear();
+       this.router.navigate(['/home']);
       const mod = require('./user-menu.service');
       const userMenuService = this.injector.get<any>(mod.UserMenuService);
       userMenuService.clearMenus();

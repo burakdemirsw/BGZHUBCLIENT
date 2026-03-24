@@ -121,6 +121,7 @@ private extractArray(response: any): any[] {
 - İkonlar: Font Awesome (`fa-solid`, `fa-regular`)
 - Tablo: `table table-centered table-hover mb-0` sınıfları, `table-responsive` wrapper
 - İnline CSS YAZMA — stil dosyasını (.scss) ayrı tut (budget limiti: 4kB)
+- ⚠️ **HTML'de ID gösterme yasağı:** Kullanıcıya görünen hiçbir `.html` template'te `id`, `userId`, `companyId`, `contactTypeId`, `platformAccountId` vb. teknik kimlik değerlerini metin olarak gösterme. ID'ler sadece teknik işlem/`track` amacıyla kullanılabilir, UI'de sunulmaz.
 
 ## ⚠️ ZORUNLU: Formlarda companyId / userId Kullanma!
 
