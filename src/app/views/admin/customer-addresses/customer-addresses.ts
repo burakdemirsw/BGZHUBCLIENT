@@ -95,6 +95,13 @@ export class CustomerAddressesPage implements OnInit {
         return c ? (c.descriptions?.[0] ? `${c.descriptions[0].firstName || ''} ${c.descriptions[0].lastName || ''}`.trim() : `${c.user?.firstName || ''} ${c.user?.lastName || ''}`.trim() || c.platformUsername || '-') : customerId.substring(0, 8) + '...';
     }
 
+    getCustomerDisplayName(customer: CustomerDetailResponse): string {
+        const description = customer.descriptions?.[0];
+        const descriptionName = description ? `${description.firstName || ''} ${description.lastName || ''}`.trim() : '';
+        const userName = `${customer.user?.firstName || ''} ${customer.user?.lastName || ''}`.trim();
+        return descriptionName || userName || customer.platformName || customer.platformUsername || customer.user?.email || customer.id.substring(0, 8) + '...';
+    }
+
     getAddressTypeName(id?: string): string {
         if (!id) return '-';
         const a = this.addressTypes.find(x => x.id === id);

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
-import { CreateTagRequest, UpdateTagRequest } from '../models/tag/tag.models';
+import { CreateTagRequest, UpdateTagRequest, Tag } from '../models/tag/tag.models';
 import { ApiResponse } from '../models/api-response.model';
 import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
@@ -8,8 +8,8 @@ import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/
 export class TagsService {
     constructor(private http: HttpClientService) {}
 
-    getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-        return this.http.get<PagedResult<any>>({ controller: 'Tags', action: buildPaginationQuery(req) });
+    getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<Tag>>> {
+        return this.http.post<PagedResult<Tag>>({ controller: 'Tags', action: 'paged' }, req ?? {});
     }
 
     getById(id: string): Promise<ApiResponse<any>> {

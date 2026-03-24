@@ -110,7 +110,7 @@
                             <select class="form-select" [(ngModel)]="form.customerId" name="customerId">
                                 <option value="">Müşteri seçiniz...</option>
                                 @for (c of customers; track c.id) {
-                                    <option [value]="c.id">{{ c.fullName || c.displayName || c.firstName + ' ' + c.lastName }}</option>
+                                    <option [value]="c.id">{{ getCustomerDisplayName(c) }}</option>
                                 }
                             </select>
                         </div>

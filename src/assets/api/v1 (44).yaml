@@ -2501,6 +2501,25 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfAuthResponse"
       security:
         - Bearer: []
+  /api/Auth/create-test-account:
+    post:
+      tags:
+        - Auth
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTestAccountResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTestAccountResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTestAccountResponse"
+      security:
+        - Bearer: []
   /api/Menus:
     get:
       tags:
@@ -7299,59 +7318,7 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
-  /api/Tags:
-    get:
-      tags:
-        - Tags
-      parameters:
-        - name: CompanyId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: PageNumber
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int32
-        - name: PageSize
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int32
-        - name: SearchTerm
-          in: query
-          schema:
-            type: string
-        - name: SortBy
-          in: query
-          schema:
-            type: string
-        - name: SortDescending
-          in: query
-          schema:
-            type: boolean
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfTagResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfTagResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfTagResponse"
-      security:
-        - Bearer: []
+  /api/Tags/paged:
     post:
       tags:
         - Tags
@@ -7359,13 +7326,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateTagRequest"
+              $ref: "#/components/schemas/PaginationRequest"
           text/json:
             schema:
-              $ref: "#/components/schemas/CreateTagRequest"
+              $ref: "#/components/schemas/PaginationRequest"
           application/*+json:
             schema:
-              $ref: "#/components/schemas/CreateTagRequest"
+              $ref: "#/components/schemas/PaginationRequest"
         required: true
       responses:
         "200":
@@ -7373,13 +7340,13 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfTagResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfTagResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfTagResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfTagResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfTagResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfTagResponse"
       security:
         - Bearer: []
   /api/Tags/{id}:
@@ -7458,6 +7425,37 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfListOfTagResponse"
+      security:
+        - Bearer: []
+  /api/Tags:
+    post:
+      tags:
+        - Tags
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTagRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateTagRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateTagRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTagResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTagResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTagResponse"
       security:
         - Bearer: []
   /api/Tags/update/{id}:
@@ -9352,58 +9350,6 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
-  /api/IntegrationConnectionTypes:
-    get:
-      tags:
-        - IntegrationConnectionTypes
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationConnectionTypeRespons\
-                  e"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationConnectionTypeRespons\
-                  e"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationConnectionTypeRespons\
-                  e"
-      security:
-        - Bearer: []
-    post:
-      tags:
-        - IntegrationConnectionTypes
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateIntegrationConnectionTypeRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/CreateIntegrationConnectionTypeRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/CreateIntegrationConnectionTypeRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfIntegrationConnectionTypeResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfIntegrationConnectionTypeResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfIntegrationConnectionTypeResponse"
-      security:
-        - Bearer: []
   /api/IntegrationConnectionTypes/paged:
     get:
       tags:
@@ -9496,6 +9442,37 @@ paths:
           required: true
           schema:
             type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfIntegrationConnectionTypeResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfIntegrationConnectionTypeResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfIntegrationConnectionTypeResponse"
+      security:
+        - Bearer: []
+  /api/IntegrationConnectionTypes:
+    post:
+      tags:
+        - IntegrationConnectionTypes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateIntegrationConnectionTypeRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateIntegrationConnectionTypeRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateIntegrationConnectionTypeRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -10369,19 +10346,56 @@ paths:
     get:
       tags:
         - Integrations
+      parameters:
+        - name: CompanyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
+          schema:
+            type: string
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationPropertyResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfIntegrationPropertyRespon\
+                  se"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationPropertyResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfIntegrationPropertyRespon\
+                  se"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationPropertyResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfIntegrationPropertyRespon\
+                  se"
       security:
         - Bearer: []
     post:
@@ -10451,71 +10465,55 @@ paths:
           schema:
             type: string
             format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationPropertyResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationPropertyResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationPropertyResponse"
-      security:
-        - Bearer: []
-  /api/Integrations/properties/by-user/{userId}:
-    get:
-      tags:
-        - Integrations
-      parameters:
-        - name: userId
-          in: path
-          required: true
+        - name: CompanyId
+          in: query
           schema:
             type: string
             format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationPropertyResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationPropertyResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationPropertyResponse"
-      security:
-        - Bearer: []
-  /api/Integrations/properties/by-company/{companyId}:
-    get:
-      tags:
-        - Integrations
-      parameters:
-        - name: companyId
-          in: path
-          required: true
+        - name: PageNumber
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        - name: SearchTerm
+          in: query
           schema:
             type: string
-            format: uuid
+        - name: SortBy
+          in: query
+          schema:
+            type: string
+        - name: SortDescending
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationPropertyResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfIntegrationPropertyRespon\
+                  se"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationPropertyResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfIntegrationPropertyRespon\
+                  se"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfIntegrationPropertyResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfIntegrationPropertyRespon\
+                  se"
       security:
         - Bearer: []
   /api/Integrations/update/properties/{id}:
@@ -10587,6 +10585,11 @@ paths:
       tags:
         - UserIntegrationUserSocialMediaAccounts
       parameters:
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
         - name: CompanyId
           in: query
           schema:
@@ -16631,59 +16634,7 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
-  /api/Segments:
-    get:
-      tags:
-        - Segments
-      parameters:
-        - name: CompanyId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: PageNumber
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int32
-        - name: PageSize
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int32
-        - name: SearchTerm
-          in: query
-          schema:
-            type: string
-        - name: SortBy
-          in: query
-          schema:
-            type: string
-        - name: SortDescending
-          in: query
-          schema:
-            type: boolean
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfSegmentResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfSegmentResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfSegmentResponse"
-      security:
-        - Bearer: []
+  /api/Segments/paged:
     post:
       tags:
         - Segments
@@ -16691,13 +16642,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateSegmentRequest"
+              $ref: "#/components/schemas/PaginationRequest"
           text/json:
             schema:
-              $ref: "#/components/schemas/CreateSegmentRequest"
+              $ref: "#/components/schemas/PaginationRequest"
           application/*+json:
             schema:
-              $ref: "#/components/schemas/CreateSegmentRequest"
+              $ref: "#/components/schemas/PaginationRequest"
         required: true
       responses:
         "200":
@@ -16705,13 +16656,13 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfSegmentResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfSegmentResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfSegmentResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfSegmentResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfSegmentResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfSegmentResponse"
       security:
         - Bearer: []
   /api/Segments/{id}:
@@ -16790,6 +16741,37 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfListOfSegmentResponse"
+      security:
+        - Bearer: []
+  /api/Segments:
+    post:
+      tags:
+        - Segments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSegmentRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateSegmentRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateSegmentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSegmentResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSegmentResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSegmentResponse"
       security:
         - Bearer: []
   /api/Segments/update/{id}:
@@ -20750,40 +20732,6 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfListOfIntegrationConnectionTypeResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          type:
-            - "null"
-            - array
-          items:
-            $ref: "#/components/schemas/IntegrationConnectionTypeResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
     ApiResponseOfListOfIntegrationCustomerResponse:
       type: object
       properties:
@@ -20799,40 +20747,6 @@ components:
             - array
           items:
             $ref: "#/components/schemas/IntegrationCustomerResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfListOfIntegrationPropertyResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          type:
-            - "null"
-            - array
-          items:
-            $ref: "#/components/schemas/IntegrationPropertyResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -23325,6 +23239,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfPagedResultOfIntegrationPropertyResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/PagedResultOfIntegrationPropertyResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfPagedResultOfIntegrationTypeResponse:
       type: object
       properties:
@@ -25259,6 +25205,38 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/TeamUserResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfTestAccountResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TestAccountResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -28014,6 +27992,7 @@ components:
     CreateShortcutRequest:
       required:
         - userId
+        - companyId
         - shortcutTypeId
         - name
         - shortCode
@@ -28022,6 +28001,9 @@ components:
       type: object
       properties:
         userId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         shortcutTypeId:
@@ -30228,6 +30210,27 @@ components:
           type:
             - "null"
             - string
+    OrderAddressSummary:
+      required:
+        - id
+        - addressLine
+        - postalCode
+        - isDefault
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        addressLine:
+          type:
+            - "null"
+            - string
+        postalCode:
+          type:
+            - "null"
+            - string
+        isDefault:
+          type: boolean
     OrderCustomerSummary:
       required:
         - id
@@ -30495,6 +30498,77 @@ components:
             - number
             - string
           format: double
+    OrderItemSummary:
+      required:
+        - id
+        - productId
+        - productName
+        - productImageUrl
+        - quantity
+        - unitPrice
+        - discountRate
+        - discountTotal
+        - taxRate
+        - taxTotal
+        - totalPrice
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        productName:
+          type:
+            - "null"
+            - string
+        productImageUrl:
+          type:
+            - "null"
+            - string
+        quantity:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        unitPrice:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        discountRate:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        discountTotal:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        taxRate:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        taxTotal:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        totalPrice:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+          type:
+            - number
+            - string
+          format: double
     OrderListDto:
       required:
         - id
@@ -30596,6 +30670,53 @@ components:
         paymentDate:
           type: string
           format: date-time
+    OrderPaymentSummary:
+      required:
+        - id
+        - paymentTypeId
+        - paymentTypeName
+        - paymentStatusId
+        - paymentStatusName
+        - amount
+        - currencyCode
+        - referenceNo
+        - paymentDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        paymentTypeId:
+          type: string
+          format: uuid
+        paymentTypeName:
+          type:
+            - "null"
+            - string
+        paymentStatusId:
+          type: string
+          format: uuid
+        paymentStatusName:
+          type:
+            - "null"
+            - string
+        amount:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        currencyCode:
+          type:
+            - "null"
+            - string
+        referenceNo:
+          type:
+            - "null"
+            - string
+        paymentDate:
+          type: string
+          format: date-time
     OrderStatusDto:
       required:
         - id
@@ -30647,6 +30768,9 @@ components:
         - orderStatus
         - paymentType
         - customer
+        - orderItems
+        - orderPayments
+        - address
       type: object
       properties:
         id:
@@ -30704,6 +30828,22 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/OrderCustomerSummary"
+        orderItems:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/OrderItemSummary"
+        orderPayments:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/OrderPaymentSummary"
+        address:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/OrderAddressSummary"
     PagedResultOfAddressTypeResponse:
       required:
         - items
@@ -31801,6 +31941,51 @@ components:
             - array
           items:
             $ref: "#/components/schemas/IntegrationDetailResponse"
+        pageNumber:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalPages:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        hasPreviousPage:
+          type: boolean
+        hasNextPage:
+          type: boolean
+    PagedResultOfIntegrationPropertyResponse:
+      required:
+        - items
+        - pageNumber
+        - pageSize
+        - totalCount
+        - totalPages
+        - hasPreviousPage
+        - hasNextPage
+      type: object
+      properties:
+        items:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/IntegrationPropertyResponse"
         pageNumber:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -33259,6 +33444,39 @@ components:
           type: boolean
         hasPreviousPage:
           type: boolean
+    PaginationRequest:
+      required:
+        - companyId
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        pageNumber:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 1
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 20
+        searchTerm:
+          type:
+            - "null"
+            - string
+        sortBy:
+          type:
+            - "null"
+            - string
+        sortDescending:
+          type: boolean
+          default: false
     PaymentStatusDto:
       required:
         - id
@@ -34164,6 +34382,7 @@ components:
       required:
         - id
         - userId
+        - companyId
         - shortcutTypeId
         - shortcutTypeName
         - name
@@ -34179,6 +34398,9 @@ components:
           type: string
           format: uuid
         userId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         shortcutTypeId:
@@ -34840,6 +35062,46 @@ components:
           type: string
           format: date-time
         updatedDate:
+          type: string
+          format: date-time
+    TestAccountResponse:
+      required:
+        - userId
+        - companyId
+        - email
+        - password
+        - accessToken
+        - refreshToken
+        - expiration
+        - name
+        - surname
+        - lastLoginDate
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        companyId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        email:
+          type: string
+        password:
+          type: string
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiration:
+          type: string
+          format: date-time
+        name:
+          type: string
+        surname:
+          type: string
+        lastLoginDate:
           type: string
           format: date-time
     TestAddressItem:

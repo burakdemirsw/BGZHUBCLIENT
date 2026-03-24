@@ -9,7 +9,10 @@ export class SegmentsService {
     constructor(private http: HttpClientService) {}
 
     getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-        return this.http.get<PagedResult<any>>({ controller: 'Segments', action: buildPaginationQuery(req) });
+        return this.http.post<PagedResult<any>>(
+            { controller: 'Segments', action: 'paged' },
+            req ?? {}
+        );
     }
 
     getById(id: string): Promise<ApiResponse<any>> {

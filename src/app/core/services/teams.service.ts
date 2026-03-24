@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import {
+  Team,
   CreateTeamRequest,
   UpdateTeamRequest,
   CreateTeamInvitationRequest,
@@ -16,14 +17,12 @@ import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/
 })
 export class TeamsService {
   constructor(private http: HttpClientService) {}
-
-  // ── Teams ──
-  getAll(): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'Teams' });
+  getAll(): Promise<ApiResponse<Team[]>> {
+    return this.http.get<Team[]>({ controller: 'Teams' });
   }
 
-  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-    return this.http.get<PagedResult<any>>({ controller: 'Teams', action: buildPaginationQuery(req) });
+  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<Team>>> {
+    return this.http.get<PagedResult<Team>>({ controller: 'Teams', action: buildPaginationQuery(req) });
   }
 
   getById(id: string): Promise<ApiResponse<any>> {

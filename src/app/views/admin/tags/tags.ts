@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TagsService } from '@/app/core/services/tags.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { Tag, CreateTagRequest, UpdateTagRequest } from '@/app/core/models/tag/tag.models';
 
 @Component({
@@ -25,9 +26,20 @@ export class TagsPage implements OnInit {
     showModal = false;
     editMode = false;
     selectedItem: Tag | null = null;
-    form: any = { name: '', colorCode: '#3b82f6', userId: '' };
+    form: {
+        name: string;
+        colorCode: string;
+    } = { name: '', colorCode: '#3b82f6' };
 
-    constructor(private service: TagsService) {}
+    constructor(private service: TagsService, private authStateService: AuthStateService) {}
+
+    private get companyId(): string {
+        return this.authStateService.profile?.companyId || '';
+    }
+
+    private get userId(): string {
+        return this.authStateService.profile?.userId || '';
+    }
 
     ngOnInit(): void {
         this.loadItems();
@@ -47,13 +59,16 @@ export class TagsPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
-            //console.log('Tags response:', response);
-            
+            const response = await this.service.getPaged({
+                pageNumber: this.currentPage,
+                pageSize: this.pageSize,
+                searchTerm: this.searchTerm,
+                companyId: this.companyId,
+            });
             const paged = response?.data;
             this.items = paged?.items ?? [];
             this.totalCount = paged?.totalCount ?? this.items.length;
-            this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.totalPages = paged?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
             this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('Tags load error:', err);
@@ -65,7 +80,7 @@ export class TagsPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedItem = null;
-        this.form = { name: '', colorCode: '#3b82f6', userId: '' };
+        this.form = { name: '', colorCode: '#3b82f6' };
         this.showModal = true;
     }
 
@@ -75,7 +90,6 @@ export class TagsPage implements OnInit {
         this.form = {
             name: item.name || '',
             colorCode: item.color || '#3b82f6',
-            userId: item.userId || '',
         };
         this.showModal = true;
     }
@@ -90,9 +104,14 @@ export class TagsPage implements OnInit {
                 };
                 await this.service.update(this.selectedItem.id, req);
             } else {
+                if (!this.companyId || !this.userId) {
+                    console.error('CompanyId veya UserId bulunamadı. Kullanıcı profili kontrol edilmeli.');
+                    return;
+                }
+
                 const req: CreateTagRequest = {
-                    userId: localStorage.getItem('userId') || '',
-                    companyId: localStorage.getItem('companyId') || '',
+                    userId: this.userId,
+                    companyId: this.companyId,
                     name: this.form.name,
                     colorCode: this.form.colorCode,
                 };
@@ -124,12 +143,4 @@ export class TagsPage implements OnInit {
         }
     }
 
-    private extractArray(response: any): any[] {
-        if (Array.isArray(response)) return response;
-        if (response?.$values) return response.$values;
-        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
-        if (response?.items) return response.items;
-        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
-        return [];
-    }
 }

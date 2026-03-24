@@ -35,6 +35,10 @@ export class SegmentsPage implements OnInit {
         private authStateService: AuthStateService
     ) {}
 
+        private get companyId(): string {
+            return this.authStateService.profile?.companyId || '';
+        }
+
     ngOnInit(): void {
         this.loadItems();
     }
@@ -53,13 +57,16 @@ export class SegmentsPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
-            //console.log('Segments response:', response);
-            
+            const response = await this.service.getPaged({
+                pageNumber: this.currentPage,
+                pageSize: this.pageSize,
+                searchTerm: this.searchTerm,
+                companyId: this.companyId,
+            });
             const paged = response?.data;
             this.items = paged?.items ?? [];
             this.totalCount = paged?.totalCount ?? this.items.length;
-            this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.totalPages = paged?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
             this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('Segments load error:', err);
@@ -99,7 +106,7 @@ export class SegmentsPage implements OnInit {
             } else {
                 const req: CreateSegmentRequest = {
                     userId: this.authStateService.profile?.userId || '',
-                    companyId: localStorage.getItem('companyId') || '',
+                    companyId: this.companyId,
                     name: this.form.name,
                     description: this.form.description,
                     colorCode: this.form.colorCode
@@ -132,12 +139,4 @@ export class SegmentsPage implements OnInit {
         }
     }
 
-    private extractArray(response: any): any[] {
-        if (Array.isArray(response)) return response;
-        if (response?.$values) return response.$values;
-        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
-        if (response?.items) return response.items;
-        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
-        return [];
-    }
 }

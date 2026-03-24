@@ -18,17 +18,21 @@ export class TeamsPage implements OnInit {
     editMode = false;
     selectedItem: Team | null = null;
 
-    // Datatable filter & pagination
+    // Server-side filter & pagination
     filterText = '';
     filteredItems: Team[] = [];
     pagedItems: Team[] = [];
+    totalCount = 0;
     currentPage = 1;
     pageSize = 10;
     totalPages = 1;
     totalPagesArray: number[] = [];
 
-    form: any = {
-        companyId: '',
+    form: {
+        teamName: string;
+        profilePictureUrl: string;
+        isBlocked: boolean;
+    } = {
         teamName: '',
         profilePictureUrl: '',
         isBlocked: false,
@@ -36,40 +40,41 @@ export class TeamsPage implements OnInit {
 
     constructor(private teamsService: TeamsService, private userMenuService: UserMenuService, private authStateService: AuthStateService) {}
 
+    private get companyId(): string {
+        return this.authStateService.profile?.companyId || '';
+    }
+
     ngOnInit(): void {
         this.loadItems();
     }
 
     onFilterChange(): void {
         this.currentPage = 1;
-        this.applyFilterAndPaging();
+        this.loadItems();
     }
 
     setPage(page: number): void {
         if (page < 1 || page > this.totalPages) return;
         this.currentPage = page;
-        this.applyFilterAndPaging();
-    }
-
-    applyFilterAndPaging(): void {
-        const filter = (this.filterText || '').toLowerCase();
-        this.filteredItems = this.teams.filter(item =>
-            (item.teamName || '').toLowerCase().includes(filter)
-        );
-        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
-        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
-        const start = (this.currentPage - 1) * this.pageSize;
-        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+        this.loadItems();
     }
 
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.teamsService.getAll();
-            //console.log('Teams response:', response);
-            this.teams = this.extractArray(response?.data);
-            this.applyFilterAndPaging();
+            const response = await this.teamsService.getPaged({
+                pageNumber: this.currentPage,
+                pageSize: this.pageSize,
+                searchTerm: this.filterText,
+            });
+
+            const paged = response?.data;
+            this.teams = paged?.items ?? [];
+            this.filteredItems = this.teams;
+            this.pagedItems = this.teams;
+            this.totalCount = paged?.totalCount ?? this.teams.length;
+            this.totalPages = paged?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         } catch (err) {
             console.error('Teams error:', err);
         } finally {
@@ -77,20 +82,10 @@ export class TeamsPage implements OnInit {
         }
     }
 
-    private extractArray(response: any): any[] {
-        if (Array.isArray(response)) return response;
-        if (response?.$values) return response.$values;
-        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
-        if (response?.items) return response.items;
-        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
-        return [];
-    }
-
     openCreate(): void {
         this.editMode = false;
         this.selectedItem = null;
-        const companyId = this.authStateService.profile?.companyId || '';
-        this.form = { companyId, teamName: '', profilePictureUrl: '', isBlocked: false };
+        this.form = { teamName: '', profilePictureUrl: '', isBlocked: false };
         this.showModal = true;
     }
 
@@ -98,7 +93,6 @@ export class TeamsPage implements OnInit {
         this.editMode = true;
         this.selectedItem = item;
         this.form = {
-            companyId: item.companyId,
             teamName: item.teamName,
             profilePictureUrl: item.profilePictureUrl,
             isBlocked: item.isBlocked ?? false,
@@ -108,10 +102,15 @@ export class TeamsPage implements OnInit {
 
     async save(): Promise<void> {
         try {
+            if (!this.companyId) {
+                console.error('CompanyId bulunamadı. Kullanıcı profili kontrol edilmeli.');
+                return;
+            }
+
             const currentUserId = this.userMenuService.getUserIdFromToken() || '';
             if (this.editMode && this.selectedItem) {
                 const req: UpdateTeamRequest = {
-                    companyId: this.form.companyId,
+                    companyId: this.companyId,
                     creatorId: this.selectedItem.creatorId,
                     teamName: this.form.teamName,
                     profilePictureUrl: this.form.profilePictureUrl,
@@ -120,7 +119,7 @@ export class TeamsPage implements OnInit {
                 await this.teamsService.update(this.selectedItem.id, req);
             } else {
                 const req: CreateTeamRequest = {
-                    companyId: this.form.companyId,
+                    companyId: this.companyId,
                     creatorId: currentUserId,
                     teamName: this.form.teamName,
                     profilePictureUrl: this.form.profilePictureUrl,

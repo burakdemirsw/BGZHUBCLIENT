@@ -214,12 +214,12 @@ export class TeamUsersPage implements OnInit {
 
   getTeamName(teamId: string): string {
     const team = this.teamsList.find(t => t.id === teamId);
-    return team?.teamName || teamId;
+    return team?.teamName || 'Bilinmeyen Takım';
   }
 
   getUserName(userId: string): string {
     const user = this.usersList.find(u => u.id === userId);
-    return user ? `${user.name} ${user.lastName}` : userId;
+    return user ? `${user.name} ${user.lastName}` : 'Bilinmeyen Kullanıcı';
   }
 
   getUserEmail(userId: string): string {
