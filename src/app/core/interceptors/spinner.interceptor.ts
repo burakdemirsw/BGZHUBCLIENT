@@ -9,7 +9,7 @@ export const spinnerInterceptor: HttpInterceptorFn = (req, next) => {
   const spinner = inject(NgxSpinnerService);
 
   if (activeRequests === 0) {
-    spinner.show();
+    // spinner.show();
   }
   activeRequests++;
 
@@ -17,7 +17,7 @@ export const spinnerInterceptor: HttpInterceptorFn = (req, next) => {
     finalize(() => {
       activeRequests--;
       if (activeRequests === 0) {
-        spinner.hide();
+        // spinner.hide();
       }
     })
   );

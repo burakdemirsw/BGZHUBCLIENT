@@ -756,6 +756,18 @@ $radius-lg: 18px;
     line-height: 1.5;
     color: $text-primary;
 
+    a.chat-link {
+        color: #1a73e8;
+        text-decoration: underline;
+        word-break: break-all;
+        transition: color 0.15s ease;
+
+        &:hover {
+            color: #1558b0;
+            text-decoration: underline;
+        }
+    }
+
     &.customer-bubble {
         background: $customer-bubble-bg;
         border-bottom-left-radius: 4px;
@@ -1476,7 +1488,7 @@ $radius-lg: 18px;
     align-items: center;
 
     input {
-        padding-right: 60px;
+        padding-right: 90px;
     }
 }
 

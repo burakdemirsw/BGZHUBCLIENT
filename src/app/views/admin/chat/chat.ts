@@ -1055,4 +1055,27 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
         item.active = true;
         this.router.navigate(['/chat', item.path]);
     }
+
+    /**
+     * Metin içindeki URL'leri tıklanabilir <a> etiketlerine dönüştürür.
+     * XSS koruması için önce HTML escape uygulanır.
+     */
+    linkify(text: string | undefined): string {
+        if (!text) return '';
+        // HTML escape
+        const escaped = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+        // URL regex
+        const urlRegex = /(https?:\/\/[^\s<>"']+)/gi;
+        return escaped.replace(urlRegex, (match) => {
+            // Sondaki parantez, nokta, virgül gibi karakterleri URL'den ayır
+            const trailingMatch = match.match(/[)\]},;:!?.']+$/);
+            const url = trailingMatch ? match.slice(0, -trailingMatch[0].length) : match;
+            const trailing = trailingMatch ? trailingMatch[0] : '';
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="chat-link">${url}</a>${trailing}`;
+        });
+    }
 }

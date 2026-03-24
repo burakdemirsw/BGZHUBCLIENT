@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TeamsService } from '@/app/core/services/teams.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { Team, CreateTeamRequest, UpdateTeamRequest } from '@/app/core/models/team/team.models';
 import { UserMenuService } from '@/app/core/services/user-menu.service';
 
@@ -27,12 +28,13 @@ export class TeamsPage implements OnInit {
     totalPagesArray: number[] = [];
 
     form: any = {
+        companyId: '',
         teamName: '',
         profilePictureUrl: '',
         isBlocked: false,
     };
 
-    constructor(private teamsService: TeamsService, private userMenuService: UserMenuService) {}
+    constructor(private teamsService: TeamsService, private userMenuService: UserMenuService, private authStateService: AuthStateService) {}
 
     ngOnInit(): void {
         this.loadItems();
@@ -87,7 +89,8 @@ export class TeamsPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedItem = null;
-        this.form = { teamName: '', profilePictureUrl: '', isBlocked: false };
+        const companyId = this.authStateService.profile?.companyId || '';
+        this.form = { companyId, teamName: '', profilePictureUrl: '', isBlocked: false };
         this.showModal = true;
     }
 
@@ -95,6 +98,7 @@ export class TeamsPage implements OnInit {
         this.editMode = true;
         this.selectedItem = item;
         this.form = {
+            companyId: item.companyId,
             teamName: item.teamName,
             profilePictureUrl: item.profilePictureUrl,
             isBlocked: item.isBlocked ?? false,
@@ -107,6 +111,7 @@ export class TeamsPage implements OnInit {
             const currentUserId = this.userMenuService.getUserIdFromToken() || '';
             if (this.editMode && this.selectedItem) {
                 const req: UpdateTeamRequest = {
+                    companyId: this.form.companyId,
                     creatorId: this.selectedItem.creatorId,
                     teamName: this.form.teamName,
                     profilePictureUrl: this.form.profilePictureUrl,
@@ -115,6 +120,7 @@ export class TeamsPage implements OnInit {
                 await this.teamsService.update(this.selectedItem.id, req);
             } else {
                 const req: CreateTeamRequest = {
+                    companyId: this.form.companyId,
                     creatorId: currentUserId,
                     teamName: this.form.teamName,
                     profilePictureUrl: this.form.profilePictureUrl,

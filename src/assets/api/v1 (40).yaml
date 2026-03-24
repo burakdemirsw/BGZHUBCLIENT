@@ -12953,6 +12953,32 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfListOfTeamInvitationResponse"
       security:
         - Bearer: []
+  /api/Teams/invitations/by-company/{companyId}:
+    get:
+      tags:
+        - Teams
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfTeamInvitationResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfTeamInvitationResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfTeamInvitationResponse"
+      security:
+        - Bearer: []
   /api/Teams/update/invitations/{id}:
     post:
       tags:
@@ -15632,6 +15658,128 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
+  /api/Dashboard/{companyId}/monthly-summary:
+    get:
+      tags:
+        - Dashboard
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfMonthlySummaryResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfMonthlySummaryResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfMonthlySummaryResponse"
+      security:
+        - Bearer: []
+  /api/Dashboard/{companyId}/daily-sales:
+    get:
+      tags:
+        - Dashboard
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: days
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 7
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfDailySalesResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfDailySalesResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfDailySalesResponse"
+      security:
+        - Bearer: []
+  /api/Dashboard/{companyId}/integration-counts:
+    get:
+      tags:
+        - Dashboard
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfIntegrationCountsResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfIntegrationCountsResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfIntegrationCountsResponse"
+      security:
+        - Bearer: []
+  /api/Dashboard/{companyId}/ai-replies:
+    get:
+      tags:
+        - Dashboard
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: days
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 7
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfDailyAiRepliesResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfDailyAiRepliesResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfDailyAiRepliesResponse"
+      security:
+        - Bearer: []
   /api/Companies:
     get:
       tags:
@@ -15808,6 +15956,153 @@ paths:
     post:
       tags:
         - Companies
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/CompanySettings/{id}:
+    get:
+      tags:
+        - CompanySettings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySettingResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySettingResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySettingResponse"
+      security:
+        - Bearer: []
+  /api/CompanySettings/by-company/{companyId}:
+    get:
+      tags:
+        - CompanySettings
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySettingResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySettingResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySettingResponse"
+      security:
+        - Bearer: []
+  /api/CompanySettings:
+    post:
+      tags:
+        - CompanySettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanySettingRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanySettingRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanySettingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySettingResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySettingResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySettingResponse"
+      security:
+        - Bearer: []
+  /api/CompanySettings/update/{id}:
+    post:
+      tags:
+        - CompanySettings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCompanySettingRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCompanySettingRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateCompanySettingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/CompanySettings/delete/{id}:
+    post:
+      tags:
+        - CompanySettings
       parameters:
         - name: id
           in: path
@@ -18366,6 +18661,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfCompanySettingResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/CompanySettingResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfContactTypeResponse:
       type: object
       properties:
@@ -18846,6 +19173,70 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfDailyAiRepliesResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/DailyAiRepliesResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfDailySalesResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/DailySalesResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfDistrictResponse:
       type: object
       properties:
@@ -19051,6 +19442,38 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/IntegrationConnectionTypeResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfIntegrationCountsResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/IntegrationCountsResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -21447,6 +21870,38 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/MessageResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfMonthlySummaryResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/MonthlySummaryResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -24999,6 +25454,32 @@ components:
         updatedDate:
           type: string
           format: date-time
+    CompanySettingResponse:
+      required:
+        - id
+        - companyId
+        - isTwoFactorAuthEnabled
+        - isAutoReplyEnabled
+        - createdDate
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        isTwoFactorAuthEnabled:
+          type: boolean
+        isAutoReplyEnabled:
+          type: boolean
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
     CompanySummary:
       required:
         - id
@@ -25932,6 +26413,20 @@ components:
           type:
             - "null"
             - string
+    CreateCompanySettingRequest:
+      required:
+        - companyId
+        - isTwoFactorAuthEnabled
+        - isAutoReplyEnabled
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        isTwoFactorAuthEnabled:
+          type: boolean
+        isAutoReplyEnabled:
+          type: boolean
     CreateContactTypeRequest:
       required:
         - name
@@ -26687,6 +27182,7 @@ components:
         - priceMonthly
         - priceYearly
         - maxChatCount
+        - maxMessageCount
         - marketplaceReplyRatio
         - maxConnectedChannels
         - maxUserCount
@@ -26718,6 +27214,13 @@ components:
             - string
           format: double
         maxChatCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        maxMessageCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
             - "null"
@@ -26895,6 +27398,7 @@ components:
       required:
         - promtTypeId
         - promptText
+        - shortDescription
         - order
         - isFirst
         - userId
@@ -26907,6 +27411,10 @@ components:
             - string
           format: uuid
         promptText:
+          type:
+            - "null"
+            - string
+        shortDescription:
           type:
             - "null"
             - string
@@ -27244,12 +27752,16 @@ components:
     CreateTeamInvitationRequest:
       required:
         - teamId
+        - companyId
         - invitingUserId
         - invitedUserId
         - invitationCode
       type: object
       properties:
         teamId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         invitingUserId:
@@ -27265,11 +27777,15 @@ components:
     CreateTeamRequest:
       required:
         - creatorId
+        - companyId
         - teamName
         - profilePictureUrl
       type: object
       properties:
         creatorId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         teamName:
@@ -27770,6 +28286,79 @@ components:
         updatedDate:
           type: string
           format: date-time
+    DailyAiRepliesResponse:
+      required:
+        - days
+        - items
+      type: object
+      properties:
+        days:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        items:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/DailyAiReplyItem"
+    DailyAiReplyItem:
+      required:
+        - date
+        - replyCount
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        replyCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    DailySalesItem:
+      required:
+        - date
+        - orderCount
+        - revenue
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        orderCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        revenue:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+          type:
+            - number
+            - string
+          format: double
+    DailySalesResponse:
+      required:
+        - days
+        - items
+      type: object
+      properties:
+        days:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        items:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/DailySalesItem"
     DistrictResponse:
       required:
         - id
@@ -28296,6 +28885,24 @@ components:
         updatedDate:
           type: string
           format: date-time
+    IntegrationCountsResponse:
+      required:
+        - integrationUserCount
+        - socialMediaAccountCount
+      type: object
+      properties:
+        integrationUserCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        socialMediaAccountCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
     IntegrationCustomerResponse:
       required:
         - id
@@ -28830,6 +29437,38 @@ components:
         updatedDate:
           type: string
           format: date-time
+    MonthlySummaryResponse:
+      required:
+        - customerCount
+        - productCount
+        - orderCount
+        - totalRevenue
+      type: object
+      properties:
+        customerCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        productCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        orderCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalRevenue:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+          type:
+            - number
+            - string
+          format: double
     NeighbourhoodImportResult:
       required:
         - totalRows
@@ -32042,6 +32681,7 @@ components:
         - priceMonthly
         - priceYearly
         - maxChatCount
+        - maxMessageCount
         - marketplaceReplyRatio
         - maxConnectedChannels
         - maxUserCount
@@ -32079,6 +32719,13 @@ components:
             - string
           format: double
         maxChatCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        maxMessageCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
             - "null"
@@ -32292,6 +32939,7 @@ components:
         - id
         - promtTypeId
         - promptText
+        - shortDescription
         - order
         - isFirst
         - userId
@@ -32309,6 +32957,10 @@ components:
             - string
           format: uuid
         promptText:
+          type:
+            - "null"
+            - string
+        shortDescription:
           type:
             - "null"
             - string
@@ -33203,6 +33855,7 @@ components:
       required:
         - id
         - teamId
+        - companyId
         - invitingUserId
         - invitedUserId
         - invitationCode
@@ -33217,6 +33870,9 @@ components:
           type: string
           format: uuid
         teamId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         invitingUserId:
@@ -33252,6 +33908,7 @@ components:
       required:
         - id
         - creatorId
+        - companyId
         - teamName
         - profilePictureUrl
         - isBlocked
@@ -33263,6 +33920,9 @@ components:
           type: string
           format: uuid
         creatorId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         teamName:
@@ -33913,6 +34573,16 @@ components:
             - "null"
             - string
         isBlocked:
+          type: boolean
+    UpdateCompanySettingRequest:
+      required:
+        - isTwoFactorAuthEnabled
+        - isAutoReplyEnabled
+      type: object
+      properties:
+        isTwoFactorAuthEnabled:
+          type: boolean
+        isAutoReplyEnabled:
           type: boolean
     UpdateContactTypeRequest:
       required:
@@ -34670,6 +35340,7 @@ components:
         - priceMonthly
         - priceYearly
         - maxChatCount
+        - maxMessageCount
         - marketplaceReplyRatio
         - maxConnectedChannels
         - maxUserCount
@@ -34702,6 +35373,13 @@ components:
             - string
           format: double
         maxChatCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        maxMessageCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
             - "null"
@@ -34884,6 +35562,7 @@ components:
       required:
         - promtTypeId
         - promptText
+        - shortDescription
         - order
         - isFirst
         - userId
@@ -34896,6 +35575,10 @@ components:
             - string
           format: uuid
         promptText:
+          type:
+            - "null"
+            - string
+        shortDescription:
           type:
             - "null"
             - string
@@ -35230,6 +35913,7 @@ components:
     UpdateTeamInvitationRequest:
       required:
         - teamId
+        - companyId
         - invitingUserId
         - invitedUserId
         - invitationCode
@@ -35239,6 +35923,9 @@ components:
       type: object
       properties:
         teamId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         invitingUserId:
@@ -35267,12 +35954,16 @@ components:
     UpdateTeamRequest:
       required:
         - creatorId
+        - companyId
         - teamName
         - profilePictureUrl
         - isBlocked
       type: object
       properties:
         creatorId:
+          type: string
+          format: uuid
+        companyId:
           type: string
           format: uuid
         teamName:
@@ -36083,7 +36774,9 @@ tags:
   - name: PaymentStatuses
   - name: PaymentTypes
   - name: IntegrationTypes
+  - name: Dashboard
   - name: Companies
+  - name: CompanySettings
   - name: ConversationSegments
   - name: Segments
   - name: Addresses

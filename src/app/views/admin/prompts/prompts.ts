@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -82,7 +82,7 @@ export class PromptsPage implements OnInit {
     showPromptModal = false;
     promptEditMode = false;
     selectedPromptItem: Prompt | null = null;
-    promptForm: any = { promtTypeId: '', promptText: '', order: 0, isFirst: false };
+    promptForm: any = { promtTypeId: '', promptText: '', shortDescription: '', order: 0, isFirst: false };
 
     // Modal tab: editor vs preview
     modalTab: 'editor' | 'preview' = 'editor';
@@ -98,6 +98,15 @@ export class PromptsPage implements OnInit {
         private sanitizer: DomSanitizer,
     ) {}
 
+    @HostListener('document:keydown.escape')
+    onEscPress(): void {
+        if (this.showViewModal) {
+            this.closeViewModal();
+        } else if (this.showPromptModal) {
+            this.closePromptModal();
+        }
+    }
+
     ngOnInit(): void {
         this.loadPrompts();
     }
@@ -107,12 +116,14 @@ export class PromptsPage implements OnInit {
         this.loading = true;
         try {
             const [promptsResp, typesResp] = await Promise.all([
-                this.promptsService.getAll(),
+                this.promptsService.getPaged({ pageNumber: 1, pageSize: 10000 }),
                 this.promptTypesService.getAll(),
             ]);
             const promptsData = promptsResp?.data;
             const typesData = typesResp?.data;
             this.prompts = this.extractArray(promptsData);
+            // Order'a göre küçükten büyüğe sırala
+            this.prompts.sort((a, b) => (a.order || 0) - (b.order || 0));
             this.promptTypes = this.extractArray(typesData);
             this.applyFilterAndPaging();
         } catch (err) {
@@ -125,14 +136,14 @@ export class PromptsPage implements OnInit {
     openPromptCreate(): void {
         this.promptEditMode = false;
         this.selectedPromptItem = null;
-        this.promptForm = { promtTypeId: '', promptText: '', order: 0, isFirst: false };
+        this.promptForm = { promtTypeId: '', promptText: '', shortDescription: '', order: 0, isFirst: false };
         this.showPromptModal = true;
     }
 
     openPromptEdit(item: Prompt): void {
         this.promptEditMode = true;
         this.selectedPromptItem = item;
-        this.promptForm = { promtTypeId: item.promtTypeId || '', promptText: item.promptText || '', order: item.order || 0, isFirst: item.isFirst || false };
+        this.promptForm = { promtTypeId: item.promtTypeId || '', promptText: item.promptText || '', shortDescription: item.shortDescription || '', order: item.order || 0, isFirst: item.isFirst || false };
         this.showPromptModal = true;
     }
 
@@ -144,6 +155,7 @@ export class PromptsPage implements OnInit {
                 const req: UpdatePromptRequest = {
                     promtTypeId: this.promptForm.promtTypeId || undefined,
                     promptText: this.promptForm.promptText,
+                    shortDescription: this.promptForm.shortDescription || undefined,
                     order: this.promptForm.order,
                     isFirst: this.promptForm.isFirst,
                     userId,
@@ -154,6 +166,7 @@ export class PromptsPage implements OnInit {
                 const req: CreatePromptRequest = {
                     promtTypeId: this.promptForm.promtTypeId || undefined,
                     promptText: this.promptForm.promptText,
+                    shortDescription: this.promptForm.shortDescription || undefined,
                     order: this.promptForm.order,
                     isFirst: this.promptForm.isFirst,
                     userId,
@@ -208,6 +221,11 @@ export class PromptsPage implements OnInit {
 
     // ────── Datatable ──────
     onFilterChange(): void {
+        this.currentPage = 1;
+        this.applyFilterAndPaging();
+    }
+
+    onPageSizeChange(): void {
         this.currentPage = 1;
         this.applyFilterAndPaging();
     }

@@ -4,7 +4,8 @@ export interface PlanResponse {
     description?: string;
     priceMonthly: number;
     priceYearly?: number;
-    maxChatCount?: number;
+    maxChatCount?: number;  
+    maxMessageCount?: number;
     marketplaceReplyRatio: number;
     maxConnectedChannels?: number;
     maxUserCount?: number;
@@ -23,6 +24,7 @@ export interface CreatePlanRequest {
     priceMonthly: number;
     priceYearly?: number;
     maxChatCount?: number;
+    maxMessageCount?: number;
     marketplaceReplyRatio: number;
     maxConnectedChannels?: number;
     maxUserCount?: number;
@@ -38,6 +40,7 @@ export interface UpdatePlanRequest {
     priceMonthly: number;
     priceYearly?: number;
     maxChatCount?: number;
+    maxMessageCount?: number;
     marketplaceReplyRatio: number;
     maxConnectedChannels?: number;
     maxUserCount?: number;

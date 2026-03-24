@@ -23,7 +23,6 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Takım Adı</th>
-                                    <th>Oluşturan (Creator ID)</th>
                                     <th>Profil Resmi</th>
                                     <th class="text-center">Durum</th>
                                     <th>Oluşturma Tarihi</th>
@@ -37,7 +36,6 @@
                                             <span class="badge bg-primary-subtle text-primary">{{ (currentPage - 1) * pageSize + idx + 1 }}</span>
                                         </td>
                                         <td><strong>{{ item.teamName }}</strong></td>
-                                        <td><span class="text-muted font-monospace small">{{ item.creatorId }}</span></td>
                                         <td>
                                             @if (item.profilePictureUrl) {
                                                 <img [src]="item.profilePictureUrl" alt="Profil" class="rounded-circle" width="32" height="32">
@@ -63,7 +61,7 @@
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="7" class="text-center text-muted">Takım bulunamadı.</td></tr>
+                                    <tr><td colspan="6" class="text-center text-muted">Takım bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>

@@ -1,6 +1,7 @@
 // ── Team ──
 export interface Team {
   id: string;
+  companyId: string;
   creatorId: string;
   teamName: string;
   profilePictureUrl: string;
@@ -10,12 +11,14 @@ export interface Team {
 }
 
 export interface CreateTeamRequest {
+  companyId: string;
   creatorId: string;
   teamName: string;
   profilePictureUrl: string;
 }
 
 export interface UpdateTeamRequest {
+  companyId: string;
   creatorId: string;
   teamName: string;
   profilePictureUrl: string;
@@ -25,6 +28,7 @@ export interface UpdateTeamRequest {
 // ── Team Invitation ──
 export interface TeamInvitation {
   id: string;
+  companyId: string;
   teamId: string;
   invitingUserId: string;
   invitedUserId: string;
@@ -37,6 +41,7 @@ export interface TeamInvitation {
 }
 
 export interface CreateTeamInvitationRequest {
+  companyId: string;
   teamId: string;
   invitingUserId: string;
   invitedUserId: string;
@@ -44,6 +49,7 @@ export interface CreateTeamInvitationRequest {
 }
 
 export interface UpdateTeamInvitationRequest {
+  companyId: string;
   teamId: string;
   invitingUserId: string;
   invitedUserId: string;

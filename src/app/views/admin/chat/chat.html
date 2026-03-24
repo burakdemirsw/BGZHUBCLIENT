@@ -240,7 +240,7 @@
                             </div>
                             <div class="message-group">
                                 <div class="message-bubble customer-bubble">
-                                    <p class="mb-0">{{ msg.text }}</p>
+                                    <p class="mb-0" [innerHTML]="linkify(msg.text)"></p>
                                 </div>
                                 @if (msg.imageUrl) {
                                     <div class="message-image">
@@ -264,7 +264,7 @@
                                     AI Assistant
                                 </div>
                                 <div class="message-bubble system-bubble">
-                                    <p class="mb-0">{{ msg.text }}</p>
+                                    <p class="mb-0" [innerHTML]="linkify(msg.text)"></p>
                                 </div>
                                 <span class="message-time">{{ msg.createdDate }}</span>
                             </div>
@@ -277,7 +277,7 @@
                             <div class="message-group agent-group">
                                 <div class="message-bubble agent-bubble">
                                     @if (msg.text) {
-                                        <p class="mb-0" style="white-space: pre-line;">{{ msg.text }}</p>
+                                        <p class="mb-0" style="white-space: pre-line;" [innerHTML]="linkify(msg.text)"></p>
                                     }
                                 </div>
                                 @if (msg.imageUrl) {
@@ -447,9 +447,6 @@
                     <button class="details-tab" [class.active]="detailsActiveTab === 'copilot'"
                         (click)="detailsActiveTab = 'copilot'">Copilot</button>
                 </div>
-                <button class="panel-add-btn" (click)="refreshConversationDetails()" [disabled]="isRefreshing" title="Yenile">
-                    <i class="fa-solid fa-arrows-rotate" [class.fa-spin]="isRefreshing"></i>
-                </button>
             </div>
 
             <div class="details-body">
@@ -768,6 +765,9 @@
                 <div class="details-ask-input">
                     <input type="text" class="form-control form-control-sm" placeholder="Soru sorun...">
                     <div class="ask-actions">
+                        <button class="ask-btn" (click)="refreshConversationDetails()" [disabled]="isRefreshing" title="Yenile">
+                            <i class="fa-solid fa-arrows-rotate" [class.fa-spin]="isRefreshing"></i>
+                        </button>
                         <button class="ask-btn"><i class="fa-solid fa-sliders"></i></button>
                         <button class="ask-btn"><i class="fa-solid fa-arrow-up"></i></button>
                     </div>

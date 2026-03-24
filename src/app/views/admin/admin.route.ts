@@ -69,6 +69,7 @@ import { SubscriptionsPage } from './subscriptions/subscriptions';
 import { SubscriptionPaymentsPage } from './subscription-payments/subscription-payments';
 import { SubscriptionUsagesPage } from './subscription-usages/subscription-usages';
 import { NeighbourhoodsPage } from './neighbourhoods/neighbourhoods';
+import { CompanySettingsPage } from './company-settings/company-settings';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -501,6 +502,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/neighbourhoods',
         component: NeighbourhoodsPage,
         data: { title: 'Mahalleler' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/company-settings',
+        component: CompanySettingsPage,
+        data: { title: 'Şirket Ayarları' },
         canActivate: [AuthGuard],
     },
 ];

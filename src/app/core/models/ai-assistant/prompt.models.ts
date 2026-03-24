@@ -2,6 +2,7 @@ export interface Prompt {
   id: string;
   promtTypeId?: string;
   promptText?: string;
+  shortDescription?: string;
   order: number;
   isFirst: boolean;
   userId?: string;
@@ -14,6 +15,7 @@ export interface Prompt {
 export interface CreatePromptRequest {
   promtTypeId?: string;
   promptText: string;
+  shortDescription?: string;
   order: number;
   isFirst: boolean;
   userId?: string;
@@ -23,6 +25,7 @@ export interface CreatePromptRequest {
 export interface UpdatePromptRequest {
   promtTypeId?: string;
   promptText: string;
+  shortDescription?: string;
   order: number;
   isFirst: boolean;
   userId?: string;

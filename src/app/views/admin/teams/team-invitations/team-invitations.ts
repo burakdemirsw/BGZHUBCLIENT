@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TeamsService } from '@/app/core/services/teams.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 import {
     Team,
     TeamInvitation,
@@ -23,6 +24,7 @@ export class TeamInvitationsPage implements OnInit {
     selectedItem: TeamInvitation | null = null;
 
     form: any = {
+        companyId: '',
         teamId: '',
         invitingUserId: '',
         invitedUserId: '',
@@ -38,7 +40,7 @@ export class TeamInvitationsPage implements OnInit {
         2: 'Reddedildi',
     };
 
-    constructor(private teamsService: TeamsService) {}
+    constructor(private teamsService: TeamsService, private authStateService: AuthStateService) {}
 
     ngOnInit(): void {
         this.loadItems();
@@ -96,7 +98,9 @@ export class TeamInvitationsPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedItem = null;
+        const companyId = this.authStateService.profile?.companyId || '';
         this.form = {
+            companyId,
             teamId: '',
             invitingUserId: '',
             invitedUserId: '',
@@ -112,6 +116,7 @@ export class TeamInvitationsPage implements OnInit {
         this.editMode = true;
         this.selectedItem = item;
         this.form = {
+            companyId: item.companyId,
             teamId: item.teamId,
             invitingUserId: item.invitingUserId,
             invitedUserId: item.invitedUserId,
@@ -127,6 +132,7 @@ export class TeamInvitationsPage implements OnInit {
         try {
             if (this.editMode && this.selectedItem) {
                 const req: UpdateTeamInvitationRequest = {
+                    companyId: this.form.companyId,
                     teamId: this.form.teamId,
                     invitingUserId: this.form.invitingUserId,
                     invitedUserId: this.form.invitedUserId,
@@ -138,6 +144,7 @@ export class TeamInvitationsPage implements OnInit {
                 await this.teamsService.updateInvitation(this.selectedItem.id, req);
             } else {
                 const req: CreateTeamInvitationRequest = {
+                    companyId: this.form.companyId,
                     teamId: this.form.teamId,
                     invitingUserId: this.form.invitingUserId,
                     invitedUserId: this.form.invitedUserId,
