@@ -9,6 +9,7 @@ import {
     CreateSocialMediaAccountPropertyRequest,
     UpdateSocialMediaAccountPropertyRequest,
 } from '@/app/core/models/social-media/social-media.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-social-media-properties-page',
@@ -42,7 +43,8 @@ export class SocialMediaPropertiesPage implements OnInit {
     };
 
     constructor(
-        private socialMediaService: SocialMediaService
+        private socialMediaService: SocialMediaService,
+        private authStateService: AuthStateService
     ) {}
 
     ngOnInit(): void {
@@ -53,7 +55,11 @@ export class SocialMediaPropertiesPage implements OnInit {
 
     async loadAccounts(): Promise<void> {
         try {
-            const response = await this.socialMediaService.getAccountsPaged({ pageNumber: 1, pageSize: 1000 });
+            const response = await this.socialMediaService.getAccountsPaged({
+                companyId: this.authStateService.profile?.companyId || '',
+                pageNumber: 1,
+                pageSize: 1000
+            });
             const paged = response?.data;
             this.accounts = paged?.items ?? [];
         } catch (err) {
@@ -79,6 +85,7 @@ export class SocialMediaPropertiesPage implements OnInit {
                 this.applyClientPaging();
             } else {
                 const response = await this.socialMediaService.getPropertiesPaged({
+                    companyId: this.authStateService.profile?.companyId || '',
                     pageNumber: this.currentPage,
                     pageSize: this.pageSize,
                     searchTerm: this.searchTerm,

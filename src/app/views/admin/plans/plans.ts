@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PlansService } from '@/app/core/services/plans.service';
 import { PlanResponse, CreatePlanRequest, UpdatePlanRequest } from '@/app/core/models/plan/plan.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-plans-page',
@@ -28,7 +29,7 @@ export class PlansPage implements OnInit {
     editingItem: PlanResponse | null = null;
     form: any = this.getEmptyForm();
 
-    constructor(private plansService: PlansService) {}
+    constructor(private plansService: PlansService, private authStateService: AuthStateService) {}
 
     ngOnInit(): void {
         this.loadItems();
@@ -38,6 +39,7 @@ export class PlansPage implements OnInit {
         this.loading = true;
         try {
             const resp = await this.plansService.getAll({
+                companyId : this.authStateService.profile?.companyId || '',
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
                 searchTerm: this.filterText || undefined,

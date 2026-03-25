@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { Integration } from '@/app/core/models/integration/integration.models';
 import { IntegrationUser } from '@/app/core/models/integration/integration-user.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-user-integrations-page',
@@ -23,8 +24,11 @@ export class UserIntegrationsPage implements OnInit {
     pageSize = 10;
     totalPages = 1;
     totalPagesArray: number[] = [];
+  
 
-    constructor(private integrationsService: IntegrationsService) {}
+    constructor(private integrationsService: IntegrationsService
+        ,private authStateService: AuthStateService
+    ) {}
 
     ngOnInit(): void {
         this.loadData();
@@ -60,7 +64,12 @@ export class UserIntegrationsPage implements OnInit {
         this.loading = true;
         try {
             // Tüm veriyi çekmek için büyük pageSize kullan
-            const resp = await this.integrationsService.getIntegrationUsersPaged({ pageNumber: 1, pageSize: 1000 });
+            const resp =
+                await this.integrationsService.getIntegrationUsersPaged({
+                    companyId: this.authStateService.profile?.companyId || '',
+                    pageNumber: 1,
+                    pageSize: 1000,
+                });
             const paged = resp?.data;
             this.integrationUsers = paged?.items ?? [];
             this.applyFilterAndPaging();

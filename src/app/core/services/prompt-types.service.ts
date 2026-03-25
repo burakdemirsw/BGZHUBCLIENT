@@ -10,9 +10,6 @@ import { PaginationRequest, buildPaginationRequest, PagedResult } from '../model
 export class PromptTypesService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'PromptTypes' });
-  }
 
   getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
     return this.http.post<PagedResult<any>>(

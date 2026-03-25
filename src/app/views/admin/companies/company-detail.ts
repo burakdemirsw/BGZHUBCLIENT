@@ -24,7 +24,7 @@ export class CompanyDetailPage implements OnInit {
     saving = false;
     errorMessage = '';
     successMessage = '';
-
+   
     // Edit mode
     editMode = false;
     editForm: UpdateCompanyRequest = {
@@ -128,7 +128,25 @@ export class CompanyDetailPage implements OnInit {
         this.errorMessage = '';
         this.successMessage = '';
         try {
-            await this.companiesService.update(this.company.id, this.editForm);
+            const body: UpdateCompanyRequest = {
+                name: this.editForm.name,
+                taxNumber: this.editForm.taxNumber || null,
+                taxOffice: this.editForm.taxOffice || null,
+                tradeRegisterNo: this.editForm.tradeRegisterNo || null,
+                mersisNo: this.editForm.mersisNo || null,
+                phone: this.editForm.phone || null,
+                email: this.editForm.email || null,
+                website: this.editForm.website || null,
+                logoUrl: this.editForm.logoUrl || null,
+                countryId: this.editForm.countryId || null,
+                cityId: this.editForm.cityId || null,
+                districtId: this.editForm.districtId || null,
+                address: this.editForm.address || null,
+                postalCode: this.editForm.postalCode || null,
+                isBlocked: this.editForm.isBlocked,
+            };
+            console.log('Update body:', JSON.stringify(body));
+            await this.companiesService.update(this.company.id, body);
             this.successMessage = 'Şirket bilgileri başarıyla güncellendi.';
             this.editMode = false;
             await this.loadCompany(this.company.id);
@@ -187,12 +205,12 @@ export class CompanyDetailPage implements OnInit {
         this.editForm.cityId = '';
         this.editForm.districtId = '';
         this.districts = [];
-        await this.loadCities(this.editForm.countryId);
+        await this.loadCities(this.editForm.countryId || '');
     }
 
     async onCityChange(): Promise<void> {
         this.editForm.districtId = '';
-        await this.loadDistricts(this.editForm.cityId);
+        await this.loadDistricts(this.editForm.cityId || '');
     }
 
     // ---------- Helpers ----------

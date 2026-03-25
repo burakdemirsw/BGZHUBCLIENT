@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SubscriptionPaymentsService } from '@/app/core/services/subscription-payments.service';
 import { SubscriptionPaymentResponse, CreateSubscriptionPaymentRequest } from '@/app/core/models/subscription-payment/subscription-payment.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-subscription-payments-page',
@@ -26,7 +27,7 @@ export class SubscriptionPaymentsPage implements OnInit {
     showModal = false;
     form: any = this.getEmptyForm();
 
-    constructor(private subscriptionPaymentsService: SubscriptionPaymentsService) {}
+    constructor(private subscriptionPaymentsService: SubscriptionPaymentsService, private authStateService: AuthStateService) {}
 
     ngOnInit(): void {
         this.loadItems();
@@ -36,6 +37,7 @@ export class SubscriptionPaymentsPage implements OnInit {
         this.loading = true;
         try {
             const resp = await this.subscriptionPaymentsService.getPaged({
+                companyId : this.authStateService.profile?.companyId || '',
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
                 searchTerm: this.filterText || undefined,

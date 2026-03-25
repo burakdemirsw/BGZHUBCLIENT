@@ -63,7 +63,7 @@ export class TeamUsersPage implements OnInit {
     try {
       const [teamsRes, usersRes] = await Promise.all([
         this.teamsService.getAll(),
-        this.usersService.getAll({ pageSize: 500 })
+        this.usersService.getAll({ companyId: this.companyId, pageSize: 500 })
       ]);
       this.teamsList = this.extractArray(teamsRes?.data);
       const usersData = usersRes?.data;
@@ -81,6 +81,7 @@ export class TeamUsersPage implements OnInit {
       this.error = null;
 
       const request: PaginationRequest = {
+        companyId: this.companyId,
         pageNumber: this.currentPage,
         pageSize: this.pageSize,
         searchTerm: this.filterText

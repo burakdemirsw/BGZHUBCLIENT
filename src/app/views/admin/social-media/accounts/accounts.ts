@@ -8,6 +8,7 @@ import {
     CreateSocialMediaAccountRequest,
     UpdateSocialMediaAccountRequest,
 } from '@/app/core/models/social-media/social-media.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-social-media-accounts-page',
@@ -56,6 +57,7 @@ export class SocialMediaAccountsPage implements OnInit, OnDestroy {
     constructor(
         private socialMediaService: SocialMediaService,
         private facebookLoginService: FacebookLoginService,
+        private authStateService: AuthStateService
     ) {}
 
     async ngOnInit(): Promise<void> {
@@ -106,7 +108,12 @@ export class SocialMediaAccountsPage implements OnInit, OnDestroy {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.socialMediaService.getAccountsPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const response = await this.socialMediaService.getAccountsPaged({
+                companyId: this.authStateService.profile?.companyId || '',
+                pageNumber: this.currentPage,
+                pageSize: this.pageSize,
+                searchTerm: this.searchTerm
+            });
             //console.log('SocialMedia Accounts response:', response);
             
             const paged = response?.data;

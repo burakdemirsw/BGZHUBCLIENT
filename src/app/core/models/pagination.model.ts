@@ -54,7 +54,7 @@ export class PagedResult<T> {
  * Tüm sayfalama yapılan servislerde bu interface kullanılır.
  */
 export interface PaginationRequest {
-    companyId?: string;
+    companyId: string;
     pageNumber?: number;
     pageSize?: number;
     searchTerm?: string;

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PromptTypesService } from '@/app/core/services/prompt-types.service';
 import { PromptType, CreatePromptTypeRequest, UpdatePromptTypeRequest } from '@/app/core/models/ai-assistant/prompt.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-prompt-types-page',
@@ -30,7 +31,7 @@ export class PromptTypesPage implements OnInit {
         isBlocked: false,
     };
 
-    constructor(private promptTypesService: PromptTypesService) {}
+    constructor(private promptTypesService: PromptTypesService, private authState: AuthStateService) {}
 
     ngOnInit(): void {
         this.loadItems();
@@ -39,7 +40,7 @@ export class PromptTypesPage implements OnInit {
     // ────── Datatable ──────
     onFilterChange(): void {
         this.currentPage = 1;
-        this.applyFilterAndPaging();
+        this.applyFilterAndPaging();   
     }
 
     setPage(page: number): void {
@@ -64,7 +65,7 @@ export class PromptTypesPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.promptTypesService.getAll();
+            const response = await this.promptTypesService.getPaged({ companyId: this.authState.profile?.companyId ?? '', pageNumber: 1, pageSize: 10000 });
             //console.log('PromptTypes response:', response);
             this.items = this.extractArray(response?.data);
             this.applyFilterAndPaging();

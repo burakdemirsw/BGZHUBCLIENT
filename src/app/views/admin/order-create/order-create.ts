@@ -303,6 +303,7 @@ export class OrderCreatePage implements OnInit {
         this.loadingCustomers = true;
         try {
             const response = await this.customersService.getByCompany(this.companyId, {
+                companyId: this.companyId,
                 pageNumber: this.customerPage,
                 pageSize: this.customerPageSize,
                 searchTerm: this.customerSearchText
@@ -383,6 +384,7 @@ export class OrderCreatePage implements OnInit {
         this.loadingProducts = true;
         try {
             const response = await this.productsService.getByCompany(this.companyId, {
+               companyId: this.companyId,
                 pageNumber: this.productPage,
                 pageSize: this.productPageSize,
                 searchTerm: this.productSearchText,

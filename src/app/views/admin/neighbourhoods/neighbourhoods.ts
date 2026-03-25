@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NeighbourhoodsService } from '@/app/core/services/neighbourhoods.service';
 import { AddressesService } from '@/app/core/services/addresses.service';
 import { Neighbourhood, CreateNeighbourhoodRequest, UpdateNeighbourhoodRequest, Country, City, District } from '@/app/core/models/address/address.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-neighbourhoods-page',
@@ -46,6 +47,7 @@ export class NeighbourhoodsPage implements OnInit {
     constructor(
         private neighbourhoodsService: NeighbourhoodsService,
         private addressesService: AddressesService,
+        private authStateService: AuthStateService
     ) {}
 
     ngOnInit(): void {
@@ -115,6 +117,7 @@ export class NeighbourhoodsPage implements OnInit {
             } else {
                 // Server-side paging
                 const resp = await this.neighbourhoodsService.getPaged({
+                    companyId: this.authStateService.profile?.companyId || '',
                     pageNumber: this.currentPage,
                     pageSize: this.pageSize,
                     searchTerm: this.filterText || undefined,

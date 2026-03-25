@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SubscriptionUsagesService } from '@/app/core/services/subscription-usages.service';
 import { SubscriptionUsageResponse, CreateSubscriptionUsageRequest, UpdateSubscriptionUsageRequest } from '@/app/core/models/subscription-usage/subscription-usage.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-subscription-usages-page',
@@ -28,7 +29,7 @@ export class SubscriptionUsagesPage implements OnInit {
     editingItem: SubscriptionUsageResponse | null = null;
     form: any = this.getEmptyForm();
 
-    constructor(private subscriptionUsagesService: SubscriptionUsagesService) {}
+    constructor(private subscriptionUsagesService: SubscriptionUsagesService, private authStateService: AuthStateService) {}
 
     ngOnInit(): void {
         this.loadItems();
@@ -38,6 +39,7 @@ export class SubscriptionUsagesPage implements OnInit {
         this.loading = true;
         try {
             const resp = await this.subscriptionUsagesService.getPaged({
+                companyId : this.authStateService.profile?.companyId || '',
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
                 searchTerm: this.filterText || undefined,

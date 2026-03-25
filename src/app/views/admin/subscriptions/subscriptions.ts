@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SubscriptionsService } from '@/app/core/services/subscriptions.service';
 import { SubscriptionResponse } from '@/app/core/models/subscription/subscription.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-subscriptions-page',
@@ -24,6 +25,7 @@ export class SubscriptionsPage implements OnInit {
 
     constructor(
         private subscriptionsService: SubscriptionsService,
+        private authStateService: AuthStateService
     ) {}
 
     ngOnInit(): void {
@@ -34,9 +36,11 @@ export class SubscriptionsPage implements OnInit {
         this.loading = true;
         try {
             const resp = await this.subscriptionsService.getPaged({
+                companyId : this.authStateService.profile?.companyId || '',
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
                 searchTerm: this.filterText || undefined,
+
             });
             const pagedData = resp?.data;
             this.items = pagedData?.items ? this.extractArray(pagedData.items) : this.extractArray(resp?.data || resp);

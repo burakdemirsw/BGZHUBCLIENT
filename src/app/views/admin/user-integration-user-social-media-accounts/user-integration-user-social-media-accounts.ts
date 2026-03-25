@@ -68,8 +68,8 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
     async loadLookups(): Promise<void> {
         try {
             const [intUsersRes, smRes] = await Promise.all([
-                this.integrationsService.getIntegrationUsersPaged({ pageNumber: 1, pageSize: 1000 }),
-                this.socialMediaService.getUserAccounts({ pageNumber: 1, pageSize: 1000 }),
+                this.integrationsService.getIntegrationUsersPaged({ companyId: this.companyId, pageNumber: 1, pageSize: 1000 }),
+                this.socialMediaService.getUserAccounts({ companyId: this.companyId, pageNumber: 1, pageSize: 1000 }),
             ]);
             //console.log('intUsersRes:', intUsersRes);
             //console.log('smRes:', smRes);
@@ -88,8 +88,8 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
         this.loading = true;
         try {
             const response = this.companyId
-                ? await this.service.getByCompany(this.companyId, { pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm })
-                : await this.service.getAll({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+                ? await this.service.getByCompany(this.companyId, { companyId: this.companyId, pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm })
+                : await this.service.getAll({ companyId: this.companyId, pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             //console.log('UserIntegrationUserSocialMediaAccounts response:', response);
 
             const paged = response?.data;

@@ -80,7 +80,7 @@ export class UsersPage implements OnInit {
     async loadUsers(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.usersService.getAll({ pageNumber: this.currentPage, pageSize: this.pageSize });
+            const response = await this.usersService.getAll({ companyId: this.authStateService.profile?.companyId || '', pageNumber: this.currentPage, pageSize: this.pageSize });
             const paged = response?.data;
             this.users = this.extractItems(paged);
             this.totalPages = paged?.totalPages ?? 1;
