@@ -3,6 +3,7 @@ import { HttpClientService } from './http-client.service';
 import { CreateIntegrationRequest, UpdateIntegrationRequest } from '../models/integration/integration.models';
 import { CreateIntegrationUserRequest, UpdateIntegrationUserRequest } from '../models/integration/integration-user.models';
 import { CreateIntegrationPropertyRequest, UpdateIntegrationPropertyRequest } from '../models/integration/integration-property.models';
+import { ConnectTicimaxRequest, ConnectTicimaxResponse } from '../models/integration/integration-ticimax.models';
 import { ApiResponse } from '../models/api-response.model';
 import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
 
@@ -102,5 +103,34 @@ export class IntegrationsService {
 
   deleteIntegrationProperty(id: string): Promise<ApiResponse<any>> {
     return this.http.post<any>({ controller: 'Integrations', action: `delete/properties/${id}` }, {});
+  }
+
+  async connectTicimax(request: ConnectTicimaxRequest): Promise<ApiResponse<ConnectTicimaxResponse>> {
+    try {
+      return await this.http.post<ConnectTicimaxResponse>({ controller: 'Integrations', action: 'connect-ticimax' }, request);
+    } catch (error) {
+      if (!this.shouldRetryWithFallback(error)) {
+        throw error;
+      }
+    }
+
+    try {
+      return await this.http.post<ConnectTicimaxResponse>({ controller: 'Integration', action: 'connect-ticimax' }, request);
+    } catch (error) {
+      if (!this.shouldRetryWithFallback(error)) {
+        throw error;
+      }
+    }
+
+    return this.http.post<ConnectTicimaxResponse>({ controller: 'Ticimax', action: 'connect-ticimax' }, request);
+  }
+
+  private shouldRetryWithFallback(error: unknown): boolean {
+    if (!error || typeof error !== 'object') {
+      return false;
+    }
+
+    const maybeError = error as { status?: number };
+    return maybeError.status === 404 || maybeError.status === 405;
   }
 }

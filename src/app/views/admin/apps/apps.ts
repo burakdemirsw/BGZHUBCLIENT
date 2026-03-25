@@ -1,6 +1,10 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { IntegrationsService } from '@/app/core/services/integrations.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
+import { ConnectTicimaxRequest } from '@/app/core/models/integration/integration-ticimax.models';
+import { Integration } from '@/app/core/models/integration/integration.models';
 
 interface AppChannel {
     id: string;
@@ -16,9 +20,9 @@ interface AppChannel {
 }
 
 interface TicimaxForm {
-    productXmlUrl: string;
+    xmlUrl: string;
     webServisKodu: string;
-    alanAdi: string;
+    site: string;
 }
 
 @Component({
@@ -41,10 +45,15 @@ export class AppsPage {
     showTicimaxModal = false;
     savingTicimax = false;
     ticimaxForm: TicimaxForm = this.getEmptyTicimaxForm();
+    private ticimaxIntegrationId = '';
 
-    constructor() {
+    constructor(
+        private integrationsService: IntegrationsService,
+        private authStateService: AuthStateService
+    ) {
         this.initChannels();
         this.applyFilter();
+        void this.loadTicimaxIntegrationId();
     }
 
     private initChannels(): void {
@@ -165,7 +174,7 @@ export class AppsPage {
     }
 
     onChannelClick(channel: AppChannel): void {
-        if (channel.name === 'Ticimax') {
+        if (channel.name === 'Ticimax' || channel.id === '1') {
             this.openTicimaxModal();
         } else {
             console.log('Channel clicked:', channel.name);
@@ -180,9 +189,9 @@ export class AppsPage {
     // --- Ticimax Modal ---
     private getEmptyTicimaxForm(): TicimaxForm {
         return {
-            productXmlUrl: '',
+            xmlUrl: '',
             webServisKodu: '',
-            alanAdi: '',
+            site: '',
         };
     }
 
@@ -196,18 +205,91 @@ export class AppsPage {
     }
 
     async saveTicimax(): Promise<void> {
-        if (!this.ticimaxForm.productXmlUrl || !this.ticimaxForm.webServisKodu || !this.ticimaxForm.alanAdi) {
+        if (!this.ticimaxForm.xmlUrl || !this.ticimaxForm.webServisKodu || !this.ticimaxForm.site) {
             return;
         }
         this.savingTicimax = true;
         try {
-            // TODO: API entegrasyonu yapilacak
-            console.log('Ticimax form data:', this.ticimaxForm);
+            const companyId = this.authStateService.profile?.companyId || '';
+            const userId = this.authStateService.profile?.userId || '';
+            const integrationId = await this.getTicimaxIntegrationId();
+
+            if (!this.isGuid(companyId) || !this.isGuid(userId)) {
+                alert('Kullanıcı bilgisi eksik veya geçersiz. Lütfen tekrar giriş yapın.');
+                return;
+            }
+
+            if (!this.isGuid(integrationId)) {
+                alert('Ticimax IntegrationId bulunamadı. Lütfen entegrasyon kaydını kontrol edin.');
+                return;
+            }
+
+            const request: ConnectTicimaxRequest = {
+                companyId,
+                userId,
+                integrationId,
+                xmlUrl: this.ticimaxForm.xmlUrl.trim(),
+                webServisKodu: this.ticimaxForm.webServisKodu.trim(),
+                site: this.ticimaxForm.site.trim(),
+            };
+
+            const response = await this.integrationsService.connectTicimax(request);
+            if (!response.isSuccess) {
+                throw new Error(response.innerError || response.errorCode || 'Ticimax bağlantısı başarısız.');
+            }
+
+            alert('Ticimax entegrasyonu başarıyla bağlandı.');
             this.closeTicimaxModal();
         } catch (error) {
+            const message = error instanceof Error ? error.message : 'Bilinmeyen hata';
             console.error('Ticimax kayit hatasi:', error);
+            alert('Ticimax bağlantısı sırasında hata oluştu:\n' + message);
         } finally {
             this.savingTicimax = false;
         }
+    }
+
+    private async loadTicimaxIntegrationId(): Promise<void> {
+        this.ticimaxIntegrationId = await this.getTicimaxIntegrationId();
+    }
+
+    private async getTicimaxIntegrationId(): Promise<string> {
+        if (this.isGuid(this.ticimaxIntegrationId)) {
+            return this.ticimaxIntegrationId;
+        }
+
+        const fallbackCardId = this.channels.find((ch) => ch.name.toLowerCase() === 'ticimax')?.id || '';
+        if (this.isGuid(fallbackCardId)) {
+            this.ticimaxIntegrationId = fallbackCardId;
+            return fallbackCardId;
+        }
+
+        try {
+            const response = await this.integrationsService.getAll();
+            const items = this.extractArray<Integration>(response.data);
+            const ticimax = items.find((x) => (x.integrationDescription || '').toLowerCase().includes('ticimax'));
+            this.ticimaxIntegrationId = ticimax?.id || '';
+            return this.ticimaxIntegrationId;
+        } catch {
+            return '';
+        }
+    }
+
+    private isGuid(value: string): boolean {
+        return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+    }
+
+    private extractArray<T>(response: unknown): T[] {
+        if (Array.isArray(response)) return response as T[];
+        if (response && typeof response === 'object') {
+            const map = response as Record<string, unknown>;
+            if (Array.isArray(map['$values'])) return map['$values'] as T[];
+            if (Array.isArray(map['items'])) return map['items'] as T[];
+            if (Array.isArray(map['result'])) return map['result'] as T[];
+            if (Array.isArray(map['data'])) return map['data'] as T[];
+            if (map['data']) return [map['data'] as T];
+            if (map['result']) return [map['result'] as T];
+        }
+        return [];
     }
 }

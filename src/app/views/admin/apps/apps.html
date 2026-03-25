@@ -198,7 +198,7 @@
 <!-- Ticimax Baglanti Modali -->
 @if (showTicimaxModal) {
 <div class="modal-backdrop-custom" (click)="closeTicimaxModal()"></div>
-<div class="modal d-block" tabindex="-1">
+<div class="modal d-block show" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content connect-modal">
             <div class="modal-header">
@@ -216,15 +216,15 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label fw-semibold">
-                        <i class="fa-solid fa-link me-1 text-primary"></i> Product XML URL
+                        <i class="fa-solid fa-link me-1 text-primary"></i> XmlUrl
                     </label>
                     <input
                         type="url"
                         class="form-control"
                         placeholder="https://www.siteadi.com/xml/?R=...&K=..."
-                        [(ngModel)]="ticimaxForm.productXmlUrl"
+                        [(ngModel)]="ticimaxForm.xmlUrl"
                     />
-                    <small class="text-muted">Ticimax panelinizden aldiginiz urun XML adresi</small>
+                    <small class="text-muted">Ticimax panelinizden aldiginiz XML adresi</small>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold">
@@ -240,15 +240,15 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold">
-                        <i class="fa-solid fa-globe me-1 text-info"></i> Alan Adi
+                        <i class="fa-solid fa-globe me-1 text-info"></i> Site
                     </label>
                     <input
                         type="text"
                         class="form-control"
                         placeholder="www.siteadi.com"
-                        [(ngModel)]="ticimaxForm.alanAdi"
+                        [(ngModel)]="ticimaxForm.site"
                     />
-                    <small class="text-muted">Ticimax magazanizin alan adi (domain)</small>
+                    <small class="text-muted">Ticimax magazanizin site adresi</small>
                 </div>
             </div>
             <div class="modal-footer">
@@ -258,7 +258,7 @@
                 <button
                     type="button"
                     class="btn btn-primary"
-                    [disabled]="savingTicimax || !ticimaxForm.productXmlUrl || !ticimaxForm.webServisKodu || !ticimaxForm.alanAdi"
+                    [disabled]="savingTicimax || !ticimaxForm.xmlUrl || !ticimaxForm.webServisKodu || !ticimaxForm.site"
                     (click)="saveTicimax()"
                 >
                     @if (savingTicimax) {

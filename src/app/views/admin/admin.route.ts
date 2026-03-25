@@ -72,6 +72,7 @@ import { SubscriptionUsagesPage } from './subscription-usages/subscription-usage
 import { NeighbourhoodsPage } from './neighbourhoods/neighbourhoods';
 import { CompanySettingsPage } from './company-settings/company-settings';
 import { AppsPage } from './apps/apps';
+import { SetupWizardPage } from './setup-wizard/setup-wizard';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -522,6 +523,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/apps',
         component: AppsPage,
         data: { title: 'Uygulamalar' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/setup-wizard',
+        component: SetupWizardPage,
+        data: { title: 'Kurulum Sihirbazı' },
         canActivate: [AuthGuard],
     },
 ];

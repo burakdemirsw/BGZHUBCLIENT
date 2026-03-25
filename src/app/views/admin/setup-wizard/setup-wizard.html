@@ -1,11 +1,27 @@
 <!-- ─── Setup Wizard ─── Apple iPhone Setup Style ─────────────────────────── -->
-<div class="wizard-container">
+<div class="wizard-container"
+  (mousemove)="onBackgroundMouseMove($event)"
+  (mouseleave)="onBackgroundMouseLeave()"
+  [style.--mouse-x]="mouseX"
+  [style.--mouse-y]="mouseY"
+  [style.--dot-shift-x]="dotShiftX"
+  [style.--dot-shift-y]="dotShiftY"
+  [style.--dot-repel]="dotRepel">
 
-  <!-- Background animated gradient -->
+  <!-- Background — Google Stitch-style aurora -->
   <div class="wizard-bg">
-    <div class="bg-orb orb-1"></div>
-    <div class="bg-orb orb-2"></div>
-    <div class="bg-orb orb-3"></div>
+    <div class="aurora">
+      <div class="aurora-layer aurora-1"></div>
+      <div class="aurora-layer aurora-2"></div>
+      <div class="aurora-layer aurora-3"></div>
+    </div>
+    <div class="dot-grid"></div>
+    <div class="bottom-vapor">
+      <span class="vapor vapor-1"></span>
+      <span class="vapor vapor-2"></span>
+      <span class="vapor vapor-3"></span>
+      <span class="vapor vapor-4"></span>
+    </div>
   </div>
 
   <!-- Top progress bar -->
@@ -564,7 +580,7 @@
       <div class="step-panel step-fade-in completed-step">
         <!-- Confetti particles -->
         <div class="confetti-container">
-          @for (i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]; track i) {
+          @for (i of [1,2,3,4,5,6]; track i) {
             <div class="confetti" [class]="'confetti-' + i"></div>
           }
         </div>

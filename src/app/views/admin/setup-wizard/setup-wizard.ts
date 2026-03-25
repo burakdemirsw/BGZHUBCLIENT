@@ -45,6 +45,13 @@ export class SetupWizardPage implements OnInit, OnDestroy {
   animating = false;
   userName = '';
 
+  // Background hover interaction
+  mouseX = '50%';
+  mouseY = '50%';
+  dotShiftX = '0px';
+  dotShiftY = '0px';
+  dotRepel = 0;
+
   // Step 1 - Welcome
   hasEcommerce: boolean | null = null;
 
@@ -383,5 +390,37 @@ export class SetupWizardPage implements OnInit, OnDestroy {
   getPlatformGradient(): string {
     const all = [...this.websitePlatforms, ...this.pazaryeriPlatforms];
     return all.find(p => p.id === this.selectedPlatform)?.gradient || '';
+  }
+
+  onBackgroundMouseMove(event: MouseEvent): void {
+    const target = event.currentTarget as HTMLElement | null;
+    if (!target) return;
+
+    const rect = target.getBoundingClientRect();
+    const x = Math.min(Math.max(event.clientX - rect.left, 0), rect.width);
+    const y = Math.min(Math.max(event.clientY - rect.top, 0), rect.height);
+
+    const xPercent = (x / rect.width) * 100;
+    const yPercent = (y / rect.height) * 100;
+    this.mouseX = `${xPercent.toFixed(2)}%`;
+    this.mouseY = `${yPercent.toFixed(2)}%`;
+
+    const nx = (xPercent - 50) / 50;
+    const ny = (yPercent - 50) / 50;
+    const shiftStrengthX = 14;
+    const shiftStrengthY = 10;
+
+    // Move overlayed dot layer opposite to cursor so dots feel like they are pushed away
+    this.dotShiftX = `${(-nx * shiftStrengthX).toFixed(2)}px`;
+    this.dotShiftY = `${(-ny * shiftStrengthY).toFixed(2)}px`;
+    this.dotRepel = 1;
+  }
+
+  onBackgroundMouseLeave(): void {
+    this.mouseX = '50%';
+    this.mouseY = '50%';
+    this.dotShiftX = '0px';
+    this.dotShiftY = '0px';
+    this.dotRepel = 0;
   }
 }
