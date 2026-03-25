@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SocialMediaService } from '@/app/core/services/social-media.service';
 import { UsersService } from '@/app/core/services/users.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
+import { UserResponse } from '@/app/core/models/user/user.models';
 import {
     SocialMediaAccount,
     UserSocialMediaAccount,
@@ -18,7 +20,7 @@ import {
 export class UserSocialMediaAccountsPage implements OnInit {
     filteredUserAccounts: UserSocialMediaAccount[] = [];
     accounts: SocialMediaAccount[] = [];
-    users: any[] = [];
+    users: UserResponse[] = [];
     loading = false;
     showModal = false;
     editMode = false;
@@ -44,18 +46,31 @@ export class UserSocialMediaAccountsPage implements OnInit {
     constructor(
         private socialMediaService: SocialMediaService,
         private usersService: UsersService,
+        private authStateService: AuthStateService,
     ) {}
 
     ngOnInit(): void {
-        this.loadUsers();
-        this.loadAccounts();
-        this.loadUserAccounts();
+        this.initializePage();
+    }
+
+    private async initializePage(): Promise<void> {
+        await this.loadUsers();
+        await this.loadAccounts();
+        await this.loadUserAccounts();
     }
 
     async loadUsers(): Promise<void> {
         try {
-            const response = await this.usersService.getAll();
-            this.users = this.extractArray(response?.data);
+            const response = await this.usersService.getAll({
+                pageNumber: 1,
+                pageSize: 1000,
+                companyId: this.getCompanyId(),
+            });
+            this.users = this.extractArray<UserResponse>(response?.data);
+
+            if (!this.filterUserId && this.users.length > 0) {
+                this.filterUserId = this.users[0].id;
+            }
         } catch (err) {
             console.error('Users error:', err);
         }
@@ -63,7 +78,11 @@ export class UserSocialMediaAccountsPage implements OnInit {
 
     async loadAccounts(): Promise<void> {
         try {
-            const response = await this.socialMediaService.getAccountsPaged({ pageNumber: 1, pageSize: 1000 });
+            const response = await this.socialMediaService.getAccountsPaged({
+                pageNumber: 1,
+                pageSize: 1000,
+                companyId: this.getCompanyId(),
+            });
             const paged = response?.data;
             this.accounts = paged?.items ?? [];
         } catch (err) {
@@ -74,19 +93,29 @@ export class UserSocialMediaAccountsPage implements OnInit {
     async loadUserAccounts(): Promise<void> {
         this.loading = true;
         try {
+            if (!this.filterUserId) {
+                this.allUserAccounts = [];
+                this.filteredUserAccounts = [];
+                this.totalCount = 0;
+                this.totalPages = 1;
+                this.totalPagesArray = [1];
+                return;
+            }
+
             if (this.filterUserId) {
                 const response = await this.socialMediaService.getUserAccountsByUser(this.filterUserId);
-                this.allUserAccounts = this.extractArray(response?.data);
+                this.allUserAccounts = this.extractArray<UserSocialMediaAccount>(response?.data);
                 this.applyClientPaging();
             } else if (this.filterAccountId) {
                 const response = await this.socialMediaService.getUserAccountsByAccount(this.filterAccountId);
-                this.allUserAccounts = this.extractArray(response?.data);
+                this.allUserAccounts = this.extractArray<UserSocialMediaAccount>(response?.data);
                 this.applyClientPaging();
             } else {
                 const response = await this.socialMediaService.getUserAccounts({
                     pageNumber: this.currentPage,
                     pageSize: this.pageSize,
                     searchTerm: this.searchTerm,
+                    companyId: this.getCompanyId(),
                 });
                 const paged = response?.data;
                 this.filteredUserAccounts = paged?.items ?? [];
@@ -117,12 +146,20 @@ export class UserSocialMediaAccountsPage implements OnInit {
         this.filteredUserAccounts = filtered.slice(start, start + this.pageSize);
     }
 
-    private extractArray(response: any): any[] {
+    private extractArray<T>(response: unknown): T[] {
         if (Array.isArray(response)) return response;
-        if (response?.$values) return response.$values;
-        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
-        if (response?.items) return response.items;
-        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
+
+        const objectResponse = response as {
+            $values?: T[];
+            data?: T[] | T;
+            items?: T[];
+            result?: T[] | T;
+        };
+
+        if (objectResponse?.$values) return objectResponse.$values;
+        if (objectResponse?.data) return Array.isArray(objectResponse.data) ? objectResponse.data : [objectResponse.data];
+        if (objectResponse?.items) return objectResponse.items;
+        if (objectResponse?.result) return Array.isArray(objectResponse.result) ? objectResponse.result : [objectResponse.result];
         return [];
     }
 
@@ -151,8 +188,10 @@ export class UserSocialMediaAccountsPage implements OnInit {
     }
 
     clearFilters(): void {
-        this.filterUserId = '';
         this.filterAccountId = '';
+        if (!this.filterUserId && this.users.length > 0) {
+            this.filterUserId = this.users[0].id;
+        }
         this.currentPage = 1;
         this.loadUserAccounts();
     }
@@ -190,8 +229,11 @@ export class UserSocialMediaAccountsPage implements OnInit {
 
     async save(): Promise<void> {
         try {
+            const companyId = this.getCompanyId();
+
             if (this.editMode && this.selectedUserAccount) {
                 const req: UpdateUserSocialMediaAccountRequest = {
+                    companyId,
                     userId: this.form.userId,
                     socialMediaAccountId: this.form.socialMediaAccountId,
                     isBlocked: this.form.isBlocked ?? false,
@@ -199,6 +241,7 @@ export class UserSocialMediaAccountsPage implements OnInit {
                 await this.socialMediaService.updateUserAccount(this.selectedUserAccount.id, req);
             } else {
                 const req: CreateUserSocialMediaAccountRequest = {
+                    companyId,
                     userId: this.form.userId,
                     socialMediaAccountId: this.form.socialMediaAccountId,
                 };
@@ -233,5 +276,9 @@ export class UserSocialMediaAccountsPage implements OnInit {
 
     closeModal(): void {
         this.showModal = false;
+    }
+
+    private getCompanyId(): string {
+        return this.authStateService.profile?.companyId || '';
     }
 }

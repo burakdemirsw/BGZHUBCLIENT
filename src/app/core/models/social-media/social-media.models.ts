@@ -52,11 +52,13 @@ export interface UserSocialMediaAccount {
 }
 
 export interface CreateUserSocialMediaAccountRequest {
+  companyId: string;
   userId: string;
   socialMediaAccountId: string;
 }
 
 export interface UpdateUserSocialMediaAccountRequest {
+  companyId: string;
   userId: string;
   socialMediaAccountId: string;
   isBlocked: boolean;
