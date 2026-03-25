@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateTagRequest, UpdateTagRequest, Tag } from '../models/tag/tag.models';
 import { ApiResponse } from '../models/api-response.model';
-import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
+import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
 
 @Injectable({ providedIn: 'root' })
 export class TagsService {

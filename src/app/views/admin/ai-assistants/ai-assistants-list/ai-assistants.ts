@@ -6,6 +6,8 @@ import { AiAssistant, AiKnowledge, CreateAiAssistantRequest, UpdateAiAssistantRe
 import { AiProvider } from '@/app/core/models/ai-assistant/ai-provider.models';
 import { AiModel } from '@/app/core/models/ai-assistant/ai-model.models';
 import { UserMenuService } from '@/app/core/services/user-menu.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
+import { PagedResult } from '@/app/core/models/pagination.model';
 
 @Component({
     selector: 'app-ai-assistants-page',
@@ -22,14 +24,14 @@ export class AiAssistantsPage implements OnInit {
     editMode = false;
     selectedAssistant: AiAssistant | null = null;
 
-    // Datatable filter & pagination
+    // Server-side pagination
     filterText = '';
-    filteredItems: AiAssistant[] = [];
-    pagedItems: AiAssistant[] = [];
     currentPage = 1;
     pageSize = 10;
     totalPages = 1;
+    totalCount = 0;
     totalPagesArray: number[] = [];
+    private searchTimeout: any = null;
 
     // Knowledge for selected assistant
     knowledgeList: AiKnowledge[] = [];
@@ -45,6 +47,7 @@ export class AiAssistantsPage implements OnInit {
     constructor(
         private aiService: AiProvidersService,
         private userMenuService: UserMenuService,
+        private authStateService: AuthStateService,
     ) {}
 
     ngOnInit(): void {
@@ -54,36 +57,38 @@ export class AiAssistantsPage implements OnInit {
     }
 
     onFilterChange(): void {
-        this.currentPage = 1;
-        this.applyFilterAndPaging();
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            this.currentPage = 1;
+            this.loadAssistants();
+        }, 400);
     }
 
     setPage(page: number): void {
         if (page < 1 || page > this.totalPages) return;
         this.currentPage = page;
-        this.applyFilterAndPaging();
+        this.loadAssistants();
     }
 
-    applyFilterAndPaging(): void {
-        const filter = (this.filterText || '').toLowerCase();
-        this.filteredItems = this.assistants.filter(item =>
-            (item.name || '').toLowerCase().includes(filter) ||
-            (item.providerFirmDescription || '').toLowerCase().includes(filter) ||
-            (item.modelName || '').toLowerCase().includes(filter)
-        );
-        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
+    private buildPagesArray(): void {
         this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
-        const start = (this.currentPage - 1) * this.pageSize;
-        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
     }
 
     async loadAssistants(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.aiService.getAssistants();
-            this.assistants = this.extractArray(response?.data);
-            this.applyFilterAndPaging();
+            const companyId = this.authStateService.profile?.companyId || '';
+            const response = await this.aiService.getAssistantsPaged({
+                pageNumber: this.currentPage,
+                pageSize: this.pageSize,
+                searchTerm: this.filterText || undefined,
+                companyId: companyId,
+            });
+            const paged = PagedResult.from<AiAssistant>(response);
+            this.assistants = paged.items;
+            this.totalCount = paged.totalCount;
+            this.totalPages = paged.totalPages || Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.buildPagesArray();
         } catch (err) {
             console.error('AiAssistants load error:', err);
         } finally {

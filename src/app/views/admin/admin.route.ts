@@ -52,6 +52,7 @@ import { TagsPage } from './tags/tags';
 import { ConversationTagsPage } from './conversation-tags/conversation-tags';
 import { ConversationNotesPage } from './conversation-notes/conversation-notes';
 import { CompaniesPage } from './companies/companies';
+import { CompanyDetailPage } from './companies/company-detail';
 import { SegmentsPage } from './segments/segments';
 import { ConversationSegmentsPage } from './conversation-segments/conversation-segments';
 import { ConversationListDescriptionsPage } from './conversation-list-descriptions/conversation-list-descriptions';
@@ -385,6 +386,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/companies',
         component: CompaniesPage,
         data: { title: 'Şirketler' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/company-detail',
+        component: CompanyDetailPage,
+        data: { title: 'Şirket Detayı' },
         canActivate: [AuthGuard],
     },
     {

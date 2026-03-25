@@ -10,7 +10,7 @@ import {
   UpdateTeamSettingRequest,
 } from '../models/team/team.models';
 import { ApiResponse } from '../models/api-response.model';
-import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
+import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +22,10 @@ export class TeamsService {
   }
 
   getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<Team>>> {
-    return this.http.get<PagedResult<Team>>({ controller: 'Teams', action: buildPaginationQuery(req) });
+    return this.http.post<PagedResult<Team>>(
+      { controller: 'Teams', action: 'paged' },
+      buildPaginationRequest(req),
+    );
   }
 
   getById(id: string): Promise<ApiResponse<any>> {
@@ -46,6 +49,13 @@ export class TeamsService {
   }
 
   // ── Team Invitations ──
+  getInvitationsPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.http.post<PagedResult<any>>(
+      { controller: 'Teams', action: 'invitations/paged' },
+      buildPaginationRequest(req),
+    );
+  }
+
   getInvitations(): Promise<ApiResponse<any[]>> {
     return this.http.get<any[]>({ controller: 'Teams', action: 'invitations' });
   }
@@ -75,6 +85,13 @@ export class TeamsService {
   }
 
   // ── Team Settings ──
+  getSettingsPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+    return this.http.post<PagedResult<any>>(
+      { controller: 'Teams', action: 'settings/paged' },
+      buildPaginationRequest(req),
+    );
+  }
+
   getSettings(): Promise<ApiResponse<any[]>> {
     return this.http.get<any[]>({ controller: 'Teams', action: 'settings' });
   }

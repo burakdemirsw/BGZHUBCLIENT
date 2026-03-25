@@ -41,28 +41,24 @@ export class SignIn {
 
     async doLogin(loginRequest: LoginRequest) {
         try {
-            const response: any = await this.userService.login(loginRequest);
+            const apiResponse = await this.userService.login(loginRequest);
             this.loading = false;
-            //console.log('Login response:', response);
 
-            // Token'ları kaydet - farklı response yapılarını destekle
-            const accessToken = response?.accessToken ?? response?.token?.accessToken ?? response?.data?.accessToken ?? response?.token;
-            const refreshToken = response?.refreshToken ?? response?.token?.refreshToken ?? response?.data?.refreshToken;
+            const data: AuthResponse | null = apiResponse?.data ?? null;
 
-            if (accessToken) {
-                localStorage.setItem('accessToken', accessToken);
-            }
-            if (refreshToken) {
-                localStorage.setItem('refreshToken', refreshToken);
+            if (!data || !data.accessToken) {
+                this.errorMessage = 'Giriş başarısız. Geçersiz yanıt.';
+                return;
             }
 
-            // Kullanıcı profil bilgilerini kaydet
-            const userId = response?.userId ?? response?.data?.userId ?? '';
-            const name = response?.name ?? response?.data?.name ?? '';
-            const surname = response?.surname ?? response?.data?.surname ?? '';
-            const lastLoginDate = response?.lastLoginDate ?? response?.data?.lastLoginDate ?? '';
-            const companyId = response?.companyId ?? response?.data?.companyId ?? '';
-            this.authState.setProfile({ userId, name, surname, lastLoginDate, companyId });
+            // Token'ları kaydet
+            localStorage.setItem('accessToken', data.accessToken);
+            if (data.refreshToken) {
+                localStorage.setItem('refreshToken', data.refreshToken);
+            }
+
+            // Tüm auth verisini kaydet
+            this.authState.setProfile(data);
 
             // Kullanıcı menülerini yükle
             await this.userMenuService.loadUserMenus();

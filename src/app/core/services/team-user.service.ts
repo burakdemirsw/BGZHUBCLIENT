@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from '@core/services/http-client.service';
 import { TeamUserResponse, CreateTeamUserRequest, UpdateTeamUserRequest } from '@core/models/team-user/team-user.models';
-import { PaginationRequest, PagedResult, buildPaginationQuery } from '@core/models/pagination.model';
+import { PaginationRequest, PagedResult, buildPaginationRequest } from '@core/models/pagination.model';
 import { ApiResponse } from '@core/models/api-response.model';
 
 @Injectable({ providedIn: 'root' })
@@ -9,11 +9,11 @@ export class TeamUserService {
   constructor(private http: HttpClientService) {}
 
   async getPagedAsync(request: PaginationRequest): Promise<PagedResult<TeamUserResponse>> {
-    const queryString = buildPaginationQuery(request, '');
-    const response = await this.http.get<PagedResult<TeamUserResponse>>({
-      controller: 'TeamUsers',
-      queryString
-    });
+    const body = buildPaginationRequest(request);
+    const response = await this.http.post<PagedResult<TeamUserResponse>>(
+      { controller: 'TeamUsers', action: 'paged' },
+      body,
+    );
     return PagedResult.from<TeamUserResponse>(response?.data || {});
   }
 

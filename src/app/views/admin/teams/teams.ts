@@ -63,6 +63,7 @@ export class TeamsPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.teamsService.getPaged({
+                companyId: this.companyId,
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
                 searchTerm: this.filterText,

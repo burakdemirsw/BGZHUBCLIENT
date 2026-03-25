@@ -810,7 +810,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
 
     async loadShortcuts(): Promise<void> {
         try {
-            const response = await this.shortcutsService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const response = await this.shortcutsService.getPaged({ companyId: this.authStateService.profile?.companyId || '', pageNumber: 1, pageSize: 1000 });
             this.shortcuts = (response?.data?.items ?? []).filter((s: Shortcut) => !s.isBlocked);
         } catch (err) {
             console.error('Kısayollar yüklenemedi:', err);
@@ -821,7 +821,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     // ── Tag Methods ──
     async loadAllTags(): Promise<void> {
         try {
-            const res = await this.tagsService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const res = await this.tagsService.getPaged({ companyId: this.authStateService.profile?.companyId || '', pageNumber: 1, pageSize: 1000 });
             this.allTags = (res?.data?.items ?? []).filter((t: Tag) => !t.isBlocked);
         } catch { this.allTags = []; }
     }
@@ -898,7 +898,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     // ── Segment Methods ──
     async loadAllSegments(): Promise<void> {
         try {
-            const res = await this.segmentsService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const res = await this.segmentsService.getPaged({ companyId: this.authStateService.profile?.companyId || '', pageNumber: 1, pageSize: 1000 });
             this.allSegments = (res?.data?.items ?? []).filter((s: Segment) => !s.isBlocked);
         } catch { this.allSegments = []; }
     }

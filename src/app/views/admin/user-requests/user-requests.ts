@@ -18,6 +18,7 @@ import { RequestCategory } from '@/app/core/models/request-category/request-cate
 import { RequestPriority } from '@/app/core/models/request-priority/request-priority.models';
 import { RequestStatus } from '@/app/core/models/request-status/request-status.models';
 import { User } from '@/app/core/models/user/user.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-user-requests-page',
@@ -60,6 +61,7 @@ export class UserRequestsPage implements OnInit {
         private statusService: RequestStatusesService,
         private usersService: UsersService,
         private userMenuService: UserMenuService,
+        private authStateService: AuthStateService,
     ) {}
 
     ngOnInit(): void {
@@ -74,7 +76,7 @@ export class UserRequestsPage implements OnInit {
     async loadRequests(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.requestService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const response = await this.requestService.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: 1, pageSize: 1000 });
             const paged = response?.data;
             this.requests = paged?.items ?? [];
             this.applyFilters();
@@ -87,7 +89,7 @@ export class UserRequestsPage implements OnInit {
 
     async loadCategories(): Promise<void> {
         try {
-            const response = await this.categoryService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const response = await this.categoryService.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: 1, pageSize: 1000 });
             const paged = response?.data;
             this.categories = paged?.items ?? [];
         } catch (err) {
@@ -97,7 +99,7 @@ export class UserRequestsPage implements OnInit {
 
     async loadPriorities(): Promise<void> {
         try {
-            const response = await this.priorityService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const response = await this.priorityService.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: 1, pageSize: 1000 });
             //console.log('RequestPriorities API response:', response);
             const paged = response?.data;
             this.priorities = paged?.items ?? [];
@@ -109,7 +111,7 @@ export class UserRequestsPage implements OnInit {
 
     async loadStatuses(): Promise<void> {
         try {
-            const response = await this.statusService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const response = await this.statusService.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: 1, pageSize: 1000 });
             const paged = response?.data;
             this.statuses = paged?.items ?? [];
         } catch (err) {

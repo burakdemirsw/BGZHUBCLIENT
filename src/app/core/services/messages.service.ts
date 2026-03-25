@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { ApiResponse } from '../models/api-response.model';
-import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
+import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
 
 export interface AiMessageDto {
   id?: string;
@@ -29,10 +29,10 @@ export class MessagesService {
   constructor(private httpClientService: HttpClientService) {}
 
   async getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-    return this.httpClientService.get<PagedResult<any>>({
-      controller: 'Messages',
-      action: buildPaginationQuery(req)
-    });
+    return this.httpClientService.post<PagedResult<any>>(
+      { controller: 'Messages', action: 'paged' },
+      buildPaginationRequest(req),
+    );
   }
 
   async getMessagesByConversation(conversationId: string): Promise<ApiResponse<AiMessageDto[]>> {

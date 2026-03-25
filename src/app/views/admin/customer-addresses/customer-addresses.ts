@@ -8,6 +8,7 @@ import { AddressType } from '@/app/core/models/customer/address-type.models';
 import { Country, City, District } from '@/app/core/models/address/address.models';
 import { HttpClientService } from '@/app/core/services/http-client.service';
 import { AddressTypesService } from '@/app/core/services/address-types.service';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-customer-addresses-page',
@@ -45,7 +46,8 @@ export class CustomerAddressesPage implements OnInit {
     constructor(
         private service: CustomerAddressesService,
         private addressTypesService: AddressTypesService,
-        private http: HttpClientService
+        private http: HttpClientService,
+        private authStateService: AuthStateService
     ) {}
 
     ngOnInit(): void {
@@ -57,7 +59,7 @@ export class CustomerAddressesPage implements OnInit {
         try {
             const [custRes, atRes, countryRes, cityRes, districtRes] = await Promise.all([
                 this.http.get({ controller: 'Customers' }),
-                this.addressTypesService.getPaged({ pageNumber: 1, pageSize: 1000 }),
+                this.addressTypesService.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: 1, pageSize: 1000 }),
                 this.http.get({ controller: 'Addresses', action: 'countries' }),
                 this.http.get({ controller: 'Addresses', action: 'cities' }),
                 this.http.get({ controller: 'Addresses', action: 'districts' }),
@@ -76,7 +78,7 @@ export class CustomerAddressesPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const response = await this.service.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             const paged = response?.data;
             this.items = paged?.items ?? [];
             this.totalCount = paged?.totalCount ?? this.items.length;

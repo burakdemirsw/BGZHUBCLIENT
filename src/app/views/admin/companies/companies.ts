@@ -1,15 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { CompaniesService } from '@/app/core/services/companies.service';
 import { Company, CreateCompanyRequest, UpdateCompanyRequest } from '@/app/core/models/customer/company.models';
 import { Country, City, District } from '@/app/core/models/address/address.models';
-import { HttpClientService } from '@/app/core/services/http-client.service';
 import { AddressesService } from '@/app/core/services/addresses.service';
+import { PagedResult } from '@/app/core/models/pagination.model';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-companies-page',
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RouterModule],
     templateUrl: './companies.html',
 })
 export class CompaniesPage implements OnInit {
@@ -21,14 +23,14 @@ export class CompaniesPage implements OnInit {
     filteredDistricts: District[] = [];
     loading = false;
 
-    // Datatable
+    // Server-side pagination
     filterText = '';
-    filteredItems: Company[] = [];
-    pagedItems: Company[] = [];
     currentPage = 1;
     pageSize = 10;
     totalPages = 1;
+    totalCount = 0;
     totalPagesArray: number[] = [];
+    private searchTimeout: any = null;
 
     // Modal
     showModal = false;
@@ -41,16 +43,16 @@ export class CompaniesPage implements OnInit {
     };
 
     constructor(
-        private service: CompaniesService,
-        private http: HttpClientService,
-        private addressesService: AddressesService
+        private service: CompaniesService,  
+        private addressesService: AddressesService,
+        private authStateService: AuthStateService
     ) {}
 
     async ngOnInit(): Promise<void> {
         await this.loadLookups();
         await this.loadItems();
     }
-
+   
     async loadLookups(): Promise<void> {
         try {
             const [countryRes, cityRes, districtRes] = await Promise.all([
@@ -69,9 +71,17 @@ export class CompaniesPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getAll();
-            this.items = this.extractArray(response?.data);
-            this.applyFilterAndPaging();
+            const response = await this.service.getPaged({
+                companyId: this.authStateService.profile?.companyId ?? '' ,
+                pageNumber: this.currentPage,
+                pageSize: this.pageSize,
+                searchTerm: this.filterText || undefined,
+            });
+            const paged = PagedResult.from<Company>(response);
+            this.items = paged.items;
+            this.totalCount = paged.totalCount;
+            this.totalPages = paged.totalPages || Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.buildPagesArray();
         } catch (err) {
             console.error('Companies load error:', err);
         } finally {
@@ -236,32 +246,34 @@ export class CompaniesPage implements OnInit {
         }
     }
 
-    // ────── Datatable ──────
+    // ────── Server-side Pagination ──────
     onFilterChange(): void {
-        this.currentPage = 1;
-        this.applyFilterAndPaging();
+        if (this.searchTimeout) clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            this.currentPage = 1;
+            this.loadItems();
+        }, 400);
     }
 
     setPage(page: number): void {
-        if (page < 1 || page > this.totalPages) return;
+        if (page < 1 || page > this.totalPages || page === this.currentPage) return;
         this.currentPage = page;
-        this.applyFilterAndPaging();
+        this.loadItems();
     }
 
-    applyFilterAndPaging(): void {
-        const q = (this.filterText || '').toLowerCase();
-        this.filteredItems = this.items.filter(
-            i =>
-                (i.name || '').toLowerCase().includes(q) ||
-                (i.taxNumber || '').toLowerCase().includes(q) ||
-                (i.taxOffice || '').toLowerCase().includes(q) ||
-                (i.phone || '').toLowerCase().includes(q) ||
-                (i.email || '').toLowerCase().includes(q)
-        );
-        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
-        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        const start = (this.currentPage - 1) * this.pageSize;
-        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+    private buildPagesArray(): void {
+        const maxVisible = 7;
+        if (this.totalPages <= maxVisible) {
+            this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        } else {
+            const pages: number[] = [];
+            let start = Math.max(1, this.currentPage - 3);
+            let end = Math.min(this.totalPages, this.currentPage + 3);
+            if (start === 1) end = Math.min(this.totalPages, maxVisible);
+            if (end === this.totalPages) start = Math.max(1, this.totalPages - maxVisible + 1);
+            for (let i = start; i <= end; i++) pages.push(i);
+            this.totalPagesArray = pages;
+        }
     }
 
     private extractArray(response: any): any[] {

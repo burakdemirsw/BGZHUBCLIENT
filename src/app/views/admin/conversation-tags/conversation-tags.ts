@@ -5,6 +5,7 @@ import { ConversationTagsService } from '@/app/core/services/conversation-tags.s
 import { TagsService } from '@/app/core/services/tags.service';
 import { ConversationTag, CreateConversationTagRequest } from '@/app/core/models/conversation-tag/conversation-tag.models';
 import { Tag } from '@/app/core/models/tag/tag.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-conversation-tags-page',
@@ -30,7 +31,8 @@ export class ConversationTagsPage implements OnInit {
 
     constructor(
         private service: ConversationTagsService,
-        private tagsService: TagsService
+        private tagsService: TagsService,
+        private authStateService: AuthStateService
     ) {}
 
     ngOnInit(): void {
@@ -41,7 +43,7 @@ export class ConversationTagsPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const response = await this.service.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             const paged = response?.data;
             this.items = paged?.items ?? [];
             this.totalCount = paged?.totalCount ?? this.items.length;
@@ -56,7 +58,7 @@ export class ConversationTagsPage implements OnInit {
 
     async loadTags(): Promise<void> {
         try {
-            const response = await this.tagsService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const response = await this.tagsService.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: 1, pageSize: 1000 });
             const paged = response?.data;
             this.tags = paged?.items ?? [];
         } catch (err) {

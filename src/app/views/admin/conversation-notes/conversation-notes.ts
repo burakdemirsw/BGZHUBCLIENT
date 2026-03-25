@@ -40,7 +40,7 @@ export class ConversationNotesPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const response = await this.service.getPaged({ companyId: this.authStateService.profile?.companyId || '', pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             const paged = response?.data;
             this.items = paged?.items ?? [];
             this.totalCount = paged?.totalCount ?? this.items.length;

@@ -5,6 +5,7 @@ import { ConversationListsService } from '@/app/core/services/conversation-lists
 import { ConversationListDescriptionsService } from '@/app/core/services/conversation-list-descriptions.service';
 import { ConversationListDescription, AddConversationToListRequest } from '@/app/core/models/conversation/conversation-list.models';
 import { HttpClientService } from '@/app/core/services/http-client.service';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-conversation-lists-page',
@@ -41,7 +42,8 @@ export class ConversationListsPage implements OnInit {
     constructor(
         private service: ConversationListsService,
         private listDescService: ConversationListDescriptionsService,
-        private http: HttpClientService
+        private http: HttpClientService,
+        private authStateService: AuthStateService
     ) {}
 
     ngOnInit(): void {
@@ -51,7 +53,11 @@ export class ConversationListsPage implements OnInit {
     async loadLookups(): Promise<void> {
         try {
             const [listRes, convRes] = await Promise.all([
-                this.listDescService.getPaged({ pageNumber: 1, pageSize: 1000 }),
+                this.listDescService.getPaged({
+                    companyId: this.authStateService.profile?.companyId ?? '',
+                    pageNumber: 1,
+                    pageSize: 1000,
+                }),
                 this.http.get({ controller: 'Conversations' }),
             ]);
             this.lists = this.extractArray(listRes?.data?.items ?? listRes?.data);

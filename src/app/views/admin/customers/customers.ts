@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomersService } from '@/app/core/services/customers.service';
 import { CustomerDetailResponse } from '@/app/core/models/customer/customer.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-customers-page',
@@ -27,6 +28,7 @@ export class CustomersPage implements OnInit {
 
     constructor(
         private service: CustomersService,
+        private authStateService: AuthStateService,
     ) {}
 
     ngOnInit(): void {
@@ -36,7 +38,7 @@ export class CustomersPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const response = await this.service.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             const paged = response?.data;
             this.items = paged?.items ?? [];
             this.totalCount = paged?.totalCount ?? this.items.length;

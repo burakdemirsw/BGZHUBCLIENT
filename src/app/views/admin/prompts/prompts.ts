@@ -116,7 +116,7 @@ export class PromptsPage implements OnInit {
         this.loading = true;
         try {
             const [promptsResp, typesResp] = await Promise.all([
-                this.promptsService.getPaged({ pageNumber: 1, pageSize: 10000 }),
+                this.promptsService.getPaged({ companyId: this.authState.profile?.companyId ?? '', pageNumber: 1, pageSize: 10000 }),
                 this.promptTypesService.getAll(),
             ]);
             const promptsData = promptsResp?.data;

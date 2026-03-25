@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { PageTitle } from '@app/components/page-title';
 import { RequestPrioritiesService } from '@/app/core/services/request-priorities.service';
 import { RequestPriority, CreateRequestPriorityRequest, UpdateRequestPriorityRequest } from '@/app/core/models/request-priority/request-priority.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-request-priorities-page',
@@ -33,7 +34,7 @@ export class RequestPrioritiesPage implements OnInit {
         isBlocked: false,
     };
 
-    constructor(private priorityService: RequestPrioritiesService) {}
+    constructor(private priorityService: RequestPrioritiesService, private authStateService: AuthStateService) {}
 
     ngOnInit(): void {
         this.loadPriorities();
@@ -42,7 +43,7 @@ export class RequestPrioritiesPage implements OnInit {
     async loadPriorities(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.priorityService.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const response = await this.priorityService.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             const paged = response?.data;
             this.priorities = paged?.items ?? [];
             // Seviyeye göre sırala

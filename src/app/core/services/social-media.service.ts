@@ -9,7 +9,7 @@ import {
   UpdateUserSocialMediaAccountRequest,
 } from '../models/social-media/social-media.models';
 import { ApiResponse } from '../models/api-response.model';
-import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
+import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +19,10 @@ export class SocialMediaService {
 
   // === Accounts ===
   getAccountsPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-    return this.http.get<PagedResult<any>>({ controller: 'SocialMedia', action: `accounts${buildPaginationQuery(req)}` });
+    return this.http.post<PagedResult<any>>(
+      { controller: 'SocialMedia', action: 'accounts/paged' },
+      buildPaginationRequest(req),
+    );
   }
 
   getAccountById(id: string): Promise<ApiResponse<any>> {
@@ -44,7 +47,10 @@ export class SocialMediaService {
     
   // === Properties ===
   getPropertiesPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-    return this.http.get<PagedResult<any>>({ controller: 'SocialMedia', action: `properties${buildPaginationQuery(req)}` });
+    return this.http.post<PagedResult<any>>(
+      { controller: 'SocialMedia', action: 'properties/paged' },
+      buildPaginationRequest(req),
+    );
   }
   
   getPropertyById(id: string): Promise<ApiResponse<any>> {
@@ -69,7 +75,10 @@ export class SocialMediaService {
 
   // === User Accounts ===
   getUserAccounts(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-    return this.http.get<PagedResult<any>>({ controller: 'SocialMedia', action: `user-accounts${buildPaginationQuery(req)}` });
+    return this.http.post<PagedResult<any>>(
+      { controller: 'SocialMedia', action: 'user-accounts/paged' },
+      buildPaginationRequest(req),
+    );
   }
 
   getUserAccountById(id: string): Promise<ApiResponse<any>> {

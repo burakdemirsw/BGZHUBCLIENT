@@ -5,6 +5,7 @@ import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { IntegrationTypesService } from '@/app/core/services/integration-types.service';
 import { Integration, CreateIntegrationRequest, UpdateIntegrationRequest } from '@/app/core/models/integration/integration.models';
 import { IntegrationType } from '@/app/core/models/integration/integration-type.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-integrations-page',
@@ -39,6 +40,7 @@ export class IntegrationsPage implements OnInit {
     constructor(
         private integrationService: IntegrationsService,
         private integrationTypesService: IntegrationTypesService,
+        private authStateService: AuthStateService,
     ) {}
 
     ngOnInit(): void {
@@ -81,7 +83,7 @@ export class IntegrationsPage implements OnInit {
     async loadIntegrations(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.integrationService.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const response = await this.integrationService.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: 1, pageSize: 1000 });
             const paged = response?.data;
             this.integrations = paged?.items ?? [];
             this.applyFilterAndPaging();

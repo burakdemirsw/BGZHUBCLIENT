@@ -2,14 +2,17 @@ import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { AddConversationToSegmentRequest, AddConversationsToSegmentRequest } from '../models/customer/segment.models';
 import { ApiResponse } from '../models/api-response.model';
-import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
+import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
 
 @Injectable({ providedIn: 'root' })
 export class ConversationSegmentsService {
     constructor(private http: HttpClientService) {}
 
     getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-        return this.http.get<PagedResult<any>>({ controller: 'ConversationSegments', action: buildPaginationQuery(req) });
+        return this.http.post<PagedResult<any>>(
+            { controller: 'ConversationSegments', action: 'paged' },
+            buildPaginationRequest(req),
+        );
     }
 
     getByConversation(conversationId: string): Promise<ApiResponse<any[]>> {

@@ -34,6 +34,10 @@ export class UserProfile implements OnInit {
     private notificationsService: NotificationsService
   ) {}
 
+  get activePlan() {
+    return this.authState.activePlan;
+  }
+
   ngOnInit(): void {
     this.loadUnreadCount();
   }

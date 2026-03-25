@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AddressTypesService } from '@/app/core/services/address-types.service';
 import { AddressType, CreateAddressTypeRequest, UpdateAddressTypeRequest } from '@/app/core/models/customer/address-type.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-address-types-page',
@@ -27,16 +28,16 @@ export class AddressTypesPage implements OnInit {
     selectedItem: AddressType | null = null;
     form: any = { name: '', description: '' };
 
-    constructor(private service: AddressTypesService) {}
+    constructor(private service: AddressTypesService, private authStateService: AuthStateService) {}
 
     ngOnInit(): void {
         this.loadItems();
     }
-
+   
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const response = await this.service.getPaged({ companyId: this.authStateService.profile?.companyId || '', pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             const paged = response?.data;
             this.items = paged?.items ?? [];
             this.totalCount = paged?.totalCount ?? this.items.length;

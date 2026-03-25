@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { ApiResponse } from '../models/api-response.model';
-import { PagedResult } from '../models/pagination.model';
+import { PagedResult, PaginationRequest, buildPaginationRequest } from '../models/pagination.model';
 import {
     AiKnowledgeResponse,
     CreateAiKnowledgeRequest,
@@ -18,16 +18,12 @@ export class AiKnowledgeService {
         return this.http.get<AiKnowledgeResponse[]>({ controller: 'Ai', action: 'knowledge' });
     }
 
-    getPaged(
-        pageNumber = 1,
-        pageSize = 10,
-        searchTerm = '',
-        companyId?: string
-    ): Promise<ApiResponse<PagedResult<AiKnowledgeResponse>>> {
-        let action = `knowledge?PageNumber=${pageNumber}&PageSize=${pageSize}`;
-        if (searchTerm) action += `&SearchTerm=${encodeURIComponent(searchTerm)}`;
-        if (companyId) action += `&CompanyId=${companyId}`;
-        return this.http.get<PagedResult<AiKnowledgeResponse>>({ controller: 'Ai', action });
+    getPaged(req?: Partial<PaginationRequest>): Promise<ApiResponse<PagedResult<AiKnowledgeResponse>>> {
+        const body = buildPaginationRequest(req);
+        return this.http.post<PagedResult<AiKnowledgeResponse>>(
+            { controller: 'Ai', action: 'knowledge/paged' },
+            body
+        );
     }
 
     getById(id: string): Promise<ApiResponse<AiKnowledgeResponse>> {

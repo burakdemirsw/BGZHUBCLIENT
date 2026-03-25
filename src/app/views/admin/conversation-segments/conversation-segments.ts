@@ -5,6 +5,7 @@ import { ConversationSegmentsService } from '@/app/core/services/conversation-se
 import { SegmentsService } from '@/app/core/services/segments.service';
 import { Segment, AddConversationToSegmentRequest } from '@/app/core/models/customer/segment.models';
 import { HttpClientService } from '@/app/core/services/http-client.service';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-conversation-segments-page',
@@ -41,7 +42,8 @@ export class ConversationSegmentsPage implements OnInit {
     constructor(
         private service: ConversationSegmentsService,
         private segmentsService: SegmentsService,
-        private http: HttpClientService
+        private http: HttpClientService,
+        private authStateService: AuthStateService
     ) {}
 
     ngOnInit(): void {
@@ -51,7 +53,11 @@ export class ConversationSegmentsPage implements OnInit {
     async loadLookups(): Promise<void> {
         try {
             const [segRes, convRes] = await Promise.all([
-                this.segmentsService.getPaged({ pageNumber: 1, pageSize: 1000 }),
+                this.segmentsService.getPaged({
+                    companyId : this.authStateService.profile?.companyId ?? '',   
+                    pageNumber: 1,
+                    pageSize: 1000,
+                }),
                 this.http.get({ controller: 'Conversations' }),
             ]);
             const segPaged = segRes?.data;

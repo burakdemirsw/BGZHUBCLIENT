@@ -5,20 +5,26 @@ import {
     UpdateIntegrationSocialMediaAccountRequest,
 } from '../models/integration/integration-social-media-account.models';
 import { ApiResponse } from '../models/api-response.model';
-import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
+import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
 
 @Injectable({
     providedIn: 'root',
 })
-export class IntegrationSocialMediaAccountsService {
+export class IntegrationSocialMediaAccountsService {  
     constructor(private http: HttpClientService) {}
 
     getAll(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-        return this.http.get<PagedResult<any>>({ controller: 'IntegrationSocialMediaAccounts', action: buildPaginationQuery(req) });
+        return this.http.post<PagedResult<any>>(
+            { controller: 'IntegrationSocialMediaAccounts', action: 'paged' },
+            buildPaginationRequest(req),
+        );
     }
 
     getByCompany(companyId: string, req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-        return this.http.get<PagedResult<any>>({ controller: 'IntegrationSocialMediaAccounts', action: `by-company/${companyId}${buildPaginationQuery(req)}` });
+        return this.http.post<PagedResult<any>>(
+            { controller: 'IntegrationSocialMediaAccounts', action: 'by-company/paged' },
+            buildPaginationRequest({ ...req, companyId }),
+        );
     }
 
     getById(id: string): Promise<ApiResponse<any>> {

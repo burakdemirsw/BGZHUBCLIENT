@@ -1,11 +1,19 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { ApiResponse } from '../models/api-response.model';
+import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
 import { ConversationListResponse, ConversationMessagesResponse, ConversationSidebarResponse } from '../models/conversation/conversation.models';
 
 @Injectable({ providedIn: 'root' })
 export class ConversationsService {
     constructor(private http: HttpClientService) {}
+
+    getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
+        return this.http.post<PagedResult<any>>(
+            { controller: 'Conversations', action: 'paged' },
+            buildPaginationRequest(req),
+        );
+    }
 
     getSidebar(): Promise<ApiResponse<ConversationSidebarResponse>> {
         return this.http.get<ConversationSidebarResponse>({ controller: 'Conversations', action: 'sidebar' });

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { PageTitle } from '@app/components/page-title';
 import { RequestStatusesService } from '@/app/core/services/request-statuses.service';
 import { RequestStatus, CreateRequestStatusRequest, UpdateRequestStatusRequest } from '@/app/core/models/request-status/request-status.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-request-statuses-page',
@@ -31,7 +32,7 @@ export class RequestStatusesPage implements OnInit {
         isBlocked: false,
     };
 
-    constructor(private statusService: RequestStatusesService) {}
+    constructor(private statusService: RequestStatusesService, private authStateService: AuthStateService) {}
 
     ngOnInit(): void {
         this.loadStatuses();
@@ -40,7 +41,7 @@ export class RequestStatusesPage implements OnInit {
     async loadStatuses(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.statusService.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const response = await this.statusService.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             const paged = response?.data;
             this.statuses = paged?.items ?? [];
             this.totalCount = paged?.totalCount ?? this.statuses.length;

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { UsersService } from '@/app/core/services/users.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { User } from '@/app/core/models/user/user.models';
 import {
     IntegrationProperty,
@@ -39,14 +40,14 @@ export class IntegrationPropertiesPage implements OnInit {
     form = {
         userId: '',
         integrationUserId: '',
-        companyId: '',
         key: '',
         value: '',
     };
 
     constructor(
         private integrationsService: IntegrationsService,
-        private usersService: UsersService
+        private usersService: UsersService,
+        private authStateService: AuthStateService,
     ) {}
 
     ngOnInit(): void {
@@ -68,8 +69,8 @@ export class IntegrationPropertiesPage implements OnInit {
         const q = (this.filterText || '').toLowerCase();
         this.filteredItems = this.properties.filter(
             p =>
-                p.key.toLowerCase().includes(q) ||
-                p.value.toLowerCase().includes(q) ||
+                (p.key || '').toLowerCase().includes(q) ||
+                (p.value || '').toLowerCase().includes(q) ||
                 this.getUserName(p.userId).toLowerCase().includes(q)
         );
         this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
@@ -81,14 +82,15 @@ export class IntegrationPropertiesPage implements OnInit {
     async loadData(): Promise<void> {
         this.loading = true;
         try {
+            const companyId = this.getCompanyId();
             const [usersResp, intUsersResp, propsResp] = await Promise.all([
-                this.usersService.getAll(),
-                this.integrationsService.getIntegrationUsersPaged({ pageNumber: 1, pageSize: 1000 }),
-                this.integrationsService.getIntegrationProperties(),
+                this.usersService.getAll({ pageNumber: 1, pageSize: 1000, companyId }),
+                this.integrationsService.getIntegrationUsersPaged({ pageNumber: 1, pageSize: 1000, companyId }),
+                this.integrationsService.getIntegrationProperties({ pageNumber: 1, pageSize: 1000, companyId }),
             ]);
-            this.users = this.extractArray(usersResp);
-            this.integrationUsers = this.extractArray(intUsersResp);
-            this.properties = this.extractArray(propsResp);
+            this.users = this.extractArray<User>(usersResp);
+            this.integrationUsers = this.extractArray<IntegrationUser>(intUsersResp);
+            this.properties = this.extractArray<IntegrationProperty>(propsResp);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('LoadData error:', err);
@@ -97,12 +99,45 @@ export class IntegrationPropertiesPage implements OnInit {
         }
     }
 
-    private extractArray(response: any): any[] {
+    private extractArray<T>(response: unknown): T[] {
+        if (!response || typeof response !== 'object') return [];
+
+        const obj = response as {
+            $values?: T[];
+            data?: unknown;
+            items?: T[];
+            result?: unknown;
+        };
+
         if (Array.isArray(response)) return response;
-        if (response?.$values) return response.$values;
-        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
-        if (response?.items) return response.items;
-        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
+        if (Array.isArray(obj.$values)) return obj.$values;
+        if (Array.isArray(obj.items)) return obj.items;
+
+        const data = obj.data as
+            | T[]
+            | {
+                  items?: T[];
+                  $values?: T[];
+                  data?: T[];
+                  result?: T[];
+              }
+            | undefined;
+
+        if (Array.isArray(data)) return data;
+        if (data && typeof data === 'object') {
+            if (Array.isArray(data.items)) return data.items;
+            if (Array.isArray(data.$values)) return data.$values;
+            if (Array.isArray(data.data)) return data.data;
+            if (Array.isArray(data.result)) return data.result;
+        }
+
+        const result = obj.result as T[] | { items?: T[]; $values?: T[] } | undefined;
+        if (Array.isArray(result)) return result;
+        if (result && typeof result === 'object') {
+            if (Array.isArray(result.items)) return result.items;
+            if (Array.isArray(result.$values)) return result.$values;
+        }
+
         return [];
     }
 
@@ -125,7 +160,6 @@ export class IntegrationPropertiesPage implements OnInit {
         this.form = {
             userId: '',
             integrationUserId: '',
-            companyId: localStorage.getItem('companyId') || '',
             key: '',
             value: '',
         };
@@ -138,7 +172,6 @@ export class IntegrationPropertiesPage implements OnInit {
         this.form = {
             userId: prop.userId,
             integrationUserId: prop.integrationUserId || '',
-            companyId: prop.companyId || localStorage.getItem('companyId') || '',
             key: prop.key,
             value: prop.value,
         };
@@ -156,7 +189,7 @@ export class IntegrationPropertiesPage implements OnInit {
                 const req: UpdateIntegrationPropertyRequest = {
                     userId: this.form.userId,
                     integrationUserId: this.form.integrationUserId || undefined,
-                    companyId: this.form.companyId,
+                    companyId: this.getCompanyId(),
                     key: this.form.key,
                     value: this.form.value,
                     isBlocked: this.selectedProperty.isBlocked ?? false,
@@ -168,7 +201,7 @@ export class IntegrationPropertiesPage implements OnInit {
                 const req: CreateIntegrationPropertyRequest = {
                     userId: this.form.userId,
                     integrationUserId: this.form.integrationUserId || undefined,
-                    companyId: this.form.companyId,
+                    companyId: this.getCompanyId(),
                     key: this.form.key,
                     value: this.form.value,
                 };
@@ -218,11 +251,19 @@ export class IntegrationPropertiesPage implements OnInit {
 
     private async refreshProperties(): Promise<void> {
         try {
-            const resp = await this.integrationsService.getIntegrationProperties();
-            this.properties = this.extractArray(resp);
+            const resp = await this.integrationsService.getIntegrationProperties({
+                pageNumber: 1,
+                pageSize: 1000,
+                companyId: this.getCompanyId(),
+            });
+            this.properties = this.extractArray<IntegrationProperty>(resp);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('Refresh error:', err);
         }
+    }
+
+    private getCompanyId(): string {
+        return this.authStateService.profile?.companyId || '';
     }
 }

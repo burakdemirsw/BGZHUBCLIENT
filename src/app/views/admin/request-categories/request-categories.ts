@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { PageTitle } from '@app/components/page-title';
 import { RequestCategoriesService } from '@/app/core/services/request-categories.service';
 import { RequestCategory, CreateRequestCategoryRequest, UpdateRequestCategoryRequest } from '@/app/core/models/request-category/request-category.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-request-categories-page',
@@ -31,7 +32,7 @@ export class RequestCategoriesPage implements OnInit {
         isBlocked: false,
     };
 
-    constructor(private categoryService: RequestCategoriesService) {}
+    constructor(private categoryService: RequestCategoriesService, private authStateService: AuthStateService) {}
 
     ngOnInit(): void {
         this.loadCategories();
@@ -40,7 +41,7 @@ export class RequestCategoriesPage implements OnInit {
     async loadCategories(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.categoryService.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const response = await this.categoryService.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             const paged = response?.data;
             this.categories = paged?.items ?? [];
             this.totalCount = paged?.totalCount ?? this.categories.length;

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { ApiResponse } from '../models/api-response.model';
-import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
+import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
 import {
     AiRequestLogSummaryResponse,
     AiRequestLogResponse,
@@ -18,10 +18,10 @@ export class AiRequestLogsService {
     constructor(private http: HttpClientService) {}
 
     getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<AiRequestLogSummaryResponse>>> {
-        return this.http.get<PagedResult<AiRequestLogSummaryResponse>>({
-            controller: 'AiRequestLogs',
-            action: buildPaginationQuery(req),
-        });
+        return this.http.post<PagedResult<AiRequestLogSummaryResponse>>(
+            { controller: 'AiRequestLogs', action: 'paged' },
+            buildPaginationRequest(req),
+        );
     }
 
     getById(id: string): Promise<ApiResponse<AiRequestLogResponse>> {

@@ -139,6 +139,28 @@
     .card-footer {
         padding: 0 1.25rem 1.25rem;
     }
+
+    &.connected-card {
+        border: 2px solid rgba(37, 211, 102, 0.3) !important;
+
+        &:hover {
+            border-color: rgba(37, 211, 102, 0.5) !important;
+        }
+    }
+
+    &.disabled-card {
+        cursor: not-allowed;
+        opacity: 0.8;
+
+        &:hover {
+            transform: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+            .card-img-top {
+                transform: none;
+            }
+        }
+    }
 }
 
 .app-icon-wrapper {
@@ -240,6 +262,13 @@
 
         small.text-muted {
             color: #6c7a8d !important;
+        }
+
+        &.disabled-card {
+            &:hover {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+                border-color: #293036;
+            }
         }
     }
 

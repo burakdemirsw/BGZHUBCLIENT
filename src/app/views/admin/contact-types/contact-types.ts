@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ContactTypesService } from '@/app/core/services/contact-types.service';
 import { ContactType, CreateContactTypeRequest, UpdateContactTypeRequest } from '@/app/core/models/customer/contact-type.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-contact-types-page',
@@ -27,7 +28,7 @@ export class ContactTypesPage implements OnInit {
     selectedItem: ContactType | null = null;
     form: any = { name: '', description: '' };
 
-    constructor(private service: ContactTypesService) {}
+    constructor(private service: ContactTypesService, private authStateService: AuthStateService) {}
 
     ngOnInit(): void {
         this.loadItems();
@@ -36,7 +37,7 @@ export class ContactTypesPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const response = await this.service.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             const paged = response?.data;
             this.items = paged?.items ?? [];
             this.totalCount = paged?.totalCount ?? this.items.length;

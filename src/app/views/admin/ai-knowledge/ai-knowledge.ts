@@ -10,6 +10,7 @@ import {
     UpdateAiKnowledgeRequest,
 } from '@/app/core/models/ai-assistant/ai-knowledge.models';
 import { AiAssistant } from '@/app/core/models/ai-assistant/ai-assistant.models';
+import { PagedResult } from '@/app/core/models/pagination.model';
 
 @Component({
     selector: 'app-ai-knowledge-page',
@@ -23,14 +24,14 @@ export class AiKnowledgePage implements OnInit {
     assistants: AiAssistant[] = [];
     loading = false;
 
-    // Datatable
+    // Server-side pagination
     filterText = '';
-    filteredItems: AiKnowledgeResponse[] = [];
-    pagedItems: AiKnowledgeResponse[] = [];
     currentPage = 1;
     pageSize = 10;
     totalPages = 1;
+    totalCount = 0;
     totalPagesArray: number[] = [];
+    private searchTimeout: any = null;
 
     // Modal
     showModal = false;
@@ -53,26 +54,45 @@ export class AiKnowledgePage implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.loadData();
+        this.loadKnowledge();
+        this.loadAssistants();
     }
 
     // ────── Veri yükleme ──────
-    async loadData(): Promise<void> {
+    async loadKnowledge(): Promise<void> {
         this.loading = true;
         try {
             const companyId = this.authState.profile?.companyId || '';
-            const [knowledgeResp, assistantsResp] = await Promise.all([
-                this.knowledgeService.getByCompany(companyId),
-                this.aiProvidersService.getAssistants(),
-            ]);
-            this.items = this.extractArray(knowledgeResp?.data);
-            this.assistants = this.extractArray(assistantsResp?.data);
-            this.applyFilterAndPaging();
+            const response = await this.knowledgeService.getPaged({
+                pageNumber: this.currentPage,
+                pageSize: this.pageSize,
+                searchTerm: this.filterText || undefined,
+                companyId,
+            });
+            const paged = PagedResult.from<AiKnowledgeResponse>(response);
+            this.items = paged.items;
+            this.totalCount = paged.totalCount;
+            this.totalPages = paged.totalPages || Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            this.buildPagesArray();
         } catch (err) {
             console.error('AI Knowledge yükleme hatası:', err);
         } finally {
             this.loading = false;
         }
+    }
+
+    async loadAssistants(): Promise<void> {
+        try {
+            const companyId = this.authState.profile?.companyId || '';
+            const resp = await this.aiProvidersService.getAssistantsPaged({ companyId });
+            this.assistants = this.extractArray(resp?.data);
+        } catch (err) {
+            console.error('Assistants yükleme hatası:', err);
+        }
+    }
+
+    private buildPagesArray(): void {
+        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
     }
 
     // ────── CRUD ──────
@@ -119,7 +139,7 @@ export class AiKnowledgePage implements OnInit {
                 await this.knowledgeService.create(req);
             }
             this.showModal = false;
-            await this.loadData();
+            await this.loadKnowledge();
         } catch (err: any) {
             console.error('Kaydetme hatası:', err);
             const msg =
@@ -134,7 +154,7 @@ export class AiKnowledgePage implements OnInit {
         if (confirm('Bu bilgi kaydını silmek istediğinize emin misiniz?')) {
             try {
                 await this.knowledgeService.delete(item.id);
-                await this.loadData();
+                await this.loadKnowledge();
             } catch (err) {
                 console.error('Silme hatası:', err);
             }
@@ -145,31 +165,19 @@ export class AiKnowledgePage implements OnInit {
         this.showModal = false;
     }
 
-    // ────── Datatable ──────
+    // ────── Server-side pagination ──────
     onFilterChange(): void {
-        this.currentPage = 1;
-        this.applyFilterAndPaging();
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            this.currentPage = 1;
+            this.loadKnowledge();
+        }, 400);
     }
 
     setPage(page: number): void {
         if (page < 1 || page > this.totalPages) return;
         this.currentPage = page;
-        this.applyFilterAndPaging();
-    }
-
-    applyFilterAndPaging(): void {
-        const q = (this.filterText || '').toLowerCase();
-        this.filteredItems = this.items.filter(
-            i =>
-                (i.prop || '').toLowerCase().includes(q) ||
-                (i.value || '').toLowerCase().includes(q) ||
-                this.getAssistantName(i.aiAssistantId).toLowerCase().includes(q) ||
-                (i.createdDate || '').toLowerCase().includes(q)
-        );
-        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
-        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        const start = (this.currentPage - 1) * this.pageSize;
-        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+        this.loadKnowledge();
     }
 
     // ────── Yardımcı ──────

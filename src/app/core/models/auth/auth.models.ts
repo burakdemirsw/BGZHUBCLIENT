@@ -22,12 +22,28 @@ export interface RefreshTokenRequest {
   refreshToken: string;
 }
 
+export interface ActivePlanInfo {
+  planId: string;
+  planName: string;
+  planDescription: string;
+  priceMonthly: number;
+  priceYearly: number;
+  maxMessageCount: number;
+  maxConnectedWebsites: number;
+  maxUserCount: number;
+  maxConnectedSocialMediaAccountCount: number;
+  subscriptionStartDate: string;
+  subscriptionEndDate: string;
+}
+
 export interface AuthResponse {
+  userId: string;
+  companyId: string;
   accessToken: string;
   refreshToken: string;
   expiration: string;
   name: string;
   surname: string;
   lastLoginDate: string;
-  companyId: string;
+  activePlan: ActivePlanInfo | null;
 }

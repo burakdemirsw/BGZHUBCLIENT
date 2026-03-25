@@ -30,10 +30,10 @@
                                     <th>Açıklama</th>
                                     <th class="text-end">Aylık Fiyat</th>
                                     <th class="text-end">Yıllık Fiyat</th>
-                                    <th class="text-center">Maks Chat</th>
                                     <th class="text-center">Maks Mesaj</th>
-                                    <th class="text-center">Maks Kanal</th>
+                                    <th class="text-center">Maks Website</th>
                                     <th class="text-center">Maks Kullanıcı</th>
+                                    <th class="text-center">Maks Sosyal Medya</th>
                                     <th class="text-center">Durum</th>
                                     <th class="text-center">Sıra</th>
                                     <th class="text-end">İşlemler</th>
@@ -47,10 +47,10 @@
                                         <td>{{ item.description && item.description.length > 40 ? item.description.substring(0, 40) + '...' : item.description }}</td>
                                         <td class="text-end">{{ formatCurrency(item.priceMonthly) }}</td>
                                         <td class="text-end">{{ formatCurrency(item.priceYearly) }}</td>
-                                        <td class="text-center">{{ item.maxChatCount ?? '-' }}</td>
-                                        <td class="text-center">{{ item.maxMessageCount ?? '-' }}</td>
-                                        <td class="text-center">{{ item.maxConnectedChannels ?? '-' }}</td>
-                                        <td class="text-center">{{ item.maxUserCount ?? '-' }}</td>
+                                        <td class="text-center">{{ item.maxMessageCount }}</td>
+                                        <td class="text-center">{{ item.maxConnectedWebsites }}</td>
+                                        <td class="text-center">{{ item.maxUserCount }}</td>
+                                        <td class="text-center">{{ item.maxConnectedSocialMediaAccountCount }}</td>
                                         <td class="text-center">
                                             <span class="badge" [class]="item.isActive ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
                                                 {{ item.isActive ? 'Aktif' : 'Pasif' }}
@@ -67,7 +67,7 @@
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="11" class="text-center text-muted">Plan bulunamadı.</td></tr>
+                                    <tr><td colspan="12" class="text-center text-muted">Plan bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -148,48 +148,28 @@
 
                         <h6 class="text-muted mb-3 mt-2"><i class="fa-solid fa-sliders me-1"></i>Limitler</h6>
                         <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Maks Chat Sayısı</label>
-                                <input type="number" class="form-control" [(ngModel)]="form.maxChatCount" name="maxChatCount" min="0">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Maks Mesaj Sayısı <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" [(ngModel)]="form.maxMessageCount" name="maxMessageCount" required min="0">
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Maks Mesaj Sayısı</label>
-                                <input type="number" class="form-control" [(ngModel)]="form.maxMessageCount" name="maxMessageCount" min="0">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Marketplace Yanıt Oranı <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" [(ngModel)]="form.marketplaceReplyRatio" name="marketplaceReplyRatio" required min="0">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Maks Bağlı Website <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" [(ngModel)]="form.maxConnectedWebsites" name="maxConnectedWebsites" required min="0">
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Maks Bağlı Kanal</label>
-                                <input type="number" class="form-control" [(ngModel)]="form.maxConnectedChannels" name="maxConnectedChannels" min="0">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Maks Kullanıcı <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" [(ngModel)]="form.maxUserCount" name="maxUserCount" required min="0">
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Maks Kullanıcı</label>
-                                <input type="number" class="form-control" [(ngModel)]="form.maxUserCount" name="maxUserCount" min="0">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Maks Ürün</label>
-                                <input type="number" class="form-control" [(ngModel)]="form.maxProductCount" name="maxProductCount" min="0">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Maks Sosyal Medya Hesabı <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" [(ngModel)]="form.maxConnectedSocialMediaAccountCount" name="maxConnectedSocialMediaAccountCount" required min="0">
                             </div>
                         </div>
 
-                        <h6 class="text-muted mb-3 mt-2"><i class="fa-solid fa-toggle-on me-1"></i>Özellikler</h6>
+                        <h6 class="text-muted mb-3 mt-2"><i class="fa-solid fa-toggle-on me-1"></i>Durum</h6>
                         <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" [(ngModel)]="form.hasAllIntegrations" name="hasAllIntegrations" id="hasAllIntegrations">
-                                    <label class="form-check-label" for="hasAllIntegrations">Tüm Entegrasyonlar</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" [(ngModel)]="form.hasAllCommunicationChannels" name="hasAllCommunicationChannels" id="hasAllCommunicationChannels">
-                                    <label class="form-check-label" for="hasAllCommunicationChannels">Tüm İletişim Kanalları</label>
-                                </div>
-                            </div>
                             @if (isEditMode) {
                                 <div class="col-md-4 mb-3">
                                     <div class="form-check form-switch">

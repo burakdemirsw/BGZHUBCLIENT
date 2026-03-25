@@ -35,15 +35,15 @@ export class SubscriptionPaymentsPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const resp = await this.subscriptionPaymentsService.getAll({
+            const resp = await this.subscriptionPaymentsService.getPaged({
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
                 searchTerm: this.filterText || undefined,
             });
-            const data = resp?.data || resp;
-            this.items = this.extractArray(data);
-            this.totalCount = (data as any)?.totalCount ?? this.items.length;
-            this.totalPages = (data as any)?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            const pagedData = resp?.data;
+            this.items = pagedData?.items ? this.extractArray(pagedData.items) : this.extractArray(resp?.data || resp);
+            this.totalCount = pagedData?.totalCount ?? this.items.length;
+            this.totalPages = pagedData?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
             this.buildPagesArray();
         } catch (err) {
             console.error('SubscriptionPayments loadItems error:', err);

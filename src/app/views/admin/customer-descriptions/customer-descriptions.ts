@@ -5,6 +5,7 @@ import { CustomerDescriptionsService } from '@/app/core/services/customer-descri
 import { CustomerDescription, CreateCustomerDescriptionRequest, UpdateCustomerDescriptionRequest } from '@/app/core/models/customer/customer-description.models';
 import { CustomerDetailResponse } from '@/app/core/models/customer/customer.models';
 import { HttpClientService } from '@/app/core/services/http-client.service';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-customer-descriptions-page',
@@ -32,7 +33,8 @@ export class CustomerDescriptionsPage implements OnInit {
 
     constructor(
         private service: CustomerDescriptionsService,
-        private http: HttpClientService
+        private http: HttpClientService,
+        private authStateService: AuthStateService
     ) {}
 
     ngOnInit(): void {
@@ -52,7 +54,7 @@ export class CustomerDescriptionsPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const response = await this.service.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             const paged = response?.data;
             this.items = paged?.items ?? [];
             this.totalCount = paged?.totalCount ?? this.items.length;

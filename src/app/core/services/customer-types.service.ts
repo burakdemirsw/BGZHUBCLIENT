@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateCustomerTypeRequest, UpdateCustomerTypeRequest } from '../models/customer/customer-type.models';
 import { ApiResponse } from '../models/api-response.model';
-import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
+import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
 
 @Injectable({
   providedIn: 'root',
@@ -11,10 +11,10 @@ export class CustomerTypesService {
   constructor(private http: HttpClientService) {}
 
   getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-    return this.http.get<PagedResult<any>>({
-      controller: 'CustomerTypes',
-      action: buildPaginationQuery(req)
-    });
+    return this.http.post<PagedResult<any>>(
+      { controller: 'CustomerTypes', action: 'paged' },
+      buildPaginationRequest(req),
+    );
   }
 
   getById(id: string): Promise<ApiResponse<any>> {

@@ -5,7 +5,7 @@
 export class PagedResult<T> {
     items: T[];
     pageNumber: number;
-    pageSize: number;
+    pageSize: number;  
     totalCount: number;
     totalPages: number;
     hasPreviousPage: boolean;
@@ -45,7 +45,7 @@ export class PagedResult<T> {
             totalPages: paged?.totalPages ?? 0,
             hasPreviousPage: paged?.hasPreviousPage ?? false,
             hasNextPage: paged?.hasNextPage ?? false,
-        });
+        } as Partial<PagedResult<T>>);
     }
 }
 
@@ -54,12 +54,12 @@ export class PagedResult<T> {
  * Tüm sayfalama yapılan servislerde bu interface kullanılır.
  */
 export interface PaginationRequest {
+    companyId?: string;
     pageNumber?: number;
     pageSize?: number;
     searchTerm?: string;
     sortBy?: string;
     sortDescending?: boolean;
-    companyId?: string;
 }
 
 /** Varsayılan pagination değerleri */
@@ -68,6 +68,18 @@ export const DEFAULT_PAGINATION: Required<Pick<PaginationRequest, 'pageNumber' |
     pageSize: 20,
     sortDescending: false,
 };
+
+/**
+ * Partial parametreden tam PaginationRequest oluşturur.
+ * companyId verilmediyse localStorage'dan otomatik doldurur.
+ */
+export function buildPaginationRequest(req?: Partial<PaginationRequest>): PaginationRequest {
+    return {
+        ...DEFAULT_PAGINATION,
+        ...req,
+        companyId: req?.companyId || getCompanyIdFromStorage(),
+    };
+}
 
 /**
  * PaginationRequest nesnesini query-string'e dönüştürür.
@@ -90,12 +102,12 @@ function getCompanyIdFromStorage(): string {
     }
 }
 
-export function buildPaginationQuery(req?: PaginationRequest, prefix: string = '?'): string {
+export function buildPaginationQuery(req?: PaginationRequest, prefix: string = '?', includeCompanyId: boolean = true): string {
     const p = { ...DEFAULT_PAGINATION, ...req };
     const parts: string[] = [];
 
     // companyId verilmediyse AuthState (localStorage) üzerinden otomatik doldur
-    if (!p.companyId) {
+    if (includeCompanyId && !p.companyId) {
         p.companyId = getCompanyIdFromStorage();
     }
 
@@ -105,7 +117,7 @@ export function buildPaginationQuery(req?: PaginationRequest, prefix: string = '
     if (p.searchTerm) parts.push(`SearchTerm=${encodeURIComponent(p.searchTerm)}`);
     if (p.sortBy) parts.push(`SortBy=${encodeURIComponent(p.sortBy)}`);
     if (p.sortDescending) parts.push(`SortDescending=${p.sortDescending}`);
-    if (p.companyId) parts.push(`CompanyId=${encodeURIComponent(p.companyId)}`);
+    if (includeCompanyId && p.companyId) parts.push(`CompanyId=${encodeURIComponent(p.companyId)}`);
 
     return parts.length > 0 ? `${prefix}${parts.join('&')}` : '';
 }

@@ -6,7 +6,7 @@ import {
     UpdateUserIntegrationUserSocialMediaAccountRequest,
 } from '../models/integration/user-integration-user-social-media-account.models';
 import { ApiResponse } from '../models/api-response.model';
-import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
+import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
 
 @Injectable({
     providedIn: 'root',
@@ -17,7 +17,10 @@ export class UserIntegrationUserSocialMediaAccountsService {
     constructor(private http: HttpClientService) {}
 
     getAll(req?: PaginationRequest): Promise<ApiResponse<PagedResult<UserIntegrationUserSocialMediaAccountResponse>>> {
-        return this.http.get<PagedResult<UserIntegrationUserSocialMediaAccountResponse>>({ controller: this.controller, action: buildPaginationQuery(req) });
+        return this.http.post<PagedResult<UserIntegrationUserSocialMediaAccountResponse>>(
+            { controller: this.controller, action: 'paged' },
+            buildPaginationRequest(req),
+        );
     }
 
     getById(id: string): Promise<ApiResponse<UserIntegrationUserSocialMediaAccountResponse>> {
@@ -37,7 +40,10 @@ export class UserIntegrationUserSocialMediaAccountsService {
     }
 
     getByCompany(companyId: string, req?: PaginationRequest): Promise<ApiResponse<PagedResult<UserIntegrationUserSocialMediaAccountResponse>>> {
-        return this.http.get<PagedResult<UserIntegrationUserSocialMediaAccountResponse>>({ controller: this.controller, action: `by-company/${companyId}${buildPaginationQuery(req)}` });
+        return this.http.post<PagedResult<UserIntegrationUserSocialMediaAccountResponse>>(
+            { controller: this.controller, action: 'by-company/paged' },
+            buildPaginationRequest({ ...req, companyId }),
+        );
     }
 
     create(request: CreateUserIntegrationUserSocialMediaAccountRequest): Promise<ApiResponse<UserIntegrationUserSocialMediaAccountResponse>> {

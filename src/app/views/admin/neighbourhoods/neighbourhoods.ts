@@ -114,15 +114,15 @@ export class NeighbourhoodsPage implements OnInit {
                 this.items = this.items.slice(start, start + this.pageSize);
             } else {
                 // Server-side paging
-                const resp = await this.neighbourhoodsService.getAll({
+                const resp = await this.neighbourhoodsService.getPaged({
                     pageNumber: this.currentPage,
                     pageSize: this.pageSize,
                     searchTerm: this.filterText || undefined,
                 });
-                const data = resp?.data || resp;
-                this.items = this.extractArray(data);
-                this.totalCount = (data as any)?.totalCount ?? this.items.length;
-                this.totalPages = (data as any)?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+                const pagedData = resp?.data;
+                this.items = pagedData?.items ? this.extractArray(pagedData.items) : this.extractArray(resp?.data || resp);
+                this.totalCount = pagedData?.totalCount ?? this.items.length;
+                this.totalPages = pagedData?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
             }
             this.buildPagesArray();
         } catch (err) {

@@ -109,6 +109,7 @@ export class AiRequestLogsPage implements OnInit {
         this.loading = true;
         try {
             const resp = await this.aiRequestLogsService.getPaged({
+                companyId: this.authState.profile?.companyId || '',
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
                 searchTerm: this.filterText || undefined,

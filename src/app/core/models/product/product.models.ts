@@ -1,3 +1,18 @@
+import { PaginationRequest } from '../pagination.model';
+
+export interface ProductFilterRequest extends PaginationRequest {
+    itemCode?: string;
+    barcode?: string;
+    name?: string;
+    brand?: string;
+    category?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    isActive?: boolean;
+    integrationId?: string;
+    integrationUserId?: string;
+}
+
 export interface Product {
     id: string;
     productCode?: string;

@@ -3,15 +3,11 @@ export interface PlanResponse {
     name?: string;
     description?: string;
     priceMonthly: number;
-    priceYearly?: number;
-    maxChatCount?: number;  
-    maxMessageCount?: number;
-    marketplaceReplyRatio: number;
-    maxConnectedChannels?: number;
-    maxUserCount?: number;
-    maxProductCount?: number;
-    hasAllIntegrations: boolean;
-    hasAllCommunicationChannels: boolean;
+    priceYearly: number;
+    maxMessageCount: number;
+    maxConnectedWebsites: number;
+    maxUserCount: number;
+    maxConnectedSocialMediaAccountCount: number;
     sortOrder: number;
     isActive: boolean;
     createdDate?: string;
@@ -22,15 +18,11 @@ export interface CreatePlanRequest {
     name: string;
     description: string;
     priceMonthly: number;
-    priceYearly?: number;
-    maxChatCount?: number;
-    maxMessageCount?: number;
-    marketplaceReplyRatio: number;
-    maxConnectedChannels?: number;
-    maxUserCount?: number;
-    maxProductCount?: number;
-    hasAllIntegrations: boolean;
-    hasAllCommunicationChannels: boolean;
+    priceYearly: number;
+    maxMessageCount: number;
+    maxConnectedWebsites: number;
+    maxUserCount: number;
+    maxConnectedSocialMediaAccountCount: number;
     sortOrder: number;
 }
 
@@ -38,15 +30,11 @@ export interface UpdatePlanRequest {
     name: string;
     description: string;
     priceMonthly: number;
-    priceYearly?: number;
-    maxChatCount?: number;
-    maxMessageCount?: number;
-    marketplaceReplyRatio: number;
-    maxConnectedChannels?: number;
-    maxUserCount?: number;
-    maxProductCount?: number;
-    hasAllIntegrations: boolean;
-    hasAllCommunicationChannels: boolean;
+    priceYearly: number;
+    maxMessageCount: number;
+    maxConnectedWebsites: number;
+    maxUserCount: number;
+    maxConnectedSocialMediaAccountCount: number;
     sortOrder: number;
     isActive: boolean;
 }

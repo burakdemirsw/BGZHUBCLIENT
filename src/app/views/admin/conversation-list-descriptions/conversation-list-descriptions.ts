@@ -8,6 +8,7 @@ import {
     UpdateConversationListDescriptionRequest,
 } from '@/app/core/models/conversation/conversation-list.models';
 import { HttpClientService } from '@/app/core/services/http-client.service';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-conversation-list-descriptions-page',
@@ -37,7 +38,8 @@ export class ConversationListDescriptionsPage implements OnInit {
 
     constructor(
         private service: ConversationListDescriptionsService,
-        private http: HttpClientService
+        private http: HttpClientService,
+        private authStateService: AuthStateService
     ) {}
 
     ngOnInit(): void {
@@ -54,10 +56,10 @@ export class ConversationListDescriptionsPage implements OnInit {
         }
     }
 
-    async loadItems(): Promise<void> {
+    async loadItems(): Promise<void> {  
         this.loading = true;
         try {
-            const res = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const res = await this.service.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             const paged = res?.data;
             this.items = paged?.items ?? [];
             this.totalCount = paged?.totalCount ?? this.items.length;

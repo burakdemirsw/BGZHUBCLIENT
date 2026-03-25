@@ -64,7 +64,7 @@ export class ShortcutsPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.shortcutsService.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const response = await this.shortcutsService.getPaged({ companyId: this.authState.profile?.companyId ?? '', pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             //console.log('Shortcuts response:', response);
             
             const paged = response?.data;

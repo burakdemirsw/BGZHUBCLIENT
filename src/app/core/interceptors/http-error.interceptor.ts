@@ -21,8 +21,9 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
             break;
           case 401:
             errorMessage = 'Oturum süresi doldu. Lütfen tekrar giriş yapın.';
-            localStorage.removeItem('accessToken');
-            router.navigate(['/auth/login']);
+            localStorage.clear();
+            sessionStorage.clear();
+            router.navigate(['/auth/sign-in']);
             break;
           case 403:
             errorMessage = 'Bu işlem için yetkiniz bulunmamaktadır.';

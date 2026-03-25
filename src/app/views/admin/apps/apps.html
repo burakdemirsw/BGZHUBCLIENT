@@ -27,6 +27,135 @@
     </div>
 </div>
 
+<!-- Bağlı Uygulamalar -->
+@if (connectedApps.length > 0) {
+<div class="mb-4">
+    <div class="d-flex align-items-center mb-3">
+        <div class="category-icon-wrapper bg-success bg-opacity-10 me-2">
+            <i class="fa-solid fa-link text-success"></i>
+        </div>
+        <h5 class="mb-0 fw-semibold">Bağlı Uygulamalar</h5>
+        <span class="badge bg-success-subtle text-success ms-2">{{ connectedApps.length }}</span>
+    </div>
+
+    <!-- Bağlı - Site -->
+    @if (connectedSiteChannels.length > 0) {
+    <h6 class="text-muted small fw-semibold mb-2 ms-1"><i class="fa-solid fa-globe me-1"></i>Site</h6>
+    <div class="row g-3 mb-3">
+        @for (channel of connectedSiteChannels; track channel.id) {
+        <div class="col-md-6 col-lg-4">
+            <div class="app-card card border-0 h-100 connected-card" style="cursor: pointer;" (click)="onConnectedAppClick(channel)">
+                <div class="card-img-top-wrapper">
+                    <img [src]="channel.imageUrl" [alt]="channel.name" class="card-img-top" />
+                    <div class="card-img-overlay-gradient"></div>
+                    <span class="status-badge active">
+                        <i class="fa-solid fa-circle me-1" style="font-size: 6px; vertical-align: middle;"></i>
+                        Bağlı
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="app-icon-wrapper me-3">
+                            <img [src]="channel.imageUrl" [alt]="channel.name" class="app-icon-img" />
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-semibold">{{ channel.name }}</h6>
+                            <small class="text-muted">{{ channel.categoryLabel }}</small>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">{{ channel.description }}</p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0">
+                    <button class="btn btn-sm btn-soft-primary w-100" type="button">
+                        <i class="fa-solid fa-pen me-1"></i> Düzenle
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+    }
+
+    <!-- Bağlı - Pazaryeri -->
+    @if (connectedPazaryeriChannels.length > 0) {
+    <h6 class="text-muted small fw-semibold mb-2 ms-1"><i class="fa-solid fa-store me-1"></i>Pazaryeri</h6>
+    <div class="row g-3 mb-3">
+        @for (channel of connectedPazaryeriChannels; track channel.id) {
+        <div class="col-md-6 col-lg-4">
+            <div class="app-card card border-0 h-100 connected-card" style="cursor: pointer;" (click)="onConnectedAppClick(channel)">
+                <div class="card-img-top-wrapper">
+                    <img [src]="channel.imageUrl" [alt]="channel.name" class="card-img-top" />
+                    <div class="card-img-overlay-gradient"></div>
+                    <span class="status-badge active">
+                        <i class="fa-solid fa-circle me-1" style="font-size: 6px; vertical-align: middle;"></i>
+                        Bağlı
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="app-icon-wrapper me-3">
+                            <img [src]="channel.imageUrl" [alt]="channel.name" class="app-icon-img" />
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-semibold">{{ channel.name }}</h6>
+                            <small class="text-muted">{{ channel.categoryLabel }}</small>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">{{ channel.description }}</p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0">
+                    <button class="btn btn-sm btn-soft-primary w-100" type="button">
+                        <i class="fa-solid fa-pen me-1"></i> Düzenle
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+    }
+
+    <!-- Bağlı - Sosyal Medya -->
+    @if (connectedSosyalMedyaChannels.length > 0) {
+    <h6 class="text-muted small fw-semibold mb-2 ms-1"><i class="fa-solid fa-share-nodes me-1"></i>Sosyal Medya</h6>
+    <div class="row g-3 mb-3">
+        @for (channel of connectedSosyalMedyaChannels; track channel.id) {
+        <div class="col-md-6 col-lg-4">
+            <div class="app-card card border-0 h-100 connected-card" style="cursor: pointer;" (click)="onConnectedAppClick(channel)">
+                <div class="card-img-top-wrapper">
+                    <img [src]="channel.imageUrl" [alt]="channel.name" class="card-img-top" />
+                    <div class="card-img-overlay-gradient"></div>
+                    <span class="status-badge active">
+                        <i class="fa-solid fa-circle me-1" style="font-size: 6px; vertical-align: middle;"></i>
+                        Bağlı
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="app-icon-wrapper me-3">
+                            <img [src]="channel.imageUrl" [alt]="channel.name" class="app-icon-img" />
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-semibold">{{ channel.name }}</h6>
+                            <small class="text-muted">{{ channel.categoryLabel }}</small>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">{{ channel.description }}</p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0">
+                    <button class="btn btn-sm btn-soft-primary w-100" type="button">
+                        <i class="fa-solid fa-pen me-1"></i> Düzenle
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+    }
+</div>
+
+<hr class="my-4">
+}
+
 <!-- Search -->
 <div class="row mb-4">
     <div class="col-md-6 col-lg-4">
@@ -58,14 +187,20 @@
     <div class="row g-3">
         @for (channel of siteChannels; track channel.id) {
         <div class="col-md-6 col-lg-4">
-            <div class="app-card card border-0 h-100" (click)="onChannelClick(channel)">
+            <div class="app-card card border-0 h-100" [class.disabled-card]="channel.status === 'coming-soon'" (click)="onChannelClick(channel)">
                 <div class="card-img-top-wrapper">
                     <img [src]="channel.imageUrl" [alt]="channel.name" class="card-img-top" />
                     <div class="card-img-overlay-gradient"></div>
-                    <span class="status-badge" [class.active]="channel.status === 'active'">
+                    @if (channel.status === 'active') {
+                    <span class="status-badge active">
+                        <i class="fa-solid fa-check" style="font-size: 8px;"></i>
+                    </span>
+                    } @else {
+                    <span class="status-badge">
                         <i class="fa-solid fa-circle me-1" style="font-size: 6px; vertical-align: middle;"></i>
                         {{ channel.statusLabel }}
                     </span>
+                    }
                 </div>
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-2">
@@ -80,9 +215,19 @@
                     <p class="text-muted small mb-0">{{ channel.description }}</p>
                 </div>
                 <div class="card-footer bg-transparent border-top-0 pt-0">
-                    <button class="btn btn-sm btn-soft-primary w-100" (click)="onConnectClick($event, channel)">
-                        <i class="fa-solid fa-plug me-1"></i> Baglan
-                    </button>
+                    @if (channel.status === 'active') {
+                        <button class="btn btn-sm btn-soft-primary w-100" type="button" (click)="onConnectClick($event, channel)" [disabled]="!isChannelConnectable(channel)">
+                            <i class="fa-solid fa-plus me-1"></i> Yeni Ekle
+                        </button>
+                    } @else if (isChannelConnectable(channel)) {
+                        <button class="btn btn-sm btn-soft-primary w-100" (click)="onConnectClick($event, channel)">
+                            <i class="fa-solid fa-plug me-1"></i> Bağlan
+                        </button>
+                    } @else {
+                        <button class="btn btn-sm btn-light w-100" type="button" disabled>
+                            <i class="fa-regular fa-clock me-1"></i> Yakında
+                        </button>
+                    }
                 </div>
             </div>
         </div>
@@ -104,14 +249,20 @@
     <div class="row g-3">
         @for (channel of pazaryeriChannels; track channel.id) {
         <div class="col-md-6 col-lg-4">
-            <div class="app-card card border-0 h-100" (click)="onChannelClick(channel)">
+            <div class="app-card card border-0 h-100" [class.disabled-card]="channel.status === 'coming-soon'" (click)="onChannelClick(channel)">
                 <div class="card-img-top-wrapper">
                     <img [src]="channel.imageUrl" [alt]="channel.name" class="card-img-top" />
                     <div class="card-img-overlay-gradient"></div>
-                    <span class="status-badge" [class.active]="channel.status === 'active'">
+                    @if (channel.status === 'active') {
+                    <span class="status-badge active">
+                        <i class="fa-solid fa-check" style="font-size: 8px;"></i>
+                    </span>
+                    } @else {
+                    <span class="status-badge">
                         <i class="fa-solid fa-circle me-1" style="font-size: 6px; vertical-align: middle;"></i>
                         {{ channel.statusLabel }}
                     </span>
+                    }
                 </div>
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-2">
@@ -126,9 +277,19 @@
                     <p class="text-muted small mb-0">{{ channel.description }}</p>
                 </div>
                 <div class="card-footer bg-transparent border-top-0 pt-0">
-                    <button class="btn btn-sm btn-soft-primary w-100">
-                        <i class="fa-solid fa-plug me-1"></i> Bağlan
-                    </button>
+                    @if (channel.status === 'active') {
+                        <button class="btn btn-sm btn-soft-primary w-100" type="button" (click)="onConnectClick($event, channel)" [disabled]="!isChannelConnectable(channel)">
+                            <i class="fa-solid fa-plus me-1"></i> Yeni Ekle
+                        </button>
+                    } @else if (isChannelConnectable(channel)) {
+                        <button class="btn btn-sm btn-soft-primary w-100" (click)="onConnectClick($event, channel)">
+                            <i class="fa-solid fa-plug me-1"></i> Bağlan
+                        </button>
+                    } @else {
+                        <button class="btn btn-sm btn-light w-100" type="button" disabled>
+                            <i class="fa-regular fa-clock me-1"></i> Yakında
+                        </button>
+                    }
                 </div>
             </div>
         </div>
@@ -150,14 +311,20 @@
     <div class="row g-3">
         @for (channel of sosyalMedyaChannels; track channel.id) {
         <div class="col-md-6 col-lg-4">
-            <div class="app-card card border-0 h-100" (click)="onChannelClick(channel)">
+            <div class="app-card card border-0 h-100" [class.disabled-card]="channel.status === 'coming-soon'" (click)="onChannelClick(channel)">
                 <div class="card-img-top-wrapper">
                     <img [src]="channel.imageUrl" [alt]="channel.name" class="card-img-top" />
                     <div class="card-img-overlay-gradient"></div>
-                    <span class="status-badge" [class.active]="channel.status === 'active'">
+                    @if (channel.status === 'active') {
+                    <span class="status-badge active">
+                        <i class="fa-solid fa-check" style="font-size: 8px;"></i>
+                    </span>
+                    } @else {
+                    <span class="status-badge">
                         <i class="fa-solid fa-circle me-1" style="font-size: 6px; vertical-align: middle;"></i>
                         {{ channel.statusLabel }}
                     </span>
+                    }
                 </div>
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-2">
@@ -172,9 +339,19 @@
                     <p class="text-muted small mb-0">{{ channel.description }}</p>
                 </div>
                 <div class="card-footer bg-transparent border-top-0 pt-0">
-                    <button class="btn btn-sm btn-soft-primary w-100">
-                        <i class="fa-solid fa-plug me-1"></i> Bağlan
-                    </button>
+                    @if (channel.status === 'active') {
+                        <button class="btn btn-sm btn-soft-primary w-100" type="button" (click)="onConnectClick($event, channel)" [disabled]="!isChannelConnectable(channel)">
+                            <i class="fa-solid fa-plus me-1"></i> Yeni Ekle
+                        </button>
+                    } @else if (isChannelConnectable(channel)) {
+                        <button class="btn btn-sm btn-soft-primary w-100" (click)="onConnectClick($event, channel)">
+                            <i class="fa-solid fa-plug me-1"></i> Bağlan
+                        </button>
+                    } @else {
+                        <button class="btn btn-sm btn-light w-100" type="button" disabled>
+                            <i class="fa-regular fa-clock me-1"></i> Yakında
+                        </button>
+                    }
                 </div>
             </div>
         </div>
@@ -207,8 +384,8 @@
                         <img src="assets/images/logos/ticimax_logo.svg" alt="Ticimax" class="app-icon-img" />
                     </div>
                     <div>
-                        <h5 class="modal-title mb-0">Ticimax Baglantisi</h5>
-                        <small class="text-muted">E-ticaret entegrasyon bilgilerini girin</small>
+                        <h5 class="modal-title mb-0">{{ isEditMode ? 'Ticimax Güncelle' : 'Ticimax Bağlantısı' }}</h5>
+                        <small class="text-muted">{{ isEditMode ? 'Bağlantı bilgilerinizi güncelleyin' : 'E-ticaret entegrasyon bilgilerini girin' }}</small>
                     </div>
                 </div>
                 <button type="button" class="btn-close" (click)="closeTicimaxModal()"></button>
@@ -250,21 +427,74 @@
                     />
                     <small class="text-muted">Ticimax magazanizin site adresi</small>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fa-solid fa-truck me-1 text-success"></i> Kargo Firması
+                    </label>
+                    @if (loadingCargoFirms) {
+                        <div class="d-flex align-items-center gap-2 py-2">
+                            <span class="spinner-border spinner-border-sm text-muted"></span>
+                            <small class="text-muted">Kargo firmaları yükleniyor...</small>
+                        </div>
+                    } @else if (cargoFirms.length > 0) {
+                        <div class="input-group">
+                            <select class="form-select" [(ngModel)]="ticimaxForm.kargoFirmaId">
+                                <option [ngValue]="null">Seçin veya elle girin →</option>
+                                @for (cargo of cargoFirms; track cargo.kargoFirmaId) {
+                                    <option [ngValue]="cargo.kargoFirmaId">{{ cargo.kargoFirmaTanim }}</option>
+                                }
+                            </select>
+                            <input
+                                type="number"
+                                class="form-control"
+                                style="max-width: 120px;"
+                                placeholder="Kargo ID"
+                                [ngModel]="ticimaxForm.kargoFirmaId"
+                                (ngModelChange)="ticimaxForm.kargoFirmaId = $event || null"
+                            />
+                        </div>
+                        <small class="text-muted">Listeden seçin veya Kargo ID'yi elle yazın</small>
+                    } @else {
+                        <input
+                            type="number"
+                            class="form-control"
+                            placeholder="Kargo firma ID girin"
+                            [ngModel]="ticimaxForm.kargoFirmaId"
+                            (ngModelChange)="ticimaxForm.kargoFirmaId = $event || null"
+                        />
+                        <small class="text-muted">Kargo firma ID'sini elle girebilirsiniz</small>
+                    }
+                </div>
             </div>
+            <!-- Test result alert -->
+            @if (testResult === 'success') {
+            <div class="alert alert-success d-flex align-items-center mx-3 mb-0 py-2" role="alert">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                <small>Bağlantı testi başarılı!</small>
+            </div>
+            } @else if (testResult === 'fail') {
+            <div class="alert alert-danger d-flex align-items-center mx-3 mb-0 py-2" role="alert">
+                <i class="fa-solid fa-circle-xmark me-2"></i>
+                <small>Bağlantı testi başarısız. Bilgileri kontrol edin.</small>
+            </div>
+            }
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" (click)="closeTicimaxModal()">
-                    Iptal
+                    İptal
                 </button>
                 <button
                     type="button"
                     class="btn btn-primary"
-                    [disabled]="savingTicimax || !ticimaxForm.xmlUrl || !ticimaxForm.webServisKodu || !ticimaxForm.site"
+                    [disabled]="savingTicimax || !ticimaxForm.xmlUrl || !ticimaxForm.webServisKodu || !ticimaxForm.site || !ticimaxForm.kargoFirmaId"
                     (click)="saveTicimax()"
                 >
                     @if (savingTicimax) {
                         <span class="spinner-border spinner-border-sm me-1"></span> Kaydediliyor...
+                    } @else if (isEditMode) {
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Güncelle
                     } @else {
-                        <i class="fa-solid fa-plug me-1"></i> Baglan
+                        <i class="fa-solid fa-plug me-1"></i> Bağlan
                     }
                 </button>
             </div>

@@ -3,7 +3,8 @@ import { Router } from '@angular/router';
 import { HttpClientService } from './http-client.service';
 import { ApiResponse } from '../models/api-response.model';
 import { AuthStateService } from './auth-state.service';
-import { LoginRequest, RegisterRequest, RegisterWithCompanyRequest, RefreshTokenRequest } from '../models/auth/auth.models';
+import { UserMenuService } from './user-menu.service';
+import { LoginRequest, RegisterRequest, RegisterWithCompanyRequest, RefreshTokenRequest, AuthResponse } from '../models/auth/auth.models';
 
 @Injectable({
   providedIn: 'root',
@@ -20,19 +21,21 @@ export class UserService {
     localStorage.clear();
     sessionStorage.clear();
     this.authState.clearProfile();
-    // Lazy import ile circular dependency'den kaçın
     try {
-      localStorage.clear();
-       this.router.navigate(['/home']);
-      const mod = require('./user-menu.service');
-      const userMenuService = this.injector.get<any>(mod.UserMenuService);
+      const userMenuService = this.injector.get(UserMenuService);
       userMenuService.clearMenus();
     } catch { /* ignore */ }
-    this.router.navigate(['/home']);
+    this.router.navigate(['/auth/sign-in']).then(success => {
+      if (!success) {
+        window.location.href = '/auth/sign-in';
+      }
+    }).catch(() => {
+      window.location.href = '/auth/sign-in';
+    });
   }
 
-  login(loginRequest: LoginRequest): Promise<ApiResponse<any>> {
-    return this.httpClientService.post<any>(
+  login(loginRequest: LoginRequest): Promise<ApiResponse<AuthResponse>> {
+    return this.httpClientService.post<AuthResponse>(
       { controller: 'Auth', action: 'login' },
       loginRequest
     );

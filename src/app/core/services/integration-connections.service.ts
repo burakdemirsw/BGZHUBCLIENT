@@ -6,7 +6,7 @@ import {
     UpdateIntegrationConnectionRequest,
 } from '../models/integration/integration-connection.models';
 import { ApiResponse } from '../models/api-response.model';
-import { PaginationRequest, buildPaginationQuery, PagedResult } from '../models/pagination.model';
+import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
 
 @Injectable({
     providedIn: 'root',
@@ -16,7 +16,10 @@ export class IntegrationConnectionsService {
 
 
     getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<IntegrationConnectionResponse>>> {
-        return this.http.get<PagedResult<IntegrationConnectionResponse>>({ controller: 'IntegrationConnections', action: `paged${buildPaginationQuery(req)}` });
+        return this.http.post<PagedResult<IntegrationConnectionResponse>>(
+            { controller: 'IntegrationConnections', action: 'paged' },
+            buildPaginationRequest(req),
+        );
     }
 
     getById(id: string): Promise<ApiResponse<IntegrationConnectionResponse>> {

@@ -11,6 +11,7 @@ import {
 } from '@/app/core/models/integration/integration-connection.models';
 import { Integration } from '@/app/core/models/integration/integration.models';
 import { IntegrationConnectionType } from '@/app/core/models/integration/integration-connection-type.models';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-integration-connections-page',
@@ -47,7 +48,8 @@ export class IntegrationConnectionsPage implements OnInit {
     constructor(
         private service: IntegrationConnectionsService,
         private integrationsService: IntegrationsService,
-        private connectionTypesService: IntegrationConnectionTypesService
+        private connectionTypesService: IntegrationConnectionTypesService,
+        private authStateService: AuthStateService
     ) {}
 
     ngOnInit(): void {
@@ -97,7 +99,7 @@ export class IntegrationConnectionsPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged({ pageNumber: 1, pageSize: 1000 });
+            const response = await this.service.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: 1, pageSize: 1000 });
             //console.log('IntegrationConnections response:', response);
             this.items = this.extractArray(response);
             this.applyFilterAndPaging();

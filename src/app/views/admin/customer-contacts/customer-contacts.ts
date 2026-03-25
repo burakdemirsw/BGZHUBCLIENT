@@ -7,6 +7,7 @@ import { CustomerDetailResponse } from '@/app/core/models/customer/customer.mode
 import { ContactType } from '@/app/core/models/customer/contact-type.models';
 import { HttpClientService } from '@/app/core/services/http-client.service';
 import { ContactTypesService } from '@/app/core/services/contact-types.service';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-customer-contacts-page',
@@ -36,7 +37,8 @@ export class CustomerContactsPage implements OnInit {
     constructor(
         private service: CustomerContactsService,
         private contactTypesService: ContactTypesService,
-        private http: HttpClientService
+        private http: HttpClientService,
+        private authStateService: AuthStateService
     ) {}
 
     ngOnInit(): void {
@@ -48,7 +50,7 @@ export class CustomerContactsPage implements OnInit {
         try {
             const [custRes, ctRes] = await Promise.all([
                 this.http.get({ controller: 'Customers' }),
-                this.contactTypesService.getPaged({ pageNumber: 1, pageSize: 1000 }),
+                this.contactTypesService.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: 1, pageSize: 1000 }),
             ]);
             this.customers = this.extractArray(custRes?.data);
             const ctPaged = ctRes?.data;
@@ -61,7 +63,7 @@ export class CustomerContactsPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.service.getPaged({ pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
+            const response = await this.service.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             const paged = response?.data;
             this.items = paged?.items ?? [];
             this.totalCount = paged?.totalCount ?? this.items.length;

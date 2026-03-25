@@ -34,7 +34,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @for (item of pagedItems; track item.id; let idx = $index) {
+                                @for (item of items; track item.id; let idx = $index) {
                                     <tr>
                                         <td>
                                             <span class="badge bg-primary-subtle text-primary">{{ (currentPage - 1) * pageSize + idx + 1 }}</span>
@@ -58,6 +58,9 @@
                                         </td>
                                         <td class="small text-muted">{{ item.createdDate | date:'dd.MM.yyyy HH:mm' }}</td>
                                         <td class="text-end">
+                                            <a class="btn btn-soft-info btn-sm me-1" routerLink="/admin/company-detail">
+                                                <i class="fa-solid fa-eye me-1"></i>Detay
+                                            </a>
                                             <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(item)">
                                                 <i class="fa-solid fa-pen-to-square me-1"></i>Düzenle
                                             </button>
@@ -73,7 +76,7 @@
                         </table>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mt-2">
-                        <div class="small text-muted">Toplam: {{ filteredItems.length }} kayıt</div>
+                        <div class="small text-muted">Toplam: {{ totalCount }} kayıt | Sayfa {{ currentPage }} / {{ totalPages }}</div>
                         <nav>
                             <ul class="pagination pagination-sm mb-0">
                                 <li class="page-item" [class.disabled]="currentPage === 1">
