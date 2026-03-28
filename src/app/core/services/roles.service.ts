@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { ApiResponse } from '../models/api-response.model';
 import { CreateRoleRequest, UpdateRoleRequest } from '../models/role/role.models';
-import { RoleUser, CreateRoleUserRequest, CreateBulkRoleUserRequest } from '../models/role/role.models';
+import { RoleUser, RoleUserResponse, CreateRoleUserRequest, CreateBulkRoleUserRequest } from '../models/role/role.models';
 
 @Injectable({
   providedIn: 'root',
@@ -40,8 +40,8 @@ export class RolesService {
     return this.http.get<any[]>({ controller: 'RoleUsers', action: 'by-role' }, roleId);
   }
 
-  getRolesByUser(userId: string): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'RoleUsers', action: 'by-user' }, userId);
+  getRolesByUser(userId: string): Promise<ApiResponse<RoleUserResponse[]>> {
+    return this.http.get<RoleUserResponse[]>({ controller: 'RoleUsers', action: 'by-user' }, userId);
   }
 
   assignRole(request: CreateRoleUserRequest): Promise<ApiResponse<any>> {

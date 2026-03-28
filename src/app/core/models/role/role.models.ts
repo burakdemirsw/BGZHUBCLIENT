@@ -35,3 +35,12 @@ export interface RoleUser {
   createdDate?: string;
   updatedDate?: string;
 }
+
+export interface RoleUserResponse {
+  id: string;
+  roleId: string;
+  userId: string;
+  roleDescription: string;
+  createdDate: string;
+  updatedDate: string;
+}

@@ -1,7 +1,10 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IntegrationsService } from '@/app/core/services/integrations.service';
+import { InstagramService } from '@/app/core/services/instagram.service';
+import { FacebookLoginService, FacebookConfig } from '@/app/core/services/facebook-login.service';
+import { SocialMediaService } from '@/app/core/services/social-media.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { ConnectTicimaxRequest, UpdateTicimaxRequest, TicimaxShipmentDto } from '@/app/core/models/integration/integration-ticimax.models';
 import { Integration } from '@/app/core/models/integration/integration.models';
@@ -37,7 +40,7 @@ interface TicimaxForm {
     encapsulation: ViewEncapsulation.None,
 })
 
-export class AppsPage implements OnInit {
+export class AppsPage implements OnInit, OnDestroy {
     filterText = '';
     channels: AppChannel[] = [];
     filteredChannels: AppChannel[] = [];
@@ -71,8 +74,32 @@ export class AppsPage implements OnInit {
     testingConnection = false;
     testResult: 'success' | 'fail' | null = null;
 
+    // Instagram modal
+    showInstagramModal = false;
+    connectingInstagram = false;
+    instagramResult: 'success' | 'fail' | null = null;
+    instagramErrorMessage = '';
+
+    // Facebook Graph API config (Instagram uses Meta Login)
+    private fbConfig: FacebookConfig = {
+        appId: '2082246998779710',
+        configId: '500411992500266',
+        version: 'v25.0',
+    };
+    private fbSdkInitialized = false;
+
+    private messageListener = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+        if (event.data?.type === 'facebook-callback' && event.data?.success) {
+            void this.loadConnectedChannels();
+        }
+    };
+
     constructor(
         private integrationsService: IntegrationsService,
+        private instagramService: InstagramService,
+        private facebookLoginService: FacebookLoginService,
+        private socialMediaService: SocialMediaService,
         private authStateService: AuthStateService
     ) {
         this.initChannels();
@@ -80,7 +107,22 @@ export class AppsPage implements OnInit {
     }
 
     ngOnInit(): void {
+        window.addEventListener('message', this.messageListener);
+        void this.initFacebookSdk();
         void this.loadConnectedChannels();
+    }
+
+    ngOnDestroy(): void {
+        window.removeEventListener('message', this.messageListener);
+    }
+
+    private async initFacebookSdk(): Promise<void> {
+        try {
+            await this.facebookLoginService.initFacebookSdk(this.fbConfig);
+            this.fbSdkInitialized = true;
+        } catch (err) {
+            console.error('Facebook SDK init error:', err);
+        }
     }
 
     private initChannels(): void {
@@ -111,8 +153,10 @@ export class AppsPage implements OnInit {
     }
 
     onChannelClick(channel: AppChannel): void {
-        if (this.isChannelConnectable(channel)) {
+        if (channel.name === 'Ticimax' || channel.id === '1') {
             this.openTicimaxModal();
+        } else if (channel.name === 'Instagram' || channel.id === '6') {
+            this.openInstagramModal();
         }
     }
 
@@ -125,12 +169,16 @@ export class AppsPage implements OnInit {
     }
 
     isChannelConnectable(channel: AppChannel): boolean {
-        return channel.name === 'Ticimax' || channel.id === '1';
+        return channel.name === 'Ticimax' || channel.id === '1'
+            || channel.name === 'Instagram' || channel.id === '6';
     }
 
     onConnectedAppClick(channel: AppChannel): void {
         if (this.isSameIntegrationName(channel.name, 'Ticimax')) {
             this.openTicimaxEditModal(channel);
+        } else if (this.isSameIntegrationName(channel.name, 'Instagram')) {
+            // Instagram bağlıyken tıklanırsa bilgi göster
+            this.openInstagramModal();
         }
     }
 
@@ -443,6 +491,56 @@ export class AppsPage implements OnInit {
             return this.ticimaxIntegrationId;
         } catch {
             return '';
+        }
+    }
+
+    // --- Instagram Connection ---
+    openInstagramModal(): void {
+        this.instagramResult = null;
+        this.instagramErrorMessage = '';
+        this.showInstagramModal = true;
+    }
+
+    closeInstagramModal(): void {
+        this.showInstagramModal = false;
+        this.instagramResult = null;
+        this.instagramErrorMessage = '';
+    }
+
+    async connectInstagram(): Promise<void> {
+        this.connectingInstagram = true;
+        this.instagramResult = null;
+        this.instagramErrorMessage = '';
+        try {
+            const companyId = this.authStateService.profile?.companyId || '';
+            const userId = this.authStateService.profile?.userId || '';
+            if (!this.isGuid(companyId) || !this.isGuid(userId)) {
+                this.instagramResult = 'fail';
+                this.instagramErrorMessage = 'Kullanıcı bilgisi eksik. Lütfen tekrar giriş yapın.';
+                return;
+            }
+
+            const code = await this.facebookLoginService.fbLogin(this.fbConfig.configId);
+            console.log('Facebook code:', code);
+            const result = await this.instagramService.connectInstagram({
+                companyId,
+                userId,
+                code,
+            });
+            if (result.isSuccess) {
+                this.instagramResult = 'success';
+                this.closeInstagramModal();
+                void this.loadConnectedChannels();
+            } else {
+                this.instagramResult = 'fail';
+                this.instagramErrorMessage = result.innerError || result.errorCode || 'Instagram bağlantısı başarısız.';
+            }
+        } catch (err) {
+            console.error('Instagram connect error:', err);
+            this.instagramResult = 'fail';
+            this.instagramErrorMessage = err instanceof Error ? err.message : 'Instagram bağlantısı sırasında hata oluştu.';
+        } finally {
+            this.connectingInstagram = false;
         }
     }
 

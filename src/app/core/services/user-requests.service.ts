@@ -4,9 +4,11 @@ import {
     CreateUserRequestRequest,
     UpdateUserRequestRequest,
     CreateUserRequestMessageRequest,
+    UserRequestResponse,
+    UserRequestMessageResponse,
 } from '../models/user-request/user-request.models';
 import { ApiResponse } from '../models/api-response.model';
-import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
+import { PaginationRequest, AdminPaginationRequest, buildPaginationRequest, buildAdminPaginationRequest, PagedResult } from '../models/pagination.model';
 
 @Injectable({
     providedIn: 'root',
@@ -19,6 +21,13 @@ export class UserRequestsService {
         return this.http.post<PagedResult<any>>(
             { controller: 'UserRequests', action: 'paged' },
             buildPaginationRequest(req),
+        );
+    }
+
+    adminGetPaged(req?: AdminPaginationRequest): Promise<ApiResponse<PagedResult<UserRequestResponse>>> {
+        return this.http.post<PagedResult<UserRequestResponse>>(
+            { controller: 'UserRequests', action: 'admin-paged' },
+            buildAdminPaginationRequest(req),
         );
     }
 
@@ -55,8 +64,8 @@ export class UserRequestsService {
     }
 
     // ── Messages ──
-    getMessages(requestId: string): Promise<ApiResponse<any[]>> {
-        return this.http.get<any[]>({ controller: 'UserRequests', action: `${requestId}/messages` });
+    getMessages(requestId: string): Promise<ApiResponse<UserRequestMessageResponse[]>> {
+        return this.http.get<UserRequestMessageResponse[]>({ controller: 'UserRequests', action: `${requestId}/messages` });
     }
 
     createMessage(request: CreateUserRequestMessageRequest): Promise<ApiResponse<any>> {

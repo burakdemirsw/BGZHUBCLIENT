@@ -8417,6 +8417,120 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfListOfstring"
       security:
         - Bearer: []
+  /api/Instagram/exchange-code:
+    post:
+      tags:
+        - Instagram
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExchangeCodeRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/ExchangeCodeRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/ExchangeCodeRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfJsonElement"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfJsonElement"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfJsonElement"
+      security:
+        - Bearer: []
+  /api/Instagram/connect-instagram:
+    post:
+      tags:
+        - Instagram
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectInstagramRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/ConnectInstagramRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/ConnectInstagramRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfConnectInstagramResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfConnectInstagramResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfConnectInstagramResponse"
+      security:
+        - Bearer: []
+  /api/Instagram/webhook:
+    get:
+      tags:
+        - Instagram
+      parameters:
+        - name: hub.mode
+          in: query
+          schema:
+            type: string
+        - name: hub.verify_token
+          in: query
+          schema:
+            type: string
+        - name: hub.challenge
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+      security:
+        - Bearer: []
+    post:
+      tags:
+        - Instagram
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JsonElement"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/JsonElement"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/JsonElement"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
   /api/IntegrationConnections/paged:
     post:
       tags:
@@ -11346,6 +11460,37 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/UserRequests/admin-paged:
+    post:
+      tags:
+        - UserRequests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminPaginationRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/AdminPaginationRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/AdminPaginationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfUserRequestResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfUserRequestResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfUserRequestResponse"
       security:
         - Bearer: []
   /api/UserRequests/{requestId}/messages:
@@ -16463,6 +16608,34 @@ components:
         updatedDate:
           type: string
           format: date-time
+    AdminPaginationRequest:
+      type: object
+      properties:
+        pageNumber:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 1
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 20
+        searchTerm:
+          type:
+            - "null"
+            - string
+        sortBy:
+          type:
+            - "null"
+            - string
+        sortDescending:
+          type: boolean
+          default: false
     AiAssistantResponse:
       required:
         - id
@@ -18089,6 +18262,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfConnectInstagramResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ConnectInstagramResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfConnectTicimaxResponse:
       type: object
       properties:
@@ -19128,6 +19333,36 @@ components:
             - integer
             - string
           format: int32
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfJsonElement:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          $ref: "#/components/schemas/JsonElement"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -25097,6 +25332,45 @@ components:
           type:
             - "null"
             - string
+    ConnectInstagramRequest:
+      required:
+        - companyId
+        - userId
+        - code
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        code:
+          type: string
+    ConnectInstagramResponse:
+      required:
+        - userSocialMediaAccountId
+        - companyId
+        - userId
+        - socialMediaAccountId
+        - createdDate
+      type: object
+      properties:
+        userSocialMediaAccountId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        socialMediaAccountId:
+          type: string
+          format: uuid
+        createdDate:
+          type: string
+          format: date-time
     ConnectTicimaxRequest:
       required:
         - companyId
@@ -27123,6 +27397,9 @@ components:
           type:
             - "null"
             - string
+        isDefault:
+          type: boolean
+          default: false
     CreateRequestStatusRequest:
       required:
         - name
@@ -27606,7 +27883,6 @@ components:
       required:
         - userId
         - categoryId
-        - priorityId
         - subject
         - description
       type: object
@@ -27615,9 +27891,6 @@ components:
           type: string
           format: uuid
         categoryId:
-          type: string
-          format: uuid
-        priorityId:
           type: string
           format: uuid
         subject:
@@ -28134,6 +28407,13 @@ components:
         updatedDate:
           type: string
           format: date-time
+    ExchangeCodeRequest:
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
     FacebookEntry:
       type: object
       properties:
@@ -29007,6 +29287,7 @@ components:
         updatedDate:
           type: string
           format: date-time
+    JsonElement: {}
     LoginRequest:
       required:
         - email
@@ -33259,6 +33540,7 @@ components:
         - id
         - name
         - description
+        - isDefault
         - isBlocked
         - createdDate
         - updatedDate
@@ -33275,6 +33557,8 @@ components:
           type:
             - "null"
             - string
+        isDefault:
+          type: boolean
         isBlocked:
           type: boolean
         createdDate:
@@ -35926,6 +36210,7 @@ components:
       required:
         - name
         - description
+        - isDefault
         - isBlocked
       type: object
       properties:
@@ -35937,6 +36222,8 @@ components:
           type:
             - "null"
             - string
+        isDefault:
+          type: boolean
         isBlocked:
           type: boolean
     UpdateRequestStatusRequest:
@@ -36774,6 +37061,10 @@ components:
           type:
             - "null"
             - string
+        from:
+          type:
+            - "null"
+            - string
     UserRequestResponse:
       required:
         - id
@@ -37117,6 +37408,7 @@ tags:
   - name: Customers
   - name: CustomerTypes
   - name: FileUpload
+  - name: Instagram
   - name: IntegrationConnections
   - name: IntegrationConnectionTypes
   - name: IntegrationCustomers

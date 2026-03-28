@@ -14,9 +14,9 @@ import {
     CreateUserRequestRequest,
     UpdateUserRequestRequest,
 } from '@/app/core/models/user-request/user-request.models';
-import { RequestCategory } from '@/app/core/models/request-category/request-category.models';
-import { RequestPriority } from '@/app/core/models/request-priority/request-priority.models';
-import { RequestStatus } from '@/app/core/models/request-status/request-status.models';
+import { RequestCategoryResponse } from '@/app/core/models/request-category/request-category.models';
+import { RequestPriorityResponse } from '@/app/core/models/request-priority/request-priority.models';
+import { RequestStatusResponse } from '@/app/core/models/request-status/request-status.models';
 import { User } from '@/app/core/models/user/user.models';
 import { AuthStateService } from '@core/services/auth-state.service';
 
@@ -28,20 +28,14 @@ import { AuthStateService } from '@core/services/auth-state.service';
 export class UserRequestsPage implements OnInit {
     requests: UserRequest[] = [];
     filteredRequests: UserRequest[] = [];
-    categories: RequestCategory[] = [];
-    priorities: RequestPriority[] = [];
-    statuses: RequestStatus[] = [];
+    categories: RequestCategoryResponse[] = [];
+    priorities: RequestPriorityResponse[] = [];
+    statuses: RequestStatusResponse[] = [];
     users: User[] = [];
     loading = false;
     showModal = false;
     editMode = false;
     selectedRequest: UserRequest | null = null;
-
-    // Filters
-    filterStatus = '';
-    filterPriority = '';
-    filterCategory = '';
-    searchText = '';
 
     form: any = {
         userId: '',
@@ -54,7 +48,7 @@ export class UserRequestsPage implements OnInit {
         isBlocked: false,
     };
 
-    constructor(
+    constructor(  
         private requestService: UserRequestsService,
         private categoryService: RequestCategoriesService,
         private priorityService: RequestPrioritiesService,
@@ -79,7 +73,7 @@ export class UserRequestsPage implements OnInit {
             const response = await this.requestService.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: 1, pageSize: 1000 });
             const paged = response?.data;
             this.requests = paged?.items ?? [];
-            this.applyFilters();
+            this.filteredRequests = [...this.requests];
         } catch (err) {
             console.error('UserRequests load error:', err);
         } finally {
@@ -146,10 +140,6 @@ export class UserRequestsPage implements OnInit {
         return this.priorities.find(p => p.id === id)?.name ?? '-';
     }
 
-    getPriorityColor(id: string): string {
-        return this.priorities.find(p => p.id === id)?.colorCode ?? '#6c757d';
-    }
-
     getStatusName(id: string): string {
         return this.statuses.find(s => s.id === id)?.name ?? '-';
     }
@@ -157,39 +147,6 @@ export class UserRequestsPage implements OnInit {
     getUserFullName(id: string): string {
         const user = this.users.find(u => u.id === id);
         return user ? `${user.name} ${user.lastName}` : '-';
-    }
-
-    // ── Filtreleme ──
-    applyFilters(): void {
-        let result = [...this.requests];
-
-        if (this.filterStatus) {
-            result = result.filter(r => r.statusId === this.filterStatus);
-        }
-        if (this.filterPriority) {
-            result = result.filter(r => r.priorityId === this.filterPriority);
-        }
-        if (this.filterCategory) {
-            result = result.filter(r => r.categoryId === this.filterCategory);
-        }
-        if (this.searchText.trim()) {
-            const term = this.searchText.toLowerCase();
-            result = result.filter(r =>
-                r.subject?.toLowerCase().includes(term) ||
-                r.description?.toLowerCase().includes(term) ||
-                this.getUserFullName(r.userId).toLowerCase().includes(term)
-            );
-        }
-
-        this.filteredRequests = result;
-    }
-
-    clearFilters(): void {
-        this.filterStatus = '';
-        this.filterPriority = '';
-        this.filterCategory = '';
-        this.searchText = '';
-        this.applyFilters();
     }
 
     // ── CRUD ──
@@ -202,7 +159,6 @@ export class UserRequestsPage implements OnInit {
             assignedUserId: '',
             categoryId: '',
             statusId: '',
-            priorityId: '',
             subject: '',
             description: '',
             isBlocked: false,
@@ -243,7 +199,6 @@ export class UserRequestsPage implements OnInit {
                 const req: CreateUserRequestRequest = {
                     userId: this.form.userId,
                     categoryId: this.form.categoryId,
-                    priorityId: this.form.priorityId,
                     subject: this.form.subject,
                     description: this.form.description,
                 };

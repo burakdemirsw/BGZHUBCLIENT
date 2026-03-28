@@ -1,41 +1,59 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewChecked, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { PageTitle } from '@app/components/page-title';
 import { UserRequestsService } from '@/app/core/services/user-requests.service';
 import { RequestCategoriesService } from '@/app/core/services/request-categories.service';
 import { RequestPrioritiesService } from '@/app/core/services/request-priorities.service';
 import { RequestStatusesService } from '@/app/core/services/request-statuses.service';
 import { UsersService } from '@/app/core/services/users.service';
 import { UserMenuService } from '@/app/core/services/user-menu.service';
+import { RolesService } from '@/app/core/services/roles.service';
 import {
     UserRequest,
     UserRequestMessage,
+    UserRequestMessageResponse,
     CreateUserRequestMessageRequest,
 } from '@/app/core/models/user-request/user-request.models';
-import { RequestCategory } from '@/app/core/models/request-category/request-category.models';
-import { RequestPriority } from '@/app/core/models/request-priority/request-priority.models';
-import { RequestStatus } from '@/app/core/models/request-status/request-status.models';
+import { RequestCategoryResponse } from '@/app/core/models/request-category/request-category.models';
+import { RequestPriorityResponse } from '@/app/core/models/request-priority/request-priority.models';
+import { RequestStatusResponse } from '@/app/core/models/request-status/request-status.models';
 import { User } from '@/app/core/models/user/user.models';
+import { RoleUserResponse } from '@/app/core/models/role/role.models';
 import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
     selector: 'app-user-request-detail-page',
-    imports: [CommonModule, FormsModule, RouterModule, PageTitle],
+    imports: [CommonModule, FormsModule, RouterModule],
     templateUrl: './user-request-detail.html',
+    styleUrl: './user-request-detail.scss',
 })
-export class UserRequestDetailPage implements OnInit {
+export class UserRequestDetailPage implements OnInit, AfterViewChecked {
+    @ViewChild('chatBody') private chatBodyRef!: ElementRef<HTMLDivElement>;
+    private shouldScrollToBottom = false;
     requestId = '';
     request: UserRequest | null = null;
-    messages: UserRequestMessage[] = [];
-    categories: RequestCategory[] = [];
-    priorities: RequestPriority[] = [];
-    statuses: RequestStatus[] = [];
+    messages: UserRequestMessageResponse[] = [];
+    categories: RequestCategoryResponse[] = [];
+    priorities: RequestPriorityResponse[] = [];
+    statuses: RequestStatusResponse[] = [];
     users: User[] = [];
+    userRoles: RoleUserResponse[] = [];
+    hasAdminRole = false;
+    isCustomerRole = false;
     loading = false;
     messagesLoading = false;
     newMessage = '';
+    showEditModal = false;
+    editForm: any = {
+        categoryId: '',
+        statusId: '',
+        priorityId: '',
+        assignedUserId: '',
+        subject: '',
+        description: '',
+        isBlocked: false,
+    };
 
     constructor(
         private route: ActivatedRoute,
@@ -46,12 +64,30 @@ export class UserRequestDetailPage implements OnInit {
         private statusService: RequestStatusesService,
         private usersService: UsersService,
         private userMenuService: UserMenuService,
+        private rolesService: RolesService,
         private authStateService: AuthStateService,
     ) {}
+
+    ngAfterViewChecked(): void {
+        if (this.shouldScrollToBottom) {
+            this.scrollToBottom();
+            this.shouldScrollToBottom = false;
+        }
+    }
+
+    private scrollToBottom(): void {
+        try {
+            const el = this.chatBodyRef?.nativeElement;
+            if (el) {
+                el.scrollTop = el.scrollHeight;
+            }
+        } catch (_) {}
+    }
 
     ngOnInit(): void {
         this.requestId = this.route.snapshot.paramMap.get('id') ?? '';
         if (this.requestId) {
+            this.loadCurrentUserRoles();
             this.loadRequest();
             this.loadMessages();
             this.loadCategories();
@@ -77,7 +113,8 @@ export class UserRequestDetailPage implements OnInit {
         this.messagesLoading = true;
         try {
             const response = await this.requestService.getMessages(this.requestId);
-            this.messages = this.extractArray(response?.data);
+            this.messages = this.extractArray(response?.data) as UserRequestMessageResponse[];
+            this.shouldScrollToBottom = true;
         } catch (err) {
             console.error('Messages load error:', err);
         } finally {
@@ -124,6 +161,28 @@ export class UserRequestDetailPage implements OnInit {
         }
     }
 
+    async loadCurrentUserRoles(): Promise<void> {
+        try {
+            const userId = this.userMenuService.getUserIdFromToken();
+            if (!userId) {
+                this.userRoles = [];
+                this.hasAdminRole = false;
+                this.isCustomerRole = false;
+                return;
+            }
+
+            const response = await this.rolesService.getRolesByUser(userId);
+            this.userRoles = this.extractArray(response?.data) as RoleUserResponse[];
+            this.hasAdminRole = this.userRoles.some(role => (role.roleDescription || '').toLowerCase() === 'admin');
+            this.isCustomerRole = this.userRoles.some(role => (role.roleDescription || '').toLowerCase() === 'customer');
+        } catch (err) {
+            console.error('User roles load error:', err);
+            this.userRoles = [];
+            this.hasAdminRole = false;
+            this.isCustomerRole = false;
+        }
+    }
+
     private extractArray(response: any): any[] {
         if (Array.isArray(response)) return response;
         if (response?.$values) return response.$values;
@@ -144,11 +203,6 @@ export class UserRequestDetailPage implements OnInit {
         return this.priorities.find(p => p.id === id)?.name ?? '-';
     }
 
-    getPriorityColor(id?: string): string {
-        if (!id) return '#6c757d';
-        return this.priorities.find(p => p.id === id)?.colorCode ?? '#6c757d';
-    }
-
     getStatusName(id?: string): string {
         if (!id) return '-';
         return this.statuses.find(s => s.id === id)?.name ?? '-';
@@ -158,6 +212,123 @@ export class UserRequestDetailPage implements OnInit {
         if (!id) return '-';
         const user = this.users.find(u => u.id === id);
         return user ? `${user.name} ${user.lastName}` : '-';
+    }
+
+    getCurrentUserRoleName(): string {
+        if (this.hasAdminRole) return 'admin';
+        if (this.isCustomerRole) return 'customer';
+        return '';
+    }
+
+    canEditRequest(): boolean {
+        return this.hasAdminRole;
+    }
+
+    canCloseRequest(): boolean {
+        return this.hasAdminRole && !!this.request && !this.request.isBlocked;
+    }
+
+    private getLatestMessage(): UserRequestMessageResponse | null {
+        if (!this.messages.length) return null;
+
+        return [...this.messages].sort((left, right) => {
+            const leftTime = left.createdDate ? new Date(left.createdDate).getTime() : 0;
+            const rightTime = right.createdDate ? new Date(right.createdDate).getTime() : 0;
+            return leftTime - rightTime;
+        }).at(-1) ?? null;
+    }
+
+    canComposeMessage(): boolean {
+        const currentRole = this.getCurrentUserRoleName();
+        const latestMessage = this.getLatestMessage();
+        const latestMessageRole = (latestMessage?.from || '').toLowerCase();
+
+        if (currentRole === 'admin') {
+            return true;
+        }
+
+        if (currentRole === 'customer') {
+            if (!latestMessage) return false;
+            return latestMessageRole !== 'customer';
+        }
+
+        return false;
+    }
+
+    isOutgoingMessage(message: UserRequestMessageResponse): boolean {
+        const messageRole = (message.from || '').toLowerCase();
+        const currentUserId = this.userMenuService.getUserIdFromToken();
+        const currentRole = this.getCurrentUserRoleName();
+
+        if (messageRole) {
+            return messageRole === currentRole;
+        }
+
+        if (message.senderUserId === currentUserId) {
+            return true;
+        }
+
+        if (currentRole === 'admin') {
+            return true;
+        }
+
+        return false;
+    }
+
+    getMessageAlignment(message: UserRequestMessageResponse): string {
+        return this.isOutgoingMessage(message) ? 'justify-content-end' : 'justify-content-start';
+    }
+
+    getMessageBubbleClass(message: UserRequestMessageResponse): string {
+        return this.isOutgoingMessage(message)
+            ? 'bg-primary-subtle text-primary'
+            : 'bg-light text-body';
+    }
+
+    getMessageSenderLabel(message: UserRequestMessageResponse): string {
+        return message.senderUserName || this.getUserFullName(message.senderUserId);
+    }
+
+    openEditModal(): void {
+        if (!this.request || !this.canEditRequest()) return;
+
+        this.editForm = {
+            categoryId: this.request.categoryId ?? '',
+            statusId: this.request.statusId ?? '',
+            priorityId: this.request.priorityId ?? '',
+            assignedUserId: this.request.assignedUserId ?? '',
+            subject: this.request.subject ?? '',
+            description: this.request.description ?? '',
+            isBlocked: this.request.isBlocked ?? false,
+        };
+        this.showEditModal = true;
+    }
+
+    closeEditModal(): void {
+        this.showEditModal = false;
+    }
+
+    async saveEdit(): Promise<void> {
+        if (!this.request || !this.canEditRequest()) return;
+
+        try {
+            const requestBody = {
+                assignedUserId: this.editForm.assignedUserId || null,
+                categoryId: this.editForm.categoryId,
+                statusId: this.editForm.statusId,
+                priorityId: this.editForm.priorityId,
+                subject: this.editForm.subject,
+                description: this.editForm.description,
+                isBlocked: this.editForm.isBlocked,
+            };
+
+            await this.requestService.update(this.request.id, requestBody);
+            this.showEditModal = false;
+            await this.loadRequest();
+        } catch (err) {
+            console.error('Request update error:', err);
+            alert('Talep güncellenemedi.');
+        }
     }
 
     formatDate(dateStr?: string): string {
@@ -194,6 +365,7 @@ export class UserRequestDetailPage implements OnInit {
             await this.requestService.createMessage(req);
             this.newMessage = '';
             await this.loadMessages();
+            this.shouldScrollToBottom = true;
         } catch (err: any) {
             console.error('Message send error:', err);
             const msg = err.status === 0
@@ -211,8 +383,10 @@ export class UserRequestDetailPage implements OnInit {
 
     // ── Talebi Kapat ──
     async closeRequest(): Promise<void> {
-        if (!this.request) return;
-        if (confirm(`"${this.request.subject}" talebini kapatmak istediğinize emin misiniz?`)) {
+        const request = this.request;
+        if (!request || !this.canCloseRequest()) return;
+
+        if (confirm(`"${request.subject}" talebini kapatmak istediğinize emin misiniz?`)) {
             try {
                 await this.requestService.close(this.requestId);
                 await this.loadRequest();

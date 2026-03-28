@@ -74,8 +74,8 @@ export const APP_CHANNELS: AppChannel[] = [
         description: 'Instagram DM mesajlarını SellenticAI üzerinden yönetin. Müşterilerinizle doğrudan iletişim kurun.',
         icon: 'fa-brands fa-instagram',
         iconBgColor: '#e1306c',
-        status: 'coming-soon',
-        statusLabel: 'Yakında',
+        status: 'inactive',
+        statusLabel: 'Bağlı Değil',
         imageUrl: 'assets/images/logos/instagram.svg',
     },
     {

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PageTitle } from '@app/components/page-title';
 import { RequestPrioritiesService } from '@/app/core/services/request-priorities.service';
-import { RequestPriority, CreateRequestPriorityRequest, UpdateRequestPriorityRequest } from '@/app/core/models/request-priority/request-priority.models';
+import { RequestPriorityResponse, CreateRequestPriorityRequest, UpdateRequestPriorityRequest } from '@/app/core/models/request-priority/request-priority.models';
 import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
@@ -12,11 +12,11 @@ import { AuthStateService } from '@core/services/auth-state.service';
     templateUrl: './request-priorities.html',
 })
 export class RequestPrioritiesPage implements OnInit {
-    priorities: RequestPriority[] = [];
+    priorities: RequestPriorityResponse[] = [];
     loading = false;
     showModal = false;
     editMode = false;
-    selectedPriority: RequestPriority | null = null;
+    selectedPriority: RequestPriorityResponse | null = null;
 
     // Server-side pagination
     searchTerm = '';
@@ -29,8 +29,7 @@ export class RequestPrioritiesPage implements OnInit {
     form: any = {
         name: '',
         description: '',
-        level: 1,
-        colorCode: '#3b82f6',
+        isDefault: false,
         isBlocked: false,
     };
 
@@ -46,8 +45,6 @@ export class RequestPrioritiesPage implements OnInit {
             const response = await this.priorityService.getPaged({ companyId: this.authStateService.profile?.companyId ?? '', pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
             const paged = response?.data;
             this.priorities = paged?.items ?? [];
-            // Seviyeye göre sırala
-            this.priorities.sort((a, b) => a.level - b.level);
             this.totalCount = paged?.totalCount ?? this.priorities.length;
             this.totalPages = paged?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
             this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
@@ -81,18 +78,17 @@ export class RequestPrioritiesPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedPriority = null;
-        this.form = { name: '', description: '', level: 1, colorCode: '#3b82f6', isBlocked: false };
+        this.form = { name: '', description: '', isDefault: false, isBlocked: false };
         this.showModal = true;
     }
 
-    openEdit(priority: RequestPriority): void {
+    openEdit(priority: RequestPriorityResponse): void {
         this.editMode = true;
         this.selectedPriority = priority;
         this.form = {
             name: priority.name,
             description: priority.description,
-            level: priority.level,
-            colorCode: priority.colorCode,
+            isDefault: priority.isDefault ?? false,
             isBlocked: priority.isBlocked ?? false,
         };
         this.showModal = true;
@@ -104,8 +100,7 @@ export class RequestPrioritiesPage implements OnInit {
                 const req: UpdateRequestPriorityRequest = {
                     name: this.form.name,
                     description: this.form.description,
-                    level: this.form.level,
-                    colorCode: this.form.colorCode,
+                    isDefault: this.form.isDefault,
                     isBlocked: this.form.isBlocked,
                 };
                 await this.priorityService.update(this.selectedPriority.id, req);
@@ -113,8 +108,7 @@ export class RequestPrioritiesPage implements OnInit {
                 const req: CreateRequestPriorityRequest = {
                     name: this.form.name,
                     description: this.form.description,
-                    level: this.form.level,
-                    colorCode: this.form.colorCode,
+                    isDefault: this.form.isDefault,
                 };
                 await this.priorityService.create(req);
             }
@@ -134,7 +128,7 @@ export class RequestPrioritiesPage implements OnInit {
         }
     }
 
-    async deletePriority(priority: RequestPriority): Promise<void> {
+    async deletePriority(priority: RequestPriorityResponse): Promise<void> {
         if (confirm(`"${priority.name}" önceliğini silmek istediğinize emin misiniz?`)) {
             try {
                 await this.priorityService.delete(priority.id);

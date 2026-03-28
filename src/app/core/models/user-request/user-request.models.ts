@@ -23,10 +23,30 @@ export interface UserRequest {
     priorityColorCode?: string;
 }
 
+export interface UserRequestResponse {
+    id: string;
+    userId: string;
+    assignedUserId?: string | null;
+    categoryId: string;
+    statusId: string;
+    priorityId: string;
+    requestNo?: string | null;
+    subject?: string | null;
+    description?: string | null;
+    closedDate?: string | null;
+    isBlocked: boolean;
+    createdDate: string;
+    updatedDate: string;
+    categoryName?: string | null;
+    statusName?: string | null;
+    priorityName?: string | null;
+    userName?: string | null;
+    assignedUserName?: string | null;
+}
+
 export interface CreateUserRequestRequest {
     userId: string;
     categoryId: string;
-    priorityId: string;
     subject: string;
     description: string;
 }
@@ -46,11 +66,24 @@ export interface UserRequestMessage {
     requestId: string;
     senderUserId: string;
     message: string;
+    from?: string;
     createdDate?: string;
     // Expanded
     senderUserName?: string;
     senderUserLastName?: string;
     senderUserEmail?: string;
+}
+
+export interface UserRequestMessageResponse {
+    id: string;
+    requestId: string;
+    senderUserId: string;
+    message: string;
+    isBlocked: boolean;
+    createdDate: string;
+    updatedDate: string;
+    senderUserName?: string | null;
+    from?: string | null;
 }
 
 export interface CreateUserRequestMessageRequest {

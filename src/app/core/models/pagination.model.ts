@@ -62,6 +62,15 @@ export interface PaginationRequest {
     sortDescending?: boolean;
 }
 
+/** Admin için companyId gerektirmeyen pagination request modeli. */
+export interface AdminPaginationRequest {
+    pageNumber?: number;
+    pageSize?: number;
+    searchTerm?: string;
+    sortBy?: string;
+    sortDescending?: boolean;
+}
+
 /** Varsayılan pagination değerleri */
 export const DEFAULT_PAGINATION: Required<Pick<PaginationRequest, 'pageNumber' | 'pageSize' | 'sortDescending'>> = {
     pageNumber: 1,
@@ -78,6 +87,22 @@ export function buildPaginationRequest(req?: Partial<PaginationRequest>): Pagina
         ...DEFAULT_PAGINATION,
         ...req,
         companyId: req?.companyId || getCompanyIdFromStorage(),
+    };
+}
+
+/** Admin endpointleri için companyId eklemeden pagination request oluşturur. */
+export function buildAdminPaginationRequest(req?: Partial<AdminPaginationRequest>): AdminPaginationRequest {
+    const { pageNumber, pageSize, searchTerm, sortBy, sortDescending } = {
+        ...DEFAULT_PAGINATION,
+        ...req,
+    };
+
+    return {
+        pageNumber,
+        pageSize,
+        searchTerm,
+        sortBy,
+        sortDescending,
     };
 }
 

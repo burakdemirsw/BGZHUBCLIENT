@@ -29,8 +29,7 @@
                                 <tr>
                                     <th>Öncelik Adı</th>
                                     <th>Açıklama</th>
-                                    <th>Seviye</th>
-                                    <th>Renk</th>
+                                    <th>Varsayılan</th>
                                     <th>Durum</th>
                                     <th class="text-end">İşlemler</th>
                                 </tr>
@@ -38,25 +37,18 @@
                             <tbody>
                                 @for (item of priorities; track $index) {
                                     <tr>
-                                        <td>
-                                            <span class="d-flex align-items-center gap-2">
-                                                <span class="rounded-circle d-inline-block" [style.width.px]="12" [style.height.px]="12" [style.background-color]="item.colorCode"></span>
-                                                {{ item.name }}
-                                            </span>
-                                        </td>
+                                        <td>{{ item.name }}</td>
                                         <td>
                                             <span class="text-truncate d-inline-block" style="max-width: 300px;" title="{{ item.description }}">
                                                 {{ item.description }}
                                             </span>
                                         </td>
                                         <td>
-                                            <span class="badge bg-primary-subtle text-primary">{{ item.level }}</span>
-                                        </td>
-                                        <td>
-                                            <span class="d-flex align-items-center gap-2">
-                                                <span class="rounded d-inline-block border" [style.width.px]="24" [style.height.px]="16" [style.background-color]="item.colorCode"></span>
-                                                <code>{{ item.colorCode }}</code>
-                                            </span>
+                                            @if (item.isDefault) {
+                                                <span class="badge bg-primary-subtle text-primary">Varsayılan</span>
+                                            } @else {
+                                                <span class="badge bg-light text-muted">—</span>
+                                            }
                                         </td>
                                         <td>
                                             @if (item.isBlocked) {
@@ -71,7 +63,7 @@
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="6" class="text-center text-muted">Öncelik bulunamadı.</td></tr>
+                                    <tr><td colspan="5" class="text-center text-muted">Öncelik bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -130,15 +122,9 @@
                             <textarea class="form-control" [(ngModel)]="form.description" name="description" rows="3"></textarea>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Seviye (Öncelik Sırası)</label>
-                            <input type="number" class="form-control" [(ngModel)]="form.level" name="level" min="1" required>
-                            <small class="text-muted">Düşük değer = Yüksek öncelik</small>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Renk Kodu</label>
-                            <div class="d-flex align-items-center gap-2">
-                                <input type="color" class="form-control form-control-color" [(ngModel)]="form.colorCode" name="colorCode" title="Renk seçin">
-                                <input type="text" class="form-control" [(ngModel)]="form.colorCode" name="colorCodeText" placeholder="#ff0000">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" [(ngModel)]="form.isDefault" name="isDefault" id="isDefaultSwitch">
+                                <label class="form-check-label" for="isDefaultSwitch">Varsayılan Öncelik</label>
                             </div>
                         </div>
                         @if (editMode) {

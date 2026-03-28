@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PageTitle } from '@app/components/page-title';
 import { RequestStatusesService } from '@/app/core/services/request-statuses.service';
-import { RequestStatus, CreateRequestStatusRequest, UpdateRequestStatusRequest } from '@/app/core/models/request-status/request-status.models';
+import { RequestStatusResponse, CreateRequestStatusRequest, UpdateRequestStatusRequest } from '@/app/core/models/request-status/request-status.models';
 import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
@@ -12,11 +12,11 @@ import { AuthStateService } from '@core/services/auth-state.service';
     templateUrl: './request-statuses.html',
 })
 export class RequestStatusesPage implements OnInit {
-    statuses: RequestStatus[] = [];
+    statuses: RequestStatusResponse[] = [];
     loading = false;
     showModal = false;
     editMode = false;
-    selectedStatus: RequestStatus | null = null;
+    selectedStatus: RequestStatusResponse | null = null;
 
     // Server-side pagination
     searchTerm = '';
@@ -81,7 +81,7 @@ export class RequestStatusesPage implements OnInit {
         this.showModal = true;
     }
 
-    openEdit(status: RequestStatus): void {
+    openEdit(status: RequestStatusResponse): void {
         this.editMode = true;
         this.selectedStatus = status;
         this.form = {
@@ -124,7 +124,7 @@ export class RequestStatusesPage implements OnInit {
         }
     }
 
-    async deleteStatus(status: RequestStatus): Promise<void> {
+    async deleteStatus(status: RequestStatusResponse): Promise<void> {
         if (confirm(`"${status.name}" durumunu silmek istediğinize emin misiniz?`)) {
             try {
                 await this.statusService.delete(status.id);

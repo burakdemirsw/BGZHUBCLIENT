@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PageTitle } from '@app/components/page-title';
 import { RequestCategoriesService } from '@/app/core/services/request-categories.service';
-import { RequestCategory, CreateRequestCategoryRequest, UpdateRequestCategoryRequest } from '@/app/core/models/request-category/request-category.models';
+import { RequestCategoryResponse, CreateRequestCategoryRequest, UpdateRequestCategoryRequest } from '@/app/core/models/request-category/request-category.models';
 import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
@@ -12,11 +12,11 @@ import { AuthStateService } from '@core/services/auth-state.service';
     templateUrl: './request-categories.html',
 })
 export class RequestCategoriesPage implements OnInit {
-    categories: RequestCategory[] = [];
+    categories: RequestCategoryResponse[] = [];
     loading = false;
     showModal = false;
     editMode = false;
-    selectedCategory: RequestCategory | null = null;
+    selectedCategory: RequestCategoryResponse | null = null;
 
     // Server-side pagination
     searchTerm = '';
@@ -81,7 +81,7 @@ export class RequestCategoriesPage implements OnInit {
         this.showModal = true;
     }
 
-    openEdit(category: RequestCategory): void {
+    openEdit(category: RequestCategoryResponse): void {
         this.editMode = true;
         this.selectedCategory = category;
         this.form = {
@@ -124,7 +124,7 @@ export class RequestCategoriesPage implements OnInit {
         }
     }
 
-    async deleteCategory(category: RequestCategory): Promise<void> {
+    async deleteCategory(category: RequestCategoryResponse): Promise<void> {
         if (confirm(`"${category.name}" kategorisini silmek istediğinize emin misiniz?`)) {
             try {
                 await this.categoryService.delete(category.id);

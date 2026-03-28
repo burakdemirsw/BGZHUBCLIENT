@@ -29,6 +29,7 @@ import { RequestCategoriesPage } from './request-categories/request-categories';
 import { RequestPrioritiesPage } from './request-priorities/request-priorities';
 import { RequestStatusesPage } from './request-statuses/request-statuses';
 import { UserRequestsPage } from './user-requests/user-requests';
+import { UserRequestsAdminPage } from './user-requests-admin/user-requests-admin';
 import { UserRequestDetailPage } from './user-requests/user-request-detail';
 import { TeamsPage } from './teams/teams';
 import { TeamInvitationsPage } from './teams/team-invitations/team-invitations';
@@ -249,6 +250,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/user-requests',
         component: UserRequestsPage,
         data: { title: 'Kullanıcı Talepleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/user-requests/all',
+        component: UserRequestsAdminPage,
+        data: { title: 'Tüm Talepler' },
         canActivate: [AuthGuard],
     },
     {

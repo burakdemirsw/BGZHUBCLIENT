@@ -1,23 +1,22 @@
-export interface RequestPriority {
+export interface RequestPriorityResponse {
     id: string;
     name: string;
     description: string;
-    level: number;
-    colorCode: string;
+    isDefault: boolean;
     isBlocked: boolean;
+    createdDate: string;
+    updatedDate: string;
 }
 
 export interface CreateRequestPriorityRequest {
     name: string;
     description: string;
-    level: number;
-    colorCode: string;
+    isDefault?: boolean;
 }
 
 export interface UpdateRequestPriorityRequest {
     name: string;
     description: string;
-    level: number;
-    colorCode: string;
+    isDefault: boolean;
     isBlocked: boolean;
 }
