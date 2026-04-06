@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { AiSetting, CreateAiSettingRequest, UpdateAiSettingRequest } from '@/app/core/models/ai-assistant/ai-setting.models';
+import { PagedResult } from '@/app/core/models/pagination.model';
 
 @Component({
     selector: 'app-ai-settings-page',
@@ -32,7 +34,10 @@ export class AiSettingsPage implements OnInit {
         isBlocked: false,
     };
 
-    constructor(private aiService: AiProvidersService) {}
+    constructor(
+        private aiService: AiProvidersService,
+        private authStateService: AuthStateService,
+    ) {}
 
     ngOnInit(): void {
         this.loadSettings();
@@ -66,8 +71,10 @@ export class AiSettingsPage implements OnInit {
     async loadSettings(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.aiService.getSettings();
-            this.settings = this.extractArray(response?.data);
+            const companyId = this.authStateService.profile?.companyId || '';
+            const response = await this.aiService.getSettingsPaged({ pageNumber: 1, pageSize: 1000, companyId });
+            const paged = PagedResult.from<AiSetting>(response);
+            this.settings = paged.items;
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('AiSettings load error:', err);

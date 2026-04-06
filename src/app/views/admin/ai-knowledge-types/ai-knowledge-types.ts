@@ -27,7 +27,7 @@ export class AiKnowledgeTypesPage implements OnInit {
     pagedItems: AiKnowledgeTypeResponse[] = [];
     currentPage = 1;
     pageSize = 10;
-    totalPages = 1;
+    totalPages = 1;  
     totalPagesArray: number[] = [];
 
     form: { type: string; isBlocked: boolean } = {

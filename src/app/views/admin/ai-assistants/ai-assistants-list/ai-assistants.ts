@@ -98,8 +98,10 @@ export class AiAssistantsPage implements OnInit {
 
     async loadProviders(): Promise<void> {
         try {
-            const response = await this.aiService.getProviders();
-            this.providers = this.extractArray(response?.data);
+            const companyId = this.authStateService.profile?.companyId || '';
+            const response = await this.aiService.getProvidersPaged({ pageNumber: 1, pageSize: 1000, companyId });
+            const paged = PagedResult.from<AiProvider>(response);
+            this.providers = paged.items;
         } catch (err) {
             console.error('Providers load error:', err);
         }
@@ -107,8 +109,10 @@ export class AiAssistantsPage implements OnInit {
 
     async loadModels(): Promise<void> {
         try {
-            const response = await this.aiService.getModels();
-            this.models = this.extractArray(response?.data);
+            const companyId = this.authStateService.profile?.companyId || '';
+            const response = await this.aiService.getModelsPaged({ pageNumber: 1, pageSize: 1000, companyId });
+            const paged = PagedResult.from<AiModel>(response);
+            this.models = paged.items;
             this.filteredModels = this.models;
         } catch (err) {
             console.error('Models load error:', err);
@@ -219,6 +223,7 @@ export class AiAssistantsPage implements OnInit {
             if (this.editMode && this.selectedAssistant) {
                 const req: UpdateAiAssistantRequest = {
                     userId: userId,
+                    companyId: this.authStateService.profile?.companyId || '',
                     name: this.form.name,
                     aiProviderId: this.form.aiProviderId,
                     aiModelId: this.form.aiModelId,
@@ -229,6 +234,7 @@ export class AiAssistantsPage implements OnInit {
             } else {
                 const req: CreateAiAssistantRequest = {
                     userId: userId,
+                    companyId: this.authStateService.profile?.companyId || '',
                     name: this.form.name,
                     aiProviderId: this.form.aiProviderId,
                     aiModelId: this.form.aiModelId,
@@ -254,7 +260,9 @@ export class AiAssistantsPage implements OnInit {
                 for (const k of this.newKnowledge) {
                     if (k.prop.trim() && k.value.trim()) {
                         const kReq: CreateAiKnowledgeRequest = {
-                            assistantId: assistantId,
+                            companyId: this.authStateService.profile?.companyId || '',
+                            userId: userId,
+                            aiAssistantId: assistantId,
                             prop: k.prop,
                             value: k.value,
                         };

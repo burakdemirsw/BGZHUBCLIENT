@@ -14,11 +14,37 @@
     transition: width .25s ease-in-out;
     display: flex;
     flex-direction: column;
-    overflow: visible;
+    overflow: hidden;
+    max-height: 100vh;
 
     [data-simplebar] {
         flex: 1;
         min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    .simplebar-scrollbar {
+        display: none !important;
+    }
+
+    .simplebar-track {
+        display: none !important;
+    }
+
+    .simplebar-content {
+        min-height: auto !important;
+        height: auto !important;
+    }
+
+    .simplebar-content-wrapper {
+        min-height: auto !important;
+        height: auto !important;
     }
 }
 
@@ -88,7 +114,7 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    padding-bottom: 20px;
+    padding-bottom: 4px;
     padding-top: 8px;
 
     .side-nav-item {
@@ -266,12 +292,6 @@
     }
 }
 
-// Plan info (above user bottom)
-.sidenav-plan-info {
-    flex-shrink: 0;
-    overflow: hidden;
-}
-
 // sidenav user (bottom fixed)
 .sidenav-user-bottom {
     display: block;
@@ -331,6 +351,20 @@ html[data-sidenav-size="condensed"] {
     .sidenav-menu {
         position: absolute;
         width: $sidenav-width-sm;
+        overflow: visible;
+        height: 100vh;
+        max-height: 100vh;
+
+        [data-simplebar] {
+            flex: 1;
+            min-height: 0;
+            overflow: visible;
+            scrollbar-width: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+        }
 
         .simplebar-mask,
         .simplebar-content-wrapper {
@@ -338,6 +372,10 @@ html[data-sidenav-size="condensed"] {
         }
 
         .simplebar-scrollbar {
+            display: none !important;
+        }
+
+        .simplebar-track {
             display: none !important;
         }
 
@@ -371,6 +409,8 @@ html[data-sidenav-size="condensed"] {
 
         .side-nav {
             gap: 0;
+            padding-bottom: 0;
+            padding-top: 0;
 
             >.side-nav-item {
                 padding: 0px;
@@ -382,7 +422,7 @@ html[data-sidenav-size="condensed"] {
                 .side-nav-link {
                     transition: none;
                     border-radius: 0;
-                    padding: calc($sidenav-item-padding-y * 1.75) $sidenav-item-padding-x;
+                    padding: clamp(4px, 1.2vh, 18px) $sidenav-item-padding-x;
 
                     .menu-text,
                     .menu-arrow,
@@ -393,18 +433,18 @@ html[data-sidenav-size="condensed"] {
                     .menu-icon {
                         display: flex;
                         justify-content: center;
-                        font-size: calc($sidenav-item-icon-size * 1.25);
-                        line-height: calc($sidenav-item-icon-size * 1.25);
+                        font-size: clamp(1rem, 2vh, 1.5rem);
+                        line-height: clamp(1rem, 2vh, 1.5rem);
                         min-width: calc($sidenav-width-sm - $sidenav-item-padding-x - $sidenav-item-padding-x);
 
                         i {
-                            font-size: calc($sidenav-item-icon-size * 1.25);
-                            line-height: calc($sidenav-item-icon-size * 1.25);
+                            font-size: clamp(1rem, 2vh, 1.5rem);
+                            line-height: clamp(1rem, 2vh, 1.5rem);
                         }
 
                         svg {
-                            height: calc($sidenav-item-icon-size * 1.25);
-                            width: calc($sidenav-item-icon-size * 1.25);
+                            height: clamp(1rem, 2vh, 1.5rem);
+                            width: clamp(1rem, 2vh, 1.5rem);
                         }
                     }
                 }
@@ -585,6 +625,16 @@ html[data-sidenav-size="on-hover"] {
 
     .sidenav-menu:not(:hover) {
         width: $sidenav-width-sm;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+
+        .simplebar-scrollbar,
+        .simplebar-track {
+            display: none !important;
+        }
 
         .simplebar-scrollbar:before {
             background: transparent;
@@ -612,6 +662,7 @@ html[data-sidenav-size="on-hover"] {
         .side-nav-item {
             .side-nav-link {
                 justify-content: center;
+                padding: clamp(4px, 1.2vh, 18px) $sidenav-item-padding-x;
 
                 .menu-text,
                 .menu-arrow,
@@ -619,6 +670,12 @@ html[data-sidenav-size="on-hover"] {
                     display: none;
                 }
             }
+        }
+
+        .side-nav {
+            padding-bottom: 0;
+            padding-top: 0;
+            gap: 0;
         }
 
         .side-nav-title {
@@ -642,17 +699,17 @@ html[data-sidenav-size="on-hover"] {
         }
 
         .menu-icon {
-            font-size: calc($sidenav-item-icon-size * 1.15);
-            line-height: calc($sidenav-item-icon-size * 1.15);
+            font-size: clamp(1rem, 2vh, 1.4rem);
+            line-height: clamp(1rem, 2vh, 1.4rem);
 
             i {
-                font-size: calc($sidenav-item-icon-size * 1.15);
-                line-height: calc($sidenav-item-icon-size * 1.15);
+                font-size: clamp(1rem, 2vh, 1.4rem);
+                line-height: clamp(1rem, 2vh, 1.4rem);
             }
 
             svg {
-                height: calc($sidenav-item-icon-size * 1.15);
-                width: calc($sidenav-item-icon-size * 1.15);
+                height: clamp(1rem, 2vh, 1.4rem);
+                width: clamp(1rem, 2vh, 1.4rem);
             }
         }
     }
@@ -680,9 +737,11 @@ html[data-sidenav-size="on-hover"] {
 .button-on-hover {
     cursor: pointer;
     display: none;
-    right: calc($sidenav-width-sm * 0.5 - $logo-sm-height * 0.7);
+    left: 0;
+    right: 0;
     top: 0;
     position: absolute;
+    text-align: center;
     font-size: $sidenav-item-icon-size;
     line-height: $topbar-height;
     background: transparent;
@@ -724,7 +783,9 @@ html[data-sidenav-size="on-hover-active"] {
     background: transparent;
     border: none;
     top: 0;
-    right: calc($sidenav-width-sm * 0.5 - $logo-sm-height * 0.7);
+    left: 0;
+    right: 0;
+    text-align: center;
     cursor: pointer;
     color: $sidenav-item-color;
     line-height: $topbar-height;

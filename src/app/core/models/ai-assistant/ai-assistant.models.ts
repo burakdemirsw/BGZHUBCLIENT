@@ -17,6 +17,7 @@ export interface AiAssistant {
 
 export interface CreateAiAssistantRequest {
   userId: string;
+  companyId: string;
   name: string;
   aiProviderId: string;
   aiModelId: string;
@@ -24,6 +25,7 @@ export interface CreateAiAssistantRequest {
 
 export interface UpdateAiAssistantRequest {
   userId: string;
+  companyId: string;
   name: string;
   aiProviderId: string;
   aiModelId: string;
@@ -43,15 +45,23 @@ export interface AiKnowledge {
 }
 
 export interface CreateAiKnowledgeRequest {
-  assistantId: string;
+  companyId: string;
+  userId: string;
+  aiAssistantId: string;
   integrationUserId?: string | null;
+  aiKnowledgeTypeId?: string | null;
   prop: string;
   value: string;
+  shortDescription?: string | null;
 }
 
 export interface UpdateAiKnowledgeRequest {
-  assistantId: string;
+  companyId: string;
+  userId: string;
+  aiAssistantId: string;
   integrationUserId?: string | null;
+  aiKnowledgeTypeId?: string | null;
   prop: string;
   value: string;
+  shortDescription?: string | null;
 }

@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { AiProvider, CreateAiProviderRequest, UpdateAiProviderRequest } from '@/app/core/models/ai-assistant/ai-provider.models';
+import { PagedResult } from '@/app/core/models/pagination.model';
 
 @Component({
     selector: 'app-ai-providers-page',
@@ -31,7 +33,10 @@ export class AiProvidersPage implements OnInit {
         isBlocked: false,
     };
 
-    constructor(private aiService: AiProvidersService) {}
+    constructor(
+        private aiService: AiProvidersService,
+        private authStateService: AuthStateService,
+    ) {}
 
     ngOnInit(): void {
         this.loadProviders();
@@ -62,8 +67,10 @@ export class AiProvidersPage implements OnInit {
     async loadProviders(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.aiService.getProviders();
-            this.providers = this.extractArray(response?.data);
+            const companyId = this.authStateService.profile?.companyId || '';
+            const response = await this.aiService.getProvidersPaged({ pageNumber: 1, pageSize: 1000, companyId });
+            const paged = PagedResult.from<AiProvider>(response);
+            this.providers = paged.items;
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('AiProviders load error:', err);
@@ -79,7 +86,7 @@ export class AiProvidersPage implements OnInit {
         if (response?.items) return response.items;
         if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
         return [];
-    }
+    }  
 
     openCreate(): void {
         this.editMode = false;

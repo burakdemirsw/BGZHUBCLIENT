@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiKnowledgeService } from '@/app/core/services/ai-knowledge.service';
@@ -6,6 +6,8 @@ import { AiKnowledgeTypesService } from '@/app/core/services/ai-knowledge-types.
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
 import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
+import { ConversationsService } from '@/app/core/services/conversations.service';
+import { MessagesService, AiMessageDto } from '@/app/core/services/messages.service';
 import {
     AiKnowledgeResponse,
     CreateAiKnowledgeRequest,
@@ -13,8 +15,21 @@ import {
 } from '@/app/core/models/ai-assistant/ai-knowledge.models';
 import { AiKnowledgeTypeResponse } from '@/app/core/models/ai-assistant/ai-knowledge-type.models';
 import { AiAssistant } from '@/app/core/models/ai-assistant/ai-assistant.models';
+import { ConversationHeader } from '@/app/core/models/conversation/conversation.models';
 import { IntegrationUser } from '@/app/core/models/integration/integration-user.models';
 import { PagedResult } from '@/app/core/models/pagination.model';
+
+export interface KnowledgeGroup {
+    typeName: string;
+    typeId: string | null;
+    items: AiKnowledgeResponse[];
+}
+
+export interface ChatBubble {
+    role: 'user' | 'assistant';
+    content: string;
+    time: string;
+}
 
 @Component({
     selector: 'app-ai-knowledge-page',
@@ -59,12 +74,33 @@ export class AiKnowledgePage implements OnInit {
         shortDescription: '',
     };
 
+    // ────── Tab Yapısı ──────
+    activeTab: 'entry' | 'preview' = 'entry';
+
+    // ────── Önizleme State ──────
+    selectedPreviewAssistantId = '';
+    previewKnowledge: AiKnowledgeResponse[] = [];
+    groupedKnowledge: KnowledgeGroup[] = [];
+    previewLoading = false;
+
+    // ────── Chat State ──────
+    chatMessages: ChatBubble[] = [];
+    chatInput = '';
+    chatLoading = false;
+    conversations: ConversationHeader[] = [];
+    selectedConversationId = '';
+    conversationsLoading = false;
+
+    @ViewChild('chatScrollContainer') chatScrollContainer!: ElementRef;
+
     constructor(
         private knowledgeService: AiKnowledgeService,
         private knowledgeTypesService: AiKnowledgeTypesService,
         private aiProvidersService: AiProvidersService,
         private integrationsService: IntegrationsService,
         private authState: AuthStateService,
+        private conversationsService: ConversationsService,
+        private messagesService: MessagesService,
     ) {}
 
     ngOnInit(): void {
@@ -252,5 +288,136 @@ export class AiKnowledgePage implements OnInit {
         if (response?.items) return response.items;
         if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
         return [];
+    }
+
+    // ────── Tab Yönetimi ──────
+    setTab(tab: 'entry' | 'preview'): void {
+        this.activeTab = tab;
+        if (tab === 'preview' && this.conversations.length === 0) {
+            this.loadConversations();
+        }
+    }
+
+    // ────── Önizleme ──────
+    async onPreviewAssistantChange(): Promise<void> {
+        if (!this.selectedPreviewAssistantId) {
+            this.previewKnowledge = [];
+            this.groupedKnowledge = [];
+            return;
+        }
+        this.previewLoading = true;
+        try {
+            const resp = await this.knowledgeService.getByAssistant(this.selectedPreviewAssistantId);
+            this.previewKnowledge = this.extractArray(resp?.data);
+            this.buildGroupedKnowledge();
+        } catch (err) {
+            console.error('Önizleme bilgi yükleme hatası:', err);
+            this.previewKnowledge = [];
+            this.groupedKnowledge = [];
+        } finally {
+            this.previewLoading = false;
+        }
+    }
+
+    private buildGroupedKnowledge(): void {
+        const map = new Map<string, KnowledgeGroup>();
+        for (const item of this.previewKnowledge) {
+            const typeId = item.aiKnowledgeTypeId || '__none__';
+            if (!map.has(typeId)) {
+                map.set(typeId, {
+                    typeName: this.getKnowledgeTypeName(item.aiKnowledgeTypeId) || 'Genel',
+                    typeId: item.aiKnowledgeTypeId,
+                    items: [],
+                });
+            }
+            map.get(typeId)!.items.push(item);
+        }
+        this.groupedKnowledge = Array.from(map.values());
+    }
+
+    getPreviewAssistantName(): string {
+        if (!this.selectedPreviewAssistantId) return '';
+        const a = this.assistants.find(x => x.id === this.selectedPreviewAssistantId);
+        return a?.name || '';
+    }
+
+    // ────── Chat ──────
+    async loadConversations(): Promise<void> {
+        this.conversationsLoading = true;
+        try {
+            const resp = await this.conversationsService.getList('messages', 1, 50);
+            this.conversations = resp?.data?.conversations ?? [];
+        } catch (err) {
+            console.error('Konuşmalar yükleme hatası:', err);
+        } finally {
+            this.conversationsLoading = false;
+        }
+    }
+
+    async onConversationChange(): Promise<void> {
+        if (!this.selectedConversationId) {
+            this.chatMessages = [];
+            return;
+        }
+        this.chatLoading = true;
+        try {
+            const resp = await this.messagesService.getMessagesByConversation(this.selectedConversationId);
+            const messages: AiMessageDto[] = this.extractArray(resp?.data);
+            this.chatMessages = messages.map(m => ({
+                role: (m.role?.toLowerCase() === 'user' || m.role?.toLowerCase() === 'customer') ? 'user' as const : 'assistant' as const,
+                content: m.messageContent || '',
+                time: m.createdDate ? new Date(m.createdDate).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '',
+            }));
+            this.scrollChatToBottom();
+        } catch (err) {
+            console.error('Mesajlar yükleme hatası:', err);
+            this.chatMessages = [];
+        } finally {
+            this.chatLoading = false;
+        }
+    }
+
+    async sendChatMessage(): Promise<void> {
+        const msg = this.chatInput.trim();
+        if (!msg || !this.selectedConversationId) return;
+
+        const now = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        this.chatMessages.push({ role: 'user', content: msg, time: now });
+        this.chatInput = '';
+        this.scrollChatToBottom();
+
+        this.chatLoading = true;
+        try {
+            const companyId = this.authState.profile?.companyId || '';
+            await this.messagesService.testAiChat({
+                conversationId: this.selectedConversationId,
+                companyId,
+                message: msg,
+                userId: this.authState.profile?.userId,
+            });
+            // AI yanıtını yükle
+            const resp = await this.messagesService.getMessagesByConversation(this.selectedConversationId);
+            const messages: AiMessageDto[] = this.extractArray(resp?.data);
+            this.chatMessages = messages.map(m => ({
+                role: (m.role?.toLowerCase() === 'user' || m.role?.toLowerCase() === 'customer') ? 'user' as const : 'assistant' as const,
+                content: m.messageContent || '',
+                time: m.createdDate ? new Date(m.createdDate).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '',
+            }));
+            this.scrollChatToBottom();
+        } catch (err) {
+            console.error('Chat test hatası:', err);
+            this.chatMessages.push({ role: 'assistant', content: '⚠️ AI yanıtı alınamadı. Lütfen tekrar deneyin.', time: now });
+        } finally {
+            this.chatLoading = false;
+        }
+    }
+
+    private scrollChatToBottom(): void {
+        setTimeout(() => {
+            if (this.chatScrollContainer?.nativeElement) {
+                const el = this.chatScrollContainer.nativeElement;
+                el.scrollTop = el.scrollHeight;
+            }
+        }, 100);
     }
 }

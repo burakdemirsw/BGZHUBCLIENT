@@ -4960,6 +4960,32 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
+  /api/Conversations/create-test-conversation/{companyId}:
+    post:
+      tags:
+        - Conversations
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfGuid"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfGuid"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfGuid"
+      security:
+        - Bearer: []
   /api/ConversationTags/paged:
     post:
       tags:
@@ -8253,6 +8279,63 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/Customers/test-customers/{companyId}:
+    get:
+      tags:
+        - Customers
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfCustomerDetailResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfCustomerDetailResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfCustomerDetailResponse"
+      security:
+        - Bearer: []
+  /api/Customers/create-test-customer:
+    post:
+      tags:
+        - Customers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTestCustomerRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateTestCustomerRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateTestCustomerRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCreateTestCustomerResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCreateTestCustomerResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCreateTestCustomerResponse"
       security:
         - Bearer: []
   /api/CustomerTypes/paged:
@@ -19035,6 +19118,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfCreateTestCustomerResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/CreateTestCustomerResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfCustomerAddressResponse:
       type: object
       properties:
@@ -19304,6 +19419,37 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/FileUploadResult"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfGuid:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type: string
+          format: uuid
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -20364,6 +20510,40 @@ components:
             - array
           items:
             $ref: "#/components/schemas/CustomerDescriptionResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfListOfCustomerDetailResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/CustomerDetailResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -27219,15 +27399,15 @@ components:
             - string
     CreateCustomerTypeRequest:
       required:
-        - name
-        - description
+        - customerTypeCode
+        - customerTypeDescription
       type: object
       properties:
-        name:
+        customerTypeCode:
           type:
             - "null"
             - string
-        description:
+        customerTypeDescription:
           type:
             - "null"
             - string
@@ -28404,6 +28584,60 @@ components:
         companyId:
           type: string
           format: uuid
+    CreateTestCustomerRequest:
+      required:
+        - companyId
+        - userId
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+    CreateTestCustomerResponse:
+      required:
+        - customerId
+        - companyId
+        - userId
+        - socialMediaAccountId
+        - platformAccountId
+        - platformUsername
+        - platformName
+        - firstName
+        - lastName
+        - description
+        - createdDate
+      type: object
+      properties:
+        customerId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        socialMediaAccountId:
+          type: string
+          format: uuid
+        platformAccountId:
+          type: string
+        platformUsername:
+          type: string
+        platformName:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        description:
+          type: string
+        createdDate:
+          type: string
+          format: date-time
     CreateUserCompanyRequest:
       required:
         - userId
@@ -28927,9 +29161,9 @@ components:
     CustomerTypeResponse:
       required:
         - id
-        - name
-        - description
-        - isBlocked
+        - customerTypeCode
+        - customerTypeDescription
+        - isActive
         - createdDate
         - updatedDate
       type: object
@@ -28937,15 +29171,15 @@ components:
         id:
           type: string
           format: uuid
-        name:
+        customerTypeCode:
           type:
             - "null"
             - string
-        description:
+        customerTypeDescription:
           type:
             - "null"
             - string
-        isBlocked:
+        isActive:
           type: boolean
         createdDate:
           type: string
@@ -36317,20 +36551,20 @@ components:
           type: boolean
     UpdateCustomerTypeRequest:
       required:
-        - name
-        - description
-        - isBlocked
+        - customerTypeCode
+        - customerTypeDescription
+        - isActive
       type: object
       properties:
-        name:
+        customerTypeCode:
           type:
             - "null"
             - string
-        description:
+        customerTypeDescription:
           type:
             - "null"
             - string
-        isBlocked:
+        isActive:
           type: boolean
     UpdateDistrictRequest:
       required:

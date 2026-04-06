@@ -424,6 +424,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
         const userId = this.authStateService.profile?.userId || '';
 
         this.isAiSending = true;
+        const prevMessageCount = this.messages.length;
         try {
             const response = await this.messagesService.testAiChat({
                 conversationId,
@@ -435,6 +436,12 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
 
             // Mesajları yeniden yükle (AI yanıtı SignalR ile de gelebilir)
             await this.loadMessages(conversationId);
+
+            // AI yanıtı geldiyse ses çal
+            if (this.messages.length > prevMessageCount) {
+                this.incomingMessageSound.currentTime = 0;
+                this.incomingMessageSound.play().catch(() => {});
+            }
         } catch (err: any) {
             console.error('❌ AI Chat hatası:', err);
             const msg = err.status === 0
@@ -537,6 +544,10 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
         this.shouldScroll = true;
         this.isSending = true;
 
+        // Mesaj gönderildiğinde ses çal
+        this.sentMessageSound.currentTime = 0;
+        this.sentMessageSound.play().catch(() => {});
+
         try {
             const response = await this.messagesService.sendMessage({
                 conversationId,
@@ -581,6 +592,9 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     // ── Chat SignalR Event Handlers ──
+    private incomingMessageSound = new Audio('assets/sounds/incoming-message-sound.mp3');
+    private sentMessageSound = new Audio('assets/sounds/sended-message-sound.mp3');
+
     private onNewMessage(msg: ChatMessage): void {
         // Duplicate kontrolü: aynı mesaj zaten listede varsa ekleme
         const alreadyExists = this.messages.some(m => m.id === msg.id);
@@ -605,6 +619,12 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
             this.messages.push(msg);
             this.shouldScroll = true;
             this.typingUser = null;
+
+            // AI mesajı geldiğinde bildirim sesi çal
+            if (msg.source === 'ai') {
+                this.incomingMessageSound.currentTime = 0;
+                this.incomingMessageSound.play().catch(() => {});
+            }
 
             // Mesajı okundu olarak işaretle
             if (msg.source !== 'assistant') {

@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { AiProviderSetting, CreateAiProviderSettingRequest, UpdateAiProviderSettingRequest } from '@/app/core/models/ai-assistant/ai-provider-setting.models';
 import { AiProvider } from '@/app/core/models/ai-assistant/ai-provider.models';
 import { AiSetting } from '@/app/core/models/ai-assistant/ai-setting.models';
+import { PagedResult } from '@/app/core/models/pagination.model';
 
 @Component({
     selector: 'app-ai-provider-settings-page',
@@ -34,7 +36,10 @@ export class AiProviderSettingsPage implements OnInit {
         settingId: '',
     };
 
-    constructor(private aiService: AiProvidersService) {}
+    constructor(
+        private aiService: AiProvidersService,
+        private authStateService: AuthStateService,
+    ) {}
 
     ngOnInit(): void {
         this.loadProviderSettings();
@@ -69,8 +74,10 @@ export class AiProviderSettingsPage implements OnInit {
     async loadProviderSettings(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.aiService.getProviderSettings();
-            this.providerSettings = this.extractArray(response?.data);
+            const companyId = this.authStateService.profile?.companyId || '';
+            const response = await this.aiService.getProviderSettingsPaged({ pageNumber: 1, pageSize: 1000, companyId });
+            const paged = PagedResult.from<AiProviderSetting>(response);
+            this.providerSettings = paged.items;
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('AiProviderSettings load error:', err);
@@ -81,8 +88,10 @@ export class AiProviderSettingsPage implements OnInit {
 
     async loadProviders(): Promise<void> {
         try {
-            const response = await this.aiService.getProviders();
-            this.providers = this.extractArray(response?.data);
+            const companyId = this.authStateService.profile?.companyId || '';
+            const response = await this.aiService.getProvidersPaged({ pageNumber: 1, pageSize: 1000, companyId });
+            const paged = PagedResult.from<AiProvider>(response);
+            this.providers = paged.items;
         } catch (err) {
             console.error('Providers load error:', err);
         }
@@ -90,8 +99,10 @@ export class AiProviderSettingsPage implements OnInit {
 
     async loadSettings(): Promise<void> {
         try {
-            const response = await this.aiService.getSettings();
-            this.settings = this.extractArray(response?.data);
+            const companyId = this.authStateService.profile?.companyId || '';
+            const response = await this.aiService.getSettingsPaged({ pageNumber: 1, pageSize: 1000, companyId });
+            const paged = PagedResult.from<AiSetting>(response);
+            this.settings = paged.items;
         } catch (err) {
             console.error('Settings load error:', err);
         }

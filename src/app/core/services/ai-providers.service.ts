@@ -14,11 +14,7 @@ import { AiAssistant, CreateAiAssistantRequest, UpdateAiAssistantRequest } from 
 export class AiProvidersService {
   constructor(private http: HttpClientService) {}
 
-  // ── AiProviders ──
-  getProviders(): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'AiProviders' });
-  }
-
+ 
   getProvidersPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
     return this.http.post<PagedResult<any>>(
       { controller: 'AiProviders', action: 'paged' },
@@ -35,18 +31,14 @@ export class AiProvidersService {
   }
 
   updateProvider(id: string, request: UpdateAiProviderRequest): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'AiProviders', action: id }, request);
+    return this.http.post<any>({ controller: 'AiProviders', action: `update/${id}` }, request);
   }
 
   deleteProvider(id: string): Promise<ApiResponse<any>> {
-    return this.http.get<any>({ controller: 'AiProviders', action: id });
+    return this.http.post<any>({ controller: 'AiProviders', action: `delete/${id}` }, {});
   }
 
   // ── AiSettings ──
-  getSettings(): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'AiSettings' });
-  }
-
   getSettingsPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
     return this.http.post<PagedResult<any>>(
       { controller: 'AiSettings', action: 'paged' },
@@ -63,18 +55,14 @@ export class AiProvidersService {
   }
 
   updateSetting(id: string, request: UpdateAiSettingRequest): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'AiSettings', action: id }, request);
+    return this.http.post<any>({ controller: 'AiSettings', action: `update/${id}` }, request);
   }
 
   deleteSetting(id: string): Promise<ApiResponse<any>> {
-    return this.http.get<any>({ controller: 'AiSettings', action: id });
+    return this.http.post<any>({ controller: 'AiSettings', action: `delete/${id}` }, {});
   }
 
   // ── AiProviderSettings ──
-  getProviderSettings(): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'AiProviderSettings' });
-  }
-
   getProviderSettingsPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
     return this.http.post<PagedResult<any>>(
       { controller: 'AiProviderSettings', action: 'paged' },
@@ -99,18 +87,14 @@ export class AiProvidersService {
   }
 
   updateProviderSetting(id: string, request: UpdateAiProviderSettingRequest): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'AiProviderSettings', action: id }, request);
+    return this.http.post<any>({ controller: 'AiProviderSettings', action: `update/${id}` }, request);
   }
 
   deleteProviderSetting(id: string): Promise<ApiResponse<any>> {
-    return this.http.get<any>({ controller: 'AiProviderSettings', action: id });
+    return this.http.post<any>({ controller: 'AiProviderSettings', action: `delete/${id}` }, {});
   }
 
   // ── AiModels ──
-  getModels(): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'AiModels' });
-  }
-
   getModelsPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
     return this.http.post<PagedResult<any>>(
       { controller: 'AiModels', action: 'paged' },
@@ -135,11 +119,11 @@ export class AiProvidersService {
   }
 
   updateModel(id: string, request: UpdateAiModelRequest): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'AiModels', action: id }, request);
+    return this.http.post<any>({ controller: 'AiModels', action: `update/${id}` }, request);
   }
 
   deleteModel(id: string): Promise<ApiResponse<any>> {
-    return this.http.get<any>({ controller: 'AiModels', action: id });
+    return this.http.post<any>({ controller: 'AiModels', action: `delete/${id}` }, {});
   }
 
   // ── AiAssistants ──
@@ -163,11 +147,11 @@ export class AiProvidersService {
   }
 
   updateAssistant(id: string, request: UpdateAiAssistantRequest): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'AiAssistants', action: id }, request);
+    return this.http.post<any>({ controller: 'AiAssistants', action: `update/${id}` }, request);
   }
 
   deleteAssistant(id: string): Promise<ApiResponse<any>> {
-    return this.http.get<any>({ controller: 'AiAssistants', action: id });
+    return this.http.post<any>({ controller: 'AiAssistants', action: `delete/${id}` }, {});
   }
 
   // ── AiMessages ──

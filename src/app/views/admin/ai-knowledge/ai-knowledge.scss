@@ -1,3 +1,112 @@
 :host {
     display: block;
 }
+
+// ══════ Knowledge Preview Panel ══════
+.knowledge-preview-card {
+    .knowledge-preview-scroll {
+        max-height: 600px;
+        overflow-y: auto;
+        background-color: #f7f7f9;
+    }
+}
+
+.knowledge-content {
+    .knowledge-type-badge {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: #f7f7f9;
+        padding-top: 4px;
+    }
+
+    .knowledge-entry {
+        padding: 12px 16px;
+        background: #fff;
+        border-radius: 8px;
+        border: 1px solid #eee;
+    }
+
+    .knowledge-prop {
+        font-size: 0.95rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 6px;
+    }
+
+    .knowledge-pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-family: inherit;
+        font-size: 0.85rem;
+        line-height: 1.65;
+        color: #444;
+        background: transparent;
+        border: none;
+        padding: 0;
+    }
+}
+
+// ══════ Chat Test Panel ══════
+.chat-test-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.chat-messages-container {
+    flex: 1;
+    max-height: 440px;
+    min-height: 300px;
+    overflow-y: auto;
+    background-color: #f7f7f9;
+}
+
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.chat-bubble {
+    max-width: 75%;
+    border-radius: 12px;
+    padding: 8px 14px;
+    position: relative;
+}
+
+.chat-bubble-user {
+    background-color: #d4edda;
+    color: #1b4332;
+    border-bottom-right-radius: 4px;
+}
+
+.chat-bubble-assistant {
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #e9ecef;
+    border-bottom-left-radius: 4px;
+}
+
+.chat-bubble-content {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.chat-bubble-time {
+    font-size: 0.7rem;
+    color: #999;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.chat-input-bar {
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
+}
