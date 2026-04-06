@@ -11,6 +11,7 @@ import {
   IntegrationCountsResponse,
   DailySalesItem,
   DailyAiReplyItem,
+  SubscriptionSummaryResponse,
 } from '@core/models/dashboard/dashboard.models';
 
 interface SummaryCard {
@@ -41,6 +42,10 @@ export class Dashboard1 implements OnInit {
   dailySalesItems: DailySalesItem[] = [];
   dailyAiReplyItems: DailyAiReplyItem[] = [];
 
+  // ─── Subscription Summary ─────────────────────────────────────────────────
+  subscription: SubscriptionSummaryResponse | null = null;
+  usagePercent = 0;
+
   // ─── Loading / error state ─────────────────────────────────────────────────
   loading = true;
   errorMessage = '';
@@ -64,17 +69,19 @@ export class Dashboard1 implements OnInit {
     this.errorMessage = '';
 
     try {
-      const [summary, sales, integrations, aiReplies] = await Promise.all([
+      const [summary, sales, integrations, aiReplies, subscriptionSummary] = await Promise.all([
         this.dashboardService.getMonthlySummary(),
         this.dashboardService.getDailySales(7),
         this.dashboardService.getIntegrationCounts(),
         this.dashboardService.getDailyAiReplies(7),
+        this.dashboardService.getSubscriptionSummary().catch(() => null),
       ]);
 
       this.mapSummary(summary);
       this.mapIntegrations(integrations);
       this.dailySalesItems = sales?.items ?? [];
       this.dailyAiReplyItems = aiReplies?.items ?? [];
+      this.mapSubscription(subscriptionSummary);
 
       // Re-bind chart option getters after data change
       this.getSalesChartOptions = () => this.buildSalesChart();
@@ -128,6 +135,29 @@ export class Dashboard1 implements OnInit {
   private mapIntegrations(i: IntegrationCountsResponse): void {
     this.integrationUserCount = i.integrationUserCount ?? 0;
     this.socialMediaAccountCount = i.socialMediaAccountCount ?? 0;
+  }
+
+  private mapSubscription(s: SubscriptionSummaryResponse | null): void {
+    this.subscription = s;
+    if (s && s.totalMessageLimit > 0) {
+      this.usagePercent = Math.round((s.usedMessageCount / s.totalMessageLimit) * 100);
+    } else {
+      this.usagePercent = 0;
+    }
+  }
+
+  get usageBarClass(): string {
+    if (this.usagePercent >= 90) return 'bg-danger';
+    if (this.usagePercent >= 70) return 'bg-warning';
+    return 'bg-success';
+  }
+
+  get daysRemaining(): number {
+    if (!this.subscription) return 0;
+    const end = new Date(this.subscription.endDate);
+    const now = new Date();
+    const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return diff > 0 ? diff : 0;
   }
 
   // ═══════════════════════════════════════════════════════════════════════════

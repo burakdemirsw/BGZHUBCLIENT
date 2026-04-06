@@ -30,6 +30,8 @@
                                 <tr>
                                     <th>#</th>
                                     <th>AI Asistan</th>
+                                    <th>Bilgi Tipi</th>
+                                    <th>Entegrasyon</th>
                                     <th>Özellik (Prop)</th>
                                     <th>Değer (Value)</th>
                                     <th class="text-center">Oluşturulma</th>
@@ -48,6 +50,16 @@
                                         <td>
                                             <span class="badge bg-info-subtle text-info">
                                                 <i class="fa-solid fa-robot me-1"></i>{{ getAssistantName(item.aiAssistantId) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary-subtle text-secondary">
+                                                <i class="fa-solid fa-tag me-1"></i>{{ getKnowledgeTypeName(item.aiKnowledgeTypeId) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning-subtle text-warning">
+                                                <i class="fa-solid fa-plug me-1"></i>{{ item.integrationDescription || '—' }}
                                             </span>
                                         </td>
                                         <td class="fw-semibold">{{ item.prop || '-' }}</td>
@@ -80,7 +92,7 @@
                                     </tr>
                                 } @empty {
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted">
+                                        <td colspan="9" class="text-center text-muted">
                                             Bilgi kaydı bulunamadı.
                                         </td>
                                     </tr>
@@ -144,6 +156,29 @@
                             </select>
                         </div>
                         <div class="mb-3">
+                            <label class="form-label">Bilgi Tipi</label>
+                            <select class="form-select"
+                                    [(ngModel)]="form.aiKnowledgeTypeId"
+                                    name="aiKnowledgeTypeId"
+                                    required>
+                                <option value="">Bilgi tipi seçiniz...</option>
+                                @for (kt of knowledgeTypes; track kt.id) {
+                                    <option [value]="kt.id">{{ kt.type }}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Entegrasyon Kullanıcısı</label>
+                            <select class="form-select"
+                                    [(ngModel)]="form.integrationUserId"
+                                    name="integrationUserId">
+                                <option value="">Entegrasyon kullanıcısı seçiniz (opsiyonel)...</option>
+                                @for (iu of integrationUsers; track iu.id) {
+                                    <option [value]="iu.id">{{ iu.integrationDescription || iu.userEmail || iu.id }}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label">Özellik (Prop)</label>
                             <input type="text" class="form-control"
                                    [(ngModel)]="form.prop"
@@ -160,6 +195,13 @@
                                       placeholder="Bilgi değerini giriniz..."
                                       required></textarea>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Kısa Açıklama</label>
+                            <input type="text" class="form-control"
+                                   [(ngModel)]="form.shortDescription"
+                                   name="shortDescription"
+                                   placeholder="Kısa açıklama giriniz (opsiyonel)...">
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -167,7 +209,7 @@
                             (click)="closeModal()">İptal</button>
                     <button type="button" class="btn btn-primary"
                             (click)="save()"
-                            [disabled]="!form.aiAssistantId || !form.prop || !form.value">
+                            [disabled]="!form.aiAssistantId || !form.aiKnowledgeTypeId || !form.prop || !form.value">
                         {{ editMode ? 'Güncelle' : 'Kaydet' }}
                     </button>
                 </div>

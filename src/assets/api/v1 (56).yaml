@@ -209,6 +209,145 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
+  /api/Ai/knowledge-types:
+    get:
+      tags:
+        - Ai
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfAiKnowledgeTypeResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfAiKnowledgeTypeResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfAiKnowledgeTypeResponse"
+      security:
+        - Bearer: []
+    post:
+      tags:
+        - Ai
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAiKnowledgeTypeRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateAiKnowledgeTypeRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateAiKnowledgeTypeRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAiKnowledgeTypeResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAiKnowledgeTypeResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAiKnowledgeTypeResponse"
+      security:
+        - Bearer: []
+  /api/Ai/knowledge-types/{id}:
+    get:
+      tags:
+        - Ai
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAiKnowledgeTypeResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAiKnowledgeTypeResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAiKnowledgeTypeResponse"
+      security:
+        - Bearer: []
+  /api/Ai/update/knowledge-types/{id}:
+    post:
+      tags:
+        - Ai
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAiKnowledgeTypeRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAiKnowledgeTypeRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateAiKnowledgeTypeRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/Ai/delete/knowledge-types/{id}:
+    post:
+      tags:
+        - Ai
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
   /api/Ai/knowledge/paged:
     post:
       tags:
@@ -13753,6 +13892,32 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfSubscriptionResponse"
       security:
         - Bearer: []
+  /api/Subscriptions/company/{companyId}/detail:
+    get:
+      tags:
+        - Subscriptions
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySubscriptionDetailResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySubscriptionDetailResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySubscriptionDetailResponse"
+      security:
+        - Bearer: []
   /api/Subscriptions:
     post:
       tags:
@@ -13877,6 +14042,68 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/Subscriptions/change-subscription:
+    post:
+      tags:
+        - Subscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeSubscriptionRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/ChangeSubscriptionRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/ChangeSubscriptionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSubscriptionResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSubscriptionResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSubscriptionResponse"
+      security:
+        - Bearer: []
+  /api/Subscriptions/company/{companyId}/change-subscription:
+    post:
+      tags:
+        - Subscriptions
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: newPlanId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSubscriptionResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSubscriptionResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSubscriptionResponse"
       security:
         - Bearer: []
   /api/SubscriptionUsages/paged:
@@ -15220,6 +15447,32 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfDailyAiRepliesResponse"
       security:
         - Bearer: []
+  /api/Dashboard/{companyId}/subscription-summary:
+    get:
+      tags:
+        - Dashboard
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSubscriptionSummaryResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSubscriptionSummaryResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfSubscriptionSummaryResponse"
+      security:
+        - Bearer: []
   /api/Companies/paged:
     post:
       tags:
@@ -16464,6 +16717,9 @@ components:
         - maxConnectedSocialMediaAccountCount
         - subscriptionStartDate
         - subscriptionEndDate
+        - totalMessageLimit
+        - usedMessageCount
+        - remainMessageCount
       type: object
       properties:
         planId:
@@ -16515,6 +16771,24 @@ components:
         subscriptionEndDate:
           type: string
           format: date-time
+        totalMessageLimit:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        usedMessageCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        remainMessageCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
     AddConversationsToListRequest:
       required:
         - listId
@@ -16941,8 +17215,13 @@ components:
         - companyId
         - userId
         - aiAssistantId
+        - integrationUserId
+        - integrationDescription
+        - aiKnowledgeTypeId
+        - knowledgeTypeName
         - prop
         - value
+        - shortDescription
         - createdDate
         - updatedDate
       type: object
@@ -16959,6 +17238,24 @@ components:
         aiAssistantId:
           type: string
           format: uuid
+        integrationUserId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        integrationDescription:
+          type:
+            - "null"
+            - string
+        aiKnowledgeTypeId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        knowledgeTypeName:
+          type:
+            - "null"
+            - string
         prop:
           type:
             - "null"
@@ -16967,6 +17264,34 @@ components:
           type:
             - "null"
             - string
+        shortDescription:
+          type:
+            - "null"
+            - string
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+    AiKnowledgeTypeResponse:
+      required:
+        - id
+        - type
+        - isBlocked
+        - createdDate
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type:
+            - "null"
+            - string
+        isBlocked:
+          type: boolean
         createdDate:
           type: string
           format: date-time
@@ -17752,6 +18077,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfAiKnowledgeTypeResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/AiKnowledgeTypeResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfAiMessageResponse:
       type: object
       properties:
@@ -18243,6 +18600,38 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/CompanySettingResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfCompanySubscriptionDetailResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/CompanySubscriptionDetailResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -19431,6 +19820,40 @@ components:
             - array
           items:
             $ref: "#/components/schemas/AiKnowledgeResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfListOfAiKnowledgeTypeResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/AiKnowledgeTypeResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -24398,6 +24821,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfSubscriptionSummaryResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/SubscriptionSummaryResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfSubscriptionUsageResponse:
       type: object
       properties:
@@ -25075,6 +25530,18 @@ components:
             - array
           items:
             type: string
+    ChangeSubscriptionRequest:
+      required:
+        - companyId
+        - newPlanId
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        newPlanId:
+          type: string
+          format: uuid
     ChatMessage:
       required:
         - id
@@ -25204,6 +25671,8 @@ components:
         - cityName
         - districtId
         - districtName
+        - neighbourhoodId
+        - neighbourhoodName
         - address
         - postalCode
         - isBlocked
@@ -25277,6 +25746,15 @@ components:
           type:
             - "null"
             - string
+        neighbourhoodId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        neighbourhoodName:
+          type:
+            - "null"
+            - string
         address:
           type:
             - "null"
@@ -25319,6 +25797,105 @@ components:
         updatedDate:
           type: string
           format: date-time
+    CompanySubscriptionDetailResponse:
+      required:
+        - companyId
+        - companyName
+        - hasActiveSubscription
+        - subscriptionId
+        - subscriptionStartDate
+        - subscriptionEndDate
+        - isCancelled
+        - cancelledDate
+        - totalMessageLimit
+        - usedMessageCount
+        - remainMessageCount
+        - usagePercentage
+        - daysRemaining
+        - plan
+        - payments
+        - usages
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        companyName:
+          type:
+            - "null"
+            - string
+        hasActiveSubscription:
+          type: boolean
+        subscriptionId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        subscriptionStartDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        subscriptionEndDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        isCancelled:
+          type:
+            - "null"
+            - boolean
+        cancelledDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        totalMessageLimit:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        usedMessageCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        remainMessageCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        usagePercentage:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        daysRemaining:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        plan:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/PlanDetailInfo"
+        payments:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/SubscriptionPaymentInfo"
+        usages:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/SubscriptionUsageInfo"
     CompanySummary:
       required:
         - id
@@ -26039,8 +26616,11 @@ components:
         - companyId
         - userId
         - aiAssistantId
+        - integrationUserId
+        - aiKnowledgeTypeId
         - prop
         - value
+        - shortDescription
       type: object
       properties:
         companyId:
@@ -26052,11 +26632,34 @@ components:
         aiAssistantId:
           type: string
           format: uuid
+        integrationUserId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        aiKnowledgeTypeId:
+          type:
+            - "null"
+            - string
+          format: uuid
         prop:
           type:
             - "null"
             - string
         value:
+          type:
+            - "null"
+            - string
+        shortDescription:
+          type:
+            - "null"
+            - string
+    CreateAiKnowledgeTypeRequest:
+      required:
+        - type
+      type: object
+      properties:
+        type:
           type:
             - "null"
             - string
@@ -26288,6 +26891,7 @@ components:
         - countryId
         - cityId
         - districtId
+        - neighbourhoodId
         - address
         - postalCode
       type: object
@@ -26339,6 +26943,11 @@ components:
             - string
           format: uuid
         districtId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        neighbourhoodId:
           type:
             - "null"
             - string
@@ -26546,6 +27155,8 @@ components:
         - firstName
         - lastName
         - description
+        - taxNumber
+        - identityNumber
       type: object
       properties:
         customerId:
@@ -26564,6 +27175,14 @@ components:
             - "null"
             - string
         description:
+          type:
+            - "null"
+            - string
+        taxNumber:
+          type:
+            - "null"
+            - string
+        identityNumber:
           type:
             - "null"
             - string
@@ -27131,6 +27750,7 @@ components:
         - description
         - priceMonthly
         - priceYearly
+        - currencyCode
         - maxMessageCount
         - maxConnectedWebsites
         - maxUserCount
@@ -27158,6 +27778,10 @@ components:
             - number
             - string
           format: double
+        currencyCode:
+          type:
+            - "null"
+            - string
         maxMessageCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -27327,6 +27951,7 @@ components:
         - isFirst
         - userId
         - companyId
+        - integrationId
       type: object
       properties:
         promtTypeId:
@@ -27356,6 +27981,11 @@ components:
             - string
           format: uuid
         companyId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        integrationId:
           type:
             - "null"
             - string
@@ -27624,6 +28254,7 @@ components:
         - planId
         - startDate
         - endDate
+        - totalMessageLimit
       type: object
       properties:
         companyId:
@@ -27638,6 +28269,12 @@ components:
         endDate:
           type: string
           format: date-time
+        totalMessageLimit:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
     CreateSubscriptionUsageRequest:
       required:
         - companyId
@@ -28075,6 +28712,8 @@ components:
         - firstName
         - lastName
         - description
+        - taxNumber
+        - identityNumber
         - createdDate
         - updatedDate
       type: object
@@ -28098,6 +28737,14 @@ components:
             - "null"
             - string
         description:
+          type:
+            - "null"
+            - string
+        taxNumber:
+          type:
+            - "null"
+            - string
+        identityNumber:
           type:
             - "null"
             - string
@@ -33008,6 +33655,74 @@ components:
           type:
             - "null"
             - string
+    PlanDetailInfo:
+      required:
+        - planId
+        - name
+        - description
+        - priceMonthly
+        - priceYearly
+        - currencyCode
+        - maxMessageCount
+        - maxConnectedWebsites
+        - maxUserCount
+        - maxConnectedSocialMediaAccountCount
+        - isActive
+      type: object
+      properties:
+        planId:
+          type: string
+          format: uuid
+        name:
+          type:
+            - "null"
+            - string
+        description:
+          type:
+            - "null"
+            - string
+        priceMonthly:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        priceYearly:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        currencyCode:
+          type:
+            - "null"
+            - string
+        maxMessageCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        maxConnectedWebsites:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        maxUserCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        maxConnectedSocialMediaAccountCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
     PlanResponse:
       required:
         - id
@@ -33015,6 +33730,7 @@ components:
         - description
         - priceMonthly
         - priceYearly
+        - currencyCode
         - maxMessageCount
         - maxConnectedWebsites
         - maxUserCount
@@ -33048,6 +33764,10 @@ components:
             - number
             - string
           format: double
+        currencyCode:
+          type:
+            - "null"
+            - string
         maxMessageCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -33331,6 +34051,8 @@ components:
         - isFirst
         - userId
         - companyId
+        - integrationId
+        - integrationDescription
         - createdDate
         - updatedDate
       type: object
@@ -33369,6 +34091,15 @@ components:
             - "null"
             - string
           format: uuid
+        integrationId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        integrationDescription:
+          type:
+            - "null"
+            - string
         createdDate:
           type: string
           format: date-time
@@ -33649,6 +34380,7 @@ components:
         - id
         - roleId
         - userId
+        - roleDescription
         - createdDate
         - updatedDate
       type: object
@@ -33662,6 +34394,10 @@ components:
         userId:
           type: string
           format: uuid
+        roleDescription:
+          type:
+            - "null"
+            - string
         createdDate:
           type: string
           format: date-time
@@ -34066,6 +34802,43 @@ components:
           type:
             - "null"
             - string
+    SubscriptionPaymentInfo:
+      required:
+        - id
+        - amount
+        - currency
+        - paymentMethod
+        - paymentDate
+        - isSuccess
+        - errorMessage
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        amount:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        currency:
+          type:
+            - "null"
+            - string
+        paymentMethod:
+          type:
+            - "null"
+            - string
+        paymentDate:
+          type: string
+          format: date-time
+        isSuccess:
+          type: boolean
+        errorMessage:
+          type:
+            - "null"
+            - string
     SubscriptionPaymentResponse:
       required:
         - id
@@ -34137,6 +34910,9 @@ components:
         - isCancelled
         - cancelledDate
         - cancelledUserId
+        - totalMessageLimit
+        - usedMessageCount
+        - remainMessageCount
         - createdDate
         - updatedDate
       type: object
@@ -34178,12 +34954,104 @@ components:
             - "null"
             - string
           format: uuid
+        totalMessageLimit:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        usedMessageCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        remainMessageCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
         createdDate:
           type: string
           format: date-time
         updatedDate:
           type: string
           format: date-time
+    SubscriptionSummaryResponse:
+      required:
+        - subscriptionId
+        - planName
+        - startDate
+        - endDate
+        - isActive
+        - totalMessageLimit
+        - usedMessageCount
+        - remainMessageCount
+      type: object
+      properties:
+        subscriptionId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        planName:
+          type:
+            - "null"
+            - string
+        startDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        endDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        isActive:
+          type: boolean
+        totalMessageLimit:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        usedMessageCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        remainMessageCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    SubscriptionUsageInfo:
+      required:
+        - id
+        - periodStart
+        - periodEnd
+        - usedMessage
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+        usedMessage:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
     SubscriptionUsageResponse:
       required:
         - id
@@ -34192,11 +35060,7 @@ components:
         - subscriptionId
         - periodStart
         - periodEnd
-        - usedChatCount
-        - usedMarketplaceReplyCount
-        - usedChannelCount
-        - usedUserCount
-        - usedProductCount
+        - usedMessage
         - createdDate
         - updatedDate
       type: object
@@ -34220,31 +35084,7 @@ components:
         periodEnd:
           type: string
           format: date-time
-        usedChatCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        usedMarketplaceReplyCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        usedChannelCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        usedUserCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        usedProductCount:
+        usedMessage:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
             - integer
@@ -34861,8 +35701,11 @@ components:
         - companyId
         - userId
         - aiAssistantId
+        - integrationUserId
+        - aiKnowledgeTypeId
         - prop
         - value
+        - shortDescription
       type: object
       properties:
         companyId:
@@ -34874,6 +35717,16 @@ components:
         aiAssistantId:
           type: string
           format: uuid
+        integrationUserId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        aiKnowledgeTypeId:
+          type:
+            - "null"
+            - string
+          format: uuid
         prop:
           type:
             - "null"
@@ -34882,6 +35735,22 @@ components:
           type:
             - "null"
             - string
+        shortDescription:
+          type:
+            - "null"
+            - string
+    UpdateAiKnowledgeTypeRequest:
+      required:
+        - type
+        - isBlocked
+      type: object
+      properties:
+        type:
+          type:
+            - "null"
+            - string
+        isBlocked:
+          type: boolean
     UpdateAiMessageRequest:
       required:
         - messageId
@@ -35111,6 +35980,7 @@ components:
         - countryId
         - cityId
         - districtId
+        - neighbourhoodId
         - address
         - postalCode
         - isBlocked
@@ -35163,6 +36033,11 @@ components:
             - string
           format: uuid
         districtId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        neighbourhoodId:
           type:
             - "null"
             - string
@@ -35368,6 +36243,8 @@ components:
         - firstName
         - lastName
         - description
+        - taxNumber
+        - identityNumber
       type: object
       properties:
         customerId:
@@ -35386,6 +36263,14 @@ components:
             - "null"
             - string
         description:
+          type:
+            - "null"
+            - string
+        taxNumber:
+          type:
+            - "null"
+            - string
+        identityNumber:
           type:
             - "null"
             - string
@@ -35942,6 +36827,7 @@ components:
         - description
         - priceMonthly
         - priceYearly
+        - currencyCode
         - maxMessageCount
         - maxConnectedWebsites
         - maxUserCount
@@ -35970,6 +36856,10 @@ components:
             - number
             - string
           format: double
+        currencyCode:
+          type:
+            - "null"
+            - string
         maxMessageCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -36144,6 +37034,7 @@ components:
         - isFirst
         - userId
         - companyId
+        - integrationId
       type: object
       properties:
         promtTypeId:
@@ -36173,6 +37064,11 @@ components:
             - string
           format: uuid
         companyId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        integrationId:
           type:
             - "null"
             - string
@@ -36406,6 +37302,9 @@ components:
         - isCancelled
         - cancelledDate
         - cancelledUserId
+        - totalMessageLimit
+        - usedMessageCount
+        - remainMessageCount
       type: object
       properties:
         companyId:
@@ -36434,40 +37333,30 @@ components:
             - "null"
             - string
           format: uuid
+        totalMessageLimit:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        usedMessageCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        remainMessageCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
     UpdateSubscriptionUsageRequest:
       required:
-        - usedChatCount
-        - usedMarketplaceReplyCount
-        - usedChannelCount
-        - usedUserCount
-        - usedProductCount
+        - usedMessage
       type: object
       properties:
-        usedChatCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        usedMarketplaceReplyCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        usedChannelCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        usedUserCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        usedProductCount:
+        usedMessage:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
             - integer
@@ -37034,6 +37923,7 @@ components:
         - createdDate
         - updatedDate
         - senderUserName
+        - from
       type: object
       properties:
         id:
@@ -37077,6 +37967,7 @@ components:
         - subject
         - description
         - closedDate
+        - isClosed
         - isBlocked
         - createdDate
         - updatedDate
@@ -37124,6 +38015,8 @@ components:
             - "null"
             - string
           format: date-time
+        isClosed:
+          type: boolean
         isBlocked:
           type: boolean
         createdDate:

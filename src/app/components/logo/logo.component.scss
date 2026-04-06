@@ -1,3 +1,8 @@
+:host {
+  display: block;
+  overflow: visible;
+}
+
 .logo-wrapper {
   display: flex;
   align-items: center;
@@ -105,19 +110,47 @@
   .logo-wrapper {
     padding: 0;
     flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0;
     height: auto;
-    padding-top: 12px;
-    gap: 8px;
+    padding-top: 14px;
+    position: relative;
   }
   
   .logo-brand {
     padding: 0;
     justify-content: center;
     height: auto;
+    flex: 0 0 auto;
+  }
+
+  .logo-brand-link {
+    gap: 0 !important;
   }
   
   .sidebar-toggle-btn {
-    transform: rotate(180deg);
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%) rotate(180deg);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #343a40;
+    color: #fff;
+    border: 2px solid #e9ecef;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+
+    &:hover {
+      background: #212529;
+      color: #fff;
+    }
+
+    .toggle-icon {
+      font-size: 10px;
+    }
   }
   
   .logo-brand-text-wrapper {

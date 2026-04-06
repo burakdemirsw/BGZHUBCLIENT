@@ -44,36 +44,21 @@ $radius-lg: 18px;
 }
 
 @keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    from { opacity: 0; transform: translateX(16px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    from { opacity: 0; transform: translateX(-16px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes messagePop {
-    0% {
+    from {
         opacity: 0;
-        transform: scale(0.92) translateY(8px);
+        transform: scale(0.95) translateY(6px);
     }
-    60% {
-        transform: scale(1.02) translateY(-2px);
-    }
-    100% {
+    to {
         opacity: 1;
         transform: scale(1) translateY(0);
     }
@@ -286,6 +271,24 @@ $radius-lg: 18px;
     padding: 0 14px;
     transition: all 0.2s ease;
 
+    &.btn-details {
+        width: 34px;
+        padding: 0;
+        justify-content: center;
+        background: transparent;
+        color: $text-secondary;
+
+        &:hover {
+            background: rgba(59, 130, 246, 0.08);
+            color: $accent-blue;
+        }
+
+        &.active {
+            background: rgba(59, 130, 246, 0.12);
+            color: $accent-blue;
+        }
+    }
+
     &.btn-edit {
         background: rgba(59, 130, 246, 0.08);
         color: $accent-blue;
@@ -441,18 +444,11 @@ $radius-lg: 18px;
 
     &.incoming {
         align-self: flex-start;
-        animation-name: messagePop;
     }
 
     &.outgoing {
         align-self: flex-end;
         flex-direction: row-reverse;
-    }
-
-    @for $i from 1 through 30 {
-        &:nth-child(#{$i}) {
-            animation-delay: #{$i * 0.04}s;
-        }
     }
 }
 
@@ -682,22 +678,48 @@ $radius-lg: 18px;
 }
 
 .details-header {
-    padding: 16px 20px;
+    padding: 14px 20px;
     border-bottom: 1px solid $border-color;
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
 
-    i {
-        font-size: 15px;
-        color: $accent-blue;
+    .details-header-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        i {
+            font-size: 15px;
+            color: $accent-blue;
+        }
+
+        h6 {
+            font-size: 14px;
+            font-weight: 700;
+            color: $text-primary;
+            margin: 0;
+        }
     }
+}
 
-    h6 {
-        font-size: 14px;
-        font-weight: 700;
-        color: $text-primary;
-        margin: 0;
+.details-close-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    color: $text-muted;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: #fee2e2;
+        color: #ef4444;
     }
 }
 
@@ -719,29 +741,51 @@ $radius-lg: 18px;
 /* ── Detail Sections ── */
 .detail-section {
     border-bottom: 1px solid $border-color;
-    animation: fadeInUp 0.3s ease both;
-
-    @for $i from 1 through 6 {
-        &:nth-child(#{$i}) {
-            animation-delay: #{$i * 0.06}s;
-        }
-    }
 }
 
 .detail-section-header {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
     padding: 12px 20px;
     font-size: 11.5px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: $text-muted;
+    user-select: none;
 
-    i {
-        font-size: 12px;
+    &.clickable {
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.02);
+            color: $text-secondary;
+        }
     }
+
+    .section-header-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        i { font-size: 12px; }
+    }
+
+    .section-chevron {
+        font-size: 10px;
+        transition: transform 0.2s ease;
+    }
+}
+
+.detail-section-body {
+    animation: sectionExpand 0.2s ease;
+}
+
+@keyframes sectionExpand {
+    from { opacity: 0; max-height: 0; }
+    to { opacity: 1; max-height: 500px; }
 }
 
 .detail-section-body {

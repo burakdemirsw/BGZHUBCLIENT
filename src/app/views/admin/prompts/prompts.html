@@ -33,6 +33,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Prompt Tipi</th>
+                                    <th>Entegrasyon</th>
                                     <th>Kısa Açıklama</th>
                                     <th>Prompt</th>
                                     <th class="text-center">Sıra</th>
@@ -50,6 +51,11 @@
                                         </td>
                                         <td>
                                             <span class="badge bg-info-subtle text-info">{{ getPromptTypeName(item.promtTypeId) }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning-subtle text-warning">
+                                                <i class="fa-solid fa-plug me-1"></i>{{ item.integrationDescription || '—' }}
+                                            </span>
                                         </td>
                                         <td>
                                             <span>{{ item.shortDescription || '-' }}</span>
@@ -85,7 +91,7 @@
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="8" class="text-center text-muted">Prompt bulunamadı.</td></tr>
+                                    <tr><td colspan="10" class="text-center text-muted">Prompt bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -127,7 +133,7 @@
                     <form>
                         <!-- Üst ayarlar satırı -->
                         <div class="row mb-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label">Prompt Tipi</label>
                                 <select class="form-select" [(ngModel)]="promptForm.promtTypeId" name="promtTypeId">
                                     <option value="">Seçiniz...</option>
@@ -136,11 +142,20 @@
                                     }
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <label class="form-label">Entegrasyon</label>
+                                <select class="form-select" [(ngModel)]="promptForm.integrationId" name="integrationId">
+                                    <option value="">Seçiniz...</option>
+                                    @for (integration of integrations; track integration.id) {
+                                        <option [value]="integration.id">{{ integration.integrationDescription }}</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
                                 <label class="form-label">Kısa Açıklama</label>
                                 <input type="text" class="form-control" [(ngModel)]="promptForm.shortDescription" name="shortDescription" maxlength="100" placeholder="Maksimum 100 karakter">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label">Sıra (Order)</label>
                                 <input type="number" class="form-control" [(ngModel)]="promptForm.order" name="promptOrder" required min="0">
                             </div>

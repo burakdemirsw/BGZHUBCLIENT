@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LayoutStoreService } from '@core/services/layout-store.service';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
   selector: 'app-logo',
@@ -11,7 +12,14 @@ import { LayoutStoreService } from '@core/services/layout-store.service';
 export class LogoComponent {
   @Input() logoHeight: number = 28;
 
-  constructor(public layout: LayoutStoreService) {}
+  constructor(
+    public layout: LayoutStoreService,
+    private authState: AuthStateService
+  ) {}
+
+  get homeRoute(): string {
+    return this.authState.profile ? '/dashboard' : '/home';
+  }
 
   toggleSidebar() {
     const html = document.documentElement;

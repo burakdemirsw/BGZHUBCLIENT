@@ -4,6 +4,7 @@ export interface PlanResponse {
     description?: string;
     priceMonthly: number;
     priceYearly: number;
+    currencyCode?: string;
     maxMessageCount: number;
     maxConnectedWebsites: number;
     maxUserCount: number;
@@ -19,6 +20,7 @@ export interface CreatePlanRequest {
     description: string;
     priceMonthly: number;
     priceYearly: number;
+    currencyCode: string;
     maxMessageCount: number;
     maxConnectedWebsites: number;
     maxUserCount: number;
@@ -31,6 +33,7 @@ export interface UpdatePlanRequest {
     description: string;
     priceMonthly: number;
     priceYearly: number;
+    currencyCode: string;
     maxMessageCount: number;
     maxConnectedWebsites: number;
     maxUserCount: number;

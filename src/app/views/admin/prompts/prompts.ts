@@ -5,8 +5,10 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { PromptsService } from '@/app/core/services/prompts.service';
 import { PromptTypesService } from '@/app/core/services/prompt-types.service';
+import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { Prompt, PromptType, CreatePromptRequest, UpdatePromptRequest } from '@/app/core/models/ai-assistant/prompt.models';
+import { Integration } from '@/app/core/models/integration/integration.models';
 
 @Component({
     selector: 'app-prompts-page',
@@ -67,6 +69,7 @@ export class PromptsPage implements OnInit {
     // Prompt listesi
     prompts: Prompt[] = [];
     promptTypes: PromptType[] = [];
+    integrations: Integration[] = [];
     loading = false;
 
     // Datatable
@@ -82,7 +85,7 @@ export class PromptsPage implements OnInit {
     showPromptModal = false;
     promptEditMode = false;
     selectedPromptItem: Prompt | null = null;
-    promptForm: any = { promtTypeId: '', promptText: '', shortDescription: '', order: 0, isFirst: false };
+    promptForm: any = { promtTypeId: '', integrationId: '', promptText: '', shortDescription: '', order: 0, isFirst: false };
 
     // Modal tab: editor vs preview
     modalTab: 'editor' | 'preview' = 'editor';
@@ -94,6 +97,7 @@ export class PromptsPage implements OnInit {
     constructor(
         private promptsService: PromptsService,
         private promptTypesService: PromptTypesService,
+        private integrationsService: IntegrationsService,
         private authState: AuthStateService,
         private sanitizer: DomSanitizer,
     ) {}
@@ -109,6 +113,7 @@ export class PromptsPage implements OnInit {
 
     ngOnInit(): void {
         this.loadPrompts();
+        this.loadIntegrations();
     }
 
     // ────── Prompt CRUD ──────
@@ -136,14 +141,14 @@ export class PromptsPage implements OnInit {
     openPromptCreate(): void {
         this.promptEditMode = false;
         this.selectedPromptItem = null;
-        this.promptForm = { promtTypeId: '', promptText: '', shortDescription: '', order: 0, isFirst: false };
+        this.promptForm = { promtTypeId: '', integrationId: '', promptText: '', shortDescription: '', order: 0, isFirst: false };
         this.showPromptModal = true;
     }
 
     openPromptEdit(item: Prompt): void {
         this.promptEditMode = true;
         this.selectedPromptItem = item;
-        this.promptForm = { promtTypeId: item.promtTypeId || '', promptText: item.promptText || '', shortDescription: item.shortDescription || '', order: item.order || 0, isFirst: item.isFirst || false };
+        this.promptForm = { promtTypeId: item.promtTypeId || '', integrationId: item.integrationId || '', promptText: item.promptText || '', shortDescription: item.shortDescription || '', order: item.order || 0, isFirst: item.isFirst || false };
         this.showPromptModal = true;
     }
 
@@ -160,6 +165,7 @@ export class PromptsPage implements OnInit {
                     isFirst: this.promptForm.isFirst,
                     userId,
                     companyId,
+                    integrationId: this.promptForm.integrationId || undefined,
                 };
                 await this.promptsService.update(this.selectedPromptItem.id, req);
             } else {
@@ -171,6 +177,7 @@ export class PromptsPage implements OnInit {
                     isFirst: this.promptForm.isFirst,
                     userId,
                     companyId,
+                    integrationId: this.promptForm.integrationId || undefined,
                 };
                 await this.promptsService.create(req);
             }
@@ -243,6 +250,7 @@ export class PromptsPage implements OnInit {
                 (i.promptText || '').toLowerCase().includes(q) ||
                 i.order.toString().includes(q) ||
                 this.getPromptTypeName(i.promtTypeId).toLowerCase().includes(q) ||
+                (i.integrationDescription || '').toLowerCase().includes(q) ||
                 (i.createdDate || '').toLowerCase().includes(q)
         );
         this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
@@ -255,6 +263,23 @@ export class PromptsPage implements OnInit {
         if (!typeId) return '—';
         const pt = this.promptTypes.find(t => t.id === typeId);
         return pt?.type || '—';
+    }
+
+    getIntegrationName(integrationId?: string): string {
+        if (!integrationId) return '—';
+        const i = this.integrations.find(x => x.id === integrationId);
+        return i?.integrationDescription || '—';
+    }
+
+    async loadIntegrations(): Promise<void> {
+        try {
+            const companyId = this.authState.profile?.companyId || '';
+            const response = await this.integrationsService.getPaged({ companyId, pageNumber: 1, pageSize: 1000 });
+            const paged = response?.data;
+            this.integrations = paged?.items ?? [];
+        } catch (err) {
+            console.error('Integrations yükleme hatası:', err);
+        }
     }
 
     // ────── Yardımcı ──────

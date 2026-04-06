@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AiRequestLogsPage } from './ai-request-logs/ai-request-logs';
 import { AiKnowledgePage } from './ai-knowledge/ai-knowledge';
+import { AiKnowledgeTypesPage } from './ai-knowledge-types/ai-knowledge-types';
 import { UsersPage } from './users/users';
 import { RolesPage } from './roles/roles';
 import { MenusPage } from './menus/menus';
@@ -68,6 +69,7 @@ import { UserTypesPage } from './user-types/user-types';
 import { OrderCreatePage } from './order-create/order-create';
 import { OrdersPage } from './orders/orders';
 import { PlansPage } from './plans/plans';
+import { PlanPurchasePage } from './plan-purchase/plan-purchase';
 import { SubscriptionsPage } from './subscriptions/subscriptions';
 import { SubscriptionPaymentsPage } from './subscription-payments/subscription-payments';
 import { SubscriptionUsagesPage } from './subscription-usages/subscription-usages';
@@ -498,9 +500,21 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [AuthGuard],
     },
     {
+        path: 'admin/ai-knowledge-types',
+        component: AiKnowledgeTypesPage,
+        data: { title: 'AI Bilgi Tipleri' },
+        canActivate: [AuthGuard],
+    },
+    {
         path: 'admin/plans',
         component: PlansPage,
         data: { title: 'Planlar' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/plan-purchase',
+        component: PlanPurchasePage,
+        data: { title: 'Plan Satın Al' },
         canActivate: [AuthGuard],
     },
     {

@@ -15,6 +15,8 @@ export interface Company {
   cityName?: string;
   districtId?: string;
   districtName?: string;
+  neighbourhoodId?: string;
+  neighbourhoodName?: string;
   address?: string;
   postalCode?: string;
   isBlocked: boolean;
@@ -35,6 +37,7 @@ export interface CreateCompanyRequest {
   countryId?: string | null;
   cityId?: string | null;
   districtId?: string | null;
+  neighbourhoodId?: string | null;
   address?: string | null;
   postalCode?: string | null;
 }
@@ -52,6 +55,7 @@ export interface UpdateCompanyRequest {
   countryId?: string | null;
   cityId?: string | null;
   districtId?: string | null;
+  neighbourhoodId?: string | null;
   address?: string | null;
   postalCode?: string | null;
   isBlocked: boolean;

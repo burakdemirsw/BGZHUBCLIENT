@@ -14,6 +14,7 @@
     transition: width .25s ease-in-out;
     display: flex;
     flex-direction: column;
+    overflow: visible;
 
     [data-simplebar] {
         flex: 1;
@@ -265,6 +266,12 @@
     }
 }
 
+// Plan info (above user bottom)
+.sidenav-plan-info {
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
 // sidenav user (bottom fixed)
 .sidenav-user-bottom {
     display: block;
@@ -274,6 +281,7 @@
     background: $sidenav-bg;
     margin-top: auto;
     flex-shrink: 0;
+    overflow: hidden;
 
     .sidenav-action-btn {
         width: 32px;
@@ -317,7 +325,7 @@ html[data-sidenav-size="condensed"] {
 
     .content-page {
         margin-left: $sidenav-width-sm;
-        min-height: 1900px;
+        min-height: 100vh;
     }
 
     .sidenav-menu {
@@ -353,10 +361,10 @@ html[data-sidenav-size="condensed"] {
         }
 
         .logo-brand {
-            justify-content: center;
             padding: 0;
 
-            .logo-brand-text {
+            .logo-brand-text,
+            .logo-brand-text-wrapper {
                 display: none;
             }
         }
@@ -505,19 +513,8 @@ html[data-sidenav-size="condensed"] {
         display: none;
     }
 
-    .sidenav-user-bottom {
-        padding: 12px 0;
-        display: flex;
-        justify-content: center;
-
-        .sidenav-profile-text,
-        .sidenav-profile-actions {
-            display: none !important;
-        }
-
-        .sidenav-profile-avatar {
-            margin: 0 auto;
-        }
+    app-user-profile {
+        display: none !important;
     }
 }
 
@@ -604,10 +601,10 @@ html[data-sidenav-size="on-hover"] {
         }
 
         .logo-brand {
-            justify-content: center;
             padding: 0;
 
-            .logo-brand-text {
+            .logo-brand-text,
+            .logo-brand-text-wrapper {
                 display: none;
             }
         }
@@ -635,19 +632,8 @@ html[data-sidenav-size="on-hover"] {
             display: none;
         }
 
-        .sidenav-user-bottom {
-            padding: 12px 0;
-            display: flex;
-            justify-content: center;
-
-            .sidenav-profile-text,
-            .sidenav-profile-actions {
-                display: none !important;
-            }
-
-            .sidenav-profile-avatar {
-                margin: 0 auto;
-            }
+        app-user-profile {
+            display: none !important;
         }
 
         .sub-menu {

@@ -45,6 +45,8 @@ export class UserRequestDetailPage implements OnInit, AfterViewChecked {
     messagesLoading = false;
     newMessage = '';
     showEditModal = false;
+    showDetailsSidebar = true;
+    collapsedSections: Record<string, boolean> = {};
     editForm: any = {
         categoryId: '',
         statusId: '',
@@ -220,6 +222,14 @@ export class UserRequestDetailPage implements OnInit, AfterViewChecked {
         return '';
     }
 
+    toggleSection(section: string): void {
+        this.collapsedSections[section] = !this.collapsedSections[section];
+    }
+
+    isSectionOpen(section: string): boolean {
+        return !this.collapsedSections[section];
+    }
+
     canEditRequest(): boolean {
         return this.hasAdminRole;
     }
@@ -239,6 +249,8 @@ export class UserRequestDetailPage implements OnInit, AfterViewChecked {
     }
 
     canComposeMessage(): boolean {
+        if (this.isRequestCompleted()) return false;
+  
         const currentRole = this.getCurrentUserRoleName();
         const latestMessage = this.getLatestMessage();
         const latestMessageRole = (latestMessage?.from || '').toLowerCase();
@@ -253,6 +265,12 @@ export class UserRequestDetailPage implements OnInit, AfterViewChecked {
         }
 
         return false;
+    }
+
+    isRequestCompleted(): boolean {
+        if (!this.request) return false;
+        const statusName = (this.request.statusName || this.getStatusName(this.request.statusId)).toLowerCase();
+        return statusName === 'tamamlandı' || statusName === 'completed' || statusName === 'closed';
     }
 
     isOutgoingMessage(message: UserRequestMessageResponse): boolean {

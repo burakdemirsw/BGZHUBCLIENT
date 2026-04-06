@@ -2,14 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiKnowledgeService } from '@/app/core/services/ai-knowledge.service';
+import { AiKnowledgeTypesService } from '@/app/core/services/ai-knowledge-types.service';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
+import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import {
     AiKnowledgeResponse,
     CreateAiKnowledgeRequest,
     UpdateAiKnowledgeRequest,
 } from '@/app/core/models/ai-assistant/ai-knowledge.models';
+import { AiKnowledgeTypeResponse } from '@/app/core/models/ai-assistant/ai-knowledge-type.models';
 import { AiAssistant } from '@/app/core/models/ai-assistant/ai-assistant.models';
+import { IntegrationUser } from '@/app/core/models/integration/integration-user.models';
 import { PagedResult } from '@/app/core/models/pagination.model';
 
 @Component({
@@ -22,6 +26,8 @@ export class AiKnowledgePage implements OnInit {
     // Veri
     items: AiKnowledgeResponse[] = [];
     assistants: AiAssistant[] = [];
+    integrationUsers: IntegrationUser[] = [];
+    knowledgeTypes: AiKnowledgeTypeResponse[] = [];
     loading = false;
 
     // Server-side pagination
@@ -39,23 +45,33 @@ export class AiKnowledgePage implements OnInit {
     selectedItem: AiKnowledgeResponse | null = null;
     form: {
         aiAssistantId: string;
+        aiKnowledgeTypeId: string;
+        integrationUserId: string;
         prop: string;
         value: string;
+        shortDescription: string;
     } = {
         aiAssistantId: '',
+        aiKnowledgeTypeId: '',
+        integrationUserId: '',
         prop: '',
         value: '',
+        shortDescription: '',
     };
 
     constructor(
         private knowledgeService: AiKnowledgeService,
+        private knowledgeTypesService: AiKnowledgeTypesService,
         private aiProvidersService: AiProvidersService,
+        private integrationsService: IntegrationsService,
         private authState: AuthStateService,
     ) {}
 
     ngOnInit(): void {
         this.loadKnowledge();
         this.loadAssistants();
+        this.loadIntegrationUsers();
+        this.loadKnowledgeTypes();
     }
 
     // ────── Veri yükleme ──────
@@ -91,6 +107,27 @@ export class AiKnowledgePage implements OnInit {
         }
     }
 
+    async loadIntegrationUsers(): Promise<void> {
+        try {
+            const companyId = this.authState.profile?.companyId || '';
+            const response = await this.integrationsService.getIntegrationUsersPaged({ companyId, pageNumber: 1, pageSize: 1000 });
+            const paged = response?.data;
+            this.integrationUsers = paged?.items ?? [];
+        } catch (err) {
+            console.error('IntegrationUsers yükleme hatası:', err);
+        }
+    }
+
+    async loadKnowledgeTypes(): Promise<void> {
+        try {
+            const resp = await this.knowledgeTypesService.getAll();
+            const data = resp?.data;
+            this.knowledgeTypes = this.extractArray(data).filter((t: AiKnowledgeTypeResponse) => !t.isBlocked);
+        } catch (err) {
+            console.error('Knowledge Types yükleme hatası:', err);
+        }
+    }
+
     private buildPagesArray(): void {
         this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
     }
@@ -99,7 +136,7 @@ export class AiKnowledgePage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedItem = null;
-        this.form = { aiAssistantId: '', prop: '', value: '' };
+        this.form = { aiAssistantId: '', aiKnowledgeTypeId: '', integrationUserId: '', prop: '', value: '', shortDescription: '' };
         this.showModal = true;
     }
 
@@ -108,8 +145,11 @@ export class AiKnowledgePage implements OnInit {
         this.selectedItem = item;
         this.form = {
             aiAssistantId: item.aiAssistantId || '',
+            aiKnowledgeTypeId: item.aiKnowledgeTypeId || '',
+            integrationUserId: item.integrationUserId || '',
             prop: item.prop || '',
             value: item.value || '',
+            shortDescription: item.shortDescription || '',
         };
         this.showModal = true;
     }
@@ -124,8 +164,11 @@ export class AiKnowledgePage implements OnInit {
                     companyId,
                     userId,
                     aiAssistantId: this.form.aiAssistantId,
+                    aiKnowledgeTypeId: this.form.aiKnowledgeTypeId || null,
+                    integrationUserId: this.form.integrationUserId || null,
                     prop: this.form.prop,
                     value: this.form.value,
+                    shortDescription: this.form.shortDescription || null,
                 };
                 await this.knowledgeService.update(this.selectedItem.id, req);
             } else {
@@ -133,8 +176,11 @@ export class AiKnowledgePage implements OnInit {
                     companyId,
                     userId,
                     aiAssistantId: this.form.aiAssistantId,
+                    aiKnowledgeTypeId: this.form.aiKnowledgeTypeId || null,
+                    integrationUserId: this.form.integrationUserId || null,
                     prop: this.form.prop,
                     value: this.form.value,
+                    shortDescription: this.form.shortDescription || null,
                 };
                 await this.knowledgeService.create(req);
             }
@@ -185,6 +231,18 @@ export class AiKnowledgePage implements OnInit {
         if (!assistantId) return '—';
         const a = this.assistants.find(x => x.id === assistantId);
         return a?.name || '—';
+    }
+
+    getIntegrationUserName(integrationUserId: string): string {
+        if (!integrationUserId) return '—';
+        const iu = this.integrationUsers.find(x => x.id === integrationUserId);
+        return iu?.integrationDescription || '—';
+    }
+
+    getKnowledgeTypeName(typeId: string | null): string {
+        if (!typeId) return '—';
+        const t = this.knowledgeTypes.find(x => x.id === typeId);
+        return t?.type || '—';
     }
 
     private extractArray(response: any): any[] {

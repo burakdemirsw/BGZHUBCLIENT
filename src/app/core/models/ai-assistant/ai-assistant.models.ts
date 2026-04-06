@@ -34,6 +34,7 @@ export interface UpdateAiAssistantRequest {
 export interface AiKnowledge {
   id: string;
   assistantId: string;
+  integrationUserId?: string | null;
   prop: string;
   value: string;
   isBlocked?: boolean;
@@ -43,12 +44,14 @@ export interface AiKnowledge {
 
 export interface CreateAiKnowledgeRequest {
   assistantId: string;
+  integrationUserId?: string | null;
   prop: string;
   value: string;
 }
 
 export interface UpdateAiKnowledgeRequest {
   assistantId: string;
+  integrationUserId?: string | null;
   prop: string;
   value: string;
 }

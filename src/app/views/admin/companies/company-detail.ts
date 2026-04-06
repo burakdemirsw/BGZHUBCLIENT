@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CompaniesService } from '@/app/core/services/companies.service';
 import { AddressesService } from '@/app/core/services/addresses.service';
+import { NeighbourhoodsService } from '@/app/core/services/neighbourhoods.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { Company, UpdateCompanyRequest } from '@/app/core/models/customer/company.models';
 
@@ -40,6 +41,7 @@ export class CompanyDetailPage implements OnInit {
         countryId: '',
         cityId: '',
         districtId: '',
+        neighbourhoodId: '',
         address: '',
         postalCode: '',
         isBlocked: false,
@@ -49,11 +51,13 @@ export class CompanyDetailPage implements OnInit {
     countries: AddressOption[] = [];
     cities: AddressOption[] = [];
     districts: AddressOption[] = [];
+    neighbourhoods: AddressOption[] = [];
 
     constructor(
         private router: Router,
         private companiesService: CompaniesService,
         private addressesService: AddressesService,
+        private neighbourhoodsService: NeighbourhoodsService,
         private authStateService: AuthStateService,
     ) {}
 
@@ -100,6 +104,7 @@ export class CompanyDetailPage implements OnInit {
             countryId: this.company.countryId || '',
             cityId: this.company.cityId || '',
             districtId: this.company.districtId || '',
+            neighbourhoodId: this.company.neighbourhoodId || '',
             address: this.company.address || '',
             postalCode: this.company.postalCode || '',
             isBlocked: this.company.isBlocked || false,
@@ -113,6 +118,9 @@ export class CompanyDetailPage implements OnInit {
         }
         if (this.editForm.cityId) {
             await this.loadDistricts(this.editForm.cityId);
+        }
+        if (this.editForm.districtId) {
+            await this.loadNeighbourhoods(this.editForm.districtId);
         }
     }
 
@@ -141,6 +149,7 @@ export class CompanyDetailPage implements OnInit {
                 countryId: this.editForm.countryId || null,
                 cityId: this.editForm.cityId || null,
                 districtId: this.editForm.districtId || null,
+                neighbourhoodId: this.editForm.neighbourhoodId || null,
                 address: this.editForm.address || null,
                 postalCode: this.editForm.postalCode || null,
                 isBlocked: this.editForm.isBlocked,
@@ -163,9 +172,25 @@ export class CompanyDetailPage implements OnInit {
     private extractArray(response: any): any[] {
         if (Array.isArray(response)) return response;
         if (response?.$values) return response.$values;
-        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
-        if (response?.items) return response.items;
-        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
+        if (response?.items) {
+            const items = response.items;
+            if (Array.isArray(items)) return items;
+            if (items?.$values) return items.$values;
+        }
+        if (response?.data) {
+            const d = response.data;
+            if (Array.isArray(d)) return d;
+            if (d?.$values) return d.$values;
+            if (d?.items) {
+                if (Array.isArray(d.items)) return d.items;
+                if (d.items?.$values) return d.items.$values;
+            }
+        }
+        if (response?.result) {
+            const r = response.result;
+            if (Array.isArray(r)) return r;
+            if (r?.$values) return r.$values;
+        }
         return [];
     }
 
@@ -173,7 +198,8 @@ export class CompanyDetailPage implements OnInit {
         try {
             const res = await this.addressesService.getCountries();
             this.countries = this.extractArray(res).map((c: any) => ({ id: c.id, name: c.name }));
-        } catch {
+        } catch (err) {
+            console.error('Countries load error:', err);
             this.countries = [];
         }
     }
@@ -181,36 +207,61 @@ export class CompanyDetailPage implements OnInit {
     async loadCities(countryId: string): Promise<void> {
         this.cities = [];
         this.districts = [];
+        this.neighbourhoods = [];
         if (!countryId) return;
         try {
             const res = await this.addressesService.getCitiesByCountry(countryId);
             this.cities = this.extractArray(res).map((c: any) => ({ id: c.id, name: c.name }));
-        } catch {
+        } catch (err) {
+            console.error('Cities load error:', err);
             this.cities = [];
         }
     }
 
     async loadDistricts(cityId: string): Promise<void> {
         this.districts = [];
+        this.neighbourhoods = [];
         if (!cityId) return;
         try {
             const res = await this.addressesService.getDistrictsByCity(cityId);
             this.districts = this.extractArray(res).map((d: any) => ({ id: d.id, name: d.name }));
-        } catch {
+        } catch (err) {
+            console.error('Districts load error:', err);
             this.districts = [];
+        }
+    }
+
+    async loadNeighbourhoods(districtId: string): Promise<void> {
+        this.neighbourhoods = [];
+        if (!districtId) return;
+        try {
+            const res = await this.neighbourhoodsService.getByDistrict(districtId);
+            this.neighbourhoods = this.extractArray(res).map((n: any) => ({ id: n.id, name: n.name }));
+        } catch (err) {
+            console.error('Neighbourhoods load error:', err);
+            this.neighbourhoods = [];
         }
     }
 
     async onCountryChange(): Promise<void> {
         this.editForm.cityId = '';
         this.editForm.districtId = '';
+        this.editForm.neighbourhoodId = '';
         this.districts = [];
+        this.neighbourhoods = [];
         await this.loadCities(this.editForm.countryId || '');
     }
 
     async onCityChange(): Promise<void> {
         this.editForm.districtId = '';
+        this.editForm.neighbourhoodId = '';
+        this.neighbourhoods = [];
         await this.loadDistricts(this.editForm.cityId || '');
+    }
+
+    async onDistrictChange(): Promise<void> {
+        this.editForm.neighbourhoodId = '';
+        await this.loadNeighbourhoods(this.editForm.districtId || '');
     }
 
     // ---------- Helpers ----------
@@ -227,6 +278,10 @@ export class CompanyDetailPage implements OnInit {
         return this.districts.find(d => d.id === this.editForm.districtId)?.name || '';
     }
 
+    get selectedNeighbourhoodName(): string {
+        return this.neighbourhoods.find(n => n.id === this.editForm.neighbourhoodId)?.name || '';
+    }
+
     get statusText(): string {
         return this.company?.isBlocked ? 'Pasif' : 'Aktif';
     }
@@ -238,6 +293,7 @@ export class CompanyDetailPage implements OnInit {
     get fullAddress(): string {
         const parts: string[] = [];
         if (this.company?.address) parts.push(this.company.address);
+        if (this.company?.neighbourhoodName) parts.push(this.company.neighbourhoodName);
         if (this.company?.districtName) parts.push(this.company.districtName);
         if (this.company?.cityName) parts.push(this.company.cityName);
         if (this.company?.countryName) parts.push(this.company.countryName);

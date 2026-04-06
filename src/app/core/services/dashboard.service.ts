@@ -6,6 +6,7 @@ import {
   DailySalesResponse,
   IntegrationCountsResponse,
   DailyAiRepliesResponse,
+  SubscriptionSummaryResponse,
 } from '../models/dashboard/dashboard.models';
 import { ApiResponse } from '../models/api-response.model';
 
@@ -66,6 +67,17 @@ export class DashboardService {
       controller: this.controller,
       action: `${this.companyId}/ai-replies`,
       queryString: `days=${days}`,
+    });
+    return this.extractData(response);
+  }
+
+  /**
+   * Şirkete ait aktif abonelik bilgisini döner.
+   */
+  async getSubscriptionSummary(): Promise<SubscriptionSummaryResponse> {
+    const response = await this.httpClientService.get<SubscriptionSummaryResponse>({
+      controller: this.controller,
+      action: `${this.companyId}/subscription-summary`,
     });
     return this.extractData(response);
   }

@@ -7,6 +7,8 @@ export interface Prompt {
   isFirst: boolean;
   userId?: string;
   companyId?: string;
+  integrationId?: string;
+  integrationDescription?: string;
   isBlocked?: boolean;
   createdDate?: string;
   updatedDate?: string;
@@ -20,6 +22,7 @@ export interface CreatePromptRequest {
   isFirst: boolean;
   userId?: string;
   companyId?: string;
+  integrationId?: string;
 }
 
 export interface UpdatePromptRequest {
@@ -30,6 +33,7 @@ export interface UpdatePromptRequest {
   isFirst: boolean;
   userId?: string;
   companyId?: string;
+  integrationId?: string;
 }
 
 // PromptAiAssistant junction tablosu

@@ -409,7 +409,8 @@
                             <div class="info-item">
                                 <label class="info-label">İlçe</label>
                                 @if (editMode) {
-                                    <select class="form-select form-select-sm" [(ngModel)]="editForm.districtId">
+                                    <select class="form-select form-select-sm"
+                                            [(ngModel)]="editForm.districtId" (ngModelChange)="onDistrictChange()">
                                         <option value="">Seçiniz</option>
                                         @for (d of districts; track d.id) {
                                             <option [value]="d.id">{{ d.name }}</option>
@@ -417,6 +418,21 @@
                                     </select>
                                 } @else {
                                     <div class="info-value">{{ company.districtName || '-' }}</div>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-item">
+                                <label class="info-label">Mahalle</label>
+                                @if (editMode) {
+                                    <select class="form-select form-select-sm" [(ngModel)]="editForm.neighbourhoodId">
+                                        <option value="">Seçiniz</option>
+                                        @for (n of neighbourhoods; track n.id) {
+                                            <option [value]="n.id">{{ n.name }}</option>
+                                        }
+                                    </select>
+                                } @else {
+                                    <div class="info-value">{{ company.neighbourhoodName || '-' }}</div>
                                 }
                             </div>
                         </div>

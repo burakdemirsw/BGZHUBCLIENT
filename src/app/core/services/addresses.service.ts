@@ -39,7 +39,7 @@ export class AddressesService {
   }
 
   getCitiesByCountry(countryId: string): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'Addresses', action: `countries/${countryId}/cities` });
+    return this.http.get<any[]>({ controller: 'Addresses', action: `cities/by-country/${countryId}` });
   }
 
   createCity(request: any): Promise<ApiResponse<any>> {
@@ -64,7 +64,7 @@ export class AddressesService {
   }
 
   getDistrictsByCity(cityId: string): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'Addresses', action: `cities/${cityId}/districts` });
+    return this.http.get<any[]>({ controller: 'Addresses', action: `districts/by-city/${cityId}` });
   }
 
   createDistrict(request: any): Promise<ApiResponse<any>> {

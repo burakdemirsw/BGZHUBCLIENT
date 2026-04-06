@@ -89,6 +89,99 @@
       </div>
     </div>
 
+    <!-- ═══ Subscription Usage ═══ -->
+    @if (subscription) {
+      <div class="row g-3 mb-4">
+        <div class="col-12">
+          <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-body">
+              <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center">
+                  <div class="avatar avatar-lg me-3 flex-shrink-0">
+                    <span class="avatar-title rounded-circle fs-3"
+                          [class]="subscription.isActive ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
+                      <i class="fa-solid fa-crown"></i>
+                    </span>
+                  </div>
+                  <div>
+                    <h5 class="fw-bold mb-0">{{ subscription.planName }} Plan</h5>
+                    <span class="badge" [class]="subscription.isActive ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
+                      {{ subscription.isActive ? 'Aktif' : 'Pasif' }}
+                    </span>
+                  </div>
+                </div>
+                <div class="text-end mt-2 mt-sm-0">
+                  <p class="text-muted mb-0 fs-xs">Kalan süre</p>
+                  <h4 class="fw-bold mb-0 text-primary">{{ daysRemaining }} gün</h4>
+                </div>
+              </div>
+
+              <!-- Usage Progress -->
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="text-muted fw-medium">Mesaj Kullanımı</span>
+                  <span class="fw-semibold">
+                    {{ subscription.usedMessageCount | number }} / {{ subscription.totalMessageLimit | number }}
+                  </span>
+                </div>
+                <div class="progress" style="height: 12px; border-radius: 6px;">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated"
+                       [class]="usageBarClass"
+                       role="progressbar"
+                       [style.width.%]="usagePercent"
+                       [attr.aria-valuenow]="usagePercent"
+                       aria-valuemin="0"
+                       aria-valuemax="100">
+                    {{ usagePercent }}%
+                  </div>
+                </div>
+              </div>
+
+              <!-- Stats Row -->
+              <div class="row g-3 text-center">
+                <div class="col-4">
+                  <div class="p-2 rounded" style="background-color: #f7f7f9;">
+                    <p class="text-muted mb-1 fs-xs">Toplam Limit</p>
+                    <h5 class="fw-bold mb-0 text-primary">
+                      <span [countUp]="subscription.totalMessageLimit" [options]="{ duration: 0.9, separator: '.' }"></span>
+                    </h5>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="p-2 rounded" style="background-color: #f7f7f9;">
+                    <p class="text-muted mb-1 fs-xs">Kullanılan</p>
+                    <h5 class="fw-bold mb-0 text-warning">
+                      <span [countUp]="subscription.usedMessageCount" [options]="{ duration: 0.9, separator: '.' }"></span>
+                    </h5>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="p-2 rounded" style="background-color: #f7f7f9;">
+                    <p class="text-muted mb-1 fs-xs">Kalan</p>
+                    <h5 class="fw-bold mb-0 text-success">
+                      <span [countUp]="subscription.remainMessageCount" [options]="{ duration: 0.9, separator: '.' }"></span>
+                    </h5>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Period Info -->
+              <div class="d-flex justify-content-between mt-3 pt-2 border-top">
+                <small class="text-muted">
+                  <i class="fa-regular fa-calendar me-1"></i>
+                  Başlangıç: {{ subscription.startDate | date:'dd MMM yyyy' }}
+                </small>
+                <small class="text-muted">
+                  <i class="fa-regular fa-calendar-check me-1"></i>
+                  Bitiş: {{ subscription.endDate | date:'dd MMM yyyy' }}
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
     <!-- ═══ Charts Row ═══ -->
     <div class="row g-3 mb-4">
 

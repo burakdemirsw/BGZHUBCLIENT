@@ -7,6 +7,9 @@ import {AuthStateService} from '@/app/core/services/auth-state.service';
 import {UserService} from '@/app/core/services/user.service';
 import {LayoutStoreService} from '@core/services/layout-store.service';
 import {NotificationsService} from '@core/services/notifications.service';
+import {SubscriptionsService} from '@/app/core/services/subscriptions.service';
+import {CompanySubscriptionDetailResponse} from '@/app/core/models/subscription/subscription.models';
+import {DecimalPipe} from '@angular/common';
 
 @Component({
   selector: 'app-user-profile',
@@ -16,7 +19,8 @@ import {NotificationsService} from '@core/services/notifications.service';
     NgbDropdown,
     NgbDropdownToggle,
     NgbDropdownMenu,
-    NgIcon
+    NgIcon,
+    DecimalPipe
   ],
 
   templateUrl: './user-profile.html',
@@ -25,13 +29,15 @@ import {NotificationsService} from '@core/services/notifications.service';
 export class UserProfile implements OnInit {
   menuItems = userDropdownItems;
   unreadCount = 0;
+  subscriptionDetail: CompanySubscriptionDetailResponse | null = null;
   theme = computed(() => this.layout.state().theme);
 
   constructor(
     public authState: AuthStateService,
     private userService: UserService,
     public layout: LayoutStoreService,
-    private notificationsService: NotificationsService
+    private notificationsService: NotificationsService,
+    private subscriptionsService: SubscriptionsService
   ) {}
 
   get activePlan() {
@@ -40,6 +46,18 @@ export class UserProfile implements OnInit {
 
   ngOnInit(): void {
     this.loadUnreadCount();
+    this.loadSubscriptionDetail();
+  }
+
+  async loadSubscriptionDetail(): Promise<void> {
+    try {
+      const companyId = this.authState.profile?.companyId;
+      if (!companyId) return;
+      const response = await this.subscriptionsService.getCompanyDetail(companyId);
+      this.subscriptionDetail = response?.data ?? null;
+    } catch {
+      this.subscriptionDetail = null;
+    }
   }
 
   async loadUnreadCount(): Promise<void> {
@@ -67,6 +85,14 @@ export class UserProfile implements OnInit {
 
   get isDark(): boolean {
     return this.layout.theme === 'dark';
+  }
+
+  getRemainingDays(): number {
+    return this.subscriptionDetail?.daysRemaining ?? 0;
+  }
+
+  formatNumber(num: number): string {
+    return num.toLocaleString('tr-TR');
   }
 
   onItemClick(item: any, event: Event): void {

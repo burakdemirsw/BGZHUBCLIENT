@@ -26,6 +26,9 @@
                     </div>
                 </div>
                 <div class="chat-header-actions">
+                    <button class="header-action-btn btn-details" [class.active]="showDetailsSidebar" (click)="showDetailsSidebar = !showDetailsSidebar" title="Talep Bilgileri">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </button>
                     @if (canEditRequest()) {
                         <button class="header-action-btn btn-edit" (click)="openEditModal()">
                             <i class="fa-solid fa-pen-to-square"></i>
@@ -104,27 +107,42 @@
             } @else {
                 <div class="no-compose-message">
                     <div class="no-compose-inner">
-                        <i class="fa-solid fa-circle-info"></i>
-                        <span>Bu konuşma için şu anda yeni mesaj gönderilemez.</span>
+                        @if (isRequestCompleted()) {
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Bu talep tamamlandığı için mesaj gönderilemez.</span>
+                        } @else {
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>Bu konuşma için şu anda yeni mesaj gönderilemez.</span>
+                        }
                     </div>
                 </div>
             }
         </div>
 
         <!-- ═══ RIGHT: Details Sidebar ═══ -->
+        @if (showDetailsSidebar) {
         <aside class="details-sidebar">
             <div class="details-header">
-                <i class="fa-solid fa-circle-info"></i>
-                <h6>Talep Bilgileri</h6>
+                <div class="details-header-left">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <h6>Talep Bilgileri</h6>
+                </div>
+                <button class="details-close-btn" (click)="showDetailsSidebar = false" title="Kapat">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
 
             <div class="details-body">
                 <!-- Durum Bilgileri -->
                 <div class="detail-section">
-                    <div class="detail-section-header">
-                        <i class="fa-solid fa-chart-simple"></i>
-                        <span>Durum</span>
+                    <div class="detail-section-header clickable" (click)="toggleSection('status')">
+                        <div class="section-header-left">
+                            <i class="fa-solid fa-chart-simple"></i>
+                            <span>Durum</span>
+                        </div>
+                        <i class="fa-solid section-chevron" [class.fa-chevron-down]="isSectionOpen('status')" [class.fa-chevron-right]="!isSectionOpen('status')"></i>
                     </div>
+                    @if (isSectionOpen('status')) {
                     <div class="detail-section-body">
                         <div class="detail-row">
                             <span class="detail-label"><i class="fa-solid fa-circle-dot"></i> Durum</span>
@@ -151,14 +169,19 @@
                             }
                         </div>
                     </div>
+                    }
                 </div>
 
                 <!-- Kişiler -->
                 <div class="detail-section">
-                    <div class="detail-section-header">
-                        <i class="fa-solid fa-users"></i>
-                        <span>Kişiler</span>
+                    <div class="detail-section-header clickable" (click)="toggleSection('people')">
+                        <div class="section-header-left">
+                            <i class="fa-solid fa-users"></i>
+                            <span>Kişiler</span>
+                        </div>
+                        <i class="fa-solid section-chevron" [class.fa-chevron-down]="isSectionOpen('people')" [class.fa-chevron-right]="!isSectionOpen('people')"></i>
                     </div>
+                    @if (isSectionOpen('people')) {
                     <div class="detail-section-body">
                         <div class="detail-row">
                             <span class="detail-label"><i class="fa-solid fa-user"></i> Oluşturan</span>
@@ -173,14 +196,19 @@
                             }
                         </div>
                     </div>
+                    }
                 </div>
 
                 <!-- Tarihler -->
                 <div class="detail-section">
-                    <div class="detail-section-header">
-                        <i class="fa-regular fa-calendar"></i>
-                        <span>Tarihler</span>
+                    <div class="detail-section-header clickable" (click)="toggleSection('dates')">
+                        <div class="section-header-left">
+                            <i class="fa-regular fa-calendar"></i>
+                            <span>Tarihler</span>
+                        </div>
+                        <i class="fa-solid section-chevron" [class.fa-chevron-down]="isSectionOpen('dates')" [class.fa-chevron-right]="!isSectionOpen('dates')"></i>
                     </div>
+                    @if (isSectionOpen('dates')) {
                     <div class="detail-section-body">
                         <div class="detail-row">
                             <span class="detail-label"><i class="fa-solid fa-clock"></i> Oluşturulma</span>
@@ -195,36 +223,48 @@
                             <span class="detail-value">{{ formatDate(request.closedDate) }}</span>
                         </div>
                     </div>
+                    }
                 </div>
 
                 <!-- Açıklama -->
                 <div class="detail-section">
-                    <div class="detail-section-header">
-                        <i class="fa-solid fa-align-left"></i>
-                        <span>Açıklama</span>
+                    <div class="detail-section-header clickable" (click)="toggleSection('description')">
+                        <div class="section-header-left">
+                            <i class="fa-solid fa-align-left"></i>
+                            <span>Açıklama</span>
+                        </div>
+                        <i class="fa-solid section-chevron" [class.fa-chevron-down]="isSectionOpen('description')" [class.fa-chevron-right]="!isSectionOpen('description')"></i>
                     </div>
+                    @if (isSectionOpen('description')) {
                     <div class="detail-section-body">
                         <div class="description-card">
                             {{ request.description || 'Açıklama girilmemiş.' }}
                         </div>
                     </div>
+                    }
                 </div>
 
                 <!-- Mesaj İstatistiği -->
                 <div class="detail-section">
-                    <div class="detail-section-header">
-                        <i class="fa-solid fa-message"></i>
-                        <span>Mesajlar</span>
+                    <div class="detail-section-header clickable" (click)="toggleSection('messages')">
+                        <div class="section-header-left">
+                            <i class="fa-solid fa-message"></i>
+                            <span>Mesajlar</span>
+                        </div>
+                        <i class="fa-solid section-chevron" [class.fa-chevron-down]="isSectionOpen('messages')" [class.fa-chevron-right]="!isSectionOpen('messages')"></i>
                     </div>
+                    @if (isSectionOpen('messages')) {
                     <div class="detail-section-body">
                         <div class="detail-row">
                             <span class="detail-label"><i class="fa-solid fa-comments"></i> Toplam</span>
                             <span class="msg-count-badge">{{ messages.length }}</span>
                         </div>
                     </div>
+                    }
                 </div>
             </div>
         </aside>
+        }
     </div>
 } @else {
     <div class="detail-empty">

@@ -34,3 +34,15 @@ export interface DailyAiRepliesResponse {
   days: number;
   items: DailyAiReplyItem[];
 }
+
+// ─── Subscription Summary ──────────────────────────────────────────────────
+export interface SubscriptionSummaryResponse {
+  subscriptionId: string;
+  planName: string;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  totalMessageLimit: number;
+  usedMessageCount: number;
+  remainMessageCount: number;
+}

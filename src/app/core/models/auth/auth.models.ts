@@ -28,6 +28,7 @@ export interface ActivePlanInfo {
   planDescription: string;
   priceMonthly: number;
   priceYearly: number;
+  currencyCode?: string;
   maxMessageCount: number;
   maxConnectedWebsites: number;
   maxUserCount: number;
@@ -38,7 +39,7 @@ export interface ActivePlanInfo {
 
 export interface AuthResponse {
   userId: string;
-  companyId: string;
+  companyId: string | null;
   accessToken: string;
   refreshToken: string;
   expiration: string;
