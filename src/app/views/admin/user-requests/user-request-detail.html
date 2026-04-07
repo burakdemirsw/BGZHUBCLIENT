@@ -5,265 +5,172 @@
         <span class="loading-text">Talep yükleniyor...</span>
     </div>
 } @else if (request) {
-    <div class="request-detail-layout">
-        <!-- ═══ LEFT: Chat Panel ═══ -->
-        <div class="chat-panel">
-            <!-- Chat Header -->
-            <div class="chat-header">
-                <div class="chat-header-left">
-                    <div class="chat-header-icon">
-                        <i class="fa-solid fa-ticket"></i>
-                    </div>
-                    <div class="chat-header-info">
-                        <h6 class="chat-header-title">{{ request.subject }}</h6>
-                        <div class="chat-header-subtitle">
-                            <span class="status-dot" [class.active]="!request.isBlocked" [class.blocked]="request.isBlocked"></span>
-                            <span class="header-meta-text">
-                                {{ request.userName || getUserFullName(request.userId) }}
-                                · {{ formatDate(request.createdDate) }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="chat-header-actions">
-                    <button class="header-action-btn btn-details" [class.active]="showDetailsSidebar" (click)="showDetailsSidebar = !showDetailsSidebar" title="Talep Bilgileri">
-                        <i class="fa-solid fa-circle-info"></i>
-                    </button>
-                    @if (canEditRequest()) {
-                        <button class="header-action-btn btn-edit" (click)="openEditModal()">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                            <span>Düzenle</span>
-                        </button>
-                    }
-                    @if (canCloseRequest()) {
-                        <button class="header-action-btn btn-close-req" (click)="closeRequest()">
-                            <i class="fa-solid fa-lock"></i>
-                            <span>Kapat</span>
-                        </button>
-                    }
-                </div>
-            </div>
-
-            <!-- Chat Body / Messages -->
-            <div class="chat-body" #chatBody>
-                @if (messagesLoading) {
-                    <div class="messages-loading">
-                        <div class="loading-dots">
-                            <span></span><span></span><span></span>
-                        </div>
-                        <span class="loading-label">Mesajlar yükleniyor...</span>
-                    </div>
-                } @else {
-                    @if (messages.length > 0) {
-                        @for (msg of messages; track $index) {
-                            <div class="message-row" [class.outgoing]="isOutgoingMessage(msg)" [class.incoming]="!isOutgoingMessage(msg)">
-                                <div class="message-avatar" [class.outgoing-avatar]="isOutgoingMessage(msg)" [class.incoming-avatar]="!isOutgoingMessage(msg)">
-                                    {{ getMessageSenderLabel(msg).charAt(0).toUpperCase() }}
-                                </div>
-                                <div class="message-content">
-                                    <span class="message-sender">{{ getMessageSenderLabel(msg) }}</span>
-                                    <div class="message-bubble" [class.outgoing-bubble]="isOutgoingMessage(msg)" [class.incoming-bubble]="!isOutgoingMessage(msg)">
-                                        {{ msg.message }}
-                                    </div>
-                                    <span class="message-time">
-                                        {{ formatDate(msg.createdDate) }}
-                                        @if (msg.from) {
-                                            <span class="message-from-badge" [class.from-admin]="(msg.from || '').toLowerCase() === 'admin'" [class.from-customer]="(msg.from || '').toLowerCase() === 'customer'">
-                                                {{ msg.from }}
-                                            </span>
-                                        }
-                                    </span>
-                                </div>
-                            </div>
-                        }
-                    } @else {
-                        <div class="messages-empty">
-                            <div class="empty-messages-icon">
-                                <i class="fa-solid fa-comments"></i>
-                            </div>
-                            <p>Henüz mesaj yok. İlk mesajı gönderin!</p>
-                        </div>
-                    }
+    <div class="ticket-page">
+        <!-- ═══ Ticket Header ═══ -->
+        <div class="ticket-header">
+            <div class="ticket-header-left">
+                <h5 class="ticket-title">
+                    <span class="ticket-hash">#</span> {{ request.subject }}
+                </h5>
+                @if (request.statusName || getStatusName(request.statusId) !== '-') {
+                    <span class="ticket-id-badge">
+                        {{ request.statusName || getStatusName(request.statusId) }}
+                    </span>
                 }
             </div>
+            <div class="ticket-header-actions">
+                <button class="btn btn-sm btn-outline-primary" (click)="goBack()">
+                    <i class="fa-solid fa-arrow-rotate-left me-1"></i> Tüm Talepler
+                </button>
+                @if (canEditRequest()) {
+                    <button class="btn btn-sm btn-outline-secondary" (click)="openEditModal()">
+                        <i class="fa-solid fa-pen-to-square me-1"></i> Düzenle
+                    </button>
+                }
+                @if (canCloseRequest()) {
+                    <button class="btn btn-sm btn-outline-warning" (click)="closeRequest()">
+                        <i class="fa-solid fa-lock me-1"></i> Kapat
+                    </button>
+                }
+                @if (canComposeMessage()) {
+                    <button class="btn btn-sm btn-success" (click)="scrollToReply()">
+                        <i class="fa-solid fa-reply me-1"></i> Yanıtla
+                    </button>
+                }
+            </div>
+        </div>
 
-            <!-- Chat Input Area -->
-            @if (canComposeMessage()) {
-                <div class="chat-input-area">
-                    <div class="compose-box">
-                        <div class="compose-input-wrapper">
-                            <textarea class="compose-textarea" [(ngModel)]="newMessage" name="newMessage"
-                                rows="2" placeholder="Mesajınızı yazın..."
-                                (keydown.enter)="onMessageKeydown($any($event))"></textarea>
-                            <span class="compose-hint">
-                                <i class="fa-regular fa-keyboard"></i> Ctrl+Enter ile gönderin
-                            </span>
-                        </div>
-                        <button class="btn-send" (click)="sendMessage()" [disabled]="!newMessage.trim()" title="Gönder">
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </button>
+        <!-- ═══ Ticket Meta Bar ═══ -->
+        <div class="ticket-meta-bar">
+            <div class="meta-item">
+                <i class="fa-solid fa-user me-1"></i>
+                <span>{{ request.userName || getUserFullName(request.userId) }}</span>
+            </div>
+            <div class="meta-divider"></div>
+            <div class="meta-item">
+                <i class="fa-solid fa-tag me-1"></i>
+                <span>{{ request.categoryName || getCategoryName(request.categoryId) }}</span>
+            </div>
+            <div class="meta-divider"></div>
+            <div class="meta-item">
+                <i class="fa-solid fa-flag me-1"></i>
+                <span class="priority-badge">{{ request.priorityName || getPriorityName(request.priorityId) }}</span>
+            </div>
+            @if (request.assignedUserId) {
+                <div class="meta-divider"></div>
+                <div class="meta-item">
+                    <i class="fa-solid fa-user-gear me-1"></i>
+                    <span>{{ request.assignedUserName || getUserFullName(request.assignedUserId) }}</span>
+                </div>
+            }
+            <div class="meta-divider"></div>
+            <div class="meta-item">
+                <i class="fa-solid fa-calendar me-1"></i>
+                <span>{{ formatDate(request.createdDate) }}</span>
+            </div>
+        </div>
+
+        <!-- ═══ Ticket Description (İlk Mesaj) ═══ -->
+        <div class="ticket-description-card">
+            <div class="ticket-msg-layout">
+                <div class="ticket-msg-user-col">
+                    <div class="user-avatar-lg">
+                        <span>{{ (request.userName || getUserFullName(request.userId)).charAt(0).toUpperCase() }}</span>
                     </div>
+                    <div class="user-name-label">{{ request.userName || getUserFullName(request.userId) }}</div>
+                    <div class="user-role-label">Talep Sahibi</div>
+                </div>
+                <div class="ticket-msg-content-col">
+                    <div class="ticket-msg-date">
+                        <strong>Tarih / Saat:</strong> {{ formatDate(request.createdDate) }}
+                    </div>
+                    <div class="ticket-msg-body">
+                        {{ request.description || 'Açıklama girilmemiş.' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ Messages (Yanıtlar) ═══ -->
+        <div class="ticket-messages-area" #chatBody>
+            @if (messagesLoading) {
+                <div class="messages-loading">
+                    <div class="loading-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <span class="loading-label">Mesajlar yükleniyor...</span>
                 </div>
             } @else {
-                <div class="no-compose-message">
-                    <div class="no-compose-inner">
-                        @if (isRequestCompleted()) {
-                            <i class="fa-solid fa-circle-check"></i>
-                            <span>Bu talep tamamlandığı için mesaj gönderilemez.</span>
-                        } @else {
-                            <i class="fa-solid fa-circle-info"></i>
-                            <span>Bu konuşma için şu anda yeni mesaj gönderilemez.</span>
-                        }
+                @if (messages.length > 0) {
+                    @for (msg of messages; track $index) {
+                        <div class="ticket-message-card" [class.is-admin]="(msg.from || '').toLowerCase() === 'admin'">
+                            <div class="ticket-msg-layout">
+                                <div class="ticket-msg-user-col">
+                                    <div class="user-avatar-lg" [class.avatar-admin]="(msg.from || '').toLowerCase() === 'admin'">
+                                        <span>{{ getMessageSenderLabel(msg).charAt(0).toUpperCase() }}</span>
+                                    </div>
+                                    <div class="user-name-label">{{ getMessageSenderLabel(msg) }}</div>
+                                    @if (msg.from) {
+                                        <div class="user-role-label" [class.role-admin]="(msg.from || '').toLowerCase() === 'admin'">
+                                            @if ((msg.from || '').toLowerCase() === 'admin') {
+                                                Müşteri Temsilcisi
+                                            } @else {
+                                                Kullanıcı
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                                <div class="ticket-msg-content-col">
+                                    <div class="ticket-msg-date">
+                                        <strong>Tarih / Saat:</strong> {{ formatDate(msg.createdDate) }}
+                                    </div>
+                                    <div class="ticket-msg-body">
+                                        {{ msg.message }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                } @else {
+                    <div class="no-messages-state">
+                        <i class="fa-solid fa-comments"></i>
+                        <p>Henüz yanıt yok.</p>
                     </div>
-                </div>
+                }
             }
         </div>
 
-        <!-- ═══ RIGHT: Details Sidebar ═══ -->
-        @if (showDetailsSidebar) {
-        <aside class="details-sidebar">
-            <div class="details-header">
-                <div class="details-header-left">
-                    <i class="fa-solid fa-circle-info"></i>
-                    <h6>Talep Bilgileri</h6>
+        <!-- ═══ Reply Area ═══ -->
+        @if (canComposeMessage()) {
+            <div class="ticket-reply-area" id="replyArea">
+                <div class="reply-header">
+                    <i class="fa-solid fa-reply me-2"></i> Yanıtla
                 </div>
-                <button class="details-close-btn" (click)="showDetailsSidebar = false" title="Kapat">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="details-body">
-                <!-- Durum Bilgileri -->
-                <div class="detail-section">
-                    <div class="detail-section-header clickable" (click)="toggleSection('status')">
-                        <div class="section-header-left">
-                            <i class="fa-solid fa-chart-simple"></i>
-                            <span>Durum</span>
-                        </div>
-                        <i class="fa-solid section-chevron" [class.fa-chevron-down]="isSectionOpen('status')" [class.fa-chevron-right]="!isSectionOpen('status')"></i>
+                <div class="reply-body">
+                    <textarea class="form-control reply-textarea"
+                              [(ngModel)]="newMessage" name="newMessage"
+                              rows="4" placeholder="Yanıtınızı yazın..."
+                              (keydown.enter)="onMessageKeydown($any($event))"></textarea>
+                    <div class="reply-footer">
+                        <span class="reply-hint">
+                            <i class="fa-regular fa-keyboard me-1"></i> Ctrl+Enter ile gönderin
+                        </span>
+                        <button class="btn btn-success" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+                            <i class="fa-solid fa-reply me-1"></i> Yanıtla
+                        </button>
                     </div>
-                    @if (isSectionOpen('status')) {
-                    <div class="detail-section-body">
-                        <div class="detail-row">
-                            <span class="detail-label"><i class="fa-solid fa-circle-dot"></i> Durum</span>
-                            <span class="status-badge status-info">
-                                {{ request.statusName || getStatusName(request.statusId) }}
-                            </span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label"><i class="fa-solid fa-flag"></i> Öncelik</span>
-                            <span class="status-badge status-warning">
-                                {{ request.priorityName || getPriorityName(request.priorityId) }}
-                            </span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label"><i class="fa-solid fa-tag"></i> Kategori</span>
-                            <span class="detail-value">{{ request.categoryName || getCategoryName(request.categoryId) }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label"><i class="fa-solid fa-shield-halved"></i> Aktiflik</span>
-                            @if (request.isBlocked) {
-                                <span class="status-badge status-danger">Pasif</span>
-                            } @else {
-                                <span class="status-badge status-success">Aktif</span>
-                            }
-                        </div>
-                    </div>
-                    }
-                </div>
-
-                <!-- Kişiler -->
-                <div class="detail-section">
-                    <div class="detail-section-header clickable" (click)="toggleSection('people')">
-                        <div class="section-header-left">
-                            <i class="fa-solid fa-users"></i>
-                            <span>Kişiler</span>
-                        </div>
-                        <i class="fa-solid section-chevron" [class.fa-chevron-down]="isSectionOpen('people')" [class.fa-chevron-right]="!isSectionOpen('people')"></i>
-                    </div>
-                    @if (isSectionOpen('people')) {
-                    <div class="detail-section-body">
-                        <div class="detail-row">
-                            <span class="detail-label"><i class="fa-solid fa-user"></i> Oluşturan</span>
-                            <span class="detail-value">{{ request.userName || getUserFullName(request.userId) }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label"><i class="fa-solid fa-user-gear"></i> Atanan</span>
-                            @if (request.assignedUserId) {
-                                <span class="detail-value">{{ request.assignedUserName || getUserFullName(request.assignedUserId) }}</span>
-                            } @else {
-                                <span class="detail-value" style="color: #9ca3af; font-style: italic;">Atanmadı</span>
-                            }
-                        </div>
-                    </div>
-                    }
-                </div>
-
-                <!-- Tarihler -->
-                <div class="detail-section">
-                    <div class="detail-section-header clickable" (click)="toggleSection('dates')">
-                        <div class="section-header-left">
-                            <i class="fa-regular fa-calendar"></i>
-                            <span>Tarihler</span>
-                        </div>
-                        <i class="fa-solid section-chevron" [class.fa-chevron-down]="isSectionOpen('dates')" [class.fa-chevron-right]="!isSectionOpen('dates')"></i>
-                    </div>
-                    @if (isSectionOpen('dates')) {
-                    <div class="detail-section-body">
-                        <div class="detail-row">
-                            <span class="detail-label"><i class="fa-solid fa-clock"></i> Oluşturulma</span>
-                            <span class="detail-value">{{ formatDate(request.createdDate) }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label"><i class="fa-solid fa-rotate"></i> Güncelleme</span>
-                            <span class="detail-value">{{ formatDate(request.updatedDate) }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label"><i class="fa-solid fa-circle-check"></i> Kapanma</span>
-                            <span class="detail-value">{{ formatDate(request.closedDate) }}</span>
-                        </div>
-                    </div>
-                    }
-                </div>
-
-                <!-- Açıklama -->
-                <div class="detail-section">
-                    <div class="detail-section-header clickable" (click)="toggleSection('description')">
-                        <div class="section-header-left">
-                            <i class="fa-solid fa-align-left"></i>
-                            <span>Açıklama</span>
-                        </div>
-                        <i class="fa-solid section-chevron" [class.fa-chevron-down]="isSectionOpen('description')" [class.fa-chevron-right]="!isSectionOpen('description')"></i>
-                    </div>
-                    @if (isSectionOpen('description')) {
-                    <div class="detail-section-body">
-                        <div class="description-card">
-                            {{ request.description || 'Açıklama girilmemiş.' }}
-                        </div>
-                    </div>
-                    }
-                </div>
-
-                <!-- Mesaj İstatistiği -->
-                <div class="detail-section">
-                    <div class="detail-section-header clickable" (click)="toggleSection('messages')">
-                        <div class="section-header-left">
-                            <i class="fa-solid fa-message"></i>
-                            <span>Mesajlar</span>
-                        </div>
-                        <i class="fa-solid section-chevron" [class.fa-chevron-down]="isSectionOpen('messages')" [class.fa-chevron-right]="!isSectionOpen('messages')"></i>
-                    </div>
-                    @if (isSectionOpen('messages')) {
-                    <div class="detail-section-body">
-                        <div class="detail-row">
-                            <span class="detail-label"><i class="fa-solid fa-comments"></i> Toplam</span>
-                            <span class="msg-count-badge">{{ messages.length }}</span>
-                        </div>
-                    </div>
-                    }
                 </div>
             </div>
-        </aside>
+        } @else {
+            <div class="ticket-closed-notice">
+                @if (isRequestCompleted()) {
+                    <i class="fa-solid fa-circle-check me-2"></i>
+                    Bu talep tamamlandığı için yanıt gönderilemez.
+                } @else {
+                    <i class="fa-solid fa-circle-info me-2"></i>
+                    Bu talep için şu anda yanıt gönderilemez.
+                }
+            </div>
         }
     </div>
 } @else {

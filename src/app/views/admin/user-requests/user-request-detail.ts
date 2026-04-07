@@ -414,6 +414,15 @@ export class UserRequestDetailPage implements OnInit, AfterViewChecked {
         }
     }
 
+    scrollToReply(): void {
+        const el = document.getElementById('replyArea');
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const textarea = el.querySelector('textarea');
+            if (textarea) textarea.focus();
+        }
+    }
+
     goBack(): void {
         this.router.navigate(['/admin/user-requests']);
     }
