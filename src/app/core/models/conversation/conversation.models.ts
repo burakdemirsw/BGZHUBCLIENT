@@ -141,3 +141,14 @@ export interface ConversationOrderSummary {
     createdDate: string;
 }
 
+// ========================
+// Test Conversation Request
+// ========================
+
+export interface CreateTestConversationRequest {
+    companyId: string;
+    firstName: string;
+    lastName: string;
+    userIntSmaId?: string | null;
+}
+

@@ -50,8 +50,13 @@ export class IntegrationsPage implements OnInit {
 
     async loadIntegrationTypes(): Promise<void> {
         try {
-            const response = await this.integrationTypesService.getAll();
-            this.integrationTypes = this.extractArray(response);
+            const response = await this.integrationTypesService.getPaged({
+                companyId: this.authStateService.profile?.companyId ?? '',
+                pageNumber: 1,
+                pageSize: 1000,
+            });
+            const paged = response?.data;
+            this.integrationTypes = paged?.items ?? [];
         } catch (err) {
             console.error('IntegrationTypes load error:', err);
         }

@@ -16,20 +16,21 @@ import {
     imports: [CommonModule, FormsModule],
     templateUrl: './user-integration-user-social-media-accounts.html',
 })
-export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {     
+export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
     items: UserIntegrationUserSocialMediaAccountResponse[] = [];
+    filteredItems: UserIntegrationUserSocialMediaAccountResponse[] = [];
+    pagedItems: UserIntegrationUserSocialMediaAccountResponse[] = [];
     integrationUsers: any[] = [];
     socialMediaAccounts: any[] = [];
     loading = false;
     showModal = false;
     editMode = false;
     selectedItem: UserIntegrationUserSocialMediaAccountResponse | null = null;
-    // Server-side pagination
-    searchTerm = '';
+
+    filterText = '';
     currentPage = 1;
     pageSize = 10;
     totalPages = 1;
-    totalCount = 0;
     totalPagesArray: number[] = [];
 
     companyId = '';
@@ -54,15 +55,34 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
         this.loadItems();
     }
 
-    onSearchChange(): void {
+    onFilterChange(): void {
         this.currentPage = 1;
-        this.loadItems();
+        this.applyFilterAndPaging();
     }
 
     setPage(page: number): void {
         if (page < 1 || page > this.totalPages) return;
         this.currentPage = page;
-        this.loadItems();
+        this.applyFilterAndPaging();
+    }
+
+    applyFilterAndPaging(): void {
+        const term = this.filterText.toLowerCase().trim();
+        this.filteredItems = term
+            ? this.items.filter(item =>
+                  (item.socialMediaAccountName ?? '').toLowerCase().includes(term)
+              )
+            : [...this.items];
+
+        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
+        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+
+        if (this.currentPage > this.totalPages) {
+            this.currentPage = this.totalPages;
+        }
+
+        const start = (this.currentPage - 1) * this.pageSize;
+        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
     }
 
     async loadLookups(): Promise<void> {
@@ -88,15 +108,12 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
         this.loading = true;
         try {
             const response = this.companyId
-                ? await this.service.getByCompany(this.companyId, { companyId: this.companyId, pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm })
-                : await this.service.getAll({ companyId: this.companyId, pageNumber: this.currentPage, pageSize: this.pageSize, searchTerm: this.searchTerm });
-            //console.log('UserIntegrationUserSocialMediaAccounts response:', response);
+                ? await this.service.getByCompany(this.companyId, { companyId: this.companyId, pageNumber: 1, pageSize: 1000 })
+                : await this.service.getAll({ companyId: this.companyId, pageNumber: 1, pageSize: 1000 });
 
             const paged = response?.data;
-            this.items = paged?.items ?? [];
-            this.totalCount = paged?.totalCount ?? this.items.length;
-            this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
-            this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+            this.items = paged?.items ?? this.extractArray(response);
+            this.applyFilterAndPaging();
         } catch (err) {
             console.error('UserIntegrationUserSocialMediaAccounts error:', err);
         } finally {
@@ -104,7 +121,7 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
         }
     }
 
-    private extractArray(response: any): any[] {
+    private extractArray(response: any): UserIntegrationUserSocialMediaAccountResponse[] {
         if (Array.isArray(response)) return response;
         if (response?.$values) return response.$values;
         if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
@@ -137,8 +154,8 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
         this.editMode = true;
         this.selectedItem = item;
         this.form = {
-            integrationUserId: item.integrationUserId,
-            userSocialMediaAccountId: item.userSocialMediaAccountId,
+            integrationUserId: '',
+            userSocialMediaAccountId: item.socialMediaAccountId ?? '',
         };
         this.showModal = true;
     }
@@ -179,7 +196,7 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
     }
 
     async deleteItem(item: UserIntegrationUserSocialMediaAccountResponse): Promise<void> {
-        const name = (item.integrationDescription || this.getIntegrationUserName(item.integrationUserId)) + ' - ' + (item.socialMediaAccountName || this.getSocialMediaAccountName(item.userSocialMediaAccountId));
+        const name = item.socialMediaAccountName || this.getSocialMediaAccountName(item.socialMediaAccountId);
         if (confirm(`"${name}" kaydını silmek istediğinize emin misiniz?`)) {
             try {
                 await this.service.delete(item.id);

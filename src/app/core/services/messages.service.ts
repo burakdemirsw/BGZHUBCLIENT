@@ -5,11 +5,15 @@ import { PaginationRequest, buildPaginationRequest, PagedResult } from '../model
 
 export interface AiMessageDto {
   id?: string;
+  messageId?: string;
   conversationId?: string;
   userId?: string;
   assistantId?: string;
   role?: string | null;
   messageContent?: string | null;
+  messageText?: string | null;
+  toolName?: string | null;
+  toolArgs?: string | null;
   createdDate?: string;
   updatedDate?: string;
   responseId?: string;

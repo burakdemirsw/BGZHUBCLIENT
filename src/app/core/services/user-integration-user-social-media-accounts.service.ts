@@ -41,7 +41,7 @@ export class UserIntegrationUserSocialMediaAccountsService {
 
     getByCompany(companyId: string, req?: PaginationRequest): Promise<ApiResponse<PagedResult<UserIntegrationUserSocialMediaAccountResponse>>> {
         return this.http.post<PagedResult<UserIntegrationUserSocialMediaAccountResponse>>(
-            { controller: this.controller, action: 'by-company/paged' },
+            { controller: this.controller, action: `by-company/${companyId}` },
             buildPaginationRequest({ ...req, companyId }),
         );
     }

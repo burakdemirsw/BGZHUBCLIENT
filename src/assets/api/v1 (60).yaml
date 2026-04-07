@@ -4433,6 +4433,37 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
+  /api/Conversations/create-test-conversation:
+    post:
+      tags:
+        - Conversations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTestConversationRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateTestConversationRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateTestConversationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfGuid"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfGuid"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfGuid"
+      security:
+        - Bearer: []
   /api/Conversations/sidebar:
     get:
       tags:
@@ -4960,32 +4991,6 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
-  /api/Conversations/create-test-conversation/{companyId}:
-    post:
-      tags:
-        - Conversations
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfGuid"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfGuid"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfGuid"
-      security:
-        - Bearer: []
   /api/ConversationTags/paged:
     post:
       tags:
@@ -5130,6 +5135,158 @@ paths:
     post:
       tags:
         - ConversationTags
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/ConversationTypes/paged:
+    post:
+      tags:
+        - ConversationTypes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfConversationTypeResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfConversationTypeResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfConversationTypeResponse"
+      security:
+        - Bearer: []
+  /api/ConversationTypes/{id}:
+    get:
+      tags:
+        - ConversationTypes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfConversationTypeResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfConversationTypeResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfConversationTypeResponse"
+      security:
+        - Bearer: []
+  /api/ConversationTypes:
+    post:
+      tags:
+        - ConversationTypes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConversationTypeRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateConversationTypeRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateConversationTypeRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfConversationTypeResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfConversationTypeResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfConversationTypeResponse"
+      security:
+        - Bearer: []
+  /api/ConversationTypes/update/{id}:
+    post:
+      tags:
+        - ConversationTypes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateConversationTypeRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateConversationTypeRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateConversationTypeRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/ConversationTypes/delete/{id}:
+    post:
+      tags:
+        - ConversationTypes
       parameters:
         - name: id
           in: path
@@ -19086,6 +19243,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfConversationTypeResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ConversationTypeResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfCountryResponse:
       type: object
       properties:
@@ -22952,6 +23141,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfPagedResultOfConversationTypeResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/PagedResultOfConversationTypeResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfPagedResultOfCustomerAddressResponse:
       type: object
       properties:
@@ -26562,6 +26783,7 @@ components:
         - userIntegrationUserSocialMediaAccountId
         - customerId
         - companyId
+        - conversationTypeId
         - customerName
         - lastMessageDate
         - isFavorite
@@ -26569,6 +26791,7 @@ components:
         - isArchived
         - isLocked
         - isEscalateToHuman
+        - isTest
         - createdDate
         - updatedDate
       type: object
@@ -26577,14 +26800,15 @@ components:
           type: string
           format: uuid
         userIntegrationUserSocialMediaAccountId:
-          type:
-            - "null"
-            - string
+          type: string
           format: uuid
         customerId:
           type: string
           format: uuid
         companyId:
+          type: string
+          format: uuid
+        conversationTypeId:
           type: string
           format: uuid
         customerName:
@@ -26605,6 +26829,8 @@ components:
         isLocked:
           type: boolean
         isEscalateToHuman:
+          type: boolean
+        isTest:
           type: boolean
         createdDate:
           type: string
@@ -26697,6 +26923,35 @@ components:
           type: string
           format: uuid
         createdDate:
+          type: string
+          format: date-time
+    ConversationTypeResponse:
+      required:
+        - id
+        - conversationTypeCode
+        - conversationTypeDescription
+        - isActive
+        - createdDate
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        conversationTypeCode:
+          type:
+            - "null"
+            - string
+        conversationTypeDescription:
+          type:
+            - "null"
+            - string
+        isActive:
+          type: boolean
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
           type: string
           format: date-time
     ConversationTypeSidebarItem:
@@ -27221,17 +27476,19 @@ components:
         - userIntegrationUserSocialMediaAccountId
         - customerId
         - companyId
+        - conversationTypeId
       type: object
       properties:
         userIntegrationUserSocialMediaAccountId:
-          type:
-            - "null"
-            - string
+          type: string
           format: uuid
         customerId:
           type: string
           format: uuid
         companyId:
+          type: string
+          format: uuid
+        conversationTypeId:
           type: string
           format: uuid
     CreateConversationTagRequest:
@@ -27250,6 +27507,20 @@ components:
         companyId:
           type: string
           format: uuid
+    CreateConversationTypeRequest:
+      required:
+        - conversationTypeCode
+        - conversationTypeDescription
+      type: object
+      properties:
+        conversationTypeCode:
+          type:
+            - "null"
+            - string
+        conversationTypeDescription:
+          type:
+            - "null"
+            - string
     CreateCountryRequest:
       required:
         - name
@@ -28584,6 +28855,29 @@ components:
         companyId:
           type: string
           format: uuid
+    CreateTestConversationRequest:
+      required:
+        - companyId
+        - firstName
+        - lastName
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        firstName:
+          type:
+            - "null"
+            - string
+        lastName:
+          type:
+            - "null"
+            - string
+        userIntSmaId:
+          type:
+            - "null"
+            - string
+          format: uuid
     CreateTestCustomerRequest:
       required:
         - companyId
@@ -29563,9 +29857,7 @@ components:
       type: object
       properties:
         userIntegrationUserSocialMediaAccountId:
-          type:
-            - "null"
-            - string
+          type: string
           format: uuid
         socialMediaAccountId:
           type: string
@@ -31893,6 +32185,51 @@ components:
             - array
           items:
             $ref: "#/components/schemas/ConversationTagResponse"
+        pageNumber:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalPages:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        hasPreviousPage:
+          type: boolean
+        hasNextPage:
+          type: boolean
+    PagedResultOfConversationTypeResponse:
+      required:
+        - items
+        - pageNumber
+        - pageSize
+        - totalCount
+        - totalPages
+        - hasPreviousPage
+        - hasNextPage
+      type: object
+      properties:
+        items:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/ConversationTypeResponse"
         pageNumber:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -36349,6 +36686,7 @@ components:
         - userIntegrationUserSocialMediaAccountId
         - customerId
         - companyId
+        - conversationTypeId
         - lastMessageDate
         - isFavorite
         - isBlocked
@@ -36358,14 +36696,15 @@ components:
       type: object
       properties:
         userIntegrationUserSocialMediaAccountId:
-          type:
-            - "null"
-            - string
+          type: string
           format: uuid
         customerId:
           type: string
           format: uuid
         companyId:
+          type: string
+          format: uuid
+        conversationTypeId:
           type: string
           format: uuid
         lastMessageDate:
@@ -36382,6 +36721,23 @@ components:
         isLocked:
           type: boolean
         isEscalateToHuman:
+          type: boolean
+    UpdateConversationTypeRequest:
+      required:
+        - conversationTypeCode
+        - conversationTypeDescription
+        - isActive
+      type: object
+      properties:
+        conversationTypeCode:
+          type:
+            - "null"
+            - string
+        conversationTypeDescription:
+          type:
+            - "null"
+            - string
+        isActive:
           type: boolean
     UpdateCountryRequest:
       required:
@@ -38521,6 +38877,7 @@ tags:
   - name: ConversationNotes
   - name: Conversations
   - name: ConversationTags
+  - name: ConversationTypes
   - name: Messages
   - name: Notes
   - name: Notifications

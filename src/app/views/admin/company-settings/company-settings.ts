@@ -24,6 +24,9 @@ export class CompanySettingsPage implements OnInit {
     form = {
         isTwoFactorAuthEnabled: false,
         isAutoReplyEnabled: false,
+        isUseWorkHours: false,
+        workHoursStart: '09:00' as string | null,
+        workHoursEnd: '18:00' as string | null,
     };
 
     private companyId = '';
@@ -54,6 +57,9 @@ export class CompanySettingsPage implements OnInit {
                 this.form = {
                     isTwoFactorAuthEnabled: data.isTwoFactorAuthEnabled,
                     isAutoReplyEnabled: data.isAutoReplyEnabled,
+                    isUseWorkHours: data.isUseWorkHours ?? false,
+                    workHoursStart: data.workHoursStart ?? '09:00',
+                    workHoursEnd: data.workHoursEnd ?? '18:00',
                 };
             }
         } catch (err: any) {
@@ -76,6 +82,9 @@ export class CompanySettingsPage implements OnInit {
                 const req: UpdateCompanySettingRequest = {
                     isTwoFactorAuthEnabled: this.form.isTwoFactorAuthEnabled,
                     isAutoReplyEnabled: this.form.isAutoReplyEnabled,
+                    isUseWorkHours: this.form.isUseWorkHours,
+                    workHoursStart: this.form.isUseWorkHours ? this.form.workHoursStart : null,
+                    workHoursEnd: this.form.isUseWorkHours ? this.form.workHoursEnd : null,
                 };
                 await this.companySettingsService.update(this.setting.id, req);
                 this.successMessage = 'Ayarlar başarıyla güncellendi.';
@@ -85,6 +94,9 @@ export class CompanySettingsPage implements OnInit {
                     companyId: this.companyId,
                     isTwoFactorAuthEnabled: this.form.isTwoFactorAuthEnabled,
                     isAutoReplyEnabled: this.form.isAutoReplyEnabled,
+                    isUseWorkHours: this.form.isUseWorkHours,
+                    workHoursStart: this.form.isUseWorkHours ? this.form.workHoursStart : null,
+                    workHoursEnd: this.form.isUseWorkHours ? this.form.workHoursEnd : null,
                 };
                 await this.companySettingsService.create(req);
                 this.successMessage = 'Ayarlar başarıyla oluşturuldu.';

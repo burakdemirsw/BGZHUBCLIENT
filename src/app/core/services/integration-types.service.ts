@@ -10,10 +10,6 @@ import { PaginationRequest, buildPaginationRequest, PagedResult } from '../model
 export class IntegrationTypesService {
   constructor(private http: HttpClientService) {}
 
-  getAll(): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'IntegrationTypes' });
-  }
-
   getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
     return this.http.post<PagedResult<any>>(
       { controller: 'IntegrationTypes', action: 'paged' },

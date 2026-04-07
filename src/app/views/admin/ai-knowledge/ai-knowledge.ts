@@ -5,6 +5,7 @@ import { AiKnowledgeService } from '@/app/core/services/ai-knowledge.service';
 import { AiKnowledgeTypesService } from '@/app/core/services/ai-knowledge-types.service';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
 import { IntegrationsService } from '@/app/core/services/integrations.service';
+import { UserIntegrationUserSocialMediaAccountsService } from '@/app/core/services/user-integration-user-social-media-accounts.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { ConversationsService } from '@/app/core/services/conversations.service';
 import { MessagesService, AiMessageDto } from '@/app/core/services/messages.service';
@@ -15,8 +16,8 @@ import {
 } from '@/app/core/models/ai-assistant/ai-knowledge.models';
 import { AiKnowledgeTypeResponse } from '@/app/core/models/ai-assistant/ai-knowledge-type.models';
 import { AiAssistant } from '@/app/core/models/ai-assistant/ai-assistant.models';
-import { ConversationHeader } from '@/app/core/models/conversation/conversation.models';
 import { IntegrationUser } from '@/app/core/models/integration/integration-user.models';
+import { UserIntegrationUserSocialMediaAccountResponse } from '@/app/core/models/integration/user-integration-user-social-media-account.models';
 import { PagedResult } from '@/app/core/models/pagination.model';
 
 export interface KnowledgeGroup {
@@ -83,13 +84,18 @@ export class AiKnowledgePage implements OnInit {
     groupedKnowledge: KnowledgeGroup[] = [];
     previewLoading = false;
 
+    // ────── UserIntSma State ──────
+    userIntSmaAccounts: UserIntegrationUserSocialMediaAccountResponse[] = [];
+    selectedUserIntSmaId = '';
+
     // ────── Chat State ──────
     chatMessages: ChatBubble[] = [];
     chatInput = '';
     chatLoading = false;
-    conversations: ConversationHeader[] = [];
     selectedConversationId = '';
-    conversationsLoading = false;
+    testConversationLoading = false;
+    autoAiMode = false;
+    isAiSending = false;
 
     @ViewChild('chatScrollContainer') chatScrollContainer!: ElementRef;
 
@@ -98,6 +104,7 @@ export class AiKnowledgePage implements OnInit {
         private knowledgeTypesService: AiKnowledgeTypesService,
         private aiProvidersService: AiProvidersService,
         private integrationsService: IntegrationsService,
+        private userIntSmaService: UserIntegrationUserSocialMediaAccountsService,
         private authState: AuthStateService,
         private conversationsService: ConversationsService,
         private messagesService: MessagesService,
@@ -108,6 +115,7 @@ export class AiKnowledgePage implements OnInit {
         this.loadAssistants();
         this.loadIntegrationUsers();
         this.loadKnowledgeTypes();
+        this.loadUserIntSmaAccounts();
     }
 
     // ────── Veri yükleme ──────
@@ -161,6 +169,17 @@ export class AiKnowledgePage implements OnInit {
             this.knowledgeTypes = this.extractArray(data).filter((t: AiKnowledgeTypeResponse) => !t.isBlocked);
         } catch (err) {
             console.error('Knowledge Types yükleme hatası:', err);
+        }
+    }
+
+    async loadUserIntSmaAccounts(): Promise<void> {
+        try {
+            const companyId = this.authState.profile?.companyId || '';
+            const response = await this.userIntSmaService.getByCompany(companyId, { companyId, pageNumber: 1, pageSize: 1000 });
+            const paged = response?.data;
+            this.userIntSmaAccounts = paged?.items ?? [];
+        } catch (err) {
+            console.error('UserIntSma hesapları yükleme hatası:', err);
         }
     }
 
@@ -293,9 +312,6 @@ export class AiKnowledgePage implements OnInit {
     // ────── Tab Yönetimi ──────
     setTab(tab: 'entry' | 'preview'): void {
         this.activeTab = tab;
-        if (tab === 'preview' && this.conversations.length === 0) {
-            this.loadConversations();
-        }
     }
 
     // ────── Önizleme ──────
@@ -342,42 +358,37 @@ export class AiKnowledgePage implements OnInit {
     }
 
     // ────── Chat ──────
-    async loadConversations(): Promise<void> {
-        this.conversationsLoading = true;
+
+    /** "Sohbeti Başlat" butonu — test conversation oluşturur */
+    async startTestChat(): Promise<void> {
+        const companyId = this.authState.profile?.companyId || '';
+        if (!companyId) return;
+
+        this.testConversationLoading = true;
         try {
-            const resp = await this.conversationsService.getList('messages', 1, 50);
-            this.conversations = resp?.data?.conversations ?? [];
+            const profileName = this.authState.profile?.name || 'Test';
+            const profileSurname = this.authState.profile?.surname || 'User';
+            const resp = await this.conversationsService.createTestConversation({
+                companyId,
+                firstName: profileName,
+                lastName: profileSurname,
+                userIntSmaId: this.selectedUserIntSmaId || null,
+            });
+            const conversationId = resp?.data as string;
+            if (conversationId) {
+                this.selectedConversationId = conversationId;
+                this.chatMessages = [];
+            }
         } catch (err) {
-            console.error('Konuşmalar yükleme hatası:', err);
+            console.error('Test sohbeti oluşturma hatası:', err);
+            alert('Test sohbeti oluşturulamadı.');
         } finally {
-            this.conversationsLoading = false;
+            this.testConversationLoading = false;
         }
     }
 
-    async onConversationChange(): Promise<void> {
-        if (!this.selectedConversationId) {
-            this.chatMessages = [];
-            return;
-        }
-        this.chatLoading = true;
-        try {
-            const resp = await this.messagesService.getMessagesByConversation(this.selectedConversationId);
-            const messages: AiMessageDto[] = this.extractArray(resp?.data);
-            this.chatMessages = messages.map(m => ({
-                role: (m.role?.toLowerCase() === 'user' || m.role?.toLowerCase() === 'customer') ? 'user' as const : 'assistant' as const,
-                content: m.messageContent || '',
-                time: m.createdDate ? new Date(m.createdDate).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '',
-            }));
-            this.scrollChatToBottom();
-        } catch (err) {
-            console.error('Mesajlar yükleme hatası:', err);
-            this.chatMessages = [];
-        } finally {
-            this.chatLoading = false;
-        }
-    }
-
-    async sendChatMessage(): Promise<void> {
+    /** Customer olarak mesaj gönderir */
+    async sendCustomerMessage(): Promise<void> {
         const msg = this.chatInput.trim();
         if (!msg || !this.selectedConversationId) return;
 
@@ -389,27 +400,89 @@ export class AiKnowledgePage implements OnInit {
         this.chatLoading = true;
         try {
             const companyId = this.authState.profile?.companyId || '';
+            const userId = this.authState.profile?.userId || '';
+
+            // 1) Önce kullanıcı mesajını DB'ye kaydet
+            await this.messagesService.sendMessage({
+                conversationId: this.selectedConversationId,
+                messageContent: msg,
+                source: 'user',
+                createdUserId: userId,
+            });
+
+            // 2) Sonra AI yanıtını tetikle
             await this.messagesService.testAiChat({
                 conversationId: this.selectedConversationId,
                 companyId,
                 message: msg,
-                userId: this.authState.profile?.userId,
+                userId,
             });
-            // AI yanıtını yükle
-            const resp = await this.messagesService.getMessagesByConversation(this.selectedConversationId);
-            const messages: AiMessageDto[] = this.extractArray(resp?.data);
-            this.chatMessages = messages.map(m => ({
-                role: (m.role?.toLowerCase() === 'user' || m.role?.toLowerCase() === 'customer') ? 'user' as const : 'assistant' as const,
-                content: m.messageContent || '',
-                time: m.createdDate ? new Date(m.createdDate).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '',
-            }));
-            this.scrollChatToBottom();
+
+            // Mesajları yeniden yükle
+            await this.reloadChatMessages();
+            // Auto AI modu açıksa otomatik AI yanıtı gönder
+            if (this.autoAiMode) {
+                setTimeout(() => this.sendAiChat(), 500);
+            }
         } catch (err) {
             console.error('Chat test hatası:', err);
-            this.chatMessages.push({ role: 'assistant', content: '⚠️ AI yanıtı alınamadı. Lütfen tekrar deneyin.', time: now });
+            this.chatMessages.push({ role: 'assistant', content: '⚠️ Mesaj gönderilemedi. Lütfen tekrar deneyin.', time: now });
         } finally {
             this.chatLoading = false;
         }
+    }
+
+    /** AI Yanıt butonu — son müşteri mesajını AI'a gönderir */
+    async sendAiChat(): Promise<void> {
+        if (!this.selectedConversationId) return;
+
+        // Son müşteri mesajını bul
+        const lastCustomerMsg = [...this.chatMessages].reverse().find(m => m.role === 'user');
+        if (!lastCustomerMsg) return;
+
+        this.isAiSending = true;
+        try {
+            const companyId = this.authState.profile?.companyId || '';
+            await this.messagesService.testAiChat({
+                conversationId: this.selectedConversationId,
+                companyId,
+                message: lastCustomerMsg.content,
+                userId: this.authState.profile?.userId,
+            });
+            await this.reloadChatMessages();
+        } catch (err) {
+            console.error('AI Chat hatası:', err);
+            const now = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            this.chatMessages.push({ role: 'assistant', content: '⚠️ AI yanıtı alınamadı. Lütfen tekrar deneyin.', time: now });
+        } finally {
+            this.isAiSending = false;
+        }
+    }
+
+    /** Mevcut konuşmanın mesajlarını API'den yeniden yükler */
+    private async reloadChatMessages(): Promise<void> {
+        const resp = await this.conversationsService.getMessages(this.selectedConversationId);
+        const body = resp?.data;
+        const messages = body?.messages
+            ? (Array.isArray(body.messages) ? body.messages : (body.messages as any)?.$values ?? [])
+            : this.extractArray(body);
+        this.chatMessages = messages.map((m: any) => ({
+            role: (m.source === 'user' || m.source === 'customer') ? 'user' as const : 'assistant' as const,
+            content: m.text || m.messageText || m.messageContent || '',
+            time: m.createdDate ? new Date(m.createdDate).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '',
+        }));
+        this.scrollChatToBottom();
+    }
+
+    /** Son mesaj müşteriden mi? AI Yanıt butonu için kontrol */
+    get isLastMessageFromCustomer(): boolean {
+        if (this.chatMessages.length === 0) return false;
+        return this.chatMessages[this.chatMessages.length - 1].role === 'user';
+    }
+
+    /** Enter ile mesaj gönderir (eski sendChatMessage yerine) */
+    async sendChatMessage(): Promise<void> {
+        await this.sendCustomerMessage();
     }
 
     private scrollChatToBottom(): void {

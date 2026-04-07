@@ -77,6 +77,7 @@ import { NeighbourhoodsPage } from './neighbourhoods/neighbourhoods';
 import { CompanySettingsPage } from './company-settings/company-settings';
 import { AppsPage } from './apps/apps';
 import { SetupWizardPage } from './setup-wizard/setup-wizard';
+import { ConversationTypesPage } from './conversation-types/conversation-types';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -557,6 +558,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/setup-wizard',
         component: SetupWizardPage,
         data: { title: 'Kurulum Sihirbazı' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/conversation-types',
+        component: ConversationTypesPage,
+        data: { title: 'Konuşma Türleri' },
         canActivate: [AuthGuard],
     },
 ];

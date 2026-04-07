@@ -10,6 +10,11 @@
     will-change: transform;
     position: absolute;
     z-index: 1000;
+}
+
+// Body'ye taşınan dropdown'lar (container="body") sidenav'ın (z-index: 1005) üstünde görünmeli
+body > .dropdown-menu {
+    z-index: 1070;
 
     &[data-popper-placement="top-start"],
     &[data-popper-placement="top"] {

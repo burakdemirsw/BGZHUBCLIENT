@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { ApiResponse } from '../models/api-response.model';
 import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
-import { ConversationListResponse, ConversationMessagesResponse, ConversationSidebarResponse } from '../models/conversation/conversation.models';
+import { ConversationListResponse, ConversationMessagesResponse, ConversationSidebarResponse, CreateTestConversationRequest } from '../models/conversation/conversation.models';
 
 @Injectable({ providedIn: 'root' })
 export class ConversationsService {
@@ -41,6 +41,14 @@ export class ConversationsService {
     // ── Action endpoints ──
     private action(id: string, action: string): Promise<ApiResponse<object>> {
         return this.http.post<object>({ controller: 'Conversations', action: `${id}/${action}` }, {});
+    }
+
+    /** Test sohbeti oluşturur — POST create-test-conversation */
+    createTestConversation(request: CreateTestConversationRequest): Promise<ApiResponse<string>> {
+        return this.http.post<string>(
+            { controller: 'Conversations', action: 'create-test-conversation' },
+            request,
+        );
     }
 
     archive(id: string)     { return this.action(id, 'archive');     }

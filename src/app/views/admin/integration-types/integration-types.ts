@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IntegrationTypesService } from '@/app/core/services/integration-types.service';
+import { AuthStateService } from '@core/services/auth-state.service';
 import {
     IntegrationType,
     CreateIntegrationTypeRequest,
@@ -36,7 +37,10 @@ export class IntegrationTypesPage implements OnInit {
         isBlocked: false,
     };
 
-    constructor(private integrationTypesService: IntegrationTypesService) {}
+    constructor(
+        private integrationTypesService: IntegrationTypesService,
+        private authStateService: AuthStateService,
+    ) {}
 
     ngOnInit(): void {
         this.loadItems();
@@ -70,9 +74,13 @@ export class IntegrationTypesPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.integrationTypesService.getAll();
-            //console.log('IntegrationTypes response:', response);
-            this.items = this.extractArray(response?.data);
+            const response = await this.integrationTypesService.getPaged({
+                companyId: this.authStateService.profile?.companyId ?? '',
+                pageNumber: 1,
+                pageSize: 1000,
+            });
+            const paged = response?.data;
+            this.items = paged?.items ?? [];
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('IntegrationTypes error:', err);
