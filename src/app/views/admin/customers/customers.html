@@ -370,72 +370,8 @@
 
                     <!-- ─── TAB: Açıklamalar ─── -->
                     @if (editActiveTab === 'descriptions') {
-                        <!-- Yeni Açıklama Ekle butonu -->
-                        <div class="d-flex justify-content-end mb-3">
-                            <button class="btn btn-primary btn-sm" (click)="toggleNewDescriptionForm()">
-                                @if (showNewDescriptionForm) {
-                                    <i class="fa-solid fa-xmark me-1"></i>İptal
-                                } @else {
-                                    <i class="fa-solid fa-plus me-1"></i>Yeni Açıklama Ekle
-                                }
-                            </button>
-                        </div>
-
-                        <!-- Yeni Açıklama Formu -->
-                        @if (showNewDescriptionForm) {
-                            <div class="inline-edit-card editing p-3 mb-3">
-                                <h6 class="mb-3"><i class="fa-solid fa-plus-circle me-1 text-primary"></i>Yeni Açıklama</h6>
-                                <div class="row g-2">
-                                    <div class="col-md-4">
-                                        <label class="form-label small fw-semibold">Ad <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newDescription.firstName" placeholder="Ad">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label small fw-semibold">Soyad</label>
-                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newDescription.lastName" placeholder="Soyad">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label small fw-semibold">Dil Kodu</label>
-                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newDescription.langCode" placeholder="tr">
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label small fw-semibold">Açıklama</label>
-                                        <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="newDescription.description" placeholder="Müşteri açıklaması"></textarea>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label small fw-semibold">Vergi No</label>
-                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newDescription.taxNumber" placeholder="Vergi numarası">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label small fw-semibold">Vergi Dairesi Kodu</label>
-                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newDescription.taxOfficeCode" placeholder="Vergi dairesi kodu">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label small fw-semibold">TC Kimlik No</label>
-                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newDescription.identityNumber" placeholder="TC kimlik numarası">
-                                    </div>
-                                    <div class="col-md-4 d-flex align-items-end">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" [(ngModel)]="newDescription.isIndividualCustomer">
-                                            <label class="form-check-label small">Bireysel Müşteri</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-12 text-end mt-2">
-                                        <button class="btn btn-light btn-sm me-1" (click)="toggleNewDescriptionForm()" [disabled]="saving">
-                                            <i class="fa-solid fa-xmark me-1"></i>İptal
-                                        </button>
-                                        <button class="btn btn-success btn-sm" (click)="createDescription()" [disabled]="saving || !newDescription.firstName">
-                                            @if (saving) {
-                                                <span class="spinner-border spinner-border-sm me-1"></span>
-                                            }
-                                            <i class="fa-solid fa-plus me-1"></i>Ekle
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-
                         @if (editDescriptions.length) {
+                            <!-- Açıklama varsa: sadece güncelleme -->
                             @for (desc of editDescriptions; track desc.id) {
                                 <div class="inline-edit-card p-3 mb-3" [class.editing]="desc._editing">
                                     @if (!desc._editing) {
@@ -512,10 +448,54 @@
                                     }
                                 </div>
                             }
-                        } @else if (!showNewDescriptionForm) {
-                            <div class="text-center text-muted py-4 small">
-                                <i class="fa-solid fa-file-circle-xmark fa-2x mb-2 d-block opacity-50"></i>
-                                Kayıtlı açıklama bulunamadı.
+                        } @else {
+                            <!-- Açıklama yoksa: ekleme formu -->
+                            <div class="inline-edit-card editing p-3 mb-3">
+                                <h6 class="mb-3"><i class="fa-solid fa-plus-circle me-1 text-primary"></i>Yeni Açıklama Ekle</h6>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold">Ad <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newDescription.firstName" placeholder="Ad">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold">Soyad</label>
+                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newDescription.lastName" placeholder="Soyad">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold">Dil Kodu</label>
+                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newDescription.langCode" placeholder="tr">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label small fw-semibold">Açıklama</label>
+                                        <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="newDescription.description" placeholder="Müşteri açıklaması"></textarea>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold">Vergi No</label>
+                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newDescription.taxNumber" placeholder="Vergi numarası">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold">Vergi Dairesi Kodu</label>
+                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newDescription.taxOfficeCode" placeholder="Vergi dairesi kodu">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold">TC Kimlik No</label>
+                                        <input type="text" class="form-control form-control-sm" [(ngModel)]="newDescription.identityNumber" placeholder="TC kimlik numarası">
+                                    </div>
+                                    <div class="col-md-4 d-flex align-items-end">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" [(ngModel)]="newDescription.isIndividualCustomer">
+                                            <label class="form-check-label small">Bireysel Müşteri</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 text-end mt-2">
+                                        <button class="btn btn-success btn-sm" (click)="createDescription()" [disabled]="saving || !newDescription.firstName">
+                                            @if (saving) {
+                                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                            }
+                                            <i class="fa-solid fa-plus me-1"></i>Ekle
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         }
                     }
