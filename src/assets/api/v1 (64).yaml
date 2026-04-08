@@ -3603,6 +3603,230 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfSyncFeedResponse"
       security:
         - Bearer: []
+  /api/ImageSearch/feed-health:
+    post:
+      tags:
+        - ImageSearch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfFeedSyncHealthResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfFeedSyncHealthResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfFeedSyncHealthResponse"
+      security:
+        - Bearer: []
+  /api/ImageSearch/sync-and-report:
+    post:
+      tags:
+        - ImageSearch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfFeedSyncJobResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfFeedSyncJobResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfFeedSyncJobResponse"
+      security:
+        - Bearer: []
+  /api/ImageSearch/sync-job-status:
+    post:
+      tags:
+        - ImageSearch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfFeedSyncJobResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfFeedSyncJobResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfFeedSyncJobResponse"
+      security:
+        - Bearer: []
+  /api/ImageSearch/purge-all:
+    post:
+      tags:
+        - ImageSearch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPurgeAllProductsResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPurgeAllProductsResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPurgeAllProductsResponse"
+      security:
+        - Bearer: []
+  /api/ImageSearch/missing-embeddings:
+    post:
+      tags:
+        - ImageSearch
+      parameters:
+        - name: page
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 50
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/ImageSearch/missing-in-db:
+    post:
+      tags:
+        - ImageSearch
+      parameters:
+        - name: page
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 50
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/FeedSyncHealthRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
   /api/ImageSearch/setup-collection:
     post:
       tags:
@@ -4455,13 +4679,13 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfGuid"
+                $ref: "#/components/schemas/ApiResponseOfConversationMessagesResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfGuid"
+                $ref: "#/components/schemas/ApiResponseOfConversationMessagesResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfGuid"
+                $ref: "#/components/schemas/ApiResponseOfConversationMessagesResponse"
       security:
         - Bearer: []
   /api/Conversations/sidebar:
@@ -8625,6 +8849,158 @@ paths:
     post:
       tags:
         - CustomerTypes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/TaxOffices/paged:
+    post:
+      tags:
+        - TaxOffices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfTaxOfficeResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfTaxOfficeResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfTaxOfficeResponse"
+      security:
+        - Bearer: []
+  /api/TaxOffices/{id}:
+    get:
+      tags:
+        - TaxOffices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTaxOfficeResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTaxOfficeResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTaxOfficeResponse"
+      security:
+        - Bearer: []
+  /api/TaxOffices:
+    post:
+      tags:
+        - TaxOffices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTaxOfficeRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateTaxOfficeRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateTaxOfficeRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTaxOfficeResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTaxOfficeResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTaxOfficeResponse"
+      security:
+        - Bearer: []
+  /api/TaxOffices/update/{id}:
+    post:
+      tags:
+        - TaxOffices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTaxOfficeRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTaxOfficeRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateTaxOfficeRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/TaxOffices/delete/{id}:
+    post:
+      tags:
+        - TaxOffices
       parameters:
         - name: id
           in: path
@@ -19595,7 +19971,7 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfFileUploadResult:
+    ApiResponseOfFeedSyncHealthResponse:
       type: object
       properties:
         statusCode:
@@ -19607,7 +19983,7 @@ components:
         data:
           oneOf:
             - type: "null"
-            - $ref: "#/components/schemas/FileUploadResult"
+            - $ref: "#/components/schemas/FeedSyncHealthResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -19627,7 +20003,7 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfGuid:
+    ApiResponseOfFeedSyncJobResponse:
       type: object
       properties:
         statusCode:
@@ -19637,8 +20013,41 @@ components:
             - string
           format: int32
         data:
-          type: string
-          format: uuid
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/FeedSyncJobResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfFileUploadResult:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/FileUploadResult"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -24229,6 +24638,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfPagedResultOfTaxOfficeResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/PagedResultOfTaxOfficeResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfPagedResultOfTeamInvitationResponse:
       type: object
       properties:
@@ -24723,6 +25164,38 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/PromptTypeResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfPurgeAllProductsResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/PurgeAllProductsResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -25331,6 +25804,38 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/TagResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfTaxOfficeResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TaxOfficeResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -26178,6 +26683,9 @@ components:
         - companyId
         - isTwoFactorAuthEnabled
         - isAutoReplyEnabled
+        - isUseWorkHours
+        - workHoursStart
+        - workHoursEnd
         - createdDate
         - updatedDate
       type: object
@@ -26192,6 +26700,18 @@ components:
           type: boolean
         isAutoReplyEnabled:
           type: boolean
+        isUseWorkHours:
+          type: boolean
+        workHoursStart:
+          pattern: ^-?(\d+\.)?\d{2}:\d{2}:\d{2}(\.\d{1,7})?$
+          type:
+            - "null"
+            - string
+        workHoursEnd:
+          pattern: ^-?(\d+\.)?\d{2}:\d{2}:\d{2}(\.\d{1,7})?$
+          type:
+            - "null"
+            - string
         createdDate:
           type: string
           format: date-time
@@ -26539,6 +27059,7 @@ components:
         - archived-messages
         - locked-messages
         - escalated-messages
+        - test-messages
     ConversationListDescriptionResponse:
       required:
         - id
@@ -27400,6 +27921,9 @@ components:
         - companyId
         - isTwoFactorAuthEnabled
         - isAutoReplyEnabled
+        - isUseWorkHours
+        - workHoursStart
+        - workHoursEnd
       type: object
       properties:
         companyId:
@@ -27409,6 +27933,18 @@ components:
           type: boolean
         isAutoReplyEnabled:
           type: boolean
+        isUseWorkHours:
+          type: boolean
+        workHoursStart:
+          pattern: ^-?(\d+\.)?\d{2}:\d{2}:\d{2}(\.\d{1,7})?$
+          type:
+            - "null"
+            - string
+        workHoursEnd:
+          pattern: ^-?(\d+\.)?\d{2}:\d{2}:\d{2}(\.\d{1,7})?$
+          type:
+            - "null"
+            - string
     CreateContactTypeRequest:
       required:
         - name
@@ -27607,6 +28143,8 @@ components:
         - lastName
         - description
         - taxNumber
+        - taxOfficeCode
+        - isIndividualCustomer
         - identityNumber
       type: object
       properties:
@@ -27633,6 +28171,12 @@ components:
           type:
             - "null"
             - string
+        taxOfficeCode:
+          type:
+            - "null"
+            - string
+        isIndividualCustomer:
+          type: boolean
         identityNumber:
           type:
             - "null"
@@ -28768,6 +29312,15 @@ components:
           type:
             - "null"
             - string
+    CreateTaxOfficeRequest:
+      required:
+        - taxOfficeDescription
+      type: object
+      properties:
+        taxOfficeDescription:
+          type:
+            - "null"
+            - string
     CreateTeamInvitationRequest:
       required:
         - teamId
@@ -29241,6 +29794,8 @@ components:
         - lastName
         - description
         - taxNumber
+        - taxOfficeCode
+        - isIndividualCustomer
         - identityNumber
         - createdDate
         - updatedDate
@@ -29272,6 +29827,12 @@ components:
           type:
             - "null"
             - string
+        taxOfficeCode:
+          type:
+            - "null"
+            - string
+        isIndividualCustomer:
+          type: boolean
         identityNumber:
           type:
             - "null"
@@ -29660,6 +30221,164 @@ components:
             - array
           items:
             $ref: "#/components/schemas/FacebookEntry"
+    FeedSyncHealthRequest:
+      required:
+        - companyId
+        - integrationId
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        integrationId:
+          type: string
+          format: uuid
+    FeedSyncHealthResponse:
+      required:
+        - totalInFeed
+        - totalInDb
+        - totalEmbedded
+        - missingInDb
+        - missingEmbeddings
+        - syncRatioPercent
+        - message
+      type: object
+      properties:
+        totalInFeed:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalInDb:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalEmbedded:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        missingInDb:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        missingEmbeddings:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        syncRatioPercent:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: float
+        message:
+          type:
+            - "null"
+            - string
+    FeedSyncJobResponse:
+      required:
+        - jobId
+        - companyId
+        - integrationId
+        - status
+        - progressPercent
+        - totalInFeed
+        - processedCount
+        - indexedCount
+        - newProductCount
+        - updatedProductCount
+        - errorCount
+        - errors
+        - startedAt
+        - completedAt
+        - createdDate
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        integrationId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        status:
+          type:
+            - "null"
+            - string
+        progressPercent:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: float
+        totalInFeed:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        processedCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        indexedCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        newProductCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        updatedProductCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        errorCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        errors:
+          type:
+            - "null"
+            - array
+          items:
+            type: string
+        startedAt:
+          type:
+            - "null"
+            - string
+          format: date-time
+        completedAt:
+          type:
+            - "null"
+            - string
+          format: date-time
+        createdDate:
+          type: string
+          format: date-time
     FileUploadResult:
       required:
         - success
@@ -33743,6 +34462,51 @@ components:
           type: boolean
         hasNextPage:
           type: boolean
+    PagedResultOfTaxOfficeResponse:
+      required:
+        - items
+        - pageNumber
+        - pageSize
+        - totalCount
+        - totalPages
+        - hasPreviousPage
+        - hasNextPage
+      type: object
+      properties:
+        items:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/TaxOfficeResponse"
+        pageNumber:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalPages:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        hasPreviousPage:
+          type: boolean
+        hasNextPage:
+          type: boolean
     PagedResultOfTeamInvitationResponse:
       required:
         - items
@@ -34701,6 +35465,32 @@ components:
         updatedDate:
           type: string
           format: date-time
+    PurgeAllProductsResponse:
+      required:
+        - deletedProducts
+        - deletedEmbeddings
+        - collectionDeleted
+        - message
+      type: object
+      properties:
+        deletedProducts:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        deletedEmbeddings:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        collectionDeleted:
+          type: boolean
+        message:
+          type:
+            - "null"
+            - string
     RefreshTokenRequest:
       required:
         - refreshToken
@@ -35768,6 +36558,30 @@ components:
         updatedDate:
           type: string
           format: date-time
+    TaxOfficeResponse:
+      required:
+        - id
+        - taxOfficeDescription
+        - isBlocked
+        - createdDate
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        taxOfficeDescription:
+          type:
+            - "null"
+            - string
+        isBlocked:
+          type: boolean
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
     TeamInvitationResponse:
       required:
         - id
@@ -36627,12 +37441,27 @@ components:
       required:
         - isTwoFactorAuthEnabled
         - isAutoReplyEnabled
+        - isUseWorkHours
+        - workHoursStart
+        - workHoursEnd
       type: object
       properties:
         isTwoFactorAuthEnabled:
           type: boolean
         isAutoReplyEnabled:
           type: boolean
+        isUseWorkHours:
+          type: boolean
+        workHoursStart:
+          pattern: ^-?(\d+\.)?\d{2}:\d{2}:\d{2}(\.\d{1,7})?$
+          type:
+            - "null"
+            - string
+        workHoursEnd:
+          pattern: ^-?(\d+\.)?\d{2}:\d{2}:\d{2}(\.\d{1,7})?$
+          type:
+            - "null"
+            - string
     UpdateContactTypeRequest:
       required:
         - name
@@ -36834,6 +37663,8 @@ components:
         - lastName
         - description
         - taxNumber
+        - taxOfficeCode
+        - isIndividualCustomer
         - identityNumber
       type: object
       properties:
@@ -36860,6 +37691,12 @@ components:
           type:
             - "null"
             - string
+        taxOfficeCode:
+          type:
+            - "null"
+            - string
+        isIndividualCustomer:
+          type: boolean
         identityNumber:
           type:
             - "null"
@@ -37969,6 +38806,18 @@ components:
             - string
         isBlocked:
           type: boolean
+    UpdateTaxOfficeRequest:
+      required:
+        - taxOfficeDescription
+        - isBlocked
+      type: object
+      properties:
+        taxOfficeDescription:
+          type:
+            - "null"
+            - string
+        isBlocked:
+          type: boolean
     UpdateTeamInvitationRequest:
       required:
         - teamId
@@ -38891,6 +39740,7 @@ tags:
   - name: CustomerDescriptions
   - name: Customers
   - name: CustomerTypes
+  - name: TaxOffices
   - name: FileUpload
   - name: Instagram
   - name: IntegrationConnections

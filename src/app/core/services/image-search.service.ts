@@ -1,7 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { ApiResponse } from '../models/api-response.model';
-import { ImageSearchByUrlRequest, BatchIndexRequest, SyncFeedRequest } from '../models/image-search/image-search.models';
+import {
+  ImageSearchByUrlRequest,
+  BatchIndexRequest,
+  SyncFeedRequest,
+  FeedSyncHealthRequest,
+  FeedSyncHealthResponse,
+  FeedSyncJobResponse,
+  PurgeAllProductsResponse,
+} from '../models/image-search/image-search.models';
 
 @Injectable({
   providedIn: 'root',
@@ -65,5 +73,36 @@ export class ImageSearchService {
   // POST /api/ImageSearch/setup-collection
   setupCollection(): Promise<ApiResponse<any>> {
     return this.http.post<any>({ controller: 'ImageSearch', action: 'setup-collection' }, {});
+  }
+
+  // POST /api/ImageSearch/feed-health
+  feedHealth(request: FeedSyncHealthRequest): Promise<ApiResponse<FeedSyncHealthResponse>> {
+    return this.http.post<FeedSyncHealthResponse>({ controller: 'ImageSearch', action: 'feed-health' }, request);
+  }
+
+  // POST /api/ImageSearch/sync-and-report
+  syncAndReport(request: FeedSyncHealthRequest): Promise<ApiResponse<FeedSyncJobResponse>> {
+    return this.http.post<FeedSyncJobResponse>({ controller: 'ImageSearch', action: 'sync-and-report' }, request);
+  }
+
+  // POST /api/ImageSearch/purge-all
+  purgeAll(request: FeedSyncHealthRequest): Promise<ApiResponse<PurgeAllProductsResponse>> {
+    return this.http.post<PurgeAllProductsResponse>({ controller: 'ImageSearch', action: 'purge-all' }, request);
+  }
+
+  // POST /api/ImageSearch/missing-in-db?page=&pageSize=
+  getMissingInDb(request: FeedSyncHealthRequest, page: number = 1, pageSize: number = 50): Promise<ApiResponse<any>> {
+    return this.http.post<any>(
+      { controller: 'ImageSearch', action: 'missing-in-db', queryString: `page=${page}&pageSize=${pageSize}` },
+      request
+    );
+  }
+
+  // POST /api/ImageSearch/missing-embeddings?page=&pageSize=
+  getMissingEmbeddings(request: FeedSyncHealthRequest, page: number = 1, pageSize: number = 50): Promise<ApiResponse<any>> {
+    return this.http.post<any>(
+      { controller: 'ImageSearch', action: 'missing-embeddings', queryString: `page=${page}&pageSize=${pageSize}` },
+      request
+    );
   }
 }

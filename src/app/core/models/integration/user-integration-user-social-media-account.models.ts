@@ -1,8 +1,13 @@
 export interface UserIntegrationUserSocialMediaAccountResponse {
     id: string;
     companyId: string;
+    companyName?: string;
     userId: string;
-    socialMediaAccountId: string;
+    userName?: string;
+    userLastName?: string;
+    integrationUserId: string;
+    integrationDescription?: string;
+    userSocialMediaAccountId: string;
     socialMediaAccountName?: string;
     socialMediaAccountPhotoUrl?: string;
     isBlocked?: boolean;

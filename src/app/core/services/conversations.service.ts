@@ -20,7 +20,8 @@ export class ConversationsService {
     }
 
     getList(type: string, page?: number, pageSize?: number, searchTerm?: string): Promise<ApiResponse<ConversationListResponse>> {
-        const params: string[] = [`Type=${type}`];
+        const apiType = this.toPascalCase(type);
+        const params: string[] = [`Type=${apiType}`];
         if (page) params.push(`Page=${page}`);
         if (pageSize) params.push(`PageSize=${pageSize}`);
         if (searchTerm) params.push(`SearchTerm=${searchTerm}`);
@@ -61,4 +62,12 @@ export class ConversationsService {
     unlock(id: string)      { return this.action(id, 'unlock');      }
     escalate(id: string)    { return this.action(id, 'escalate');    }
     unescalate(id: string)  { return this.action(id, 'unescalate'); }
+
+    /** kebab-case → PascalCase dönüşümü (ör: "archived-messages" → "ArchivedMessages") */
+    private toPascalCase(value: string): string {
+        return value
+            .split('-')
+            .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+            .join('');
+    }
 }

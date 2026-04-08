@@ -10,6 +10,7 @@ export interface BatchIndexRequest {
 
 export interface SyncFeedRequest {
   feedUrl: string;
+  companyId?: string;
   integrationId?: string;
 }
 
@@ -38,4 +39,56 @@ export interface ImageSearchStatus {
   pendingCount?: number;
   lastSyncDate?: string;
   [key: string]: any;
+}
+
+// ── Feed Sync Health ──
+export interface FeedSyncHealthRequest {
+  companyId: string;
+  integrationId: string;
+}
+
+export interface FeedSyncHealthResponse {
+  totalInFeed: number;
+  totalInDb: number;
+  totalEmbedded: number;
+  missingInDb: number;
+  missingEmbeddings: number;
+  syncRatioPercent: number;
+  message: string | null;
+}
+
+// ── Feed Sync Job ──
+export interface FeedSyncJobResponse {
+  jobId: string;
+  companyId: string;
+  integrationId: string | null;
+  status: string;
+  progressPercent: number;
+  totalInFeed: number;
+  processedCount: number;
+  indexedCount: number;
+  newProductCount: number;
+  updatedProductCount: number;
+  errorCount: number;
+  errors: string[] | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdDate: string;
+}
+
+// ── Missing Product Item (missing-in-db & missing-embeddings response) ──
+export interface MissingProductItem {
+  [key: string]: any;
+}
+
+// ── Purge All Products ──
+export interface PurgeAllProductsRequest {
+  integrationId?: string;
+}
+
+export interface PurgeAllProductsResponse {
+  deletedProducts: number;
+  deletedEmbeddings: number;
+  collectionDeleted: boolean;
+  message: string | null;
 }

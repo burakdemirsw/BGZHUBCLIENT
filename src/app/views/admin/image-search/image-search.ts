@@ -10,6 +10,7 @@ import {
     ImageSearchResponse,
     ImageSearchStatus,
 } from '@/app/core/models/image-search/image-search.models';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 
 @Component({
     selector: 'app-image-search-page',
@@ -78,7 +79,10 @@ export class ImageSearchPage implements OnInit {
     operationMessage = '';
     operationSuccess = true;
 
-    constructor(private imageSearchService: ImageSearchService) {}
+    constructor(
+        private imageSearchService: ImageSearchService,
+        private authState: AuthStateService,
+    ) {}
 
     ngOnInit(): void {
         this.loadStatus();
@@ -233,6 +237,7 @@ export class ImageSearchPage implements OnInit {
         try {
             const request: SyncFeedRequest = {
                 feedUrl: this.syncFeedUrl.trim(),
+                companyId: this.authState.profile?.companyId || '',
                 integrationId: this.syncIntegrationId.trim() || undefined,
             };
             await this.imageSearchService.syncFeed(request);
@@ -254,6 +259,7 @@ export class ImageSearchPage implements OnInit {
         try {
             const request: SyncFeedRequest = {
                 feedUrl: this.syncIndexFeedUrl.trim(),
+                companyId: this.authState.profile?.companyId || '',
                 integrationId: this.syncIndexIntegrationId.trim() || undefined,
             };
             await this.imageSearchService.syncAndIndex(request);

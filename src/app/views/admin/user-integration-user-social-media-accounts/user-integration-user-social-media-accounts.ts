@@ -10,6 +10,7 @@ import {
     CreateUserIntegrationUserSocialMediaAccountRequest,
     UpdateUserIntegrationUserSocialMediaAccountRequest,
 } from '@/app/core/models/integration/user-integration-user-social-media-account.models';
+import { PagedResult } from '@/app/core/models/pagination.model';
 
 @Component({
     selector: 'app-user-integration-user-social-media-accounts-page',
@@ -111,8 +112,8 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
                 ? await this.service.getByCompany(this.companyId, { companyId: this.companyId, pageNumber: 1, pageSize: 1000 })
                 : await this.service.getAll({ companyId: this.companyId, pageNumber: 1, pageSize: 1000 });
 
-            const paged = response?.data;
-            this.items = paged?.items ?? this.extractArray(response);
+            const paged = PagedResult.from<UserIntegrationUserSocialMediaAccountResponse>(response);
+            this.items = paged.items;
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('UserIntegrationUserSocialMediaAccounts error:', err);
@@ -154,8 +155,8 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
         this.editMode = true;
         this.selectedItem = item;
         this.form = {
-            integrationUserId: '',
-            userSocialMediaAccountId: item.socialMediaAccountId ?? '',
+            integrationUserId: item.integrationUserId ?? '',
+            userSocialMediaAccountId: item.userSocialMediaAccountId ?? '',
         };
         this.showModal = true;
     }
@@ -196,7 +197,7 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
     }
 
     async deleteItem(item: UserIntegrationUserSocialMediaAccountResponse): Promise<void> {
-        const name = item.socialMediaAccountName || this.getSocialMediaAccountName(item.socialMediaAccountId);
+        const name = item.socialMediaAccountName || this.getSocialMediaAccountName(item.userSocialMediaAccountId);
         if (confirm(`"${name}" kaydını silmek istediğinize emin misiniz?`)) {
             try {
                 await this.service.delete(item.id);

@@ -37,6 +37,7 @@ import { TeamInvitationsPage } from './teams/team-invitations/team-invitations';
 import { TeamSettingsPage } from './teams/team-settings/team-settings';
 import { TeamUsersPage } from './team-users/team-users';
 import { ImageSearchPage } from './image-search/image-search';
+import { ProductSyncPage } from './product-sync/product-sync';
 import { IntegrationTypesPage } from './integration-types/integration-types';
 import { UserIntegrationUserSocialMediaAccountsPage } from './user-integration-user-social-media-accounts/user-integration-user-social-media-accounts';
 import { PromptsPage } from './prompts/prompts';
@@ -78,6 +79,7 @@ import { CompanySettingsPage } from './company-settings/company-settings';
 import { AppsPage } from './apps/apps';
 import { SetupWizardPage } from './setup-wizard/setup-wizard';
 import { ConversationTypesPage } from './conversation-types/conversation-types';
+import { TaxOfficesPage } from './tax-offices/tax-offices';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -295,6 +297,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/image-search',
         component: ImageSearchPage,
         data: { title: 'Görsel Arama' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/product-sync',
+        component: ProductSyncPage,
+        data: { title: 'Ürün Senkronizasyonu' },
         canActivate: [AuthGuard],
     },
     {
@@ -564,6 +572,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/conversation-types',
         component: ConversationTypesPage,
         data: { title: 'Konuşma Türleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/tax-offices',
+        component: TaxOfficesPage,
+        data: { title: 'Vergi Daireleri' },
         canActivate: [AuthGuard],
     },
 ];

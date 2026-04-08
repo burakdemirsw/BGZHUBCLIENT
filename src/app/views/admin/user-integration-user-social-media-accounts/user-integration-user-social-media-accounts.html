@@ -25,7 +25,8 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Sosyal Medya Hesabı</th>
-                                    <th>Durum</th>
+                                    <th>Entegrasyon</th>
+                                    <th>Kullanıcı</th>
                                     <th>Oluşturma Tarihi</th>
                                     <th class="text-end">İşlemler</th>
                                 </tr>
@@ -45,13 +46,8 @@
                                                 <span class="fw-semibold">{{ item.socialMediaAccountName || '-' }}</span>
                                             </div>
                                         </td>
-                                        <td>
-                                            @if (!item.isBlocked) {
-                                                <span class="badge bg-success-subtle text-success">Aktif</span>
-                                            } @else {
-                                                <span class="badge bg-danger-subtle text-danger">Engelli</span>
-                                            }
-                                        </td>
+                                        <td>{{ item.integrationDescription || '-' }}</td>
+                                        <td>{{ item.userName || '-' }} {{ item.userLastName || '' }}</td>
                                         <td>{{ item.createdDate ? (item.createdDate | date:'dd.MM.yyyy HH:mm') : '-' }}</td>
                                         <td class="text-end">
                                             <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(item)">
@@ -63,7 +59,7 @@
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="4" class="text-center text-muted">Kayıt bulunamadı.</td></tr>
+                                    <tr><td colspan="5" class="text-center text-muted">Kayıt bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
