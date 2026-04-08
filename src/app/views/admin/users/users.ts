@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsersService } from '@/app/core/services/users.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
-import { UserResponse, CreateUserRequest, UpdateUserRequest } from '@/app/core/models/user/user.models';
+import { UserResponse, UpdateUserRequest } from '@/app/core/models/user/user.models';
 import { PAGE_SIZE_OPTIONS, DEFAULT_PAGE_SIZE } from '@/app/constants';
 
 @Component({
@@ -15,7 +15,6 @@ export class UsersPage implements OnInit {
     users: UserResponse[] = [];
     loading = false;
     showModal = false;
-    editMode = false;
     selectedUser: UserResponse | null = null;
 
     // Datatable filter & pagination
@@ -32,10 +31,8 @@ export class UsersPage implements OnInit {
     form: any = {
         name: '',
         lastName: '',
-        email: '',
-        password: '',
         gender: 'Erkek',
-        companyId: '',
+        isBlocked: false,
     };
 
     constructor(
@@ -110,21 +107,11 @@ export class UsersPage implements OnInit {
         return [];
     }
 
-    openCreate(): void {
-        this.editMode = false;
-        this.selectedUser = null;
-        const companyId = this.authStateService.profile?.companyId || '';
-        this.form = { name: '', lastName: '', email: '', password: '', gender: 'Erkek', companyId };
-        this.showModal = true;
-    }
-
     openEdit(user: UserResponse): void {
-        this.editMode = true;
         this.selectedUser = user;
         this.form = {
             name: user.name,
             lastName: user.lastName,
-            email: user.email,
             gender: user.gender,
             isBlocked: user.isBlocked,
         };
@@ -132,37 +119,15 @@ export class UsersPage implements OnInit {
     }
 
     async save(): Promise<void> {
+        if (!this.selectedUser) return;
         try {
-            if (this.editMode && this.selectedUser) {
-                const req: UpdateUserRequest = {
-                    name: this.form.name,
-                    lastName: this.form.lastName,
-                    email: this.form.email,
-                    gender: this.form.gender,
-                    isBlocked: this.form.isBlocked ?? false,
-                };
-                await this.usersService.update(this.selectedUser.id, req);
-            } else {
-                // Yeni kullanıcı oluştur: companyId varsa registerWithCompany kullan, yoksa create kullan
-                if (this.form.companyId) {
-                    await this.usersService.registerWithCompany({
-                        name: this.form.name,
-                        lastName: this.form.lastName,
-                        email: this.form.email,
-                        password: this.form.password,
-                        companyId: this.form.companyId,
-                    });
-                } else {
-                    const req: CreateUserRequest = {
-                        name: this.form.name,
-                        lastName: this.form.lastName,
-                        email: this.form.email,
-                        password: this.form.password,
-                        gender: this.form.gender,
-                    };  
-                    await this.usersService.create(req);
-                }
-            }
+            const req: UpdateUserRequest = {
+                name: this.form.name,
+                lastName: this.form.lastName,
+                gender: this.form.gender,
+                isBlocked: this.form.isBlocked ?? false,
+            };
+            await this.usersService.update(this.selectedUser.id, req);
             this.showModal = false;
             await this.loadUsers();
         } catch (err) {

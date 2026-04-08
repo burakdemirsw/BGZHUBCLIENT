@@ -59,6 +59,10 @@ export interface CustomerDescriptionSummary {
   firstName: string;
   lastName?: string;
   description?: string;
+  taxNumber?: string;
+  taxOfficeCode?: string;
+  isIndividualCustomer?: boolean;
+  identityNumber?: string;
 }
 
 // ── Request Models ──

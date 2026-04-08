@@ -9,7 +9,6 @@ export interface CreateUserRequest {
 export interface UpdateUserRequest {
   name: string;
   lastName: string;
-  email: string;
   gender: string;
   isBlocked: boolean;
 }

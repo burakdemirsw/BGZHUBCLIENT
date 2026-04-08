@@ -1,11 +1,8 @@
 <div class="row mt-3">
     <div class="col-12">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header">
                 <h4 class="card-title mb-0">Kullanıcı Listesi</h4>
-                <button class="btn btn-primary btn-sm" (click)="openCreate()">
-                    + Yeni Kullanıcı
-                </button>
             </div>
             <div class="card-body">
                 @if (loading) {
@@ -100,7 +97,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">{{ editMode ? 'Kullanıcı Düzenle' : 'Yeni Kullanıcı' }}</h5>
+                    <h5 class="modal-title">Kullanıcı Düzenle</h5>
                     <button type="button" class="btn-close" (click)="closeModal()"></button>
                 </div>
                 <div class="modal-body">
@@ -114,16 +111,6 @@
                             <input type="text" class="form-control" [(ngModel)]="form.lastName" name="lastName" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">E-posta</label>
-                            <input type="email" class="form-control" [(ngModel)]="form.email" name="email" required>
-                        </div>
-                        @if (!editMode) {
-                            <div class="mb-3">
-                                <label class="form-label">Şifre</label>
-                                <input type="password" class="form-control" [(ngModel)]="form.password" name="password" required>
-                            </div>
-                        }
-                        <div class="mb-3">
                             <label class="form-label">Cinsiyet</label>
                             <select class="form-select" [(ngModel)]="form.gender" name="gender">
                                 <option value="Erkek">Erkek</option>
@@ -131,17 +118,15 @@
                                 <option value="Diğer">Diğer</option>
                             </select>
                         </div>
-                        @if (editMode) {
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" [(ngModel)]="form.isBlocked" name="isBlocked" id="isBlocked">
-                                <label class="form-check-label" for="isBlocked">Engelli</label>
-                            </div>
-                        }
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" [(ngModel)]="form.isBlocked" name="isBlocked" id="isBlocked">
+                            <label class="form-check-label" for="isBlocked">Engelli</label>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
-                    <button type="button" class="btn btn-primary" (click)="save()">{{ editMode ? 'Güncelle' : 'Kaydet' }}</button>
+                    <button type="button" class="btn btn-primary" (click)="save()">Güncelle</button>
                 </div>
             </div>
         </div>

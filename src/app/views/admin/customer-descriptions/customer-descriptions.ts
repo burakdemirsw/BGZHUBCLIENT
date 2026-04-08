@@ -29,7 +29,7 @@ export class CustomerDescriptionsPage implements OnInit {
     showModal = false;
     editMode = false;
     selectedItem: CustomerDescription | null = null;
-    form: any = { customerId: '', langCode: '', firstName: '', lastName: '', description: '' };
+    form: any = { customerId: '', langCode: '', firstName: '', lastName: '', description: '', taxNumber: '', taxOfficeCode: '', isIndividualCustomer: false, identityNumber: '' };
 
     constructor(
         private service: CustomerDescriptionsService,
@@ -83,7 +83,7 @@ export class CustomerDescriptionsPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedItem = null;
-        this.form = { customerId: '', langCode: '', firstName: '', lastName: '', description: '' };
+        this.form = { customerId: '', langCode: '', firstName: '', lastName: '', description: '', taxNumber: '', taxOfficeCode: '', isIndividualCustomer: false, identityNumber: '' };
         this.showModal = true;
     }
 
@@ -95,7 +95,11 @@ export class CustomerDescriptionsPage implements OnInit {
             langCode: item.langCode || '',
             firstName: item.firstName || '',
             lastName: item.lastName || '',
-            description: item.description || ''
+            description: item.description || '',
+            taxNumber: item.taxNumber || '',
+            taxOfficeCode: item.taxOfficeCode || '',
+            isIndividualCustomer: item.isIndividualCustomer ?? false,
+            identityNumber: item.identityNumber || ''
         };
         this.showModal = true;
     }
@@ -108,7 +112,11 @@ export class CustomerDescriptionsPage implements OnInit {
                     langCode: this.form.langCode,
                     firstName: this.form.firstName,
                     lastName: this.form.lastName,
-                    description: this.form.description
+                    description: this.form.description,
+                    taxNumber: this.form.taxNumber,
+                    taxOfficeCode: this.form.taxOfficeCode,
+                    isIndividualCustomer: this.form.isIndividualCustomer,
+                    identityNumber: this.form.identityNumber
                 };
                 await this.service.update(this.selectedItem.id, req);
             } else {
@@ -117,7 +125,11 @@ export class CustomerDescriptionsPage implements OnInit {
                     langCode: this.form.langCode,
                     firstName: this.form.firstName,
                     lastName: this.form.lastName,
-                    description: this.form.description
+                    description: this.form.description,
+                    taxNumber: this.form.taxNumber,
+                    taxOfficeCode: this.form.taxOfficeCode,
+                    isIndividualCustomer: this.form.isIndividualCustomer,
+                    identityNumber: this.form.identityNumber
                 };
                 await this.service.create(req);
             }

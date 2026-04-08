@@ -29455,6 +29455,10 @@ components:
         - firstName
         - lastName
         - description
+        - taxNumber
+        - taxOfficeCode
+        - isIndividualCustomer
+        - identityNumber
         - createdDate
       type: object
       properties:
@@ -29481,7 +29485,23 @@ components:
         lastName:
           type: string
         description:
-          type: string
+          type:
+            - "null"
+            - string
+        taxNumber:
+          type:
+            - "null"
+            - string
+        taxOfficeCode:
+          type:
+            - "null"
+            - string
+        isIndividualCustomer:
+          type: boolean
+        identityNumber:
+          type:
+            - "null"
+            - string
         createdDate:
           type: string
           format: date-time
@@ -29850,6 +29870,10 @@ components:
         - firstName
         - lastName
         - description
+        - taxNumber
+        - taxOfficeCode
+        - isIndividualCustomer
+        - identityNumber
       type: object
       properties:
         id:
@@ -29868,6 +29892,20 @@ components:
             - "null"
             - string
         description:
+          type:
+            - "null"
+            - string
+        taxNumber:
+          type:
+            - "null"
+            - string
+        taxOfficeCode:
+          type:
+            - "null"
+            - string
+        isIndividualCustomer:
+          type: boolean
+        identityNumber:
           type:
             - "null"
             - string
@@ -39068,7 +39106,6 @@ components:
       required:
         - name
         - lastName
-        - email
         - gender
         - isBlocked
       type: object
@@ -39078,10 +39115,6 @@ components:
             - "null"
             - string
         lastName:
-          type:
-            - "null"
-            - string
-        email:
           type:
             - "null"
             - string

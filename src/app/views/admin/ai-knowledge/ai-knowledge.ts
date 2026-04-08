@@ -15,7 +15,7 @@ import {
     UpdateAiKnowledgeRequest,
 } from '@/app/core/models/ai-assistant/ai-knowledge.models';
 import { AiKnowledgeTypeResponse } from '@/app/core/models/ai-assistant/ai-knowledge-type.models';
-import { AiAssistant } from '@/app/core/models/ai-assistant/ai-assistant.models';
+import { AiAssistant, UpdateAiAssistantRequest } from '@/app/core/models/ai-assistant/ai-assistant.models';
 import { IntegrationUser } from '@/app/core/models/integration/integration-user.models';
 import { UserIntegrationUserSocialMediaAccountResponse } from '@/app/core/models/integration/user-integration-user-social-media-account.models';
 import { PagedResult } from '@/app/core/models/pagination.model';
@@ -74,6 +74,12 @@ export class AiKnowledgePage implements OnInit {
         value: '',
         shortDescription: '',
     };
+
+    // ────── Asistan Adı Güncelleme ──────
+    showRenameModal = false;
+    renameAssistantId = '';
+    renameAssistantName = '';
+    renameSaving = false;
 
     // ────── Tab Yapısı ──────
     activeTab: 'entry' | 'preview' = 'entry';
@@ -307,6 +313,46 @@ export class AiKnowledgePage implements OnInit {
         if (response?.items) return response.items;
         if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
         return [];
+    }
+
+    // ────── Asistan Adı Güncelleme ──────
+    openRenameAssistant(assistantId: string): void {
+        const assistant = this.assistants.find(a => a.id === assistantId);
+        if (!assistant) return;
+        this.renameAssistantId = assistant.id;
+        this.renameAssistantName = assistant.name || '';
+        this.showRenameModal = true;
+    }
+
+    async saveAssistantName(): Promise<void> {
+        if (!this.renameAssistantId || !this.renameAssistantName.trim()) return;
+        const assistant = this.assistants.find(a => a.id === this.renameAssistantId);
+        if (!assistant) return;
+
+        this.renameSaving = true;
+        try {
+            const req: UpdateAiAssistantRequest = {
+                userId: this.authState.profile?.userId || '',
+                companyId: this.authState.profile?.companyId || '',
+                name: this.renameAssistantName.trim(),
+                aiProviderId: assistant.aiProviderId,
+                aiModelId: assistant.aiModelId,
+                isBlocked: assistant.isBlocked ?? false,
+            };
+            await this.aiProvidersService.updateAssistant(this.renameAssistantId, req);
+            // Listeyi güncelle
+            assistant.name = this.renameAssistantName.trim();
+            this.showRenameModal = false;
+        } catch (err) {
+            console.error('Asistan adı güncelleme hatası:', err);
+            alert('Asistan adı güncellenirken hata oluştu.');
+        } finally {
+            this.renameSaving = false;
+        }
+    }
+
+    closeRenameModal(): void {
+        this.showRenameModal = false;
     }
 
     // ────── Tab Yönetimi ──────

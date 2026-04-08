@@ -5,6 +5,10 @@ export interface CustomerDescription {
   firstName?: string;
   lastName?: string;
   description?: string;
+  taxNumber?: string;
+  taxOfficeCode?: string;
+  isIndividualCustomer?: boolean;
+  identityNumber?: string;
   isBlocked?: boolean;
   createdDate?: string;
   updatedDate?: string;
@@ -18,6 +22,10 @@ export interface CreateCustomerDescriptionRequest {
   firstName: string;
   lastName: string;
   description: string;
+  taxNumber: string;
+  taxOfficeCode: string;
+  isIndividualCustomer: boolean;
+  identityNumber: string;
 }
 
 export interface UpdateCustomerDescriptionRequest {
@@ -26,4 +34,8 @@ export interface UpdateCustomerDescriptionRequest {
   firstName: string;
   lastName: string;
   description: string;
+  taxNumber: string;
+  taxOfficeCode: string;
+  isIndividualCustomer: boolean;
+  identityNumber: string;
 }
