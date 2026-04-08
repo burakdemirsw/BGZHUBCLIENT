@@ -42,3 +42,7 @@ testem.log
 Thumbs.db
 
 .idea
+
+# Large binary files
+src/assets/images/logos/ProtonVPN_v4.3.12_x64.exe
+*.exe
