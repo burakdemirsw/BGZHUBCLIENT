@@ -28496,6 +28496,9 @@ components:
             - integer
             - string
           format: int32
+        isInvisible:
+          type: boolean
+          default: false
     CreateNeighbourhoodRequest:
       required:
         - districtId
@@ -31288,6 +31291,7 @@ components:
         - colorCode
         - orderIndex
         - isBlocked
+        - isInvisible
         - createdDate
         - updatedDate
       type: object
@@ -31327,6 +31331,8 @@ components:
             - string
           format: int32
         isBlocked:
+          type: boolean
+        isInvisible:
           type: boolean
         createdDate:
           type: string
@@ -38044,6 +38050,7 @@ components:
         - colorCode
         - orderIndex
         - isBlocked
+        - isInvisible
       type: object
       properties:
         parentId:
@@ -38078,6 +38085,8 @@ components:
             - string
           format: int32
         isBlocked:
+          type: boolean
+        isInvisible:
           type: boolean
     UpdateMessageRequest:
       required:
@@ -39124,6 +39133,14 @@ components:
             - string
         isBlocked:
           type: boolean
+        photoUrl:
+          type:
+            - "null"
+            - string
+        phoneNumber:
+          type:
+            - "null"
+            - string
     UpdateUserRequestRequest:
       required:
         - assignedUserId
@@ -39348,6 +39365,7 @@ components:
         - icon
         - colorCode
         - orderIndex
+        - isInvisible
         - parentId
       type: object
       properties:
@@ -39380,6 +39398,8 @@ components:
             - integer
             - string
           format: int32
+        isInvisible:
+          type: boolean
         parentId:
           type:
             - "null"
@@ -39527,6 +39547,8 @@ components:
         - lastLoginDate
         - isBlocked
         - isMailConfirmed
+        - photoUrl
+        - phoneNumber
         - createdDate
         - updatedDate
       type: object
@@ -39559,6 +39581,14 @@ components:
           type:
             - "null"
             - boolean
+        photoUrl:
+          type:
+            - "null"
+            - string
+        phoneNumber:
+          type:
+            - "null"
+            - string
         createdDate:
           type: string
           format: date-time

@@ -138,6 +138,14 @@
                                                 <td class="text-muted fw-semibold">Alt Menü</td>
                                                 <td>{{ selectedNode.children.length }} adet</td>
                                             </tr>
+                                            <tr>
+                                                <td class="text-muted fw-semibold">Görünürlük</td>
+                                                <td>
+                                                    <span class="badge" [class]="selectedNode.menu.isInvisible ? 'bg-warning-subtle text-warning' : 'bg-success-subtle text-success'">
+                                                        {{ selectedNode.menu.isInvisible ? 'Gizli' : 'Görünür' }}
+                                                    </span>
+                                                </td>
+                                            </tr>
                                             @if (selectedNode.assigned && selectedNode.roleMenu) {
                                                 <tr>
                                                     <td class="text-muted fw-semibold">Durum</td>
@@ -215,6 +223,11 @@
 
                 <!-- Ad -->
                 <span class="flex-grow-1 small" [class.fw-semibold]="node.children.length > 0">{{ node.menu.name }}</span>
+
+                <!-- Görünürlük badge -->
+                @if (node.menu.isInvisible) {
+                    <span class="badge bg-warning-subtle text-warning ms-1" style="font-size: 0.6rem">Gizli</span>
+                }
 
                 <!-- Durum badge (sadece atanmış ise) -->
                 @if (node.assigned && node.roleMenu) {

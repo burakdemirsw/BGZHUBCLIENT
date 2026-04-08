@@ -1,14 +1,13 @@
-import { Component } from '@angular/core';
-import {Timeline} from '@/app/views/apps/users/profile/components/timeline';
-import {Settings} from '@/app/views/apps/users/profile/components/settings';
-import {About} from '@/app/views/apps/users/profile/components/about';
-import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
-import {NgIcon} from '@ng-icons/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Settings } from '@/app/views/apps/users/profile/components/settings';
+import { About } from '@/app/views/apps/users/profile/components/about';
+import { NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
+import { NgIcon } from '@ng-icons/core';
+import { UserResponse } from '@core/models/user/user.models';
 
 @Component({
   selector: 'app-account',
     imports: [
-        Timeline,
         Settings,
         About,
         NgbNav,
@@ -22,34 +21,25 @@ import {NgIcon} from '@ng-icons/core';
       <div class="card">
           <div class="card-header card-tabs d-flex align-items-center">
               <div class="flex-grow-1">
-                  <h4 class="card-title">My Account</h4>
+                  <h4 class="card-title">Hesabım</h4>
               </div>
               <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="nav nav-tabs card-header-tabs nav-bordered">
                   <li ngbNavItem="about">
                       <a href="javascript:void(0);" ngbNavLink>
                           <ng-icon name="tablerHome" class="d-md-none d-block"/>
-                          <span class="d-none d-md-block fw-bold">About Me</span>
+                          <span class="d-none d-md-block fw-bold">Hakkımda</span>
                       </a>
                       <ng-template ngbNavContent>
-                          <app-about/>
-                      </ng-template>
-                  </li>
-                  <li ngbNavItem="timeline">
-                      <a href="javascript:void(0);"  ngbNavLink>
-                          <ng-icon name="tablerUserCircle" class="d-md-none d-block"/>
-                          <span class="d-none d-md-block fw-bold">Timeline</span>
-                      </a>
-                      <ng-template ngbNavContent>
-                          <app-timeline/>
+                          <app-about [user]="user"/>
                       </ng-template>
                   </li>
                   <li ngbNavItem="settings">
                       <a href="javascript:void(0);" ngbNavLink>
                           <ng-icon name="tablerSettings" class="d-md-none d-block"/>
-                          <span class="d-none d-md-block fw-bold">Settings</span>
+                          <span class="d-none d-md-block fw-bold">Ayarlar</span>
                       </a>
                       <ng-template ngbNavContent>
-                          <app-settings/>
+                          <app-settings [user]="user" (profileUpdated)="onProfileUpdated()"/>
                       </ng-template>
                   </li>
               </ul>
@@ -63,5 +53,11 @@ import {NgIcon} from '@ng-icons/core';
   styles: ``
 })
 export class Account {
-    activeId="timeline"
+    @Input() user: UserResponse | null = null;
+    @Output() profileUpdated = new EventEmitter<void>();
+    activeId = 'about';
+
+    onProfileUpdated(): void {
+        this.profileUpdated.emit();
+    }
 }

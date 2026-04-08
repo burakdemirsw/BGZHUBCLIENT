@@ -6,25 +6,33 @@
                      style="min-height: 300px; background-image: url(assets/images/profile-bg.jpg);">
                     <div
                         class="p-4 card-img-overlay rounded-start-0 auth-overlay d-flex align-items-center flex-column justify-content-center">
-                        <h3 class="text-white mb-1 fst-italic">"Crafting innovation through clean design"</h3>
-                        <p class="text-white mb-4">– MyStatus</p>
+                        @if (user) {
+                            <h3 class="text-white mb-1 fst-italic">{{ user.name }} {{ user.lastName }}</h3>
+                            <p class="text-white mb-4">{{ user.email }}</p>
+                        }
                     </div>
                 </div>
             </article>
         </div>
     </div>
 
-    <div class="px-3 mt-n4">
-        <div class="row">
-            <div class="col-xl-4">
-                <app-profile-card/>
+    @if (loading) {
+        <div class="d-flex align-items-center justify-content-center gap-2 p-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <span>Yükleniyor...</span>
+        </div>
+    } @else if (user) {
+        <div class="px-3 mt-n4">
+            <div class="row">
+                <div class="col-xl-4">
+                    <app-profile-card [user]="user"/>
+                </div>
 
-            </div>
-
-            <div class="col-xl-8">
-                <app-account/>
+                <div class="col-xl-8">
+                    <app-account [user]="user" (profileUpdated)="onProfileUpdated()"/>
+                </div>
             </div>
         </div>
-    </div>
+    }
 
 </div>

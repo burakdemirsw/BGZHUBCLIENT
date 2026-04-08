@@ -36,6 +36,7 @@ export class MenusPage implements OnInit {
         colorCode: '',
         orderIndex: 0,
         isBlocked: false,
+        isInvisible: false,
     };
 
     // İkon seçici
@@ -107,7 +108,7 @@ export class MenusPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedMenu = null;
-        this.form = { parentId: null, name: '', description: '', url: '', icon: '', colorCode: '', orderIndex: 0, isBlocked: false };
+        this.form = { parentId: null, name: '', description: '', url: '', icon: '', colorCode: '', orderIndex: 0, isBlocked: false, isInvisible: false };
         this.showModal = true;
     }
 
@@ -123,6 +124,7 @@ export class MenusPage implements OnInit {
             colorCode: menu.colorCode || '',
             orderIndex: menu.orderIndex,
             isBlocked: menu.isBlocked,
+            isInvisible: menu.isInvisible ?? false,
         };
         this.showModal = true;
     }
@@ -139,6 +141,7 @@ export class MenusPage implements OnInit {
                     colorCode: this.form.colorCode,
                     orderIndex: this.form.orderIndex,
                     isBlocked: this.form.isBlocked,
+                    isInvisible: this.form.isInvisible,
                 };
                 await this.menusService.update(this.selectedMenu.id, req);
             } else {
@@ -150,6 +153,7 @@ export class MenusPage implements OnInit {
                     icon: this.form.icon,
                     colorCode: this.form.colorCode,
                     orderIndex: this.form.orderIndex,
+                    isInvisible: this.form.isInvisible,
                 };
                 await this.menusService.create(req);
             }

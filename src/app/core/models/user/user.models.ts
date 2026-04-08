@@ -11,18 +11,23 @@ export interface UpdateUserRequest {
   lastName: string;
   gender: string;
   isBlocked: boolean;
+  photoUrl?: string | null;
+  phoneNumber?: string | null;
 }
 
 export interface UserResponse {
   id: string;
-  name: string;
-  lastName: string;
-  email: string;
-  gender: string;
-  lastLoginDate?: string;
+  name: string | null;
+  lastName: string | null;
+  email: string | null;
+  gender: string | null;
+  lastLoginDate: string;
   isBlocked: boolean;
-  createdDate?: string;
-  updatedDate?: string;
+  isMailConfirmed: boolean | null;
+  photoUrl: string | null;
+  phoneNumber: string | null;
+  createdDate: string;
+  updatedDate: string;
 }
 
 /** @deprecated UserResponse kullanın */

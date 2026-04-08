@@ -80,6 +80,7 @@ import { AppsPage } from './apps/apps';
 import { SetupWizardPage } from './setup-wizard/setup-wizard';
 import { ConversationTypesPage } from './conversation-types/conversation-types';
 import { TaxOfficesPage } from './tax-offices/tax-offices';
+import { Profile } from '@/app/views/apps/users/profile/profile';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
@@ -578,6 +579,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/tax-offices',
         component: TaxOfficesPage,
         data: { title: 'Vergi Daireleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'users/profile',
+        component: Profile,
+        data: { title: 'Profil' },
         canActivate: [AuthGuard],
     },
 ];

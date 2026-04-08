@@ -5,6 +5,7 @@ import { ApiResponse } from '../models/api-response.model';
 import { AuthStateService } from './auth-state.service';
 import { UserMenuService } from './user-menu.service';
 import { LoginRequest, RegisterRequest, RegisterWithCompanyRequest, RefreshTokenRequest, AuthResponse } from '../models/auth/auth.models';
+import { UserResponse, UpdateUserRequest } from '../models/user/user.models';
 
 @Injectable({
   providedIn: 'root',
@@ -59,6 +60,22 @@ export class UserService {
     return this.httpClientService.post<any>(
       { controller: 'Auth', action: 'refresh-token' },
       refreshTokenRequest
+    );
+  }
+
+  /** Kullanıcı bilgilerini ID ile getirir */
+  getUserById(id: string): Promise<ApiResponse<UserResponse>> {
+    return this.httpClientService.get<UserResponse>(
+      { controller: 'Users' },
+      id
+    );
+  }
+
+  /** Kullanıcı bilgilerini günceller */
+  updateUser(id: string, request: UpdateUserRequest): Promise<ApiResponse<object>> {
+    return this.httpClientService.post<object>(
+      { controller: 'Users', action: `update/${id}` },
+      request
     );
   }
 }

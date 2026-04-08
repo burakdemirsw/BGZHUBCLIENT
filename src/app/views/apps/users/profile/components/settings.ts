@@ -1,212 +1,159 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import {NgIcon} from '@ng-icons/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { NgIcon } from '@ng-icons/core';
+import { FormsModule } from '@angular/forms';
+import { UserResponse, UpdateUserRequest } from '@core/models/user/user.models';
+import { UserService } from '@core/services/user.service';
 
 @Component({
   selector: 'app-settings',
     imports: [
         NgIcon,
-        RouterLink,
+        FormsModule,
     ],
   template: `
-      <form>
+      @if (user) {
+          <form (ngSubmit)="onSubmit()">
 
-          <h5 class="mb-3 text-uppercase bg-light-subtle p-1 border-dashed border rounded border-light text-center">
-              <ng-icon name="tablerUserCircle" class="me-1"/> Personal Info</h5>
-          <div class="row">
-              <div class="col-md-6">
-                  <div class="mb-3">
-                      <label for="firstname" class="form-label">First Name</label>
-                      <input type="text" class="form-control" id="firstname"
-                             placeholder="Enter first name">
+              <h5 class="mb-3 text-uppercase bg-light-subtle p-1 border-dashed border rounded border-light text-center">
+                  <ng-icon name="tablerUserCircle" class="me-1"/> Kişisel Bilgiler</h5>
+              <div class="row">
+                  <div class="col-md-6">
+                      <div class="mb-3">
+                          <label for="firstname" class="form-label">Ad</label>
+                          <input type="text" class="form-control" id="firstname"
+                                 [(ngModel)]="formModel.name" name="name"
+                                 placeholder="Adınızı girin">
+                      </div>
+                  </div>
+                  <div class="col-md-6">
+                      <div class="mb-3">
+                          <label for="lastname" class="form-label">Soyad</label>
+                          <input type="text" class="form-control" id="lastname"
+                                 [(ngModel)]="formModel.lastName" name="lastName"
+                                 placeholder="Soyadınızı girin">
+                      </div>
                   </div>
               </div>
-              <div class="col-md-6">
-                  <div class="mb-3">
-                      <label for="lastname" class="form-label">Last Name</label>
-                      <input type="text" class="form-control" id="lastname"
-                             placeholder="Enter last name">
-                  </div>
-              </div>
-          </div>
 
-          <div class="row">
-              <div class="col-md-6">
-                  <div class="mb-3">
-                      <label for="jobtitle" class="form-label">Job Title</label>
-                      <input type="text" class="form-control" id="jobtitle"
-                             placeholder="e.g. UI Developer, Designer">
+              <div class="row">
+                  <div class="col-md-6">
+                      <div class="mb-3">
+                          <label for="phone" class="form-label">Telefon</label>
+                          <input type="text" class="form-control" id="phone"
+                                 [(ngModel)]="formModel.phoneNumber" name="phoneNumber"
+                                 placeholder="+90 5XX XXX XXXX">
+                      </div>
+                  </div>
+                  <div class="col-md-6">
+                      <div class="mb-3">
+                          <label for="gender" class="form-label">Cinsiyet</label>
+                          <select class="form-select" id="gender"
+                                  [(ngModel)]="formModel.gender" name="gender">
+                              <option value="">Seçiniz</option>
+                              <option value="Erkek">Erkek</option>
+                              <option value="Kadın">Kadın</option>
+                              <option value="Diğer">Diğer</option>
+                          </select>
+                      </div>
                   </div>
               </div>
-              <div class="col-md-6">
-                  <div class="mb-3">
-                      <label for="phone" class="form-label">Phone Number</label>
-                      <input type="text" class="form-control" id="phone" placeholder="+1 234 567 8901">
-                  </div>
-              </div>
-          </div>
 
-          <div class="mb-3">
-              <label for="userbio" class="form-label">Bio</label>
-              <textarea class="form-control" id="userbio" rows="4"
-                        placeholder="Write something about yourself..."></textarea>
-          </div>
+              <div class="row">
+                  <div class="col-md-6">
+                      <div class="mb-3">
+                          <label for="useremail" class="form-label">E-posta Adresi</label>
+                          <input type="email" class="form-control" id="useremail"
+                                 [value]="user.email || ''" disabled
+                                 placeholder="E-posta adresi">
+                          <span class="form-text fs-xs fst-italic text-muted">E-posta adresi değiştirilemez</span>
+                      </div>
+                  </div>
+                  <div class="col-md-6">
+                      <div class="mb-3">
+                          <label for="photoUrl" class="form-label">Profil Fotoğrafı URL</label>
+                          <input type="text" class="form-control" id="photoUrl"
+                                 [(ngModel)]="formModel.photoUrl" name="photoUrl"
+                                 placeholder="https://example.com/photo.jpg">
+                      </div>
+                  </div>
+              </div>
 
-          <div class="row">
-              <div class="col-md-6">
-                  <div class="mb-3">
-                      <label for="useremail" class="form-label">Email Address</label>
-                      <input type="email" class="form-control" id="useremail" placeholder="Enter email">
-                      <span class="form-text fs-xs fst-italic text-muted"><a [routerLink]="['.']"
-                                                                             class="link-reset">Click here to change your email</a></span>
+              @if (successMessage) {
+                  <div class="alert alert-success alert-dismissible fade show" role="alert">
+                      <ng-icon name="tablerCheck" class="me-1"/>
+                      {{ successMessage }}
+                      <button type="button" class="btn-close" (click)="successMessage = ''"></button>
                   </div>
-              </div>
-              <div class="col-md-6">
-                  <div class="mb-3">
-                      <label for="userpassword" class="form-label">Password</label>
-                      <input type="password" class="form-control" id="userpassword"
-                             placeholder="Enter new password">
-                      <span class="form-text fs-xs fst-italic text-muted"><a [routerLink]="['.']"
-                                                                             class="link-reset">Click here to change your password</a></span>
-                  </div>
-              </div>
-          </div>
+              }
 
-          <div class="mb-4">
-              <label for="profilephoto" class="form-label">Profile Photo</label>
-              <input class="form-control" type="file" id="profilephoto">
-          </div>
+              @if (errorMessage) {
+                  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                      <ng-icon name="tablerAlertCircle" class="me-1"/>
+                      {{ errorMessage }}
+                      <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+                  </div>
+              }
 
-
-          <h5 class="mb-3 text-uppercase bg-light-subtle p-1 border-dashed border rounded border-light text-center">
-              <ng-icon name="tablerMapPin" class="me-1"/> Address Info
-          </h5>
-          <div class="row">
-              <div class="col-md-6">
-                  <div class="mb-3">
-                      <label for="address-line1" class="form-label">Address Line 1</label>
-                      <input type="text" class="form-control" id="address-line1"
-                             placeholder="Street, Apartment, Unit, etc.">
-                  </div>
+              <div class="text-end mt-4">
+                  <button type="submit" class="btn btn-success" [disabled]="saving">
+                      <ng-icon name="tablerDeviceFloppy" class="me-1"/>
+                      {{ saving ? 'Kaydediliyor...' : 'Kaydet' }}
+                  </button>
               </div>
-              <div class="col-md-6">
-                  <div class="mb-3">
-                      <label for="address-line2" class="form-label">Address Line 2</label>
-                      <input type="text" class="form-control" id="address-line2" placeholder="Optional">
-                  </div>
-              </div>
-          </div>
-          <div class="row">
-              <div class="col-md-4">
-                  <div class="mb-3">
-                      <label for="city" class="form-label">City</label>
-                      <input type="text" class="form-control" id="city" placeholder="City">
-                  </div>
-              </div>
-              <div class="col-md-4">
-                  <div class="mb-3">
-                      <label for="state" class="form-label">State / Province</label>
-                      <input type="text" class="form-control" id="state"
-                             placeholder="State or Province">
-                  </div>
-              </div>
-              <div class="col-md-4">
-                  <div class="mb-3">
-                      <label for="zipcode" class="form-label">Postal / ZIP Code</label>
-                      <input type="text" class="form-control" id="zipcode" placeholder="Postal Code">
-                  </div>
-              </div>
-          </div>
-          <div class="row">
-              <div class="col-md-6">
-                  <div class="mb-3">
-                      <label for="country" class="form-label">Country</label>
-                      <input type="text" class="form-control" id="country" placeholder="Country">
-                  </div>
-              </div>
-          </div>
-
-
-          <h5 class="mb-3 text-uppercase bg-light-subtle p-1 border-dashed border rounded border-light text-center">
-              <ng-icon name="tablerBuildingSkyscraper" class="me-1"></ng-icon> Company Info</h5>
-          <div class="row">
-              <div class="col-md-6">
-                  <div class="mb-3">
-                      <label for="companyname" class="form-label">Company Name</label>
-                      <input type="text" class="form-control" id="companyname"
-                             placeholder="Enter company name">
-                  </div>
-              </div>
-              <div class="col-md-6">
-                  <div class="mb-3">
-                      <label for="cwebsite" class="form-label">Website</label>
-                      <input type="text" class="form-control" id="cwebsite"
-                             placeholder="https://yourcompany.com">
-                  </div>
-              </div>
-          </div>
-
-
-          <h5 class="mb-3 text-uppercase bg-light-subtle p-1 border-dashed border rounded border-light text-center">
-              <ng-icon name="tablerWorld" class="me-1"/> Social</h5>
-          <div class="row g-3">
-              <div class="col-md-6">
-                  <label for="social-fb" class="form-label">Facebook</label>
-                  <div class="input-group">
-                      <span class="input-group-text"><ng-icon name="tablerBrandFacebook"/></span>
-                      <input type="text" class="form-control" id="social-fb" placeholder="Facebook URL">
-                  </div>
-              </div>
-              <div class="col-md-6">
-                  <label for="social-tw" class="form-label">Twitter X</label>
-                  <div class="input-group">
-                      <span class="input-group-text"><ng-icon name="tablerBrandX" /></span>
-                      <input type="text" class="form-control" id="social-tw" placeholder="@username">
-                  </div>
-              </div>
-              <div class="col-md-6">
-                  <label for="social-insta" class="form-label">Instagram</label>
-                  <div class="input-group">
-                      <span class="input-group-text"><ng-icon name="tablerBrandInstagram"/></span>
-                      <input type="text" class="form-control" id="social-insta"
-                             placeholder="Instagram URL">
-                  </div>
-              </div>
-              <div class="col-md-6">
-                  <label for="social-lin" class="form-label">LinkedIn</label>
-                  <div class="input-group">
-                      <span class="input-group-text"><ng-icon name="tablerBrandLinkedin"/></span>
-                      <input type="text" class="form-control" id="social-lin"
-                             placeholder="LinkedIn Profile">
-                  </div>
-              </div>
-              <div class="col-md-6">
-                  <label for="social-gh" class="form-label">GitHub</label>
-                  <div class="input-group">
-                      <span class="input-group-text"><ng-icon name="tablerBrandGithub"/></span>
-                      <input type="text" class="form-control" id="social-gh"
-                             placeholder="GitHub Username">
-                  </div>
-              </div>
-              <div class="col-md-6">
-                  <label for="social-sky" class="form-label">Skype</label>
-                  <div class="input-group">
-                      <span class="input-group-text"><ng-icon name="tablerBrandSkype"/></span>
-                      <input type="text" class="form-control" id="social-sky" placeholder="@username">
-                  </div>
-              </div>
-          </div>
-
-
-          <div class="text-end mt-4">
-              <button type="submit" class="btn btn-success"><ng-icon name="tablerDeviceFloppy" class="me-1"/>
-                  Save Changes
-              </button>
-          </div>
-      </form>
+          </form>
+      }
   `,
   styles: ``
 })
-export class Settings {
+export class Settings implements OnChanges {
+    @Input() user: UserResponse | null = null;
+    @Output() profileUpdated = new EventEmitter<void>();
 
+    formModel: UpdateUserRequest = {
+        name: '',
+        lastName: '',
+        gender: '',
+        isBlocked: false,
+        phoneNumber: null,
+        photoUrl: null
+    };
+
+    saving = false;
+    successMessage = '';
+    errorMessage = '';
+
+    constructor(private userService: UserService) {}
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['user'] && this.user) {
+            this.formModel = {
+                name: this.user.name || '',
+                lastName: this.user.lastName || '',
+                gender: this.user.gender || '',
+                isBlocked: this.user.isBlocked,
+                phoneNumber: this.user.phoneNumber || null,
+                photoUrl: this.user.photoUrl || null
+            };
+        }
+    }
+
+    async onSubmit(): Promise<void> {
+        if (!this.user) return;
+        this.saving = true;
+        this.successMessage = '';
+        this.errorMessage = '';
+        try {
+            const response = await this.userService.updateUser(this.user.id, this.formModel);
+            if (response.isSuccess) {
+                this.successMessage = 'Profil bilgileri başarıyla güncellendi.';
+                this.profileUpdated.emit();
+            } else {
+                this.errorMessage = response.errorCode || 'Güncelleme sırasında bir hata oluştu.';
+            }
+        } catch {
+            this.errorMessage = 'Profil güncellenirken bir hata oluştu.';
+        } finally {
+            this.saving = false;
+        }
+    }
 }

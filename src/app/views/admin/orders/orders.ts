@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { OrdersService } from '@/app/core/services/orders.service';
 import { OrderStatusesService } from '@/app/core/services/order-statuses.service';
 import { PaymentTypesService } from '@/app/core/services/payment-types.service';
+import { AuthStateService } from '@core/services/auth-state.service';
 import { OrderWithCustomerResponse, OrderFilterRequest } from '@/app/core/models/order/order.models';
 
 @Component({
@@ -42,6 +43,7 @@ export class OrdersPage implements OnInit {
         private service: OrdersService,
         private orderStatusesService: OrderStatusesService,
         private paymentTypesService: PaymentTypesService,
+        private authStateService: AuthStateService,
         private router: Router
     ) {}
 
@@ -66,8 +68,7 @@ export class OrdersPage implements OnInit {
     async loadItems(): Promise<void> {
         this.loading = true;
         try {
-            const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-            const companyId = profile.companyId || '';
+            const companyId = this.authStateService.profile?.companyId ?? '';
 
             if (!companyId) {
                 console.error('Company ID bulunamadı');
@@ -90,7 +91,7 @@ export class OrdersPage implements OnInit {
 
             const response = await this.service.getByCompanyPaged(filter);
             const paged = response?.data;
-            this.items = paged?.items ?? [];
+            this.items = this.extractArray(paged?.items ?? paged);
             this.totalCount = paged?.totalCount ?? this.items.length;
             this.totalPages = paged?.totalPages ?? Math.max(1, Math.ceil(this.totalCount / this.pageSize));
             this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);

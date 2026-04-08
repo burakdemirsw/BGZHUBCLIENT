@@ -65,8 +65,8 @@ export interface OrderWithCustomerResponse {
     orderStatus?: OrderStatusSummary;
     paymentType?: PaymentTypeSummary;
     customer?: OrderCustomerSummary;
-    orderItems: OrderItemSummary[];
-    orderPayments: OrderPaymentSummary[];
+    orderItems: OrderItemSummary[] | null;
+    orderPayments: OrderPaymentSummary[] | null;
     address?: OrderAddressSummary;
 }
 
