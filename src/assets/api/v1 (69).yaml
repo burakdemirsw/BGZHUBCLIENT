@@ -12305,6 +12305,284 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfUserRequestMessageResponse"
       security:
         - Bearer: []
+  /api/AwsS3Settings:
+    get:
+      tags:
+        - AwsS3Settings
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfAwsS3SettingResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfAwsS3SettingResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfAwsS3SettingResponse"
+      security:
+        - Bearer: []
+    post:
+      tags:
+        - AwsS3Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAwsS3SettingRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateAwsS3SettingRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateAwsS3SettingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAwsS3SettingResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAwsS3SettingResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAwsS3SettingResponse"
+      security:
+        - Bearer: []
+  /api/AwsS3Settings/{id}:
+    get:
+      tags:
+        - AwsS3Settings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAwsS3SettingResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAwsS3SettingResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAwsS3SettingResponse"
+      security:
+        - Bearer: []
+  /api/AwsS3Settings/update/{id}:
+    post:
+      tags:
+        - AwsS3Settings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAwsS3SettingRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAwsS3SettingRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateAwsS3SettingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/AwsS3Settings/delete/{id}:
+    post:
+      tags:
+        - AwsS3Settings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/CloudinarySettings:
+    get:
+      tags:
+        - CloudinarySettings
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfCloudinarySettingResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfCloudinarySettingResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfCloudinarySettingResponse"
+      security:
+        - Bearer: []
+    post:
+      tags:
+        - CloudinarySettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCloudinarySettingRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateCloudinarySettingRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateCloudinarySettingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCloudinarySettingResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCloudinarySettingResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCloudinarySettingResponse"
+      security:
+        - Bearer: []
+  /api/CloudinarySettings/{id}:
+    get:
+      tags:
+        - CloudinarySettings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCloudinarySettingResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCloudinarySettingResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCloudinarySettingResponse"
+      security:
+        - Bearer: []
+  /api/CloudinarySettings/update/{id}:
+    post:
+      tags:
+        - CloudinarySettings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCloudinarySettingRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCloudinarySettingRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateCloudinarySettingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/CloudinarySettings/delete/{id}:
+    post:
+      tags:
+        - CloudinarySettings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
   /api/MailSettings:
     get:
       tags:
@@ -18981,6 +19259,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfAwsS3SettingResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/AwsS3SettingResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfboolean:
       type: object
       properties:
@@ -19120,6 +19430,38 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/CityResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfCloudinarySettingResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/CloudinarySettingResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -20753,6 +21095,40 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfListOfAwsS3SettingResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/AwsS3SettingResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfListOfCityResponse:
       type: object
       properties:
@@ -20768,6 +21144,40 @@ components:
             - array
           items:
             $ref: "#/components/schemas/CityResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfListOfCloudinarySettingResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/CloudinarySettingResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -26341,6 +26751,48 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/ActivePlanInfo"
+    AwsS3SettingResponse:
+      required:
+        - id
+        - region
+        - bucketName
+        - accessKey
+        - secretKey
+        - isActive
+        - isBlocked
+        - createdDate
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        region:
+          type:
+            - "null"
+            - string
+        bucketName:
+          type:
+            - "null"
+            - string
+        accessKey:
+          type:
+            - "null"
+            - string
+        secretKey:
+          type:
+            - "null"
+            - string
+        isActive:
+          type: boolean
+        isBlocked:
+          type: boolean
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
     Base64UploadRequest:
       required:
         - base64Data
@@ -26532,6 +26984,43 @@ components:
           type:
             - "null"
             - string
+        isBlocked:
+          type: boolean
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+    CloudinarySettingResponse:
+      required:
+        - id
+        - cloudName
+        - apiKey
+        - apiSecret
+        - isActive
+        - isBlocked
+        - createdDate
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        cloudName:
+          type:
+            - "null"
+            - string
+        apiKey:
+          type:
+            - "null"
+            - string
+        apiSecret:
+          type:
+            - "null"
+            - string
+        isActive:
+          type: boolean
         isBlocked:
           type: boolean
         createdDate:
@@ -27804,6 +28293,33 @@ components:
           type:
             - "null"
             - string
+    CreateAwsS3SettingRequest:
+      required:
+        - region
+        - bucketName
+        - accessKey
+        - secretKey
+        - isActive
+      type: object
+      properties:
+        region:
+          type:
+            - "null"
+            - string
+        bucketName:
+          type:
+            - "null"
+            - string
+        accessKey:
+          type:
+            - "null"
+            - string
+        secretKey:
+          type:
+            - "null"
+            - string
+        isActive:
+          type: boolean
     CreateBulkRoleUserRequest:
       required:
         - roleUsers
@@ -27833,6 +28349,28 @@ components:
           type:
             - "null"
             - string
+    CreateCloudinarySettingRequest:
+      required:
+        - cloudName
+        - apiKey
+        - apiSecret
+        - isActive
+      type: object
+      properties:
+        cloudName:
+          type:
+            - "null"
+            - string
+        apiKey:
+          type:
+            - "null"
+            - string
+        apiSecret:
+          type:
+            - "null"
+            - string
+        isActive:
+          type: boolean
     CreateCompanyRequest:
       required:
         - name
@@ -37374,6 +37912,36 @@ components:
             - string
         isBlocked:
           type: boolean
+    UpdateAwsS3SettingRequest:
+      required:
+        - region
+        - bucketName
+        - accessKey
+        - secretKey
+        - isActive
+        - isBlocked
+      type: object
+      properties:
+        region:
+          type:
+            - "null"
+            - string
+        bucketName:
+          type:
+            - "null"
+            - string
+        accessKey:
+          type:
+            - "null"
+            - string
+        secretKey:
+          type:
+            - "null"
+            - string
+        isActive:
+          type: boolean
+        isBlocked:
+          type: boolean
     UpdateCityRequest:
       required:
         - countryId
@@ -37393,6 +37961,31 @@ components:
           type:
             - "null"
             - string
+        isBlocked:
+          type: boolean
+    UpdateCloudinarySettingRequest:
+      required:
+        - cloudName
+        - apiKey
+        - apiSecret
+        - isActive
+        - isBlocked
+      type: object
+      properties:
+        cloudName:
+          type:
+            - "null"
+            - string
+        apiKey:
+          type:
+            - "null"
+            - string
+        apiSecret:
+          type:
+            - "null"
+            - string
+        isActive:
+          type: boolean
         isBlocked:
           type: boolean
     UpdateCompanyRequest:
@@ -39818,6 +40411,8 @@ tags:
   - name: RequestPriorities
   - name: RequestStatuses
   - name: UserRequests
+  - name: AwsS3Settings
+  - name: CloudinarySettings
   - name: MailSettings
   - name: NetGsmSettings
   - name: Teams

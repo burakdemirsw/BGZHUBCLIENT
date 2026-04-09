@@ -1,20 +1,4 @@
 <div class="container-fluid mt-3">
-    <div class="row">
-        <div class="col-12">
-            <article class="card overflow-hidden mb-0">
-                <div class="position-relative card-side-img overflow-hidden"
-                     style="min-height: 300px; background-image: url(assets/images/profile-bg.jpg);">
-                    <div
-                        class="p-4 card-img-overlay rounded-start-0 auth-overlay d-flex align-items-center flex-column justify-content-center">
-                        @if (user) {
-                            <h3 class="text-white mb-1 fst-italic">{{ user.name }} {{ user.lastName }}</h3>
-                            <p class="text-white mb-4">{{ user.email }}</p>
-                        }
-                    </div>
-                </div>
-            </article>
-        </div>
-    </div>
 
     @if (loading) {
         <div class="d-flex align-items-center justify-content-center gap-2 p-5">
@@ -22,15 +6,71 @@
             <span>Yükleniyor...</span>
         </div>
     } @else if (user) {
-        <div class="px-3 mt-n4">
-            <div class="row">
-                <div class="col-xl-4">
-                    <app-profile-card [user]="user"/>
-                </div>
 
-                <div class="col-xl-8">
-                    <app-account [user]="user" (profileUpdated)="onProfileUpdated()"/>
+        <!-- Animated Profile Header -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="profile-header">
+                    <div class="profile-header-shapes">
+                        <div class="ph-shape s1"><i class="fa-solid fa-user-shield"></i></div>
+                        <div class="ph-shape s2"><i class="fa-solid fa-envelope"></i></div>
+                        <div class="ph-shape s3"><i class="fa-solid fa-bolt"></i></div>
+                        <div class="ph-shape s4"><i class="fa-solid fa-gear"></i></div>
+                        <div class="ph-shape s5"><i class="fa-solid fa-star"></i></div>
+                    </div>
+
+                    <div class="profile-header-content">
+                        <div class="profile-header-avatar">
+                            @if (user.photoUrl) {
+                                <img [src]="user.photoUrl" alt="avatar">
+                            } @else {
+                                {{ getInitials() }}
+                            }
+                        </div>
+                        <div class="profile-header-info">
+                            <h3>{{ user.name }} {{ user.lastName }}</h3>
+                            <p>{{ user.email }}</p>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                @if (user.isBlocked) {
+                                    <span class="badge bg-danger">Engelli</span>
+                                } @else {
+                                    <span class="badge bg-success">Aktif</span>
+                                }
+                                @if (user.isMailConfirmed) {
+                                    <span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>E-posta Onaylı</span>
+                                } @else {
+                                    <span class="badge bg-warning text-dark"><i class="fa-solid fa-exclamation-triangle me-1"></i>E-posta Onaylanmadı</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- E-posta Onayı Uyarı Şeridi -->
+        @if (!user.isMailConfirmed) {
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="mail-confirm-strip">
+                        <i class="fa-solid fa-triangle-exclamation mail-confirm-icon"></i>
+                        <span class="mail-confirm-text">E-posta adresiniz henüz onaylanmadı. Lütfen gelen kutunuzu kontrol edin veya yeni bir onay maili gönderin.</span>
+                        <button class="btn btn-sm btn-warning" (click)="sendConfirmMail()" [disabled]="sendingMail">
+                            <i class="fa-solid fa-envelope me-1"></i>
+                            {{ sendingMail ? 'Gönderiliyor...' : 'Onay Maili Gönder' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-xl-4">
+                <app-profile-card [user]="user"/>
+            </div>
+
+            <div class="col-xl-8">
+                <app-account [user]="user" (profileUpdated)="onProfileUpdated()"/>
             </div>
         </div>
     }

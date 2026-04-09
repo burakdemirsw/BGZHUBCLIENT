@@ -7,6 +7,8 @@ import { RolesPage } from './roles/roles';
 import { MenusPage } from './menus/menus';
 import { MailSettingsPage } from './mail-settings/mail-settings';
 import { NetGsmSettingsPage } from './netgsm-settings/netgsm-settings';
+import { CloudinarySettingsPage } from './cloudinary-settings/cloudinary-settings';
+import { AwsS3SettingsPage } from './aws-s3-settings/aws-s3-settings';
 import { CountriesPage } from './countries/countries';
 import { CitiesPage } from './cities/cities';  
 import { DistrictsPage } from './districts/districts';
@@ -579,6 +581,18 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/tax-offices',
         component: TaxOfficesPage,
         data: { title: 'Vergi Daireleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/cloudinary-settings',
+        component: CloudinarySettingsPage,
+        data: { title: 'Cloudinary Ayarları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/aws-s3-settings',
+        component: AwsS3SettingsPage,
+        data: { title: 'AWS S3 Ayarları' },
         canActivate: [AuthGuard],
     },
     {

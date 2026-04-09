@@ -12,11 +12,12 @@ import { UserResponse } from '@core/models/user/user.models';
         Account
     ],
   templateUrl: './profile.html',
-  styles: ``
+  styleUrl: './profile.scss'
 })
 export class Profile implements OnInit {
   user: UserResponse | null = null;
   loading = true;
+  sendingMail = false;
 
   constructor(
     private userService: UserService,
@@ -40,6 +41,27 @@ export class Profile implements OnInit {
       console.error('Profil yüklenirken hata:', error);
     } finally {
       this.loading = false;
+    }
+  }
+
+  getInitials(): string {
+    const n = this.user?.name?.charAt(0) ?? '';
+    const l = this.user?.lastName?.charAt(0) ?? '';
+    return (n + l).toUpperCase();
+  }
+
+  async sendConfirmMail(): Promise<void> {
+    if (!this.user) return;
+    this.sendingMail = true;
+    try {
+      await this.userService.sendConfirmMail(this.user.id);
+      alert('Onay maili başarıyla gönderildi.');
+      await this.loadProfile();
+    } catch (err) {
+      console.error('Send confirm mail error:', err);
+      alert('Onay maili gönderilirken hata oluştu.');
+    } finally {
+      this.sendingMail = false;
     }
   }
 

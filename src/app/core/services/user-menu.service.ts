@@ -63,15 +63,15 @@ export class UserMenuService {
           .map(rm => rm.menuId)
       );
 
-      // 4) Filtrelenmiş menüleri al (engelli olmayanlar + kullanıcıya atanmış)
-      const allowedMenus = allMenus.filter(m => !m.isBlocked && allowedMenuIds.has(m.id));
+      // 4) Filtrelenmiş menüleri al (engelli olmayanlar + görünür olanlar + kullanıcıya atanmış)
+      const allowedMenus = allMenus.filter(m => !m.isBlocked && !m.isInvisible && allowedMenuIds.has(m.id));
 
       // 5) Parent menülerini de ekle (eğer child'ı varsa parent'ı da göster)
       const finalMenuIds = new Set(allowedMenus.map(m => m.id));
       for (const menu of allowedMenus) {
         if (menu.parentId && !finalMenuIds.has(menu.parentId)) {
           const parent = allMenus.find(m => m.id === menu.parentId);
-          if (parent && !parent.isBlocked) {
+          if (parent && !parent.isBlocked && !parent.isInvisible) {
             finalMenuIds.add(parent.id);
           }
         }

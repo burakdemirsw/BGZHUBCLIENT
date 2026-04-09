@@ -148,7 +148,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
 
     // Right sidebar
     detailSections: SidebarSection[] = [];
-    showDetails = true;
+    showDetails = false;
     detailsActiveTab: 'details' | 'copilot' = 'details';
 
     // Tags
@@ -413,7 +413,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     /** AI Chat butonuna basıldığında çalışır */
-    async sendAiChat(): Promise<void> {
+    async   sendAiChat(): Promise<void> {
         if (!this.selectedConversation  ) return;
 
         const lastCustomerMsg = [...this.messages].reverse().find(m => m.source === 'user');

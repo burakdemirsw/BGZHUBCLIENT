@@ -48,8 +48,8 @@ export const APP_CHANNELS: AppChannel[] = [
         description: 'Trendyol pazaryeri entegrasyonu ile siparişlerinizi takip edin, müşteri sorularını yanıtlayın ve satışlarınızı artırın.',
         icon: 'fa-solid fa-store',
         iconBgColor: '#f27a1a',
-        status: 'coming-soon',
-        statusLabel: 'Yakında',
+        status: 'inactive',
+        statusLabel: 'Bağlı Değil',
         imageUrl: 'assets/images/logos/trendyol.png',
     },
     {

@@ -5,8 +5,10 @@ import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { InstagramService } from '@/app/core/services/instagram.service';
 import { FacebookLoginService, FacebookConfig } from '@/app/core/services/facebook-login.service';
 import { SocialMediaService } from '@/app/core/services/social-media.service';
+import { TrendyolService } from '@/app/core/services/trendyol.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { ConnectTicimaxRequest, UpdateTicimaxRequest, TicimaxShipmentDto } from '@/app/core/models/integration/integration-ticimax.models';
+import { ConnectTrendyolRequest, UpdateTrendyolRequest } from '@/app/core/models/integration/integration-trendyol.models';
 import { Integration } from '@/app/core/models/integration/integration.models';
 import { IntegrationUserSummary } from '@/app/core/models/integration/company-integrations.models';
 import { IntegrationProperty } from '@/app/core/models/integration/integration-property.models';
@@ -30,6 +32,12 @@ interface TicimaxForm {
     webServisKodu: string;
     site: string;
     kargoFirmaId: number | null;
+}
+
+interface TrendyolForm {
+    supplierId: string;
+    apiKey: string;
+    apiSecret: string;
 }
 
 @Component({
@@ -80,6 +88,12 @@ export class AppsPage implements OnInit, OnDestroy {
     instagramResult: 'success' | 'fail' | null = null;
     instagramErrorMessage = '';
 
+    // Trendyol modal
+    showTrendyolModal = false;
+    savingTrendyol = false;
+    trendyolForm: TrendyolForm = this.getEmptyTrendyolForm();
+    private trendyolIntegrationId = '';
+
     // Facebook Graph API config (Instagram uses Meta Login)
     private fbConfig: FacebookConfig = {
         appId: '2082246998779710',
@@ -100,7 +114,8 @@ export class AppsPage implements OnInit, OnDestroy {
         private instagramService: InstagramService,
         private facebookLoginService: FacebookLoginService,
         private socialMediaService: SocialMediaService,
-        private authStateService: AuthStateService
+        private authStateService: AuthStateService,
+        private trendyolService: TrendyolService
     ) {
         this.initChannels();
         this.applyFilter();
@@ -157,6 +172,8 @@ export class AppsPage implements OnInit, OnDestroy {
             this.openTicimaxModal();
         } else if (channel.name === 'Instagram' || channel.id === '6') {
             this.openInstagramModal();
+        } else if (channel.name === 'Trendyol' || channel.id === '4') {
+            this.openTrendyolModal();
         }
     }
 
@@ -170,7 +187,8 @@ export class AppsPage implements OnInit, OnDestroy {
 
     isChannelConnectable(channel: AppChannel): boolean {
         return channel.name === 'Ticimax' || channel.id === '1'
-            || channel.name === 'Instagram' || channel.id === '6';
+            || channel.name === 'Instagram' || channel.id === '6'
+            || channel.name === 'Trendyol' || channel.id === '4';
     }
 
     onConnectedAppClick(channel: AppChannel): void {
@@ -179,6 +197,8 @@ export class AppsPage implements OnInit, OnDestroy {
         } else if (this.isSameIntegrationName(channel.name, 'Instagram')) {
             // Instagram bağlıyken tıklanırsa bilgi göster
             this.openInstagramModal();
+        } else if (this.isSameIntegrationName(channel.name, 'Trendyol')) {
+            this.openTrendyolEditModal(channel);
         }
     }
 
@@ -541,6 +561,157 @@ export class AppsPage implements OnInit, OnDestroy {
             this.instagramErrorMessage = err instanceof Error ? err.message : 'Instagram bağlantısı sırasında hata oluştu.';
         } finally {
             this.connectingInstagram = false;
+        }
+    }
+
+    // --- Trendyol Modal ---
+    private getEmptyTrendyolForm(): TrendyolForm {
+        return {
+            supplierId: '',
+            apiKey: '',
+            apiSecret: '',
+        };
+    }
+
+    openTrendyolModal(): void {
+        this.isEditMode = false;
+        this.editingIntegrationUserId = '';
+        this.testResult = null;
+        this.trendyolForm = this.getEmptyTrendyolForm();
+        this.showTrendyolModal = true;
+    }
+
+    openTrendyolEditModal(channel: AppChannel): void {
+        this.isEditMode = true;
+        this.editingIntegrationUserId = channel.id;
+        this.testResult = null;
+        this.trendyolForm = this.getEmptyTrendyolForm();
+
+        // Property'lerden form'u doldur
+        const props = this.allIntegrationProperties.filter(
+            (p) => p.integrationUserId === channel.id
+        );
+        for (const p of props) {
+            const key = (p.key || '').toLowerCase().replace(/[\s_\-]/g, '');
+            const val = (p.value || '').trim();
+            if (key === 'supplierid') {
+                this.trendyolForm.supplierId = val;
+            } else if (key === 'apikey') {
+                this.trendyolForm.apiKey = val;
+            } else if (key === 'apisecret') {
+                this.trendyolForm.apiSecret = val;
+            }
+        }
+
+        this.showTrendyolModal = true;
+    }
+
+    closeTrendyolModal(): void {
+        this.showTrendyolModal = false;
+    }
+
+    async saveTrendyol(): Promise<void> {
+        if (!this.trendyolForm.supplierId || !this.trendyolForm.apiKey || !this.trendyolForm.apiSecret) {
+            alert('Lütfen tüm alanları doldurun.');
+            return;
+        }
+        this.savingTrendyol = true;
+        this.testResult = null;
+        try {
+            const integrationId = await this.getTrendyolIntegrationId();
+
+            if (!this.isGuid(integrationId)) {
+                alert('Trendyol IntegrationId bulunamadı. Lütfen entegrasyon kaydını kontrol edin.');
+                return;
+            }
+
+            if (this.isEditMode && this.isGuid(this.editingIntegrationUserId)) {
+                // Update
+                const updateRequest: UpdateTrendyolRequest = {
+                    supplierId: this.trendyolForm.supplierId.trim(),
+                    apiKey: this.trendyolForm.apiKey.trim(),
+                    apiSecret: this.trendyolForm.apiSecret.trim(),
+                };
+
+                const response = await this.trendyolService.update(this.editingIntegrationUserId, updateRequest);
+                if (!response.isSuccess) {
+                    throw new Error(response.innerError || response.errorCode || 'Trendyol güncelleme başarısız.');
+                }
+                alert('Trendyol entegrasyonu başarıyla güncellendi!');
+            } else {
+                // Connect
+                const connectRequest: ConnectTrendyolRequest = {
+                    supplierId: this.trendyolForm.supplierId.trim(),
+                    apiKey: this.trendyolForm.apiKey.trim(),
+                    apiSecret: this.trendyolForm.apiSecret.trim(),
+                };
+
+                const response = await this.trendyolService.connect(connectRequest);
+                if (!response.isSuccess) {
+                    throw new Error(response.innerError || response.errorCode || 'Trendyol bağlantısı başarısız.');
+                }
+                alert('Trendyol entegrasyonu başarıyla eklendi!');
+            }
+
+            this.closeTrendyolModal();
+            void this.loadConnectedChannels();
+        } catch (err) {
+            console.error('Trendyol save error:', err);
+            alert(err instanceof Error ? err.message : 'Trendyol kaydedilemedi.');
+        } finally {
+            this.savingTrendyol = false;
+        }
+    }
+
+    async testTrendyolConnection(): Promise<void> {
+        if (!this.trendyolForm.supplierId || !this.trendyolForm.apiKey || !this.trendyolForm.apiSecret) {
+            alert('Lütfen tüm alanları doldurun.');
+            return;
+        }
+        this.testingConnection = true;
+        this.testResult = null;
+        try {
+            const testRequest: ConnectTrendyolRequest = {
+                supplierId: this.trendyolForm.supplierId.trim(),
+                apiKey: this.trendyolForm.apiKey.trim(),
+                apiSecret: this.trendyolForm.apiSecret.trim(),
+            };
+
+            const response = await this.trendyolService.testConnection(testRequest);
+            if (response.isSuccess) {
+                this.testResult = 'success';
+            } else {
+                this.testResult = 'fail';
+                alert(response.innerError || response.errorCode || 'Bağlantı testi başarısız.');
+            }
+        } catch (err) {
+            console.error('Trendyol test error:', err);
+            this.testResult = 'fail';
+            alert(err instanceof Error ? err.message : 'Bağlantı testi sırasında hata oluştu.');
+        } finally {
+            this.testingConnection = false;
+        }
+    }
+
+    private async getTrendyolIntegrationId(): Promise<string> {
+        if (this.isGuid(this.trendyolIntegrationId)) {
+            return this.trendyolIntegrationId;
+        }
+
+        const fallbackCardId = this.channels.find((ch) => ch.name.toLowerCase() === 'trendyol')?.id || '';
+        if (this.isGuid(fallbackCardId)) {
+            this.trendyolIntegrationId = fallbackCardId;
+            return fallbackCardId;
+        }
+
+        try {
+            const response = await this.integrationsService.getAll();
+            const items = this.extractArray<Integration>(response.data);
+            const trendyol = items.find((x) => (x.integrationDescription || '').toLowerCase().includes('trendyol'));
+            this.trendyolIntegrationId = trendyol?.id || '';
+            return this.trendyolIntegrationId;
+        } catch {
+            return '';
         }
     }
 

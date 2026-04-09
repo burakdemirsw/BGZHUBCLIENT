@@ -577,3 +577,122 @@
     </div>
 </div>
 }
+<!-- Trendyol Modal -->
+@if (showTrendyolModal) {
+<div class="modal-backdrop-custom" (click)="closeTrendyolModal()"></div>
+<div class="modal d-block show" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content connect-modal">
+            <div class="modal-header" style="background: linear-gradient(135deg, #f27a1a, #ff6000); border-bottom: none;">
+                <div class="d-flex align-items-center">
+                    <div class="app-icon-wrapper me-3" style="background: rgba(255,255,255,0.2);">
+                        <i class="fa-solid fa-store text-white" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title mb-0 text-white">
+                            @if (isEditMode) {
+                                Trendyol Entegrasyonunu Düzenle
+                            } @else {
+                                Trendyol Entegrasyonu
+                            }
+                        </h5>
+                        <small class="text-white-50">Trendyol API bilgilerinizi girin</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" (click)="closeTrendyolModal()"></button>
+            </div>
+            <div class="modal-body" style="background-color: #f7f7f9;">
+                <div class="bg-white rounded-3 p-3 mb-3">
+                    <div class="alert alert-info d-flex align-items-start py-2 mb-3" role="alert" style="background-color: #e7f3ff; border-color: #b3d9ff;">
+                        <i class="fa-solid fa-circle-info me-2 mt-1" style="color: #0066cc;"></i>
+                        <small class="text-muted">
+                            Trendyol entegrasyonu için Supplier ID, API Key ve API Secret bilgilerinize ihtiyacınız var.
+                            Bu bilgilere Trendyol Seller Office → Entegrasyonlar bölümünden ulaşabilirsiniz.
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Supplier ID <span class="text-danger">*</span></label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            [(ngModel)]="trendyolForm.supplierId"
+                            placeholder="Supplier ID'nizi girin"
+                        />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">API Key <span class="text-danger">*</span></label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            [(ngModel)]="trendyolForm.apiKey"
+                            placeholder="API Key'inizi girin"
+                        />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">API Secret <span class="text-danger">*</span></label>
+                        <input
+                            type="password"
+                            class="form-control"
+                            [(ngModel)]="trendyolForm.apiSecret"
+                            placeholder="API Secret'ınızı girin"
+                        />
+                    </div>
+                </div>
+
+                <!-- Test Connection Button -->
+                <div class="text-center mb-3">
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary btn-sm"
+                        [disabled]="testingConnection || !trendyolForm.supplierId || !trendyolForm.apiKey || !trendyolForm.apiSecret"
+                        (click)="testTrendyolConnection()"
+                    >
+                        @if (testingConnection) {
+                            <span class="spinner-border spinner-border-sm me-1"></span> Test ediliyor...
+                        } @else {
+                            <i class="fa-solid fa-vial me-1"></i> Bağlantıyı Test Et
+                        }
+                    </button>
+                </div>
+
+                <!-- Test Result -->
+                @if (testResult === 'success') {
+                    <div class="alert alert-success d-flex align-items-center py-2 mb-0" role="alert">
+                        <i class="fa-solid fa-circle-check me-2"></i>
+                        <small>Bağlantı testi başarılı! Bilgileriniz doğru.</small>
+                    </div>
+                } @else if (testResult === 'fail') {
+                    <div class="alert alert-danger d-flex align-items-center py-2 mb-0" role="alert">
+                        <i class="fa-solid fa-circle-xmark me-2"></i>
+                        <small>Bağlantı testi başarısız. Lütfen bilgilerinizi kontrol edin.</small>
+                    </div>
+                }
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" (click)="closeTrendyolModal()">
+                    İptal
+                </button>
+                <button
+                    type="button"
+                    class="btn text-white"
+                    style="background: linear-gradient(135deg, #f27a1a, #ff6000);"
+                    [disabled]="savingTrendyol || !trendyolForm.supplierId || !trendyolForm.apiKey || !trendyolForm.apiSecret"
+                    (click)="saveTrendyol()"
+                >
+                    @if (savingTrendyol) {
+                        <span class="spinner-border spinner-border-sm me-1"></span> Kaydediliyor...
+                    } @else if (isEditMode) {
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Güncelle
+                    } @else {
+                        <i class="fa-solid fa-plug me-1"></i> Bağlan
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+}

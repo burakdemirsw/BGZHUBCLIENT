@@ -78,4 +78,12 @@ export class UserService {
       request
     );
   }
+
+  /** Kullanıcıya e-posta onay maili gönderir */
+  sendConfirmMail(id: string): Promise<ApiResponse<object>> {
+    return this.httpClientService.post<object>(
+      { controller: 'Users', action: `send-confirm-mail/${id}` },
+      {}
+    );
+  }
 }

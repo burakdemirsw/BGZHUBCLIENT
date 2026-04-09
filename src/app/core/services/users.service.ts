@@ -41,4 +41,8 @@ export class UsersService {
   sendConfirmMail(id: string): Promise<ApiResponse<object>> {
     return this.http.post<object>({ controller: 'Users', action: `send-confirm-mail/${id}` }, {});
   }
+
+  confirmMail(id: string, token: string): Promise<ApiResponse<object>> {
+    return this.http.post<object>({ controller: 'Users', action: `confirm-mail/${id}`, queryString: `token=${encodeURIComponent(token)}` }, {});
+  }
 }

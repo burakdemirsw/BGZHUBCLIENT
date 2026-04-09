@@ -135,17 +135,6 @@ export class UsersPage implements OnInit {
         }
     }
 
-    async sendConfirmMail(user: UserResponse): Promise<void> {
-        if (confirm(`"${user.email}" adresine onay maili göndermek istediğinize emin misiniz?`)) {
-            try {
-                await this.usersService.sendConfirmMail(user.id);
-                alert('Onay maili başarıyla gönderildi.');
-            } catch (err) {
-                console.error('Send confirm mail error:', err);
-            }
-        }
-    }
-
     closeModal(): void {
         this.showModal = false;
     }

@@ -9,6 +9,7 @@ import { SuccessMail } from './success-mail/success-mail';
 import { LoginPin } from './login-pin/login-pin';
 import { DeleteAccount } from './delete-account/delete-account';
 import { FacebookCallbackPage } from './facebook-callback/facebook-callback';
+import { ConfirmMailPage } from './confirm-mail/confirm-mail';
 
 
 export const BASIC_ROUTES: Routes = [
@@ -61,5 +62,10 @@ export const BASIC_ROUTES: Routes = [
         path: 'auth/facebook/callback',
         component: FacebookCallbackPage,
         data: { title: 'Facebook Callback' },
+    },
+    {
+        path: 'auth/confirm-mail',
+        component: ConfirmMailPage,
+        data: { title: 'E-posta Onaylama' },
     },
 ];

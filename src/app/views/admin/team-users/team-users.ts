@@ -8,7 +8,7 @@ import { AuthStateService } from '@core/services/auth-state.service';
 import { TeamUserResponse, CreateTeamUserRequest, UpdateTeamUserRequest } from '@core/models/team-user/team-user.models';
 import { Team } from '@core/models/team/team.models';
 import { UserResponse } from '@core/models/user/user.models';
-import { PaginationRequest, PagedResult } from '@core/models/pagination.model';
+import { PaginationRequest } from '@core/models/pagination.model';
 
 @Component({
   selector: 'app-team-users-page',
@@ -60,18 +60,28 @@ export class TeamUsersPage implements OnInit {
   }
 
   async loadDropdownData(): Promise<void> {
+    // Takımları yükle
     try {
-      const [teamsRes, usersRes] = await Promise.all([
-        this.teamsService.getAll(),
-        this.usersService.getAll({ companyId: this.companyId, pageSize: 500 })
-      ]);
-      this.teamsList = this.extractArray(teamsRes?.data);
-      const usersData = usersRes?.data;
-      this.usersList = usersData instanceof PagedResult
-        ? usersData.items
-        : this.extractArray(usersData);
+      const teamsRes = await this.teamsService.getPaged({
+        companyId: this.companyId,
+        pageSize: 500
+      });
+      const teamsData: any = teamsRes?.data;
+      this.teamsList = teamsData?.items ?? this.extractArray(teamsData);
     } catch (err) {
-      console.error('Dropdown verileri yüklenemedi:', err);
+      console.error('Takım verileri yüklenemedi:', err);
+    }
+
+    // Kullanıcıları yükle
+    try {
+      const usersRes = await this.usersService.getAll({
+        companyId: this.companyId,
+        pageSize: 500
+      });
+      const usersData: any = usersRes?.data;
+      this.usersList = usersData?.items ?? this.extractArray(usersData);
+    } catch (err) {
+      console.error('Kullanıcı verileri yüklenemedi:', err);
     }
   }
 
