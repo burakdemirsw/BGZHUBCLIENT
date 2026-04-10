@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { AiRequestLogsPage } from './ai-request-logs/ai-request-logs';
 import { AiKnowledgePage } from './ai-knowledge/ai-knowledge';
 import { AiKnowledgeTypesPage } from './ai-knowledge-types/ai-knowledge-types';
-import { UsersPage } from './users/users';
 import { RolesPage } from './roles/roles';
 import { MenusPage } from './menus/menus';
 import { MailSettingsPage } from './mail-settings/mail-settings';
@@ -77,7 +76,6 @@ import { SubscriptionsPage } from './subscriptions/subscriptions';
 import { SubscriptionPaymentsPage } from './subscription-payments/subscription-payments';
 import { SubscriptionUsagesPage } from './subscription-usages/subscription-usages';
 import { NeighbourhoodsPage } from './neighbourhoods/neighbourhoods';
-import { CompanySettingsPage } from './company-settings/company-settings';
 import { AppsPage } from './apps/apps';
 import { SetupWizardPage } from './setup-wizard/setup-wizard';
 import { ConversationTypesPage } from './conversation-types/conversation-types';
@@ -86,12 +84,6 @@ import { Profile } from '@/app/views/apps/users/profile/profile';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
-    {
-        path: 'admin/users',
-        component: UsersPage,
-        data: { title: 'Kullanıcılar' },
-        canActivate: [AuthGuard],
-    },
     {
         path: 'admin/roles',
         component: RolesPage,
@@ -551,12 +543,6 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/neighbourhoods',
         component: NeighbourhoodsPage,
         data: { title: 'Mahalleler' },
-        canActivate: [AuthGuard],
-    },
-    {
-        path: 'admin/company-settings',
-        component: CompanySettingsPage,
-        data: { title: 'Şirket Ayarları' },
         canActivate: [AuthGuard],
     },
     {

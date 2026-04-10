@@ -54,11 +54,11 @@
             </div>
         </div>
         <div class="d-flex align-items-center gap-2">
-            @if (!editMode) {
+            @if (activeTab === 'company' && !editMode) {
                 <button class="btn btn-soft-primary btn-sm" (click)="enterEditMode()">
                     <i class="fa-solid fa-pen-to-square me-1"></i>Düzenle
                 </button>
-            } @else {
+            } @else if (activeTab === 'company' && editMode) {
                 <button class="btn btn-light btn-sm" (click)="cancelEdit()" [disabled]="saving">
                     <i class="fa-solid fa-xmark me-1"></i>İptal
                 </button>
@@ -76,6 +76,28 @@
             </span>
         </div>
     </div>
+
+    <!-- TABS -->
+    <ul class="nav nav-tabs nav-bordered mb-4" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link" [class.active]="activeTab === 'company'" (click)="switchTab('company')" style="cursor: pointer;">
+                <i class="fa-solid fa-building me-2"></i>Şirket Bilgileri
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" [class.active]="activeTab === 'users'" (click)="switchTab('users')" style="cursor: pointer;">
+                <i class="fa-solid fa-users me-2"></i>Kullanıcılar
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" [class.active]="activeTab === 'settings'" (click)="switchTab('settings')" style="cursor: pointer;">
+                <i class="fa-solid fa-gear me-2"></i>Şirket Ayarları
+            </a>
+        </li>
+    </ul>
+
+    <!-- TAB CONTENT: COMPANY -->
+    @if (activeTab === 'company') {
 
     <div class="row g-4">
         <!-- ═══ Sol: Şirket Kimlik Kartı ═══ -->
@@ -484,4 +506,324 @@
             }
         </div>
     </div>
+    }
+
+    <!-- TAB CONTENT: USERS -->
+    @if (activeTab === 'users') {
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-bottom">
+                        <h5 class="card-title mb-0">
+                            <i class="fa-solid fa-users me-2"></i>Kullanıcı Listesi
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (usersLoading) {
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <p class="mt-2 text-muted">Yükleniyor...</p>
+                            </div>
+                        } @else {
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="text-muted">Toplam: <strong>{{ usersTotalCount }}</strong> kayıt</div>
+                                <div style="max-width:300px">
+                                    <input type="text" class="form-control form-control-sm" placeholder="Ad, soyad veya e-posta ara..."
+                                           [(ngModel)]="userFilterText" (ngModelChange)="onUserFilterChange()">
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-centered table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Ad</th>
+                                            <th>Soyad</th>
+                                            <th>E-posta</th>
+                                            <th>Cinsiyet</th>
+                                            <th>Durum</th>
+                                            <th class="text-end">İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (user of pagedUsers; track user.id) {
+                                            <tr>
+                                                <td>{{ user.name }}</td>
+                                                <td>{{ user.lastName }}</td>
+                                                <td>{{ user.email }}</td>
+                                                <td>{{ user.gender }}</td>
+                                                <td>
+                                                    <span class="badge" [class]="user.isBlocked ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'">
+                                                        {{ user.isBlocked ? 'Engelli' : 'Aktif' }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <button class="btn btn-soft-primary btn-sm" (click)="openEditUser(user)">Düzenle</button>
+                                                </td>
+                                            </tr>
+                                        } @empty {
+                                            <tr><td colspan="6" class="text-center text-muted">Kullanıcı bulunamadı.</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="small text-muted">Sayfa {{ usersCurrentPage }} / {{ usersTotalPages }}</span>
+                                    <select class="form-select form-select-sm" style="width:auto" [(ngModel)]="usersPageSize" (ngModelChange)="onUsersPageSizeChange()">
+                                        @for (opt of usersPageSizeOptions; track opt) {
+                                            <option [ngValue]="opt">{{ opt }}</option>
+                                        }
+                                    </select>
+                                    <span class="small text-muted">kayıt/sayfa</span>
+                                </div>
+                                @if (usersTotalPages > 1) {
+                                    <nav>
+                                        <ul class="pagination pagination-sm mb-0">
+                                            <li class="page-item" [class.disabled]="usersCurrentPage === 1">
+                                                <button class="page-link" (click)="setUsersPage(usersCurrentPage - 1)" [disabled]="usersCurrentPage === 1">&laquo;</button>
+                                            </li>
+                                            @for (p of usersTotalPagesArray; track p) {
+                                                <li class="page-item" [class.active]="p === usersCurrentPage">
+                                                    <button class="page-link" (click)="setUsersPage(p)">{{ p }}</button>
+                                                </li>
+                                            }
+                                            <li class="page-item" [class.disabled]="usersCurrentPage === usersTotalPages">
+                                                <button class="page-link" (click)="setUsersPage(usersCurrentPage + 1)" [disabled]="usersCurrentPage === usersTotalPages">&raquo;</button>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Edit Modal -->
+        @if (showUserModal) {
+            <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Kullanıcı Düzenle</h5>
+                            <button type="button" class="btn-close" (click)="closeUserModal()"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form>
+                                <div class="mb-3">
+                                    <label class="form-label">Ad</label>
+                                    <input type="text" class="form-control" [(ngModel)]="userForm.name" name="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Soyad</label>
+                                    <input type="text" class="form-control" [(ngModel)]="userForm.lastName" name="lastName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Cinsiyet</label>
+                                    <select class="form-select" [(ngModel)]="userForm.gender" name="gender">
+                                        <option value="Erkek">Erkek</option>
+                                        <option value="Kadın">Kadın</option>
+                                        <option value="Diğer">Diğer</option>
+                                    </select>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="userForm.isBlocked" name="isBlocked" id="isBlocked">
+                                    <label class="form-check-label" for="isBlocked">Engelli</label>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" (click)="closeUserModal()">İptal</button>
+                            <button type="button" class="btn btn-primary" (click)="saveUser()">Güncelle</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <!-- TAB CONTENT: SETTINGS -->
+    @if (activeTab === 'settings') {
+        <div class="row">
+            <div class="col-12 col-lg-10 col-xl-8 mx-auto">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-bottom">
+                        <h5 class="card-title mb-0">
+                            <i class="fa-solid fa-gear me-2"></i>Şirket Ayarları
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (settingsLoading) {
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <p class="mt-2 text-muted">Yükleniyor...</p>
+                            </div>
+                        } @else {
+                            @if (settingsSuccessMessage) {
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fa-solid fa-circle-check me-1"></i> {{ settingsSuccessMessage }}
+                                    <button type="button" class="btn-close" (click)="settingsSuccessMessage = ''"></button>
+                                </div>
+                            }
+
+                            @if (settingsErrorMessage) {
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fa-solid fa-circle-exclamation me-1"></i> {{ settingsErrorMessage }}
+                                    <button type="button" class="btn-close" (click)="settingsErrorMessage = ''"></button>
+                                </div>
+                            }
+
+                            <form>
+                                <div class="setting-item mb-4 p-3 rounded" style="background: #f7f7f9; border: 1px solid #e9ecef;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <i class="fa-solid fa-shield-halved me-2 text-primary"></i>
+                                                İki Faktörlü Doğrulama (2FA)
+                                            </h6>
+                                            <p class="text-muted small mb-0">
+                                                Kullanıcıların giriş yaparken ek doğrulama adımı gerektirir. Güvenliği artırır.
+                                            </p>
+                                        </div>
+                                        <div class="form-check form-switch ms-3">
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="twoFactorAuth"
+                                                   [(ngModel)]="settingsForm.isTwoFactorAuthEnabled"
+                                                   name="isTwoFactorAuthEnabled"
+                                                   style="width: 3em; height: 1.5em; cursor: pointer;">
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        @if (settingsForm.isTwoFactorAuthEnabled) {
+                                            <span class="badge bg-success-subtle text-success">
+                                                <i class="fa-solid fa-check me-1"></i>Aktif
+                                            </span>
+                                        } @else {
+                                            <span class="badge bg-danger-subtle text-danger">
+                                                <i class="fa-solid fa-xmark me-1"></i>Pasif
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="setting-item mb-4 p-3 rounded" style="background: #f7f7f9; border: 1px solid #e9ecef;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <i class="fa-solid fa-robot me-2 text-success"></i>
+                                                Otomatik Yanıt
+                                            </h6>
+                                            <p class="text-muted small mb-0">
+                                                Gelen mesajlara AI tarafından otomatik yanıt verilmesini sağlar.
+                                            </p>
+                                        </div>
+                                        <div class="form-check form-switch ms-3">
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="autoReply"
+                                                   [(ngModel)]="settingsForm.isAutoReplyEnabled"
+                                                   name="isAutoReplyEnabled"
+                                                   style="width: 3em; height: 1.5em; cursor: pointer;">
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        @if (settingsForm.isAutoReplyEnabled) {
+                                            <span class="badge bg-success-subtle text-success">
+                                                <i class="fa-solid fa-check me-1"></i>Aktif
+                                            </span>
+                                        } @else {
+                                            <span class="badge bg-danger-subtle text-danger">
+                                                <i class="fa-solid fa-xmark me-1"></i>Pasif
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="setting-item mb-4 p-3 rounded" style="background: #f7f7f9; border: 1px solid #e9ecef;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <i class="fa-solid fa-clock me-2 text-warning"></i>
+                                                Çalışma Saatleri
+                                            </h6>
+                                            <p class="text-muted small mb-0">
+                                                AI otomatik yanıtlarının yalnızca belirlenen çalışma saatleri içinde gönderilmesini sağlar.
+                                            </p>
+                                        </div>
+                                        <div class="form-check form-switch ms-3">
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="useWorkHours"
+                                                   [(ngModel)]="settingsForm.isUseWorkHours"
+                                                   name="isUseWorkHours"
+                                                   style="width: 3em; height: 1.5em; cursor: pointer;">
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        @if (settingsForm.isUseWorkHours) {
+                                            <span class="badge bg-success-subtle text-success">
+                                                <i class="fa-solid fa-check me-1"></i>Aktif
+                                            </span>
+                                        } @else {
+                                            <span class="badge bg-danger-subtle text-danger">
+                                                <i class="fa-solid fa-xmark me-1"></i>Pasif
+                                            </span>
+                                        }
+                                    </div>
+
+                                    @if (settingsForm.isUseWorkHours) {
+                                        <div class="mt-3 pt-3 border-top">
+                                            <div class="row g-3">
+                                                <div class="col-sm-6">
+                                                    <label class="form-label small fw-semibold">
+                                                        <i class="fa-solid fa-right-to-bracket me-1 text-success"></i>Başlangıç Saati
+                                                    </label>
+                                                    <input type="time" class="form-control"
+                                                           [(ngModel)]="settingsForm.workHoursStart"
+                                                           name="workHoursStart">
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <label class="form-label small fw-semibold">
+                                                        <i class="fa-solid fa-right-from-bracket me-1 text-danger"></i>Bitiş Saati
+                                                    </label>
+                                                    <input type="time" class="form-control"
+                                                           [(ngModel)]="settingsForm.workHoursEnd"
+                                                           name="workHoursEnd">
+                                                </div>
+                                            </div>
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="fa-solid fa-info-circle me-1"></i>
+                                                    Mesai saatleri dışında gelen mesajlara AI otomatik yanıt vermeyecektir.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="d-flex justify-content-end mt-3">
+                                    <button class="btn btn-primary" type="button" (click)="saveSettings()" [disabled]="settingsSaving">
+                                        @if (settingsSaving) {
+                                            <i class="fa-solid fa-spinner fa-spin me-1"></i> Kaydediliyor...
+                                        } @else {
+                                            <i class="fa-solid fa-floppy-disk me-1"></i> Kaydet
+                                        }
+                                    </button>
+                                </div>
+                            </form>
+
+                            @if (setting) {
+                                <div class="mt-3 pt-3 border-top">
+                                    <small class="text-muted">
+                                        <i class="fa-solid fa-clock me-1"></i>
+                                        Son güncelleme: {{ setting.updatedDate | date:'dd.MM.yyyy HH:mm' }}
+                                    </small>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 }

@@ -63,6 +63,7 @@
         "ngx-countup": "^13.2.0",
         "ngx-daterangepicker-bootstrap": "^20.5.0",
         "ngx-dropzone-wrapper": "^17.0.0",
+        "ngx-facebook": "^3.0.0-0",
         "ngx-filepond": "^7.0.3",
         "ngx-mask": "^20.0.3",
         "ngx-masonry": "^14.0.1",

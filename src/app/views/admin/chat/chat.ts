@@ -118,6 +118,15 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
         private messagesService: MessagesService
     ) {}
 
+    @HostListener('window:resize')
+    onResize() {
+        // Ekran genişliği 992px'den büyükse mobile menüleri kapat
+        if (window.innerWidth > 991) {
+            this.isMobileSidebarOpen = false;
+            this.isMobileConvListOpen = true;
+        }
+    }
+
     teammates: OnlineUser[] = [];
     showTeammates = true;
     hubConnectionState: 'connected' | 'disconnected' | 'reconnecting' = 'disconnected';
@@ -150,6 +159,10 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     detailSections: SidebarSection[] = [];
     showDetails = false;
     detailsActiveTab: 'details' | 'copilot' = 'details';
+
+    // Mobile responsive
+    isMobileSidebarOpen = false;
+    isMobileConvListOpen = true; // Başlangıçta conversation listesi açık
 
     // Tags
     allTags: Tag[] = [];
@@ -185,7 +198,53 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     shortcutSearchText = '';
     selectedShortcutIndex = 0;
 
+    // Emoji picker
+    showEmojiPicker = false;
+    emojis = [
+        '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃',
+        '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '😚', '😙',
+        '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔',
+        '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥',
+        '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮',
+        '🤧', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '😎', '🤓',
+        '🧐', '😕', '😟', '🙁', '☹️', '😮', '😯', '😲', '😳', '🥺',
+        '😦', '😧', '😨', '😰', '😥', '😢', '😭', '😱', '😖', '😣',
+        '😞', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈',
+        '👋', '🤚', '🖐', '✋', '🖖', '👌', '🤏', '✌️', '🤞', '🤟',
+        '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍', '👎',
+        '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏',
+        '❤️', '🧡', '💛', '💚', '💙', '💜', '🤎', '🖤', '🤍', '💔',
+        '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '☮️',
+        '✝️', '☪️', '🕉', '☸️', '✡️', '🔯', '🕎', '☯️', '☦️', '🛐',
+        '⚛️', '🆕', '🆓', '🆙', '🆗', '🆒', '🆖', '🔝', '🔚', '🔙',
+        '🔛', '🔜', '🔞', '⭐', '🌟', '✨', '⚡', '☄️', '💥', '🔥',
+        '🌈', '☀️', '⛅', '⛈', '🌤', '🌥', '🌦', '🌧', '🌨', '🌩',
+        '👀', '💋', '💘', '💝', '🎉', '🎊', '🎁', '🎈', '🏆', '🥇'
+    ];
+
     private shouldScroll = false;
+
+    toggleMobileSidebar() {
+        this.isMobileSidebarOpen = !this.isMobileSidebarOpen;
+    }
+
+    toggleMobileConvList() {
+        this.isMobileConvListOpen = !this.isMobileConvListOpen;
+    }
+
+    closeMobileMenus() {
+        this.isMobileSidebarOpen = false;
+        this.isMobileConvListOpen = false;
+    }
+
+    toggleEmojiPicker() {
+        this.showEmojiPicker = !this.showEmojiPicker;
+    }
+
+    selectEmoji(emoji: string) {
+        this.newMessage += emoji;
+        this.showEmojiPicker = false;
+    }
 
     // File upload
     @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
@@ -254,15 +313,15 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
             if (convId) {
                 const found = this.conversations.find(c => c.id === convId);
                 if (found) {
+                    // URL'den gelen conversation seçiminde listeyi kapat
+                    this.isMobileConvListOpen = false;
                     this.selectConversation(found, false);
                     return;
                 }
             }
 
-            // conversationId yoksa veya bulunamadıysa ilk sohbeti seç
-            if (this.conversations.length > 0) {
-                this.selectConversation(this.conversations[0], true);
-            }
+            // conversationId yoksa ilk conversation'ı seçme - sadece listeyi göster
+            // İlk conversation otomatik seçilmeyecek, kullanıcı manuel seçsin
         });
     }
 
@@ -329,6 +388,8 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
         this.selectedConversation = conv;
         this.activeConversationId = conv.id;
         this.typingUser = null;
+        // Mobilde conversation seçilince listeyi kapat
+        this.isMobileConvListOpen = false;
         this.chatSignalR.joinConversation(conv.id);
         this.loadMessages(conv.id);
         this.loadConversationSegments(conv.id);
@@ -595,28 +656,14 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     private incomingMessageSound = new Audio('assets/sounds/incoming-message-sound.mp3');
     private sentMessageSound = new Audio('assets/sounds/sended-message-sound.mp3');
 
-    private onNewMessage(msg: ChatMessage): void {
-        // Duplicate kontrolü: aynı mesaj zaten listede varsa ekleme
-        const alreadyExists = this.messages.some(m => m.id === msg.id);
-        if (alreadyExists) return;
+    private async onNewMessage(msg: ChatMessage): Promise<void> {
+        console.log('🔔 Hub mesaj aldı:', msg);
 
-        // Optimistic mesajla eşleşme: agent kendi gönderdiği mesajın gerçek ID'si geldi
-        if (msg.source === 'assistant' && msg.conversationId === this.activeConversationId) {
-            const tempIdx = this.messages.findIndex(m =>
-                m.id.startsWith('temp_') &&
-                m.conversationId === msg.conversationId &&
-                m.text === msg.text
-            );
-            if (tempIdx !== -1) {
-                // Temp mesajı gerçek mesajla değiştir
-                this.messages[tempIdx] = msg;
-                return;
-            }
-        }
-
-        // Aktif sohbete gelen mesajı listeye ekle
+        // Aktif sohbete gelen mesaj ise tüm mesajları yeniden yükle
         if (msg.conversationId === this.activeConversationId) {
-            this.messages.push(msg);
+            console.log('🔄 Aktif conversation için mesajlar yeniden yükleniyor...');
+            await this.loadMessages(msg.conversationId);
+            
             this.shouldScroll = true;
             this.typingUser = null;
 
@@ -635,6 +682,8 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
             if (this.autoAiMode && msg.source === 'user' && !this.isAiSending) {
                 setTimeout(() => this.sendAiChat(), 500);
             }
+        } else {
+            console.log('ℹ️ Mesaj başka conversation\'a ait:', msg.conversationId);
         }
 
         // Sidebar'daki sohbet bilgisini güncelle
@@ -976,6 +1025,7 @@ export class ChatPage implements OnInit, OnDestroy, AfterViewChecked {
     @HostListener('document:click')
     onDocumentClick(): void {
         this.closeContextMenu();
+        this.showEmojiPicker = false;
     }
 
     async toggleBlock(conv: ConversationHeader): Promise<void> {

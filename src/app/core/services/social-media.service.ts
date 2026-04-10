@@ -7,6 +7,8 @@ import {
   UpdateSocialMediaAccountPropertyRequest,
   CreateUserSocialMediaAccountRequest,
   UpdateUserSocialMediaAccountRequest,
+  DeleteUserSocialMediaAccountWithRelationsRequest,
+  CompanySocialMediaResponse,
 } from '../models/social-media/social-media.models';
 import { ApiResponse } from '../models/api-response.model';
 import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
@@ -103,6 +105,21 @@ export class SocialMediaService {
 
   deleteUserAccount(id: string): Promise<ApiResponse<any>> {
     return this.http.post<any>({ controller: 'SocialMedia', action: `user-accounts/delete/${id}` }, {});
+  }
+
+  deleteUserAccountWithRelations(request: DeleteUserSocialMediaAccountWithRelationsRequest): Promise<ApiResponse<object>> {
+    return this.http.post<object>(
+      { controller: 'SocialMedia', action: 'user-accounts/delete-with-relations' },
+      request
+    );
+  }
+
+  /** Company'e ait tüm sosyal medya hesapları, kullanıcı hesapları ve özelliklerini getirir */
+  getCompanySocialMedia(companyId: string): Promise<ApiResponse<CompanySocialMediaResponse>> {
+    return this.http.get<CompanySocialMediaResponse>({ 
+      controller: 'SocialMedia', 
+      action: `company/${companyId}/all` 
+    });
   }
 
 }

@@ -66,9 +66,18 @@
                     <p class="text-muted small mb-0">{{ channel.description }}</p>
                 </div>
                 <div class="card-footer bg-transparent border-top-0 pt-0">
-                    <button class="btn btn-sm btn-soft-primary w-100" type="button">
-                        <i class="fa-solid fa-pen me-1"></i> Düzenle
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-soft-primary flex-fill" type="button">
+                            <i class="fa-solid fa-pen me-1"></i> Düzenle
+                        </button>
+                        <button 
+                            class="btn btn-sm btn-soft-danger" 
+                            type="button"
+                            (click)="disconnectIntegration($event, channel)"
+                            title="Entegrasyonu Kaldır">
+                            <i class="fa-solid fa-unlink"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -104,9 +113,18 @@
                     <p class="text-muted small mb-0">{{ channel.description }}</p>
                 </div>
                 <div class="card-footer bg-transparent border-top-0 pt-0">
-                    <button class="btn btn-sm btn-soft-primary w-100" type="button">
-                        <i class="fa-solid fa-pen me-1"></i> Düzenle
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-soft-primary flex-fill" type="button">
+                            <i class="fa-solid fa-pen me-1"></i> Düzenle
+                        </button>
+                        <button 
+                            class="btn btn-sm btn-soft-danger" 
+                            type="button"
+                            (click)="disconnectIntegration($event, channel)"
+                            title="Entegrasyonu Kaldır">
+                            <i class="fa-solid fa-unlink"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -142,9 +160,18 @@
                     <p class="text-muted small mb-0">{{ channel.description }}</p>
                 </div>
                 <div class="card-footer bg-transparent border-top-0 pt-0">
-                    <button class="btn btn-sm btn-soft-primary w-100" type="button">
-                        <i class="fa-solid fa-pen me-1"></i> Düzenle
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-soft-primary flex-fill" type="button">
+                            <i class="fa-solid fa-pen me-1"></i> Düzenle
+                        </button>
+                        <button 
+                            class="btn btn-sm btn-soft-danger" 
+                            type="button"
+                            (click)="disconnectSocialMedia($event, channel)"
+                            title="Bağlantıyı Kes">
+                            <i class="fa-solid fa-unlink"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { CreateIntegrationRequest, UpdateIntegrationRequest } from '../models/integration/integration.models';
-import { CreateIntegrationUserRequest, UpdateIntegrationUserRequest } from '../models/integration/integration-user.models';
+import { CreateIntegrationUserRequest, UpdateIntegrationUserRequest, DeleteIntegrationUserWithRelationsRequest } from '../models/integration/integration-user.models';
 import { CreateIntegrationPropertyRequest, UpdateIntegrationPropertyRequest } from '../models/integration/integration-property.models';
 import { ConnectTicimaxRequest, ConnectTicimaxResponse, UpdateTicimaxRequest, TicimaxShipmentDto } from '../models/integration/integration-ticimax.models';
 import { CompanyIntegrationsResponse } from '../models/integration/company-integrations.models';
@@ -86,6 +86,13 @@ export class IntegrationsService {
 
   deleteIntegrationUser(id: string): Promise<ApiResponse<any>> {
     return this.http.post<any>({ controller: 'Integrations', action: `delete/users/${id}` }, {});
+  }
+
+  deleteUserWithRelations(request: DeleteIntegrationUserWithRelationsRequest): Promise<ApiResponse<object>> {
+    return this.http.post<object>(
+      { controller: 'Integrations', action: 'users/delete-with-relations' },
+      request
+    );
   }
 
   // ── Integration Properties ──

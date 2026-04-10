@@ -107,9 +107,13 @@ export class ProductSyncPage implements OnInit {
     }
 
     // ────── Request Builder ──────
-    private buildRequest(): FeedSyncHealthRequest {
+    private buildRequest(): FeedSyncHealthRequest | null {
+        const companyId = this.authState.profile?.companyId;
+        if (!companyId || !this.selectedIntegrationId) {
+            return null;
+        }
         return {
-            companyId: this.authState.profile?.companyId || '',
+            companyId,
             integrationId: this.selectedIntegrationId,
         };
     }
@@ -117,10 +121,15 @@ export class ProductSyncPage implements OnInit {
     // ────── Sağlık Kontrolü ──────
     async loadHealth(): Promise<void> {
         if (!this.selectedIntegrationId) return;
+        const request = this.buildRequest();
+        if (!request) {
+            this.healthError = 'Şirket bilgisi veya entegrasyon seçilmemiş.';
+            return;
+        }
         this.healthLoading = true;
         this.healthError = '';
         try {
-            const resp = await this.imageSearchService.feedHealth(this.buildRequest());
+            const resp = await this.imageSearchService.feedHealth(request);
             this.health = resp?.data ?? null;
             this.lastHealthCheck = new Date();
         } catch (err: any) {
@@ -134,11 +143,16 @@ export class ProductSyncPage implements OnInit {
     // ────── Senkronizasyon ──────
     async runSync(): Promise<void> {
         if (!this.selectedIntegrationId) return;
+        const request = this.buildRequest();
+        if (!request) {
+            this.syncError = 'Şirket bilgisi veya entegrasyon seçilmemiş.';
+            return;
+        }
         this.syncLoading = true;
         this.syncError = '';
         this.syncResult = null;
         try {
-            const resp = await this.imageSearchService.syncAndReport(this.buildRequest());
+            const resp = await this.imageSearchService.syncAndReport(request);
             this.syncResult = resp?.data ?? null;
             this.lastSyncTime = new Date();
             // Sağlık verisini yeniden yükle
@@ -161,12 +175,18 @@ export class ProductSyncPage implements OnInit {
     }
 
     async confirmPurge(): Promise<void> {
+        const request = this.buildRequest();
+        if (!request) {
+            this.purgeError = 'Şirket bilgisi veya entegrasyon seçilmemiş.';
+            this.showPurgeConfirm = false;
+            return;
+        }
         this.purgeLoading = true;
         this.purgeError = '';
         this.purgeResult = null;
         this.showPurgeConfirm = false;
         try {
-            const resp = await this.imageSearchService.purgeAll(this.buildRequest());
+            const resp = await this.imageSearchService.purgeAll(request);
             this.purgeResult = resp?.data ?? null;
             if (this.selectedIntegrationId) {
                 await this.loadHealth();
@@ -205,10 +225,14 @@ export class ProductSyncPage implements OnInit {
 
     async loadDetailPage(): Promise<void> {
         if (!this.activeDetail || !this.selectedIntegrationId) return;
+        const request = this.buildRequest();
+        if (!request) {
+            this.detailError = 'Şirket bilgisi veya entegrasyon seçilmemiş.';
+            return;
+        }
         this.detailLoading = true;
         this.detailError = '';
         try {
-            const request = this.buildRequest();
             let resp: any;
             if (this.activeDetail === 'missing-db') {
                 resp = await this.imageSearchService.getMissingInDb(request, this.detailPage, this.detailPageSize);

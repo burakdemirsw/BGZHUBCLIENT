@@ -6,7 +6,7 @@ import {
     ImageSearchByUrlRequest,
     BatchIndexRequest,
     SyncFeedRequest,
-    ImageSearchResult,
+    SimilarProductResponse,
     ImageSearchResponse,
     ImageSearchStatus,
 } from '@/app/core/models/image-search/image-search.models';
@@ -24,10 +24,10 @@ export class ImageSearchPage implements OnInit {
     statusError = '';
 
     // Search results datatable
-    searchResults: ImageSearchResult[] = [];
+    searchResults: SimilarProductResponse[] = [];
     filterText = '';
-    filteredItems: ImageSearchResult[] = [];
-    pagedItems: ImageSearchResult[] = [];
+    filteredItems: SimilarProductResponse[] = [];
+    pagedItems: SimilarProductResponse[] = [];
     currentPage = 1;
     pageSize = 10;
     totalPages = 1;

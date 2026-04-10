@@ -3356,6 +3356,11 @@ paths:
       tags:
         - ImageSearch
       parameters:
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
         - name: topK
           in: query
           schema:
@@ -3491,6 +3496,11 @@ paths:
       tags:
         - ImageSearch
       parameters:
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
         - name: batchSize
           in: query
           schema:
@@ -3831,6 +3841,12 @@ paths:
     post:
       tags:
         - ImageSearch
+      parameters:
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
       responses:
         "200":
           description: OK
@@ -3850,6 +3866,12 @@ paths:
     get:
       tags:
         - ImageSearch
+      parameters:
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
       responses:
         "200":
           description: OK
@@ -7333,6 +7355,63 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
+  /api/SocialMedia/user-accounts/delete-with-relations:
+    post:
+      tags:
+        - SocialMedia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteUserSocialMediaAccountWithRelationsRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/DeleteUserSocialMediaAccountWithRelationsRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/DeleteUserSocialMediaAccountWithRelationsRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/SocialMedia/company/{companyId}/all:
+    get:
+      tags:
+        - SocialMedia
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySocialMediaResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySocialMediaResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanySocialMediaResponse"
+      security:
+        - Bearer: []
   /api/Tags/paged:
     post:
       tags:
@@ -9028,10 +9107,21 @@ paths:
       tags:
         - FileUpload
       parameters:
-        - name: folderId
+        - name: companyId
           in: query
           schema:
             type: string
+            format: uuid
+        - name: category
+          in: query
+          schema:
+            default: 0
+            $ref: "#/components/schemas/FileUploadCategory"
+        - name: subFolderId
+          in: query
+          schema:
+            type: string
+            format: uuid
       requestBody:
         content:
           multipart/form-data:
@@ -9061,10 +9151,21 @@ paths:
       tags:
         - FileUpload
       parameters:
-        - name: folderId
+        - name: companyId
           in: query
           schema:
             type: string
+            format: uuid
+        - name: category
+          in: query
+          schema:
+            default: 0
+            $ref: "#/components/schemas/FileUploadCategory"
+        - name: subFolderId
+          in: query
+          schema:
+            type: string
+            format: uuid
       requestBody:
         content:
           multipart/form-data:
@@ -9147,16 +9248,26 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
-  /api/FileUpload/folder/{folderId}/files:
+  /api/FileUpload/folder/files:
     get:
       tags:
         - FileUpload
       parameters:
-        - name: folderId
-          in: path
-          required: true
+        - name: companyId
+          in: query
           schema:
             type: string
+            format: uuid
+        - name: category
+          in: query
+          schema:
+            default: 0
+            $ref: "#/components/schemas/FileUploadCategory"
+        - name: subFolderId
+          in: query
+          schema:
+            type: string
+            format: uuid
       responses:
         "200":
           description: OK
@@ -10430,6 +10541,37 @@ paths:
           schema:
             type: string
             format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/Integrations/users/delete-with-relations:
+    post:
+      tags:
+        - Integrations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteIntegrationUserWithRelationsRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/DeleteIntegrationUserWithRelationsRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/DeleteIntegrationUserWithRelationsRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -12918,6 +13060,145 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
+  /api/QdrantSettings:
+    get:
+      tags:
+        - QdrantSettings
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfQdrantSettingResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfQdrantSettingResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfQdrantSettingResponse"
+      security:
+        - Bearer: []
+    post:
+      tags:
+        - QdrantSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateQdrantSettingRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateQdrantSettingRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateQdrantSettingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfQdrantSettingResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfQdrantSettingResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfQdrantSettingResponse"
+      security:
+        - Bearer: []
+  /api/QdrantSettings/{id}:
+    get:
+      tags:
+        - QdrantSettings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfQdrantSettingResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfQdrantSettingResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfQdrantSettingResponse"
+      security:
+        - Bearer: []
+  /api/QdrantSettings/update/{id}:
+    post:
+      tags:
+        - QdrantSettings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateQdrantSettingRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateQdrantSettingRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateQdrantSettingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/QdrantSettings/delete/{id}:
+    post:
+      tags:
+        - QdrantSettings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
   /api/Teams/paged:
     post:
       tags:
@@ -14220,6 +14501,246 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/Trendyol/connect-trendyol:
+    post:
+      tags:
+        - Trendyol
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectTrendyolRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/ConnectTrendyolRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/ConnectTrendyolRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfConnectTrendyolResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfConnectTrendyolResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfConnectTrendyolResponse"
+      security:
+        - Bearer: []
+  /api/Trendyol/test-connection:
+    get:
+      tags:
+        - Trendyol
+      parameters:
+        - name: integrationUserId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfboolean"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfboolean"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfboolean"
+      security:
+        - Bearer: []
+  /api/Trendyol/questions:
+    get:
+      tags:
+        - Trendyol
+      parameters:
+        - name: integrationUserId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: barcode
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 0
+        - name: size
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 20
+        - name: startDate
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int64
+        - name: endDate
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int64
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/TrendyolQuestionStatus"
+        - name: orderByField
+          in: query
+          schema:
+            $ref: "#/components/schemas/TrendyolOrderByField"
+        - name: orderByDirection
+          in: query
+          schema:
+            $ref: "#/components/schemas/TrendyolOrderByDirection"
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolQuestionsPagedResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolQuestionsPagedResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolQuestionsPagedResponse"
+      security:
+        - Bearer: []
+  /api/Trendyol/questions/{questionId}:
+    get:
+      tags:
+        - Trendyol
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type: integer
+            format: int64
+        - name: integrationUserId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolQuestionDto"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolQuestionDto"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolQuestionDto"
+      security:
+        - Bearer: []
+  /api/Trendyol/questions/answer:
+    post:
+      tags:
+        - Trendyol
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolAnswerQuestionRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolAnswerQuestionRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/TrendyolAnswerQuestionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolAnswerQuestionResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolAnswerQuestionResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolAnswerQuestionResponse"
+      security:
+        - Bearer: []
+  /api/Trendyol/sync-questions:
+    post:
+      tags:
+        - Trendyol
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolSyncQuestionsRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolSyncQuestionsRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/TrendyolSyncQuestionsRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolSyncQuestionsResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolSyncQuestionsResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolSyncQuestionsResponse"
       security:
         - Bearer: []
   /api/Ticimax/cargo-firms/recent:
@@ -19577,6 +20098,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfCompanySocialMediaResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/CompanySocialMediaResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfCompanySubscriptionDetailResponse:
       type: object
       properties:
@@ -19654,6 +20207,38 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/ConnectTicimaxResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfConnectTrendyolResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ConnectTrendyolResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -22334,6 +22919,40 @@ components:
             - array
           items:
             $ref: "#/components/schemas/PromptAiAssistantResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfListOfQdrantSettingResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/QdrantSettingResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -25625,6 +26244,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfQdrantSettingResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/QdrantSettingResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfRegisterInvitationResponse:
       type: object
       properties:
@@ -26489,6 +27140,134 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfTrendyolAnswerQuestionResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolAnswerQuestionResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfTrendyolQuestionDto:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolQuestionDto"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfTrendyolQuestionsPagedResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolQuestionsPagedResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfTrendyolSyncQuestionsResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolSyncQuestionsResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfUserCompanyResponse:
       type: object
       properties:
@@ -26796,10 +27575,21 @@ components:
     Base64UploadRequest:
       required:
         - base64Data
+        - companyId
       type: object
       properties:
         base64Data:
           type: string
+        companyId:
+          type: string
+          format: uuid
+        category:
+          $ref: "#/components/schemas/FileUploadCategory"
+        subFolderId:
+          type:
+            - "null"
+            - string
+          format: uuid
         fileName:
           type:
             - "null"
@@ -26808,15 +27598,15 @@ components:
           type:
             - "null"
             - string
-        folderId:
-          type:
-            - "null"
-            - string
     BatchIndexRequest:
       required:
+        - companyId
         - productIds
       type: object
       properties:
+        companyId:
+          type: string
+          format: uuid
         productIds:
           type:
             - "null"
@@ -27207,6 +27997,25 @@ components:
         updatedDate:
           type: string
           format: date-time
+    CompanySocialMediaResponse:
+      required:
+        - accounts
+        - userAccounts
+        - properties
+      type: object
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/SocialMediaAccountResponse"
+        userAccounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserSocialMediaAccountResponse"
+        properties:
+          type: array
+          items:
+            $ref: "#/components/schemas/SocialMediaAccountPropertyResponse"
     CompanySubscriptionDetailResponse:
       required:
         - companyId
@@ -27412,6 +28221,65 @@ components:
           type: string
           format: uuid
         alanAdiPropertyId:
+          type: string
+          format: uuid
+    ConnectTrendyolRequest:
+      required:
+        - companyId
+        - userId
+        - integrationId
+        - supplierId
+        - apiKey
+        - apiSecret
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        integrationId:
+          type: string
+          format: uuid
+        supplierId:
+          type:
+            - "null"
+            - string
+        apiKey:
+          type:
+            - "null"
+            - string
+        apiSecret:
+          type:
+            - "null"
+            - string
+    ConnectTrendyolResponse:
+      required:
+        - integrationUserId
+        - userSocialMediaAccountId
+        - userIntegrationUserSocialMediaAccountId
+        - supplierIdPropertyId
+        - apiKeyPropertyId
+        - apiSecretPropertyId
+      type: object
+      properties:
+        integrationUserId:
+          type: string
+          format: uuid
+        userSocialMediaAccountId:
+          type: string
+          format: uuid
+        userIntegrationUserSocialMediaAccountId:
+          type: string
+          format: uuid
+        supplierIdPropertyId:
+          type: string
+          format: uuid
+        apiKeyPropertyId:
+          type: string
+          format: uuid
+        apiSecretPropertyId:
           type: string
           format: uuid
     ContactTypeResponse:
@@ -29535,6 +30403,45 @@ components:
           type:
             - "null"
             - string
+    CreateQdrantSettingRequest:
+      required:
+        - host
+        - port
+        - apiKey
+        - useHttps
+        - collectionName
+        - embeddingDimension
+        - isActive
+      type: object
+      properties:
+        host:
+          type:
+            - "null"
+            - string
+        port:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        apiKey:
+          type:
+            - "null"
+            - string
+        useHttps:
+          type: boolean
+        collectionName:
+          type:
+            - "null"
+            - string
+        embeddingDimension:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
     CreateRequestCategoryRequest:
       required:
         - name
@@ -30694,6 +31601,30 @@ components:
             - array
           items:
             $ref: "#/components/schemas/DailySalesItem"
+    DeleteIntegrationUserWithRelationsRequest:
+      required:
+        - id
+        - companyId
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+    DeleteUserSocialMediaAccountWithRelationsRequest:
+      required:
+        - id
+        - companyId
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
     DistrictResponse:
       required:
         - id
@@ -30958,6 +31889,8 @@ components:
         createdDate:
           type: string
           format: date-time
+    FileUploadCategory:
+      type: integer
     FileUploadResult:
       required:
         - success
@@ -31013,9 +31946,13 @@ components:
       format: binary
     ImageSearchByUrlRequest:
       required:
+        - companyId
         - imageUrl
       type: object
       properties:
+        companyId:
+          type: string
+          format: uuid
         imageUrl:
           type:
             - "null"
@@ -36073,6 +37010,60 @@ components:
           type:
             - "null"
             - string
+    QdrantSettingResponse:
+      required:
+        - id
+        - host
+        - port
+        - apiKey
+        - useHttps
+        - collectionName
+        - embeddingDimension
+        - isActive
+        - isBlocked
+        - createdDate
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        host:
+          type:
+            - "null"
+            - string
+        port:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        apiKey:
+          type:
+            - "null"
+            - string
+        useHttps:
+          type: boolean
+        collectionName:
+          type:
+            - "null"
+            - string
+        embeddingDimension:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
+        isBlocked:
+          type: boolean
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
     RefreshTokenRequest:
       required:
         - refreshToken
@@ -37618,6 +38609,361 @@ components:
           type:
             - "null"
             - string
+    TrendyolAnswerDto:
+      required:
+        - id
+        - text
+        - creationDate
+      type: object
+      properties:
+        id:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        text:
+          type:
+            - "null"
+            - string
+        creationDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        hasPrivateInfo:
+          type:
+            - "null"
+            - boolean
+        reason:
+          type:
+            - "null"
+            - string
+    TrendyolAnswerQuestionRequest:
+      required:
+        - integrationUserId
+        - companyId
+        - questionId
+        - text
+      type: object
+      properties:
+        integrationUserId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        questionId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        text:
+          type:
+            - "null"
+            - string
+    TrendyolAnswerQuestionResponse:
+      required:
+        - answerId
+      type: object
+      properties:
+        answerId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+    TrendyolOrderByDirection:
+      enum:
+        - ASC
+        - DESC
+        - null
+    TrendyolOrderByField:
+      enum:
+        - LastModifiedDate
+        - CreatedDate
+        - null
+    TrendyolQuestionDto:
+      required:
+        - id
+        - text
+        - customerId
+        - userName
+        - showUserName
+        - status
+        - creationDate
+        - public
+        - reason
+        - reportReason
+        - reportedDate
+        - rejectedDate
+        - answeredDateMessage
+        - imageUrl
+        - productName
+        - productMainId
+        - webUrl
+        - answer
+        - rejectedAnswer
+      type: object
+      properties:
+        id:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        text:
+          type:
+            - "null"
+            - string
+        customerId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        userName:
+          type:
+            - "null"
+            - string
+        showUserName:
+          type: boolean
+        status:
+          type:
+            - "null"
+            - string
+        creationDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        public:
+          type: boolean
+        reason:
+          type:
+            - "null"
+            - string
+        reportReason:
+          type:
+            - "null"
+            - string
+        reportedDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        rejectedDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        answeredDateMessage:
+          type:
+            - "null"
+            - string
+        imageUrl:
+          type:
+            - "null"
+            - string
+        productName:
+          type:
+            - "null"
+            - string
+        productMainId:
+          type:
+            - "null"
+            - string
+        webUrl:
+          type:
+            - "null"
+            - string
+        answer:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolAnswerDto"
+        rejectedAnswer:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolAnswerDto"
+    TrendyolQuestionsPagedResponse:
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+        - totalPages
+      type: object
+      properties:
+        content:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/TrendyolQuestionDto"
+        page:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        size:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalElements:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        totalPages:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    TrendyolQuestionStatus:
+      enum:
+        - WAITING_FOR_ANSWER
+        - ANSWERED
+        - REPORTED
+        - REJECTED
+        - UNANSWERED
+        - null
+    TrendyolSyncedQuestionDetail:
+      required:
+        - trendyolQuestionId
+        - customerId
+        - conversationId
+        - messageId
+        - isNewCustomer
+        - isNewConversation
+      type: object
+      properties:
+        trendyolQuestionId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        customerId:
+          type: string
+          format: uuid
+        conversationId:
+          type: string
+          format: uuid
+        messageId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        isNewCustomer:
+          type: boolean
+        isNewConversation:
+          type: boolean
+    TrendyolSyncQuestionsRequest:
+      required:
+        - integrationUserId
+        - companyId
+        - userId
+      type: object
+      properties:
+        integrationUserId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        startDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        endDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        status:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolQuestionStatus"
+        page:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 0
+        size:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 50
+    TrendyolSyncQuestionsResponse:
+      required:
+        - totalQuestionsFetched
+        - newCustomersCreated
+        - newConversationsCreated
+        - newMessagesCreated
+        - skippedAlreadyExists
+        - details
+      type: object
+      properties:
+        totalQuestionsFetched:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        newCustomersCreated:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        newConversationsCreated:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        newMessagesCreated:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        skippedAlreadyExists:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        details:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/TrendyolSyncedQuestionDetail"
     UpdateAddressTypeRequest:
       required:
         - name
@@ -39152,6 +40498,48 @@ components:
             - string
         isBlocked:
           type: boolean
+    UpdateQdrantSettingRequest:
+      required:
+        - host
+        - port
+        - apiKey
+        - useHttps
+        - collectionName
+        - embeddingDimension
+        - isActive
+        - isBlocked
+      type: object
+      properties:
+        host:
+          type:
+            - "null"
+            - string
+        port:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        apiKey:
+          type:
+            - "null"
+            - string
+        useHttps:
+          type: boolean
+        collectionName:
+          type:
+            - "null"
+            - string
+        embeddingDimension:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
+        isBlocked:
+          type: boolean
     UpdateRequestCategoryRequest:
       required:
         - name
@@ -40415,10 +41803,12 @@ tags:
   - name: CloudinarySettings
   - name: MailSettings
   - name: NetGsmSettings
+  - name: QdrantSettings
   - name: Teams
   - name: TeamUsers
   - name: UserTypes
   - name: Webhook
+  - name: Trendyol
   - name: Ticimax
   - name: Plans
   - name: SubscriptionPayments

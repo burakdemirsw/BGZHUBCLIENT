@@ -1,9 +1,18 @@
 // Trendyol Integration Models
 
 export interface ConnectTrendyolRequest {
+    companyId: string;
+    userId: string;
+    integrationId: string;
     supplierId: string;
     apiKey: string;
     apiSecret: string;
+}
+
+export interface ConnectTrendyolResponse {
+    integrationUserId: string;
+    userSocialMediaAccountId: string;
+    userIntegrationUserSocialMediaAccountId: string;
 }
 
 export interface UpdateTrendyolRequest {

@@ -14,21 +14,21 @@ export interface SyncFeedRequest {
   integrationId?: string;
 }
 
-export interface ImageSearchResult {
-  productId?: string;
-  productCode?: string;
-  name?: string;
-  imageUrl?: string;
-  productUrl?: string;
-  brand?: string;
-  price?: number;
-  salePrice?: number | null;
-  currency?: string;
-  similarityScore?: number;
+export interface SimilarProductResponse {
+  productId: string;
+  productCode: string | null;
+  name: string | null;
+  imageUrl: string | null;
+  productUrl: string | null;
+  brand: string | null;
+  price: number | null;
+  salePrice: number | null;
+  currency: string | null;
+  similarityScore: number;
 }
 
 export interface ImageSearchResponse {
-  results: ImageSearchResult[];
+  results: SimilarProductResponse[] | null;
   totalFound: number;
   searchDurationMs: number;
 }

@@ -12,6 +12,7 @@ import { ConnectTrendyolRequest, UpdateTrendyolRequest } from '@/app/core/models
 import { Integration } from '@/app/core/models/integration/integration.models';
 import { IntegrationUserSummary } from '@/app/core/models/integration/company-integrations.models';
 import { IntegrationProperty } from '@/app/core/models/integration/integration-property.models';
+import { SocialMediaAccountResponse, UserSocialMediaAccountResponse } from '@/app/core/models/social-media/social-media.models';
 import { APP_CHANNELS } from './apps-data';
 
 export interface AppChannel {
@@ -199,6 +200,63 @@ export class AppsPage implements OnInit, OnDestroy {
             this.openInstagramModal();
         } else if (this.isSameIntegrationName(channel.name, 'Trendyol')) {
             this.openTrendyolEditModal(channel);
+        }
+    }
+
+    async disconnectSocialMedia(event: Event, channel: AppChannel): Promise<void> {
+        event.stopPropagation();
+
+        if (!confirm(`${channel.name} bağlantısını kesmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve tüm ilişkili kayıtlar silinecektir.`)) {
+            return;
+        }
+
+        const companyId = this.authStateService.profile?.companyId || '';
+        if (!this.isGuid(channel.id) || !this.isGuid(companyId)) {
+            alert('Geçersiz hesap veya kullanıcı bilgisi.');
+            return;
+        }
+
+        this.loading = true;
+        try {
+            await this.socialMediaService.deleteUserAccountWithRelations({
+                id: channel.id,
+            });
+            alert(`${channel.name} bağlantısı başarıyla kesildi.`);
+            void this.loadConnectedChannels();
+        } catch (error) {
+            console.error('Disconnect error:', error);
+            alert(`Bağlantı kesilirken hata oluştu: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}`);
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    async disconnectIntegration(event: Event, channel: AppChannel): Promise<void> {
+        event.stopPropagation();
+
+        if (!confirm(`${channel.name} entegrasyonunu kaldırmak istediğinizden emin misiniz? Bu işlem geri alınamaz ve tüm ilişkili ayarlar silinecektir.`)) {
+            return;
+        }
+
+        const companyId = this.authStateService.profile?.companyId || '';
+        if (!this.isGuid(channel.id) || !this.isGuid(companyId)) {
+            alert('Geçersiz entegrasyon veya kullanıcı bilgisi.');
+            return;
+        }
+
+        this.loading = true;
+        try {
+            await this.integrationsService.deleteUserWithRelations({
+                id: channel.id,
+                companyId: companyId,
+            });
+            alert(`${channel.name} entegrasyonu başarıyla kaldırıldı.`);
+            void this.loadConnectedChannels();
+        } catch (error) {
+            console.error('Disconnect integration error:', error);
+            alert(`Entegrasyon kaldırılırken hata oluştu: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}`);
+        } finally {
+            this.loading = false;
         }
     }
 
@@ -403,16 +461,23 @@ export class AppsPage implements OnInit, OnDestroy {
 
         this.loading = true;
         try {
-            const response = await this.integrationsService.getCompanyIntegrations(companyId);
-            const data = response.data;
-            if (!data) {
-                return;
-            }
+            // İki API'yi paralel çağır
+            const [integrationsResponse, socialMediaResponse] = await Promise.all([
+                this.integrationsService.getCompanyIntegrations(companyId),
+                this.socialMediaService.getCompanySocialMedia(companyId)
+            ]);
 
-            // Tüm entegrasyonlar ve bağlı kullanıcılar
-            const integrations = this.extractArray<Integration>(data.integrations);
-            const integrationUsers = this.extractArray<IntegrationUserSummary>(data.integrationUsers);
-            this.allIntegrationProperties = this.extractArray<IntegrationProperty>(data.integrationProperties);
+            // Integrations verileri
+            const integrationsData = integrationsResponse.data;
+            const integrations = this.extractArray<Integration>(integrationsData?.integrations);
+            const integrationUsers = this.extractArray<IntegrationUserSummary>(integrationsData?.integrationUsers);
+            this.allIntegrationProperties = this.extractArray<IntegrationProperty>(integrationsData?.integrationProperties);
+
+            // Social Media verileri
+            const socialMediaData = socialMediaResponse.data;
+            const socialAccounts = this.extractArray<SocialMediaAccountResponse>(socialMediaData?.accounts);
+            const userSocialAccounts = this.extractArray<UserSocialMediaAccountResponse>(socialMediaData?.userAccounts);
+            const socialProperties = this.extractArray(socialMediaData?.properties);
 
             // Ticimax integrationId'yi bul
             const ticimax = integrations.find((x) => (x.integrationDescription || '').toLowerCase().includes('ticimax'));
@@ -424,6 +489,7 @@ export class AppsPage implements OnInit, OnDestroy {
             this.connectedApps = [];
             const connectedNames = new Set<string>();
 
+            // 1. Integration Users (Ticimax, Trendyol vb.)
             for (const iu of integrationUsers) {
                 const desc = (iu.integrationDescription || '').trim();
                 if (!desc) continue;
@@ -446,6 +512,34 @@ export class AppsPage implements OnInit, OnDestroy {
                     status: 'active',
                     statusLabel: 'Bağlı',
                     imageUrl: iu.photoUrl || matchedChannel?.imageUrl || '',
+                });
+            }
+
+            // 2. User Social Media Accounts (Instagram, Facebook vb.)
+            for (const usa of userSocialAccounts) {
+                // İlgili account bilgisini bul
+                const account = socialAccounts.find((a) => a.id === usa.socialMediaAccountId);
+                const accountName = account?.name || usa.socialMediaAccountName || 'Sosyal Medya';
+                const accountPhoto = account?.photoUrl || usa.socialMediaAccountPhotoUrl;
+
+                connectedNames.add(accountName.toLowerCase());
+
+                // Tanımlı kanal bilgilerini eşleştir
+                const matchedChannel = this.channels.find((ch) =>
+                    this.isSameIntegrationName(ch.name, accountName)
+                );
+
+                this.connectedApps.push({
+                    id: usa.id,
+                    name: accountName,
+                    category: matchedChannel?.category || 'sosyal-medya',
+                    categoryLabel: matchedChannel?.categoryLabel || 'Sosyal Medya',
+                    description: matchedChannel?.description || `${accountName} hesabı`,
+                    icon: matchedChannel?.icon || 'fa-solid fa-share-nodes',
+                    iconBgColor: matchedChannel?.iconBgColor || '#e83e8c',
+                    status: 'active',
+                    statusLabel: 'Bağlı',
+                    imageUrl: accountPhoto || matchedChannel?.imageUrl || '',
                 });
             }
 
@@ -618,6 +712,14 @@ export class AppsPage implements OnInit, OnDestroy {
         this.savingTrendyol = true;
         this.testResult = null;
         try {
+            const companyId = this.authStateService.profile?.companyId || '';
+            const userId = this.authStateService.profile?.userId || '';
+
+            if (!this.isGuid(companyId) || !this.isGuid(userId)) {
+                alert('Kullanıcı bilgisi eksik veya geçersiz. Lütfen tekrar giriş yapın.');
+                return;
+            }
+
             const integrationId = await this.getTrendyolIntegrationId();
 
             if (!this.isGuid(integrationId)) {
@@ -641,6 +743,9 @@ export class AppsPage implements OnInit, OnDestroy {
             } else {
                 // Connect
                 const connectRequest: ConnectTrendyolRequest = {
+                    companyId,
+                    userId,
+                    integrationId,
                     supplierId: this.trendyolForm.supplierId.trim(),
                     apiKey: this.trendyolForm.apiKey.trim(),
                     apiSecret: this.trendyolForm.apiSecret.trim(),
@@ -671,18 +776,43 @@ export class AppsPage implements OnInit, OnDestroy {
         this.testingConnection = true;
         this.testResult = null;
         try {
-            const testRequest: ConnectTrendyolRequest = {
+            const companyId = this.authStateService.profile?.companyId || '';
+
+            if (!this.isGuid(companyId)) {
+                this.testResult = 'fail';
+                alert('Kullanıcı bilgisi eksik. Lütfen tekrar giriş yapın.');
+                return;
+            }
+
+            // Test için önce geçici kayıt oluştur
+            const userId = this.authStateService.profile?.userId || '';
+            const integrationId = await this.getTrendyolIntegrationId();
+
+            if (!this.isGuid(integrationId) || !this.isGuid(userId)) {
+                this.testResult = 'fail';
+                alert('Test için gerekli bilgiler eksik.');
+                return;
+            }
+
+            // Önce bağlantıyı oluştur
+            const connectRequest: ConnectTrendyolRequest = {
+                companyId,
+                userId,
+                integrationId,
                 supplierId: this.trendyolForm.supplierId.trim(),
                 apiKey: this.trendyolForm.apiKey.trim(),
                 apiSecret: this.trendyolForm.apiSecret.trim(),
             };
 
-            const response = await this.trendyolService.testConnection(testRequest);
-            if (response.isSuccess) {
+            const connectResponse = await this.trendyolService.connect(connectRequest);
+            if (connectResponse.isSuccess && connectResponse.data) {
                 this.testResult = 'success';
+                // Başarılı test sonrası oluşturulan kaydı sakla (edit mode için)
+                this.editingIntegrationUserId = connectResponse.data.integrationUserId;
+                this.isEditMode = true;
             } else {
                 this.testResult = 'fail';
-                alert(response.innerError || response.errorCode || 'Bağlantı testi başarısız.');
+                alert(connectResponse.innerError || connectResponse.errorCode || 'Bağlantı testi başarısız.');
             }
         } catch (err) {
             console.error('Trendyol test error:', err);

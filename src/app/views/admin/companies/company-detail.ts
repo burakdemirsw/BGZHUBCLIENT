@@ -6,7 +6,16 @@ import { CompaniesService } from '@/app/core/services/companies.service';
 import { AddressesService } from '@/app/core/services/addresses.service';
 import { NeighbourhoodsService } from '@/app/core/services/neighbourhoods.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
+import { UsersService } from '@/app/core/services/users.service';
+import { CompanySettingsService } from '@/app/core/services/company-settings.service';
 import { Company, UpdateCompanyRequest } from '@/app/core/models/customer/company.models';
+import { UserResponse, UpdateUserRequest } from '@/app/core/models/user/user.models';
+import {
+    CompanySetting,
+    CreateCompanySettingRequest,
+    UpdateCompanySettingRequest,
+} from '@/app/core/models/company-setting/company-setting.models';
+import { PAGE_SIZE_OPTIONS, DEFAULT_PAGE_SIZE } from '@/app/constants';
 
 interface AddressOption {
     id: string;
@@ -20,6 +29,10 @@ interface AddressOption {
     styleUrls: ['./company-detail.scss'],
 })
 export class CompanyDetailPage implements OnInit {
+    // Aktif sekme
+    activeTab: 'company' | 'users' | 'settings' = 'company';
+
+    // Şirket bilgileri
     company: Company | null = null;
     loading = false;
     saving = false;
@@ -53,18 +66,59 @@ export class CompanyDetailPage implements OnInit {
     districts: AddressOption[] = [];
     neighbourhoods: AddressOption[] = [];
 
+    // ═══ USERS TAB ═══
+    users: UserResponse[] = [];
+    usersLoading = false;
+    showUserModal = false;
+    selectedUser: UserResponse | null = null;
+    userFilterText = '';
+    filteredUsers: UserResponse[] = [];
+    pagedUsers: UserResponse[] = [];
+    usersCurrentPage = 1;
+    usersPageSize = DEFAULT_PAGE_SIZE;
+    usersPageSizeOptions = PAGE_SIZE_OPTIONS;
+    usersTotalPages = 1;
+    usersTotalPagesArray: number[] = [];
+    usersTotalCount = 0;
+    userForm: any = {
+        name: '',
+        lastName: '',
+        gender: 'Erkek',
+        isBlocked: false,
+    };
+
+    // ═══ SETTINGS TAB ═══
+    setting: CompanySetting | null = null;
+    settingsLoading = false;
+    settingsSaving = false;
+    settingsSuccessMessage = '';
+    settingsErrorMessage = '';
+    settingsForm = {
+        isTwoFactorAuthEnabled: false,
+        isAutoReplyEnabled: false,
+        isUseWorkHours: false,
+        workHoursStart: '09:00' as string | null,
+        workHoursEnd: '18:00' as string | null,
+    };
+
+    private companyId = '';
+
     constructor(
         private router: Router,
         private companiesService: CompaniesService,
         private addressesService: AddressesService,
         private neighbourhoodsService: NeighbourhoodsService,
         private authStateService: AuthStateService,
+        private usersService: UsersService,
+        private companySettingsService: CompanySettingsService,
     ) {}
 
     ngOnInit(): void {
-        const companyId = this.authStateService.profile?.companyId || '';
-        if (companyId) {
-            this.loadCompany(companyId);
+        this.companyId = this.authStateService.profile?.companyId || '';
+        if (this.companyId) {
+            this.loadCompany(this.companyId);
+            this.loadUsers();
+            this.loadSettings();
         } else {
             this.errorMessage = 'Şirket bilgisi bulunamadı.';
         }
@@ -328,5 +382,182 @@ export class CompanyDetailPage implements OnInit {
 
     goBack(): void {
         this.router.navigate(['/admin/companies']);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // USERS TAB METHODS
+    // ═══════════════════════════════════════════════════════════════════════
+
+    onUserFilterChange(): void {
+        this.usersCurrentPage = 1;
+        this.applyUserFilterAndPaging();
+    }
+
+    onUsersPageSizeChange(): void {
+        this.usersCurrentPage = 1;
+        this.loadUsers();
+    }
+
+    setUsersPage(page: number): void {
+        if (page < 1 || page > this.usersTotalPages) return;
+        this.usersCurrentPage = page;
+        this.loadUsers();
+    }
+
+    applyUserFilterAndPaging(): void {
+        const q = (this.userFilterText || '').toLowerCase();
+        if (q) {
+            this.filteredUsers = this.users.filter(u =>
+                (u.name || '').toLowerCase().includes(q) ||
+                (u.lastName || '').toLowerCase().includes(q) ||
+                (u.email || '').toLowerCase().includes(q)
+            );
+        } else {
+            this.filteredUsers = [...this.users];
+        }
+        this.pagedUsers = this.filteredUsers;
+    }
+
+    async loadUsers(): Promise<void> {
+        this.usersLoading = true;
+        try {
+            const response = await this.usersService.getAll({
+                companyId: this.companyId,
+                pageNumber: this.usersCurrentPage,
+                pageSize: this.usersPageSize
+            });
+            const paged = response?.data;
+            this.users = this.extractItems(paged);
+            this.usersTotalPages = paged?.totalPages ?? 1;
+            this.usersTotalCount = paged?.totalCount ?? this.users.length;
+            this.usersTotalPagesArray = Array.from({ length: this.usersTotalPages }, (_, i) => i + 1);
+            this.applyUserFilterAndPaging();
+        } catch (err) {
+            console.error('Users error:', err);
+        } finally {
+            this.usersLoading = false;
+        }
+    }
+
+    private extractItems(data: any): UserResponse[] {
+        if (Array.isArray(data)) return data;
+        if (data?.items) return Array.isArray(data.items) ? data.items : [data.items];
+        if (data?.$values) return data.$values;
+        return [];
+    }
+
+    openEditUser(user: UserResponse): void {
+        this.selectedUser = user;
+        this.userForm = {
+            name: user.name,
+            lastName: user.lastName,
+            gender: user.gender,
+            isBlocked: user.isBlocked,
+        };
+        this.showUserModal = true;
+    }
+
+    async saveUser(): Promise<void> {
+        if (!this.selectedUser) return;
+        try {
+            const req: UpdateUserRequest = {
+                name: this.userForm.name,
+                lastName: this.userForm.lastName,
+                gender: this.userForm.gender,
+                isBlocked: this.userForm.isBlocked ?? false,
+            };
+            await this.usersService.update(this.selectedUser.id, req);
+            this.showUserModal = false;
+            await this.loadUsers();
+        } catch (err) {
+            console.error('Save user error:', err);
+        }
+    }
+
+    closeUserModal(): void {
+        this.showUserModal = false;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // SETTINGS TAB METHODS
+    // ═══════════════════════════════════════════════════════════════════════
+
+    async loadSettings(): Promise<void> {
+        if (!this.companyId) {
+            this.settingsErrorMessage = 'Şirket bilgisi bulunamadı.';
+            return;
+        }
+
+        this.settingsLoading = true;
+        this.settingsErrorMessage = '';
+        try {
+            const response = await this.companySettingsService.getByCompany(this.companyId);
+            const data = this.extractData(response);
+            if (data) {
+                this.setting = data;
+                this.settingsForm = {
+                    isTwoFactorAuthEnabled: data.isTwoFactorAuthEnabled,
+                    isAutoReplyEnabled: data.isAutoReplyEnabled,
+                    isUseWorkHours: data.isUseWorkHours ?? false,
+                    workHoursStart: data.workHoursStart ?? '09:00',
+                    workHoursEnd: data.workHoursEnd ?? '18:00',
+                };
+            }
+        } catch (err: any) {
+            console.error('CompanySettings load error:', err);
+            this.setting = null;
+        } finally {
+            this.settingsLoading = false;
+        }
+    }
+
+    async saveSettings(): Promise<void> {
+        this.settingsSaving = true;
+        this.settingsSuccessMessage = '';
+        this.settingsErrorMessage = '';
+
+        try {
+            if (this.setting) {
+                const req: UpdateCompanySettingRequest = {
+                    isTwoFactorAuthEnabled: this.settingsForm.isTwoFactorAuthEnabled,
+                    isAutoReplyEnabled: this.settingsForm.isAutoReplyEnabled,
+                    isUseWorkHours: this.settingsForm.isUseWorkHours,
+                    workHoursStart: this.settingsForm.isUseWorkHours ? this.settingsForm.workHoursStart : null,
+                    workHoursEnd: this.settingsForm.isUseWorkHours ? this.settingsForm.workHoursEnd : null,
+                };
+                await this.companySettingsService.update(this.setting.id, req);
+                this.settingsSuccessMessage = 'Ayarlar başarıyla güncellendi.';
+            } else {
+                const req: CreateCompanySettingRequest = {
+                    companyId: this.companyId,
+                    isTwoFactorAuthEnabled: this.settingsForm.isTwoFactorAuthEnabled,
+                    isAutoReplyEnabled: this.settingsForm.isAutoReplyEnabled,
+                    isUseWorkHours: this.settingsForm.isUseWorkHours,
+                    workHoursStart: this.settingsForm.isUseWorkHours ? this.settingsForm.workHoursStart : null,
+                    workHoursEnd: this.settingsForm.isUseWorkHours ? this.settingsForm.workHoursEnd : null,
+                };
+                await this.companySettingsService.create(req);
+                this.settingsSuccessMessage = 'Ayarlar başarıyla oluşturuldu.';
+            }
+            await this.loadSettings();
+        } catch (err: any) {
+            console.error('CompanySettings save error:', err);
+            this.settingsErrorMessage = 'Ayarlar kaydedilirken hata oluştu.';
+        } finally {
+            this.settingsSaving = false;
+        }
+    }
+
+    private extractData(response: any): CompanySetting | null {
+        if (!response) return null;
+        if (response.data) return response.data;
+        if (response.result) return response.result;
+        if (response.id) return response;
+        return null;
+    }
+
+    // Tab switching
+    switchTab(tab: 'company' | 'users' | 'settings'): void {
+        this.activeTab = tab;
     }
 }

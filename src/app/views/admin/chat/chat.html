@@ -1,6 +1,35 @@
 <div class="chat-dashboard">
+    <!-- Mobile Header -->
+    <div class="mobile-chat-header">
+        <button class="mobile-menu-btn" (click)="toggleMobileSidebar()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="mobile-header-title">
+            @if (selectedConversation) {
+                <span>{{ selectedConversation.customerName }}</span>
+            } @else {
+                <span>Sohbetler</span>
+            }
+        </div>
+        @if (selectedConversation) {
+            <button class="mobile-menu-btn" (click)="isMobileConvListOpen = true">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <button class="mobile-menu-btn" (click)="showDetails = !showDetails">
+                <i class="fa-solid fa-circle-info"></i>
+            </button>
+        } @else {
+            <div style="width: 40px;"></div>
+        }
+    </div>
+
+    <!-- Mobile Overlay -->
+    @if (isMobileSidebarOpen) {
+        <div class="mobile-overlay" (click)="isMobileSidebarOpen = false"></div>
+    }
+
     <!-- 1) LEFT SIDEBAR -->
-    <aside class="chat-sidebar">
+    <aside class="chat-sidebar" [class.mobile-open]="isMobileSidebarOpen">
         <div class="sidebar-header">
             <div class="sidebar-brand">
                 <i class="fa-solid fa-message-dots me-2"></i>
@@ -89,7 +118,7 @@
     </aside>
 
     <!-- 2) CONVERSATION LIST -->
-    <div class="conversation-list">
+    <div class="conversation-list" [class.mobile-open]="isMobileConvListOpen">
         <div class="conversation-list-header">
             <div class="conversation-list-filters">
                 <div class="filter-dropdown">
@@ -381,9 +410,28 @@
                         <button class="input-tool-btn" title="Bilgi bankası">
                             <i class="fa-solid fa-book"></i>
                         </button>
-                        <button class="input-tool-btn" title="Emoji">
-                            <i class="fa-regular fa-face-smile"></i>
-                        </button>
+                        <div style="position: relative;">
+                            <button class="input-tool-btn" title="Emoji" (click)="toggleEmojiPicker(); $event.stopPropagation()">
+                                <i class="fa-regular fa-face-smile"></i>
+                            </button>
+                            @if (showEmojiPicker) {
+                                <div class="emoji-picker" (click)="$event.stopPropagation()">
+                                    <div class="emoji-picker-header">
+                                        <span>Emoji Seç</span>
+                                        <button class="emoji-picker-close" (click)="showEmojiPicker = false" title="Kapat">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                    <div class="emoji-picker-grid">
+                                        @for (emoji of emojis; track emoji) {
+                                            <button class="emoji-item" (click)="selectEmoji(emoji)" [title]="emoji">
+                                                {{ emoji }}
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
                         <button class="input-tool-btn" title="Dosya ekle" (click)="openFileInput()">
                             <i class="fa-solid fa-paperclip"></i>
                         </button>
@@ -439,7 +487,11 @@
 
     <!-- 4) RIGHT SIDEBAR (Details) -->
     @if (selectedConversation && showDetails) {
-        <aside class="chat-details" @detailsSlide>
+        <aside class="chat-details" [class.mobile-open]="showDetails" @detailsSlide>
+            <!-- Mobile Close Button -->
+            <button class="mobile-details-close" (click)="showDetails = false">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
             <div class="details-header">
                 <div class="details-tabs">
                     <button class="details-tab" [class.active]="detailsActiveTab === 'details'"

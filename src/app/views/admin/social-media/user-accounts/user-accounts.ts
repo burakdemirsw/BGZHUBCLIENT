@@ -25,8 +25,6 @@ export class UserSocialMediaAccountsPage implements OnInit {
     showModal = false;
     editMode = false;
     selectedUserAccount: UserSocialMediaAccount | null = null;
-    filterUserId: string = '';
-    filterAccountId: string = '';
 
     // Server-side pagination
     searchTerm = '';
@@ -54,8 +52,8 @@ export class UserSocialMediaAccountsPage implements OnInit {
     }
 
     private async initializePage(): Promise<void> {
-        await this.loadUsers();
         await this.loadAccounts();
+        await this.loadUsers();
         await this.loadUserAccounts();
     }
 
@@ -67,10 +65,6 @@ export class UserSocialMediaAccountsPage implements OnInit {
                 companyId: this.getCompanyId(),
             });
             this.users = this.extractArray<UserResponse>(response?.data);
-
-            if (!this.filterUserId && this.users.length > 0) {
-                this.filterUserId = this.users[0].id;
-            }
         } catch (err) {
             console.error('Users error:', err);
         }
@@ -93,36 +87,16 @@ export class UserSocialMediaAccountsPage implements OnInit {
     async loadUserAccounts(): Promise<void> {
         this.loading = true;
         try {
-            if (!this.filterUserId) {
-                this.allUserAccounts = [];
-                this.filteredUserAccounts = [];
-                this.totalCount = 0;
-                this.totalPages = 1;
-                this.totalPagesArray = [1];
-                return;
-            }
-
-            if (this.filterUserId) {
-                const response = await this.socialMediaService.getUserAccountsByUser(this.filterUserId);
-                this.allUserAccounts = this.extractArray<UserSocialMediaAccount>(response?.data);
-                this.applyClientPaging();
-            } else if (this.filterAccountId) {
-                const response = await this.socialMediaService.getUserAccountsByAccount(this.filterAccountId);
-                this.allUserAccounts = this.extractArray<UserSocialMediaAccount>(response?.data);
-                this.applyClientPaging();
-            } else {
-                const response = await this.socialMediaService.getUserAccounts({
-                    pageNumber: this.currentPage,
-                    pageSize: this.pageSize,
-                    searchTerm: this.searchTerm,
-                    companyId: this.getCompanyId(),
-                });
-                const paged = response?.data;
-                this.filteredUserAccounts = paged?.items ?? [];
-                this.totalCount = paged?.totalCount ?? this.filteredUserAccounts.length;
-                this.totalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
-                this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-            }
+            const response = await this.socialMediaService.getUserAccounts({
+                pageNumber: 1,
+                pageSize: 10000,
+                searchTerm: '',
+                companyId: this.getCompanyId(),
+            });
+            
+            const paged = response?.data;
+            this.allUserAccounts = paged?.items ?? [];
+            this.applyClientPaging();
         } catch (err) {
             console.error('User Accounts error:', err);
         } finally {
@@ -163,38 +137,18 @@ export class UserSocialMediaAccountsPage implements OnInit {
         return [];
     }
 
-    onFilterChange(): void {
-        this.currentPage = 1;
-        this.loadUserAccounts();
-    }
-
     onSearchChange(): void {
         this.currentPage = 1;
-        if (this.filterUserId || this.filterAccountId) {
-            this.applyClientPaging();
-        } else {
-            this.loadUserAccounts();
-        }
+        this.applyClientPaging();
     }
 
     setPage(page: number): void {
         if (page < 1 || page > this.totalPages) return;
         this.currentPage = page;
-        if (this.filterUserId || this.filterAccountId) {
-            this.applyClientPaging();
-        } else {
-            this.loadUserAccounts();
-        }
+        this.applyClientPaging();
     }
 
-    clearFilters(): void {
-        this.filterAccountId = '';
-        if (!this.filterUserId && this.users.length > 0) {
-            this.filterUserId = this.users[0].id;
-        }
-        this.currentPage = 1;
-        this.loadUserAccounts();
-    }
+
 
     getUserName(userId: string): string {
         const user = this.users.find(u => u.id === userId);
@@ -209,8 +163,8 @@ export class UserSocialMediaAccountsPage implements OnInit {
         this.editMode = false;
         this.selectedUserAccount = null;
         this.form = {
-            userId: this.filterUserId || '',
-            socialMediaAccountId: this.filterAccountId || '',
+            userId: '',
+            socialMediaAccountId: '',
             isBlocked: false,
         };
         this.showModal = true;

@@ -85,3 +85,46 @@ export interface UpdateUserSocialMediaAccountPropertyRequest {
   value: string;
   isBlocked: boolean;
 }
+
+// === Delete with Relations ===
+export interface DeleteUserSocialMediaAccountWithRelationsRequest {
+  id: string;
+}
+
+// === API Responses ===
+export interface SocialMediaAccountResponse {
+  id: string;
+  name: string;
+  photoUrl?: string;
+  isBlocked: boolean;
+  createdDate: string;
+  updatedDate: string;
+}
+
+export interface UserSocialMediaAccountResponse {
+  id: string;
+  companyId: string;
+  userId: string;
+  socialMediaAccountId: string;
+  socialMediaAccountName?: string;
+  socialMediaAccountPhotoUrl?: string;
+  isBlocked: boolean;
+  createdDate: string;
+  updatedDate: string;
+}
+
+export interface SocialMediaAccountPropertyResponse {
+  id: string;
+  userSocialMediaAccountId: string;
+  key: string;
+  value: string;
+  isBlocked: boolean;
+  createdDate: string;
+  updatedDate: string;
+}
+
+export interface CompanySocialMediaResponse {
+  accounts: SocialMediaAccountResponse[];
+  userAccounts: UserSocialMediaAccountResponse[];
+  properties: SocialMediaAccountPropertyResponse[];
+}

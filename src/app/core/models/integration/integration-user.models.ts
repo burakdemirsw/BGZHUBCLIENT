@@ -25,3 +25,8 @@ export interface UpdateIntegrationUserRequest {
   companyId?: string;
   isBlocked: boolean;
 }
+
+export interface DeleteIntegrationUserWithRelationsRequest {
+  id: string;
+  companyId: string;
+}

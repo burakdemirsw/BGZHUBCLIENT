@@ -1,8 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { UserResponse } from '@core/models/user/user.models';
 import { DatePipe } from '@angular/common';
+import { AuthStateService } from '@core/services/auth-state.service';
 
 @Component({
   selector: 'app-profile-card',
@@ -91,6 +92,23 @@ import { DatePipe } from '@angular/common';
                       </div>
                   }
               </div>
+
+              <div class="mt-3 pt-3 border-top">
+                  <div class="d-flex gap-2 flex-wrap">
+                      <button 
+                          class="btn btn-sm btn-soft-primary flex-fill"
+                          (click)="copyUserId()"
+                          title="Kullanıcı ID'yi kopyala">
+                          <ng-icon name="tablerCopy" class="fs-sm me-1"/>User ID
+                      </button>
+                      <button 
+                          class="btn btn-sm btn-soft-primary flex-fill"
+                          (click)="copyCompanyId()"
+                          title="Şirket ID'yi kopyala">
+                          <ng-icon name="tablerCopy" class="fs-sm me-1"/>Company ID
+                      </button>
+                  </div>
+              </div>
           </div>
       </div>
   `,
@@ -98,10 +116,41 @@ import { DatePipe } from '@angular/common';
 })
 export class ProfileCard {
     @Input() user: UserResponse | null = null;
+    private authState = inject(AuthStateService);
 
     getInitials(): string {
         const n = this.user?.name?.charAt(0) ?? '';
         const l = this.user?.lastName?.charAt(0) ?? '';
         return (n + l).toUpperCase();
+    }
+
+    copyUserId(): void {
+        const userId = this.authState.profile?.userId;
+        if (userId) {
+            this.copyToClipboard(userId, 'Kullanıcı ID');
+        } else {
+            alert('Kullanıcı ID bulunamadı.');
+        }
+    }
+
+    copyCompanyId(): void {
+        const companyId = this.authState.profile?.companyId;
+        if (companyId) {
+            this.copyToClipboard(companyId, 'Şirket ID');
+        } else {
+            alert('Şirket ID bulunamadı.');
+        }
+    }
+
+    private copyToClipboard(text: string, label: string): void {
+        navigator.clipboard.writeText(text).then(
+            () => {
+                alert(`${label} kopyalandı: ${text}`);
+            },
+            (err) => {
+                console.error('Kopyalama hatası:', err);
+                alert('Kopyalama başarısız. Lütfen manuel olarak kopyalayın.');
+            }
+        );
     }
 }
