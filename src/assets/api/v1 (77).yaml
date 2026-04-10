@@ -14535,20 +14535,21 @@ paths:
       security:
         - Bearer: []
   /api/Trendyol/test-connection:
-    get:
+    post:
       tags:
         - Trendyol
-      parameters:
-        - name: integrationUserId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: companyId
-          in: query
-          schema:
-            type: string
-            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolTestConnectionRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolTestConnectionRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/TrendyolTestConnectionRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -14565,70 +14566,21 @@ paths:
       security:
         - Bearer: []
   /api/Trendyol/questions:
-    get:
+    post:
       tags:
         - Trendyol
-      parameters:
-        - name: integrationUserId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: companyId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: barcode
-          in: query
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int32
-            default: 0
-        - name: size
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int32
-            default: 20
-        - name: startDate
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int64
-        - name: endDate
-          in: query
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type:
-              - integer
-              - string
-            format: int64
-        - name: status
-          in: query
-          schema:
-            $ref: "#/components/schemas/TrendyolQuestionStatus"
-        - name: orderByField
-          in: query
-          schema:
-            $ref: "#/components/schemas/TrendyolOrderByField"
-        - name: orderByDirection
-          in: query
-          schema:
-            $ref: "#/components/schemas/TrendyolOrderByDirection"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolQuestionsFilterRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolQuestionsFilterRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/TrendyolQuestionsFilterRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -14644,28 +14596,22 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfTrendyolQuestionsPagedResponse"
       security:
         - Bearer: []
-  /api/Trendyol/questions/{questionId}:
-    get:
+  /api/Trendyol/questions/get-by-id:
+    post:
       tags:
         - Trendyol
-      parameters:
-        - name: questionId
-          in: path
-          required: true
-          schema:
-            pattern: ^-?(?:0|[1-9]\d*)$
-            type: integer
-            format: int64
-        - name: integrationUserId
-          in: query
-          schema:
-            type: string
-            format: uuid
-        - name: companyId
-          in: query
-          schema:
-            type: string
-            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolGetQuestionByIdRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolGetQuestionByIdRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/TrendyolGetQuestionByIdRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -14741,6 +14687,161 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfTrendyolSyncQuestionsResponse"
+      security:
+        - Bearer: []
+  /api/Trendyol/products:
+    post:
+      tags:
+        - Trendyol
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolFilterProductsRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolFilterProductsRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/TrendyolFilterProductsRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolProductsPagedResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolProductsPagedResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolProductsPagedResponse"
+      security:
+        - Bearer: []
+  /api/Trendyol/sync-products:
+    post:
+      tags:
+        - Trendyol
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolSyncProductsRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolSyncProductsRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/TrendyolSyncProductsRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolSyncProductsResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolSyncProductsResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolSyncProductsResponse"
+      security:
+        - Bearer: []
+  /api/Trendyol/product-health:
+    post:
+      tags:
+        - Trendyol
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolProductSyncHealthRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolProductSyncHealthRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/TrendyolProductSyncHealthRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolProductSyncHealthResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolProductSyncHealthResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolProductSyncHealthResponse"
+      security:
+        - Bearer: []
+  /api/Trendyol/sync-and-report-products:
+    post:
+      tags:
+        - Trendyol
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolSyncProductsRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolSyncProductsRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/TrendyolSyncProductsRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolSyncProductsResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolSyncProductsResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolSyncProductsResponse"
+      security:
+        - Bearer: []
+  /api/Trendyol/orders:
+    post:
+      tags:
+        - Trendyol
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolShipmentPackagesFilterRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/TrendyolShipmentPackagesFilterRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/TrendyolShipmentPackagesFilterRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolShipmentPackagesPagedResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolShipmentPackagesPagedResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfTrendyolShipmentPackagesPagedResponse"
       security:
         - Bearer: []
   /api/Ticimax/cargo-firms/recent:
@@ -16886,6 +16987,41 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfSubscriptionSummaryResponse"
+      security:
+        - Bearer: []
+  /api/Dashboard/{companyId}/daily-conversations:
+    get:
+      tags:
+        - Dashboard
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: days
+          in: query
+          schema:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+            default: 7
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfDailyConversationsResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfDailyConversationsResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfDailyConversationsResponse"
       security:
         - Bearer: []
   /api/Companies/paged:
@@ -20815,6 +20951,38 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/DailyAiRepliesResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfDailyConversationsResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/DailyConversationsResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -27172,6 +27340,70 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfTrendyolProductsPagedResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolProductsPagedResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfTrendyolProductSyncHealthResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolProductSyncHealthResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfTrendyolQuestionDto:
       type: object
       properties:
@@ -27217,6 +27449,70 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/TrendyolQuestionsPagedResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfTrendyolShipmentPackagesPagedResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolShipmentPackagesPagedResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfTrendyolSyncProductsResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolSyncProductsResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -31561,6 +31857,39 @@ components:
             - integer
             - string
           format: int32
+    DailyConversationItem:
+      required:
+        - date
+        - conversationCount
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        conversationCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    DailyConversationsResponse:
+      required:
+        - days
+        - items
+      type: object
+      properties:
+        days:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        items:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/DailyConversationItem"
     DailySalesItem:
       required:
         - date
@@ -38609,6 +38938,93 @@ components:
           type:
             - "null"
             - string
+    TrendyolAddressDto:
+      required:
+        - id
+        - firstName
+        - lastName
+        - address1
+        - address2
+        - city
+        - cityCode
+        - district
+        - districtId
+        - postalCode
+        - countryCode
+        - neighborhoodId
+        - neighborhood
+        - fullName
+        - fullAddress
+      type: object
+      properties:
+        id:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        firstName:
+          type:
+            - "null"
+            - string
+        lastName:
+          type:
+            - "null"
+            - string
+        address1:
+          type:
+            - "null"
+            - string
+        address2:
+          type:
+            - "null"
+            - string
+        city:
+          type:
+            - "null"
+            - string
+        cityCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        district:
+          type:
+            - "null"
+            - string
+        districtId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        postalCode:
+          type:
+            - "null"
+            - string
+        countryCode:
+          type:
+            - "null"
+            - string
+        neighborhoodId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        neighborhood:
+          type:
+            - "null"
+            - string
+        fullName:
+          type:
+            - "null"
+            - string
+        fullAddress:
+          type:
+            - "null"
+            - string
     TrendyolAnswerDto:
       required:
         - id
@@ -38675,6 +39091,139 @@ components:
             - integer
             - string
           format: int64
+    TrendyolDateQueryType:
+      enum:
+        - CREATED_DATE
+        - LAST_MODIFIED_DATE
+        - null
+    TrendyolDeliveryOptionDto:
+      required:
+        - deliveryDuration
+        - fastDeliveryType
+      type: object
+      properties:
+        deliveryDuration:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        fastDeliveryType:
+          type:
+            - "null"
+            - string
+    TrendyolFilterProductsRequest:
+      required:
+        - integrationUserId
+        - companyId
+      type: object
+      properties:
+        integrationUserId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        approved:
+          type:
+            - "null"
+            - boolean
+        barcode:
+          type:
+            - "null"
+            - string
+        startDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        endDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        page:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 0
+        size:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 50
+        dateQueryType:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolDateQueryType"
+        stockCode:
+          type:
+            - "null"
+            - string
+        archived:
+          type:
+            - "null"
+            - boolean
+        productMainId:
+          type:
+            - "null"
+            - string
+        onSale:
+          type:
+            - "null"
+            - boolean
+        rejected:
+          type:
+            - "null"
+            - boolean
+        blacklisted:
+          type:
+            - "null"
+            - boolean
+        brandIds:
+          type:
+            - "null"
+            - array
+          items:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int32
+        specialConsumptionTax:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - "null"
+            - number
+            - string
+          format: double
+    TrendyolGetQuestionByIdRequest:
+      required:
+        - integrationUserId
+        - companyId
+        - questionId
+      type: object
+      properties:
+        integrationUserId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        questionId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
     TrendyolOrderByDirection:
       enum:
         - ASC
@@ -38685,6 +39234,562 @@ components:
         - LastModifiedDate
         - CreatedDate
         - null
+    TrendyolOrderLineDto:
+      required:
+        - id
+        - productSize
+        - productColor
+        - merchantSku
+        - productName
+        - productCode
+        - merchantId
+        - amount
+        - discount
+        - tyDiscount
+        - currencyCode
+        - productCategory
+        - shipmentType
+        - gift
+        - fastDelivery
+        - fastDeliveryType
+        - sku
+        - vatBaseAmount
+        - barcode
+        - orderLineItemStatusName
+        - price
+        - quantity
+        - fastDeliveryOptions
+        - salesCampaignId
+        - productSellerCode
+        - deliveryFeeType
+        - laborCostPerItem
+      type: object
+      properties:
+        id:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        productSize:
+          type:
+            - "null"
+            - string
+        productColor:
+          type:
+            - "null"
+            - string
+        merchantSku:
+          type:
+            - "null"
+            - string
+        productName:
+          type:
+            - "null"
+            - string
+        productCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        merchantId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        amount:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        discount:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        tyDiscount:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        currencyCode:
+          type:
+            - "null"
+            - string
+        productCategory:
+          type:
+            - "null"
+            - string
+        shipmentType:
+          type:
+            - "null"
+            - string
+        gift:
+          type: boolean
+        fastDelivery:
+          type: boolean
+        fastDeliveryType:
+          type:
+            - "null"
+            - string
+        sku:
+          type:
+            - "null"
+            - string
+        vatBaseAmount:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        barcode:
+          type:
+            - "null"
+            - string
+        orderLineItemStatusName:
+          type:
+            - "null"
+            - string
+        price:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        quantity:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        fastDeliveryOptions:
+          type:
+            - "null"
+            - array
+          items:
+            type: string
+        salesCampaignId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        productSellerCode:
+          type:
+            - "null"
+            - string
+        deliveryFeeType:
+          type:
+            - "null"
+            - string
+        laborCostPerItem:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+    TrendyolOrderStatus:
+      enum:
+        - Created
+        - Picking
+        - Invoiced
+        - Shipped
+        - Cancelled
+        - Delivered
+        - UnDelivered
+        - Returned
+        - null
+    TrendyolPackageHistoryDto:
+      required:
+        - createdDate
+        - status
+      type: object
+      properties:
+        createdDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        status:
+          type:
+            - "null"
+            - string
+    TrendyolProductAttributeDto:
+      required:
+        - attributeId
+        - attributeName
+        - attributeValueId
+        - attributeValue
+      type: object
+      properties:
+        attributeId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        attributeName:
+          type:
+            - "null"
+            - string
+        attributeValueId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        attributeValue:
+          type:
+            - "null"
+            - string
+    TrendyolProductDto:
+      required:
+        - id
+        - approved
+        - archived
+        - productCode
+        - batchRequestId
+        - supplierId
+        - createDateTime
+        - lastUpdateDate
+        - gender
+        - brand
+        - barcode
+        - title
+        - categoryName
+        - productMainId
+        - description
+        - stockUnitType
+        - quantity
+        - listPrice
+        - salePrice
+        - vatRate
+        - dimensionalWeight
+        - stockCode
+        - locationBasedDelivery
+        - lotNumber
+        - specialConsumptionTax
+        - deliveryOption
+        - images
+        - attributes
+        - platformListingId
+        - stockId
+        - hasActiveCampaign
+        - locked
+        - productContentId
+        - pimCategoryId
+        - brandId
+        - version
+        - color
+        - size
+        - lockedByUnSuppliedReason
+        - onsale
+        - productUrl
+      type: object
+      properties:
+        id:
+          type:
+            - "null"
+            - string
+        approved:
+          type: boolean
+        archived:
+          type: boolean
+        productCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        batchRequestId:
+          type:
+            - "null"
+            - string
+        supplierId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        createDateTime:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        lastUpdateDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        gender:
+          type:
+            - "null"
+            - string
+        brand:
+          type:
+            - "null"
+            - string
+        barcode:
+          type:
+            - "null"
+            - string
+        title:
+          type:
+            - "null"
+            - string
+        categoryName:
+          type:
+            - "null"
+            - string
+        productMainId:
+          type:
+            - "null"
+            - string
+        description:
+          type:
+            - "null"
+            - string
+        stockUnitType:
+          type:
+            - "null"
+            - string
+        quantity:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        listPrice:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        salePrice:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        vatRate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        dimensionalWeight:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        stockCode:
+          type:
+            - "null"
+            - string
+        locationBasedDelivery:
+          type:
+            - "null"
+            - string
+        lotNumber:
+          type:
+            - "null"
+            - string
+        specialConsumptionTax:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        deliveryOption:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolDeliveryOptionDto"
+        images:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/TrendyolProductImageDto"
+        attributes:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/TrendyolProductAttributeDto"
+        platformListingId:
+          type:
+            - "null"
+            - string
+        stockId:
+          type:
+            - "null"
+            - string
+        hasActiveCampaign:
+          type: boolean
+        locked:
+          type: boolean
+        productContentId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        pimCategoryId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        brandId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        version:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        color:
+          type:
+            - "null"
+            - string
+        size:
+          type:
+            - "null"
+            - string
+        lockedByUnSuppliedReason:
+          type: boolean
+        onsale:
+          type: boolean
+        productUrl:
+          type:
+            - "null"
+            - string
+    TrendyolProductImageDto:
+      required:
+        - url
+      type: object
+      properties:
+        url:
+          type:
+            - "null"
+            - string
+    TrendyolProductsPagedResponse:
+      required:
+        - totalElements
+        - totalPages
+        - page
+        - size
+        - content
+      type: object
+      properties:
+        totalElements:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        totalPages:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        page:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        size:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        content:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/TrendyolProductDto"
+    TrendyolProductSyncHealthRequest:
+      required:
+        - integrationUserId
+        - companyId
+      type: object
+      properties:
+        integrationUserId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+    TrendyolProductSyncHealthResponse:
+      required:
+        - totalInTrendyol
+        - totalInDb
+        - totalEmbedded
+        - missingInDb
+        - missingEmbeddings
+        - syncRatioPercent
+        - message
+      type: object
+      properties:
+        totalInTrendyol:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalInDb:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalEmbedded:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        missingInDb:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        missingEmbeddings:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        syncRatioPercent:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: float
+        message:
+          type:
+            - "null"
+            - string
     TrendyolQuestionDto:
       required:
         - id
@@ -38792,6 +39897,58 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/TrendyolAnswerDto"
+    TrendyolQuestionsFilterRequest:
+      required:
+        - integrationUserId
+        - companyId
+      type: object
+      properties:
+        integrationUserId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        barcode:
+          type:
+            - "null"
+            - string
+        page:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 0
+        size:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 20
+        startDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        endDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        status:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolQuestionStatus"
+        orderByField:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolOrderByField"
+        orderByDirection:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolOrderByDirection"
     TrendyolQuestionsPagedResponse:
       required:
         - content
@@ -38839,6 +39996,338 @@ components:
         - REJECTED
         - UNANSWERED
         - null
+    TrendyolShipmentOrderByField:
+      enum:
+        - PackageLastModifiedDate
+        - CreatedDate
+        - null
+    TrendyolShipmentPackageDto:
+      required:
+        - id
+        - shipmentNumber
+        - orderNumber
+        - grossAmount
+        - totalDiscount
+        - totalTyDiscount
+        - taxNumber
+        - invoiceAddress
+        - customerFirstName
+        - customerLastName
+        - customerEmail
+        - customerId
+        - customerTckn
+        - shipmentAddress
+        - shipmentPackageStatus
+        - status
+        - deliveryType
+        - timeSlotId
+        - estimatedDeliveryStartDate
+        - estimatedDeliveryEndDate
+        - totalPrice
+        - agreedDeliveryDate
+        - agreedDeliveryDateExtendible
+        - agreedDeliveryExtensionStartDate
+        - agreedDeliveryExtensionEndDate
+        - extendedAgreedDeliveryDate
+        - deci
+        - cargoTrackingNumber
+        - cargoTrackingLink
+        - cargoSenderNumber
+        - cargoProviderName
+        - cargoProviderId
+        - lines
+        - packageHistory
+        - warehouseId
+      type: object
+      properties:
+        id:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        shipmentNumber:
+          type:
+            - "null"
+            - string
+        orderNumber:
+          type:
+            - "null"
+            - string
+        grossAmount:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        totalDiscount:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        totalTyDiscount:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        taxNumber:
+          type:
+            - "null"
+            - string
+        invoiceAddress:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolAddressDto"
+        customerFirstName:
+          type:
+            - "null"
+            - string
+        customerLastName:
+          type:
+            - "null"
+            - string
+        customerEmail:
+          type:
+            - "null"
+            - string
+        customerId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        customerTckn:
+          type:
+            - "null"
+            - string
+        shipmentAddress:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolAddressDto"
+        shipmentPackageStatus:
+          type:
+            - "null"
+            - string
+        status:
+          type:
+            - "null"
+            - string
+        deliveryType:
+          type:
+            - "null"
+            - string
+        timeSlotId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        estimatedDeliveryStartDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        estimatedDeliveryEndDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        totalPrice:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        agreedDeliveryDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        agreedDeliveryDateExtendible:
+          type: boolean
+        agreedDeliveryExtensionStartDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        agreedDeliveryExtensionEndDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        extendedAgreedDeliveryDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        deci:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        cargoTrackingNumber:
+          type:
+            - "null"
+            - string
+        cargoTrackingLink:
+          type:
+            - "null"
+            - string
+        cargoSenderNumber:
+          type:
+            - "null"
+            - string
+        cargoProviderName:
+          type:
+            - "null"
+            - string
+        cargoProviderId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        lines:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/TrendyolOrderLineDto"
+        packageHistory:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/TrendyolPackageHistoryDto"
+        warehouseId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+    TrendyolShipmentPackagesFilterRequest:
+      required:
+        - integrationUserId
+        - companyId
+      type: object
+      properties:
+        integrationUserId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        startDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        endDate:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int64
+        page:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 0
+        size:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+          default: 200
+        orderNumber:
+          type:
+            - "null"
+            - string
+        status:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolOrderStatus"
+        orderByField:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolShipmentOrderByField"
+        orderByDirection:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/TrendyolOrderByDirection"
+        shipmentPackageIds:
+          type:
+            - "null"
+            - array
+          items:
+            pattern: ^-?(?:0|[1-9]\d*)$
+            type:
+              - integer
+              - string
+            format: int64
+    TrendyolShipmentPackagesPagedResponse:
+      required:
+        - page
+        - size
+        - totalPages
+        - totalElements
+        - content
+      type: object
+      properties:
+        page:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        size:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalPages:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalElements:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int64
+        content:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/TrendyolShipmentPackageDto"
     TrendyolSyncedQuestionDetail:
       required:
         - trendyolQuestionId
@@ -38870,6 +40359,76 @@ components:
           type: boolean
         isNewConversation:
           type: boolean
+    TrendyolSyncProductsRequest:
+      required:
+        - integrationUserId
+        - companyId
+      type: object
+      properties:
+        integrationUserId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        approved:
+          type:
+            - "null"
+            - boolean
+        onSale:
+          type:
+            - "null"
+            - boolean
+        archived:
+          type:
+            - "null"
+            - boolean
+    TrendyolSyncProductsResponse:
+      required:
+        - totalFetched
+        - newProducts
+        - updatedProducts
+        - stockChangedProducts
+        - skippedNoBarcodeProducts
+        - errors
+      type: object
+      properties:
+        totalFetched:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        newProducts:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        updatedProducts:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        stockChangedProducts:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        skippedNoBarcodeProducts:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        errors:
+          type:
+            - "null"
+            - array
+          items:
+            type: string
     TrendyolSyncQuestionsRequest:
       required:
         - integrationUserId
@@ -38887,19 +40446,15 @@ components:
           type: string
           format: uuid
         startDate:
-          pattern: ^-?(?:0|[1-9]\d*)$
           type:
             - "null"
-            - integer
             - string
-          format: int64
+          format: date-time
         endDate:
-          pattern: ^-?(?:0|[1-9]\d*)$
           type:
             - "null"
-            - integer
             - string
-          format: int64
+          format: date-time
         status:
           oneOf:
             - type: "null"
@@ -38964,6 +40519,18 @@ components:
             - array
           items:
             $ref: "#/components/schemas/TrendyolSyncedQuestionDetail"
+    TrendyolTestConnectionRequest:
+      required:
+        - integrationUserId
+        - companyId
+      type: object
+      properties:
+        integrationUserId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
     UpdateAddressTypeRequest:
       required:
         - name

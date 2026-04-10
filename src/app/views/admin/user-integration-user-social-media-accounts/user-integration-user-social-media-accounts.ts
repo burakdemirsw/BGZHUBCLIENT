@@ -198,12 +198,18 @@ export class UserIntegrationUserSocialMediaAccountsPage implements OnInit {
 
     async deleteItem(item: UserIntegrationUserSocialMediaAccountResponse): Promise<void> {
         const name = item.socialMediaAccountName || this.getSocialMediaAccountName(item.userSocialMediaAccountId);
-        if (confirm(`"${name}" kaydını silmek istediğinize emin misiniz?`)) {
+        const userName = item.userName ? `${item.userName} ${item.userLastName || ''}`.trim() : '-';
+        if (confirm(`"${userName}" kullanıcısının "${name}" hesap atamasını silmek istediğinize emin misiniz?`)) {
             try {
                 await this.service.delete(item.id);
                 await this.loadItems();
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Delete error:', err);
+                const msg =
+                    err.status === 0
+                        ? `Sunucuya bağlanılamadı.\nURL: ${err.url}\nMesaj: ${err.message}`
+                        : `Hata ${err.status}: ${err.error?.message || err.error?.title || JSON.stringify(err.error)}`;
+                alert('Silme işlemi başarısız:\n' + msg);
             }
         }
     }

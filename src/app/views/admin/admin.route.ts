@@ -80,6 +80,7 @@ import { AppsPage } from './apps/apps';
 import { SetupWizardPage } from './setup-wizard/setup-wizard';
 import { ConversationTypesPage } from './conversation-types/conversation-types';
 import { TaxOfficesPage } from './tax-offices/tax-offices';
+import { TrendyolTestPage } from './trendyol-test/trendyol-test';
 import { Profile } from '@/app/views/apps/users/profile/profile';
 import { AuthGuard } from '@/app/core/guards/auth.guard';
 
@@ -579,6 +580,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/aws-s3-settings',
         component: AwsS3SettingsPage,
         data: { title: 'AWS S3 Ayarları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/trendyol-test',
+        component: TrendyolTestPage,
+        data: { title: 'Trendyol Test Paneli' },
         canActivate: [AuthGuard],
     },
     {

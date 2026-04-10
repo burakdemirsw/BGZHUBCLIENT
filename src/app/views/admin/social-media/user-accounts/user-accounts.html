@@ -41,8 +41,12 @@
                                             </span>
                                         </td>
                                         <td class="text-end">
-                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(userAccount)">Düzenle</button>
-                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteUserAccount(userAccount)">Sil</button>
+                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(userAccount)">
+                                                <i class="fa-solid fa-pen-to-square me-1"></i>Düzenle
+                                            </button>
+                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteUserAccount(userAccount)">
+                                                <i class="fa-solid fa-trash me-1"></i>Sil
+                                            </button>
                                         </td>
                                     </tr>
                                 } @empty {

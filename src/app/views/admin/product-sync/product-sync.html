@@ -13,7 +13,7 @@
         <div class="d-flex align-items-center gap-2">
             <button class="btn btn-soft-primary btn-sm"
                     (click)="loadHealth()"
-                    [disabled]="healthLoading || !selectedIntegrationId">
+                    [disabled]="healthLoading || !selectedUserIntegrationId">
                 @if (healthLoading) {
                     <i class="fa-solid fa-spinner fa-spin me-1"></i>
                 } @else {
@@ -33,18 +33,18 @@
         </div>
         <div class="selector-content">
             <label class="form-label fw-semibold mb-1 small">Entegrasyon Seçin</label>
-            @if (integrationsLoading) {
+            @if (userIntegrationsLoading) {
                 <div class="d-flex align-items-center gap-2 text-muted small">
                     <div class="spinner-border spinner-border-sm" role="status"></div>
                     Entegrasyonlar yükleniyor...
                 </div>
             } @else {
                 <select class="form-select"
-                        [(ngModel)]="selectedIntegrationId"
+                        [(ngModel)]="selectedUserIntegrationId"
                         (ngModelChange)="onIntegrationChange()">
                     <option value="">Bir entegrasyon seçiniz...</option>
-                    @for (integration of integrations; track integration.id) {
-                        <option [value]="integration.id">{{ integration.integrationDescription }}</option>
+                    @for (userInt of userIntegrations; track userInt.id) {
+                        <option [value]="userInt.id">{{ userInt.integrationName }} - {{ userInt.userName || 'Kullanıcı' }}</option>
                     }
                 </select>
             }
@@ -53,7 +53,7 @@
 </div>
 
 <!-- ══════ Entegrasyon Seçilmediğinde ══════ -->
-@if (!selectedIntegrationId) {
+@if (!selectedUserIntegrationId) {
     <div class="no-selection-state">
         <div class="no-selection-icon">
             <i class="fa-solid fa-plug"></i>
@@ -64,7 +64,7 @@
 }
 
 <!-- ══════ Entegrasyon Seçildikten Sonra: Sağlık + İşlemler ══════ -->
-@if (selectedIntegrationId) {
+@if (selectedUserIntegrationId) {
     <!-- ══════ Sağlık Durumu Kartları ══════ -->
     <div class="health-section">
         @if (healthLoading && !health) {
@@ -423,6 +423,210 @@
         </div>
         }
     </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         TRENDYOL ÖZELLEŞTİRMELERİ
+    ════════════════════════════════════════════════════════════════ -->
+    @if (isTrendyolIntegration()) {
+        <div class="trendyol-section mt-4">
+            <div class="section-header mb-3">
+                <h5 class="mb-0"><i class="fa-solid fa-cart-shopping me-2"></i>Trendyol Ürün Senkronizasyonu</h5>
+                <p class="text-muted small mb-0">Trendyol API'den ürünleri DB'ye senkronize edin</p>
+            </div>
+
+            <!-- Trendyol Health -->
+            @if (trendyolHealthLoading && !trendyolHealth) {
+                <div class="loading-state">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-3 text-muted">Trendyol sağlık durumu kontrol ediliyor...</p>
+                </div>
+            } @else if (trendyolHealthError && !trendyolHealth) {
+                <div class="error-state">
+                    <div class="error-icon">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                    </div>
+                    <h6>Bağlantı Hatası</h6>
+                    <p>{{ trendyolHealthError }}</p>
+                    <button class="btn btn-primary btn-sm" (click)="loadTrendyolHealth()">
+                        <i class="fa-solid fa-rotate me-1"></i>Tekrar Dene
+                    </button>
+                </div>
+            } @else if (trendyolHealth) {
+                <div class="row g-3">
+                    <!-- Trendyol Genel Durum -->
+                    <div class="col-md-12">
+                        <div class="ratio-card ratio-card-sm" [ngClass]="getTrendyolSyncRatioClass()">
+                            <div class="ratio-card-inner">
+                                <div class="ratio-visual">
+                                    <div class="ratio-circle">
+                                        <svg viewBox="0 0 36 36" class="ratio-svg">
+                                            <path class="ratio-bg"
+                                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                            <path class="ratio-fill"
+                                                  [attr.stroke-dasharray]="trendyolHealth.syncRatioPercent + ', 100'"
+                                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                        </svg>
+                                        <div class="ratio-value">
+                                            <span class="ratio-number">{{ trendyolHealth.syncRatioPercent | number:'1.1-1' }}</span>
+                                            <span class="ratio-percent">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ratio-info">
+                                    <div class="ratio-title">
+                                        <i [class]="getTrendyolSyncRatioIcon()"></i>
+                                        Trendyol Senkronizasyon Oranı
+                                    </div>
+                                    <div class="ratio-stats">
+                                        <div class="ratio-stat">
+                                            <span class="ratio-stat-label">Trendyol'da</span>
+                                            <span class="ratio-stat-value">{{ trendyolHealth.totalInTrendyol | number }}</span>
+                                        </div>
+                                        <div class="ratio-stat">
+                                            <span class="ratio-stat-label">DB'de</span>
+                                            <span class="ratio-stat-value">{{ trendyolHealth.totalInDb | number }}</span>
+                                        </div>
+                                        <div class="ratio-stat">
+                                            <span class="ratio-stat-label">Embedding'li</span>
+                                            <span class="ratio-stat-value">{{ trendyolHealth.totalEmbedded | number }}</span>
+                                        </div>
+                                        <div class="ratio-stat">
+                                            <span class="ratio-stat-label">Eksik DB</span>
+                                            <span class="ratio-stat-value text-warning">{{ trendyolHealth.missingInDb | number }}</span>
+                                        </div>
+                                        <div class="ratio-stat">
+                                            <span class="ratio-stat-label">Eksik Emb.</span>
+                                            <span class="ratio-stat-value text-danger">{{ trendyolHealth.missingEmbeddings | number }}</span>
+                                        </div>
+                                    </div>
+                                    @if (trendyolHealth.message) {
+                                        <div class="ratio-message mt-2">
+                                            <i class="fa-solid fa-info-circle me-1"></i>{{ trendyolHealth.message }}
+                                        </div>
+                                    }
+                                    @if (lastTrendyolHealthCheck) {
+                                        <div class="ratio-timestamp">
+                                            Son kontrol: {{ formatTime(lastTrendyolHealthCheck) }}
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trendyol Sync Kartı -->
+                    <div class="col-md-12">
+                        <div class="action-card">
+                            <div class="action-card-header">
+                                <div class="action-card-icon action-card-icon-primary">
+                                    <i class="fa-solid fa-download"></i>
+                                </div>
+                                <div class="action-card-title">
+                                    <h6 class="mb-0">Trendyol Ürün Senkronizasyonu</h6>
+                                    <p class="text-muted small mb-0">Trendyol API'den ürünleri çek ve DB'ye kaydet</p>
+                                </div>
+                            </div>
+                            <div class="action-card-body">
+                                <!-- Sync Filtreleri -->
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label small">Onay Durumu</label>
+                                        <select class="form-select form-select-sm" [(ngModel)]="trendyolSyncApproved">
+                                            <option [ngValue]="null">Tümü</option>
+                                            <option [ngValue]="true">Onaylı</option>
+                                            <option [ngValue]="false">Onaysız</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small">Satış Durumu</label>
+                                        <select class="form-select form-select-sm" [(ngModel)]="trendyolSyncOnSale">
+                                            <option [ngValue]="null">Tümü</option>
+                                            <option [ngValue]="true">Satışta</option>
+                                            <option [ngValue]="false">Satışta Değil</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small">Arşiv Durumu</label>
+                                        <select class="form-select form-select-sm" [(ngModel)]="trendyolSyncArchived">
+                                            <option [ngValue]="null">Tümü</option>
+                                            <option [ngValue]="false">Aktif</option>
+                                            <option [ngValue]="true">Arşivlenmiş</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                @if (trendyolSyncError) {
+                                    <div class="alert alert-danger alert-sm">
+                                        <i class="fa-solid fa-circle-exclamation me-1"></i>{{ trendyolSyncError }}
+                                    </div>
+                                }
+
+                                @if (trendyolSyncResult) {
+                                    <div class="sync-result-panel">
+                                        <div class="sync-result-header">
+                                            <i class="fa-solid fa-circle-check text-success me-2"></i>
+                                            Senkronizasyon Tamamlandı
+                                        </div>
+                                        <div class="sync-result-grid">
+                                            <div class="sync-detail-item">
+                                                <span class="sync-detail-label">Toplam Çekilen</span>
+                                                <span class="sync-detail-value">{{ trendyolSyncResult.totalFetched | number }}</span>
+                                            </div>
+                                            <div class="sync-detail-item">
+                                                <span class="sync-detail-label">Yeni Ürünler</span>
+                                                <span class="sync-detail-value text-success">{{ trendyolSyncResult.newProducts | number }}</span>
+                                            </div>
+                                            <div class="sync-detail-item">
+                                                <span class="sync-detail-label">Güncellenenler</span>
+                                                <span class="sync-detail-value text-info">{{ trendyolSyncResult.updatedProducts | number }}</span>
+                                            </div>
+                                            <div class="sync-detail-item">
+                                                <span class="sync-detail-label">Stok Değişenler</span>
+                                                <span class="sync-detail-value text-warning">{{ trendyolSyncResult.stockChangedProducts | number }}</span>
+                                            </div>
+                                            <div class="sync-detail-item">
+                                                <span class="sync-detail-label">Barkod Eksik (Atlandı)</span>
+                                                <span class="sync-detail-value text-muted">{{ trendyolSyncResult.skippedNoBarcodeProducts | number }}</span>
+                                            </div>
+                                        </div>
+                                        @if (trendyolSyncResult.errors && trendyolSyncResult.errors.length > 0) {
+                                            <div class="mt-3">
+                                                <div class="text-danger fw-semibold mb-2">
+                                                    <i class="fa-solid fa-triangle-exclamation me-1"></i>Hatalar:
+                                                </div>
+                                                <ul class="list-unstyled mb-0 small">
+                                                    @for (error of trendyolSyncResult.errors; track error) {
+                                                        <li class="text-danger">• {{ error }}</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                        @if (lastTrendyolSyncTime) {
+                                            <div class="sync-timestamp mt-2">
+                                                Son senkronizasyon: {{ formatTime(lastTrendyolSyncTime) }}
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div class="action-card-footer">
+                                <button class="btn btn-primary" (click)="runTrendyolSync()" [disabled]="trendyolSyncLoading">
+                                    @if (trendyolSyncLoading) {
+                                        <i class="fa-solid fa-spinner fa-spin me-1"></i>Senkronize Ediliyor...
+                                    } @else {
+                                        <i class="fa-solid fa-download me-1"></i>Trendyol Ürünlerini Senkronize Et
+                                    }
+                                </button>
+                                <button class="btn btn-soft-primary ms-2" (click)="loadTrendyolHealth()" [disabled]="trendyolHealthLoading">
+                                    <i class="fa-solid fa-rotate me-1"></i>Durumu Yenile
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 }
 
 <!-- ══════ Purge Onay Modalı ══════ -->

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ImageSearchService } from '@/app/core/services/image-search.service';
 import { IntegrationsService } from '@/app/core/services/integrations.service';
+import { TrendyolService } from '@/app/core/services/trendyol.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { Integration } from '@/app/core/models/integration/integration.models';
 import {
@@ -12,6 +13,12 @@ import {
     PurgeAllProductsResponse,
     MissingProductItem,
 } from '@/app/core/models/image-search/image-search.models';
+import {
+    TrendyolSyncProductsRequest,
+    TrendyolSyncProductsResponse,
+    TrendyolProductSyncHealthRequest,
+    TrendyolProductSyncHealthResponse,
+} from '@/app/core/models/trendyol/trendyol.models';
 
 @Component({
     selector: 'app-product-sync-page',
@@ -24,6 +31,11 @@ export class ProductSyncPage implements OnInit {
     integrations: Integration[] = [];
     integrationsLoading = false;
     selectedIntegrationId = '';
+
+    // ── User Entegrasyonları ──
+    userIntegrations: any[] = [];
+    userIntegrationsLoading = false;
+    selectedUserIntegrationId = '';
 
     // ── Sağlık Durumu ──
     health: FeedSyncHealthResponse | null = null;
@@ -55,36 +67,45 @@ export class ProductSyncPage implements OnInit {
     lastHealthCheck: Date | null = null;
     lastSyncTime: Date | null = null;
 
+    // ── Trendyol Özel ──
+    trendyolHealth: TrendyolProductSyncHealthResponse | null = null;
+    trendyolHealthLoading = false;
+    trendyolHealthError = '';
+    trendyolSyncResult: TrendyolSyncProductsResponse | null = null;
+    trendyolSyncLoading = false;
+    trendyolSyncError = '';
+    trendyolSyncApproved: boolean | null = null;
+    trendyolSyncOnSale: boolean | null = null;
+    trendyolSyncArchived: boolean | null = null;
+    lastTrendyolHealthCheck: Date | null = null;
+    lastTrendyolSyncTime: Date | null = null;
+
     constructor(
         private imageSearchService: ImageSearchService,
         private integrationsService: IntegrationsService,
+        private trendyolService: TrendyolService,
         private authState: AuthStateService,
     ) {}
 
     ngOnInit(): void {
-        this.loadIntegrations();
+        this.loadUserIntegrations();
     }
 
-    // ────── Entegrasyonları Yükle ──────
-    async loadIntegrations(): Promise<void> {
-        this.integrationsLoading = true;
+    // ────── User Entegrasyonlarını Yükle ──────
+    async loadUserIntegrations(): Promise<void> {
+        this.userIntegrationsLoading = true;
         try {
             const companyId = this.authState.profile?.companyId || '';
-            const response = await this.integrationsService.getPaged({
-                companyId,
-                pageNumber: 1,
-                pageSize: 1000,
-            });
-            const paged = response?.data;
-            this.integrations = (paged?.items ?? []).filter((i: Integration) => !i.isBlocked);
+            const response = await this.integrationsService.getIntegrationUsersByCompany(companyId);
+            this.userIntegrations = (response?.data ?? []).filter((ui: any) => !ui.isBlocked);
         } catch (err) {
-            console.error('Entegrasyon yükleme hatası:', err);
+            console.error('User entegrasyon yükleme hatası:', err);
         } finally {
-            this.integrationsLoading = false;
+            this.userIntegrationsLoading = false;
         }
     }
 
-    // ────── Entegrasyon Seçildiğinde ──────
+    // ── User Entegrasyon Seçildiğinde ──────
     onIntegrationChange(): void {
         this.health = null;
         this.healthError = '';
@@ -94,11 +115,28 @@ export class ProductSyncPage implements OnInit {
         this.purgeError = '';
         this.lastHealthCheck = null;
         this.lastSyncTime = null;
+        this.trendyolHealth = null;
+        this.trendyolHealthError = '';
+        this.trendyolSyncResult = null;
+        this.trendyolSyncError = '';
+        this.lastTrendyolHealthCheck = null;
+        this.lastTrendyolSyncTime = null;
         this.closeDetail();
 
         if (this.selectedIntegrationId) {
             this.loadHealth();
+            // Eğer seçilen entegrasyon Trendyol ise Trendyol health'i de yükle
+            if (this.isTrendyolIntegration()) {
+                this.loadTrendyolHealth();
+            }
         }
+    }
+
+    isTrendyolIntegration(): boolean {
+        const item = this.integrations.find(i => i.id === this.selectedIntegrationId);
+        // integrationTypeId veya başka bir alan üzerinden Trendyol kontrolü yapılabilir
+        // Şimdilik integrationDescription içinde "Trendyol" geçip geçmediğine bakıyoruz
+        return (item?.integrationDescription || '').toLowerCase().includes('trendyol');
     }
 
     getSelectedIntegrationName(): string {
@@ -313,5 +351,92 @@ export class ProductSyncPage implements OnInit {
         if (response?.items) return response.items;
         if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
         return [];
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  TRENDYOL ÖZELLEŞTİRMELERİ
+    // ════════════════════════════════════════════════════════════════
+
+    private getTrendyolIntegrationUserId(): string | null {
+        const item = this.integrations.find(i => i.id === this.selectedIntegrationId);
+        // Integration'dan integrationUserId'yi almalıyız
+        // Şimdilik item.id kullanıyoruz (bu değer integrationUserId olmalı)
+        return item?.id || null;
+    }
+
+    async loadTrendyolHealth(): Promise<void> {
+        const integrationUserId = this.getTrendyolIntegrationUserId();
+        const companyId = this.authState.profile?.companyId;
+        if (!integrationUserId || !companyId) {
+            this.trendyolHealthError = 'Entegrasyon veya şirket bilgisi eksik.';
+            return;
+        }
+
+        this.trendyolHealthLoading = true;
+        this.trendyolHealthError = '';
+        try {
+            const request: TrendyolProductSyncHealthRequest = {
+                integrationUserId,
+                companyId,
+            };
+            const resp = await this.trendyolService.getProductHealth(request);
+            this.trendyolHealth = resp?.data ?? null;
+            this.lastTrendyolHealthCheck = new Date();
+        } catch (err: any) {
+            console.error('Trendyol health hatası:', err);
+            this.trendyolHealthError = err?.error?.message || err?.message || 'Trendyol sağlık durumu alınamadı.';
+        } finally {
+            this.trendyolHealthLoading = false;
+        }
+    }
+
+    async runTrendyolSync(): Promise<void> {
+        const integrationUserId = this.getTrendyolIntegrationUserId();
+        const companyId = this.authState.profile?.companyId;
+        if (!integrationUserId || !companyId) {
+            this.trendyolSyncError = 'Entegrasyon veya şirket bilgisi eksik.';
+            return;
+        }
+
+        this.trendyolSyncLoading = true;
+        this.trendyolSyncError = '';
+        this.trendyolSyncResult = null;
+        try {
+            const request: TrendyolSyncProductsRequest = {
+                integrationUserId,
+                companyId,
+                approved: this.trendyolSyncApproved,
+                onSale: this.trendyolSyncOnSale,
+                archived: this.trendyolSyncArchived,
+            };
+            const resp = await this.trendyolService.syncProducts(request);
+            this.trendyolSyncResult = resp?.data ?? null;
+            this.lastTrendyolSyncTime = new Date();
+            // Health'i yenile
+            await this.loadTrendyolHealth();
+        } catch (err: any) {
+            console.error('Trendyol sync hatası:', err);
+            this.trendyolSyncError = err?.error?.message || err?.message || 'Trendyol senkronizasyon başarısız.';
+        } finally {
+            this.trendyolSyncLoading = false;
+        }
+    }
+
+    getTrendyolSyncRatioClass(): string {
+        if (!this.trendyolHealth) return '';
+        const ratio = this.trendyolHealth.syncRatioPercent;
+        if (ratio >= 90) return 'ratio-excellent';
+        if (ratio >= 70) return 'ratio-good';
+        if (ratio >= 40) return 'ratio-warning';
+        return 'ratio-danger';
+    }
+
+    getTrendyolSyncRatioIcon(): string {
+        if (!this.trendyolHealth) return 'fa-solid fa-circle-question';
+        const ratio = this.trendyolHealth.syncRatioPercent;
+        if (ratio >= 90) return 'fa-solid fa-circle-check';
+        if (ratio >= 70) return 'fa-solid fa-circle-half-stroke';
+        if (ratio >= 40) return 'fa-solid fa-triangle-exclamation';
+        return 'fa-solid fa-circle-xmark';
     }
 }

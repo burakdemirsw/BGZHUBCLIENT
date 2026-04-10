@@ -94,12 +94,19 @@ export class UserIntegrationsPage implements OnInit {
 
     // ── İşlemler ──
     async deleteItem(item: IntegrationUser): Promise<void> {
-        if (confirm('Bu entegrasyon atamasını silmek istediğinize emin misiniz?')) {
+        const userName = item.userName ? `${item.userName} ${item.userLastName || ''}`.trim() : 'Kullanıcı';
+        const integrationName = item.integrationDescription || 'Entegrasyon';
+        if (confirm(`"${userName}" kullanıcısının "${integrationName}" entegrasyon atamasını silmek istediğinize emin misiniz?`)) {
             try {
                 await this.integrationsService.deleteIntegrationUser(item.id);
                 await this.loadData();
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Silme hatası:', err);
+                const msg =
+                    err.status === 0
+                        ? `Sunucuya bağlanılamadı.\nURL: ${err.url}\nMesaj: ${err.message}`
+                        : `Hata ${err.status}: ${err.error?.message || err.error?.title || JSON.stringify(err.error)}`;
+                alert('Silme işlemi başarısız:\n' + msg);
             }
         }
     }
