@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
-import { CreateIntegrationRequest, UpdateIntegrationRequest } from '../models/integration/integration.models';
-import { CreateIntegrationUserRequest, UpdateIntegrationUserRequest, DeleteIntegrationUserWithRelationsRequest } from '../models/integration/integration-user.models';
-import { CreateIntegrationPropertyRequest, UpdateIntegrationPropertyRequest } from '../models/integration/integration-property.models';
+import { Integration, CreateIntegrationRequest, UpdateIntegrationRequest } from '../models/integration/integration.models';
+import { IntegrationUser, CreateIntegrationUserRequest, UpdateIntegrationUserRequest, DeleteIntegrationUserWithRelationsRequest } from '../models/integration/integration-user.models';
+import { IntegrationProperty, CreateIntegrationPropertyRequest, UpdateIntegrationPropertyRequest } from '../models/integration/integration-property.models';
 import { ConnectTicimaxRequest, ConnectTicimaxResponse, UpdateTicimaxRequest, TicimaxShipmentDto } from '../models/integration/integration-ticimax.models';
 import { CompanyIntegrationsResponse } from '../models/integration/company-integrations.models';
 import { ApiResponse } from '../models/api-response.model';
@@ -15,31 +15,31 @@ export class IntegrationsService {
   constructor(private http: HttpClientService) {}
 
   // ── Integrations ──
-  getAll(): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'Integrations' });
+  getAll(): Promise<ApiResponse<Integration[]>> {
+    return this.http.get<Integration[]>({ controller: 'Integrations' });
   }
 
-  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-    return this.http.post<PagedResult<any>>(
+  getPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<Integration>>> {
+    return this.http.post<PagedResult<Integration>>(
       { controller: 'Integrations', action: 'paged' },
       buildPaginationRequest(req),
     );
   }
 
-  getById(id: string): Promise<ApiResponse<any>> {
-    return this.http.get<any>({ controller: 'Integrations', action: `${id}` });
+  getById(id: string): Promise<ApiResponse<Integration>> {
+    return this.http.get<Integration>({ controller: 'Integrations', action: `${id}` });
   }
 
-  create(request: CreateIntegrationRequest): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'Integrations' }, request);
+  create(request: CreateIntegrationRequest): Promise<ApiResponse<Integration>> {
+    return this.http.post<Integration>({ controller: 'Integrations' }, request);
   }
 
-  update(id: string, request: UpdateIntegrationRequest): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'Integrations', action: `update/${id}` }, request);
+  update(id: string, request: UpdateIntegrationRequest): Promise<ApiResponse<Integration>> {
+    return this.http.post<Integration>({ controller: 'Integrations', action: `update/${id}` }, request);
   }
 
-  delete(id: string): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'Integrations', action: `delete/${id}` }, {});
+  delete(id: string): Promise<ApiResponse<object>> {
+    return this.http.post<object>({ controller: 'Integrations', action: `delete/${id}` }, {});
   }
 
   // ── Integration Users ──
@@ -47,28 +47,28 @@ export class IntegrationsService {
   //   return this.http.get({ controller: 'Integrations', action: 'users' });
   // }
 
-  getIntegrationUsersPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
-    return this.http.post<PagedResult<any>>(
+  getIntegrationUsersPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<IntegrationUser>>> {
+    return this.http.post<PagedResult<IntegrationUser>>(
       { controller: 'Integrations', action: 'users/paged' },
       buildPaginationRequest(req),
     );
   }
 
-  getIntegrationUserById(id: string): Promise<ApiResponse<any>> {
-    return this.http.get<any>({ controller: 'Integrations', action: `users/${id}` });
+  getIntegrationUserById(id: string): Promise<ApiResponse<IntegrationUser>> {
+    return this.http.get<IntegrationUser>({ controller: 'Integrations', action: `users/${id}` });
   }
 
-  getUsersByIntegration(integrationId: string): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'Integrations', action: `${integrationId}/users` });
+  getUsersByIntegration(integrationId: string): Promise<ApiResponse<IntegrationUser[]>> {
+    return this.http.get<IntegrationUser[]>({ controller: 'Integrations', action: `${integrationId}/users` });
   }
 
-  getIntegrationsByUser(userId: string): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'Integrations', action: `users/by-user/${userId}` });
+  getIntegrationsByUser(userId: string): Promise<ApiResponse<IntegrationUser[]>> {
+    return this.http.get<IntegrationUser[]>({ controller: 'Integrations', action: `users/by-user/${userId}` });
   }
 
   /** CompanyId'ye göre integration user'ları özet bilgilerle getirir */
-  getIntegrationUsersByCompany(companyId: string): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'Integrations', action: `users/by-company/${companyId}` });
+  getIntegrationUsersByCompany(companyId: string): Promise<ApiResponse<IntegrationUser[]>> {
+    return this.http.get<IntegrationUser[]>({ controller: 'Integrations', action: `users/by-company/${companyId}` });
   }
 
   /** Company için bağlı entegrasyon verilerini toplu getirir */
@@ -76,16 +76,16 @@ export class IntegrationsService {
     return this.http.get<CompanyIntegrationsResponse>({ controller: 'Integrations', action: `company/${companyId}/all` });
   }
 
-  createIntegrationUser(request: CreateIntegrationUserRequest): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'Integrations', action: 'users' }, request);
+  createIntegrationUser(request: CreateIntegrationUserRequest): Promise<ApiResponse<IntegrationUser>> {
+    return this.http.post<IntegrationUser>({ controller: 'Integrations', action: 'users' }, request);
   }
 
-  updateIntegrationUser(id: string, request: UpdateIntegrationUserRequest): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'Integrations', action: `update/users/${id}` }, request);
+  updateIntegrationUser(id: string, request: UpdateIntegrationUserRequest): Promise<ApiResponse<IntegrationUser>> {
+    return this.http.post<IntegrationUser>({ controller: 'Integrations', action: `update/users/${id}` }, request);
   }
 
-  deleteIntegrationUser(id: string): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'Integrations', action: `delete/users/${id}` }, {});
+  deleteIntegrationUser(id: string): Promise<ApiResponse<object>> {
+    return this.http.post<object>({ controller: 'Integrations', action: `delete/users/${id}` }, {});
   }
 
   deleteUserWithRelations(request: DeleteIntegrationUserWithRelationsRequest): Promise<ApiResponse<object>> {
@@ -96,42 +96,42 @@ export class IntegrationsService {
   }
 
   // ── Integration Properties ──
-  getIntegrationProperties(req?: PaginationRequest): Promise<ApiResponse<any[]>> {
-    return this.http.post<any[]>(
+  getIntegrationProperties(req?: PaginationRequest): Promise<ApiResponse<IntegrationProperty[]>> {
+    return this.http.post<IntegrationProperty[]>(
       { controller: 'Integrations', action: 'properties/paged' },
       buildPaginationRequest(req),
     );
   }
 
-  getIntegrationPropertyById(id: string): Promise<ApiResponse<any>> {
-    return this.http.get<any>({ controller: 'Integrations', action: `properties/${id}` });
+  getIntegrationPropertyById(id: string): Promise<ApiResponse<IntegrationProperty>> {
+    return this.http.get<IntegrationProperty>({ controller: 'Integrations', action: `properties/${id}` });
   }
 
-  getPropertiesByIntegration(integrationId: string): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'Integrations', action: `${integrationId}/properties` });
+  getPropertiesByIntegration(integrationId: string): Promise<ApiResponse<IntegrationProperty[]>> {
+    return this.http.get<IntegrationProperty[]>({ controller: 'Integrations', action: `${integrationId}/properties` });
   }
 
-  getPropertiesByIntegrationUser(integrationUserId: string): Promise<ApiResponse<any[]>> {
-    return this.http.post<any[]>(
+  getPropertiesByIntegrationUser(integrationUserId: string): Promise<ApiResponse<IntegrationProperty[]>> {
+    return this.http.post<IntegrationProperty[]>(
       { controller: 'Integrations', action: `properties/by-integration-user/${integrationUserId}` },
       {},
     );
   }
 
-  getPropertiesByUser(userId: string): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'Integrations', action: `properties/by-user/${userId}` });
+  getPropertiesByUser(userId: string): Promise<ApiResponse<IntegrationProperty[]>> {
+    return this.http.get<IntegrationProperty[]>({ controller: 'Integrations', action: `properties/by-user/${userId}` });
   }
 
-  createIntegrationProperty(request: CreateIntegrationPropertyRequest): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'Integrations', action: 'properties' }, request);
+  createIntegrationProperty(request: CreateIntegrationPropertyRequest): Promise<ApiResponse<IntegrationProperty>> {
+    return this.http.post<IntegrationProperty>({ controller: 'Integrations', action: 'properties' }, request);
   }
 
-  updateIntegrationProperty(id: string, request: UpdateIntegrationPropertyRequest): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'Integrations', action: `update/properties/${id}` }, request);
+  updateIntegrationProperty(id: string, request: UpdateIntegrationPropertyRequest): Promise<ApiResponse<IntegrationProperty>> {
+    return this.http.post<IntegrationProperty>({ controller: 'Integrations', action: `update/properties/${id}` }, request);
   }
 
-  deleteIntegrationProperty(id: string): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'Integrations', action: `delete/properties/${id}` }, {});
+  deleteIntegrationProperty(id: string): Promise<ApiResponse<object>> {
+    return this.http.post<object>({ controller: 'Integrations', action: `delete/properties/${id}` }, {});
   }
 
   /** Ticimax bağlantı bilgilerini günceller */

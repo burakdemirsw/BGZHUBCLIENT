@@ -44,7 +44,9 @@
                         (ngModelChange)="onIntegrationChange()">
                     <option value="">Bir entegrasyon seçiniz...</option>
                     @for (userInt of userIntegrations; track userInt.id) {
-                        <option [value]="userInt.id">{{ userInt.integrationName }} - {{ userInt.userName || 'Kullanıcı' }}</option>
+                        <option [value]="userInt.id">
+                            {{ userInt.integrationDescription }}@if (userInt.userName) { - {{ userInt.userName }} }
+                        </option>
                     }
                 </select>
             }

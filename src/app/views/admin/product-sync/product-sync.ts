@@ -6,6 +6,7 @@ import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { TrendyolService } from '@/app/core/services/trendyol.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { Integration } from '@/app/core/models/integration/integration.models';
+import { IntegrationUser } from '@/app/core/models/integration/integration-user.models';
 import {
     FeedSyncHealthRequest,
     FeedSyncHealthResponse,
@@ -33,7 +34,7 @@ export class ProductSyncPage implements OnInit {
     selectedIntegrationId = '';
 
     // ── User Entegrasyonları ──
-    userIntegrations: any[] = [];
+    userIntegrations: IntegrationUser[] = [];
     userIntegrationsLoading = false;
     selectedUserIntegrationId = '';
 
@@ -97,7 +98,7 @@ export class ProductSyncPage implements OnInit {
         try {
             const companyId = this.authState.profile?.companyId || '';
             const response = await this.integrationsService.getIntegrationUsersByCompany(companyId);
-            this.userIntegrations = (response?.data ?? []).filter((ui: any) => !ui.isBlocked);
+            this.userIntegrations = (response?.data ?? []).filter((ui: IntegrationUser) => !ui.isBlocked);
         } catch (err) {
             console.error('User entegrasyon yükleme hatası:', err);
         } finally {
@@ -123,42 +124,45 @@ export class ProductSyncPage implements OnInit {
         this.lastTrendyolSyncTime = null;
         this.closeDetail();
 
-        if (this.selectedIntegrationId) {
+        // Seçili userIntegration'ı bul
+        const selectedUser = this.userIntegrations.find(ui => ui.id === this.selectedUserIntegrationId);
+        if (!selectedUser) return;
+
+        // Trendyol mu kontrol et
+        if (this.isTrendyolIntegration()) {
+            this.loadTrendyolHealth();
+        } else {
             this.loadHealth();
-            // Eğer seçilen entegrasyon Trendyol ise Trendyol health'i de yükle
-            if (this.isTrendyolIntegration()) {
-                this.loadTrendyolHealth();
-            }
         }
     }
 
+    // ── Trendyol Entegrasyon Kontrolü ──
     isTrendyolIntegration(): boolean {
-        const item = this.integrations.find(i => i.id === this.selectedIntegrationId);
-        // integrationTypeId veya başka bir alan üzerinden Trendyol kontrolü yapılabilir
-        // Şimdilik integrationDescription içinde "Trendyol" geçip geçmediğine bakıyoruz
-        return (item?.integrationDescription || '').toLowerCase().includes('trendyol');
+        if (!this.selectedUserIntegrationId) return false;
+        const selectedUser = this.userIntegrations.find(ui => ui.id === this.selectedUserIntegrationId);
+        return selectedUser?.integrationDescription?.toLowerCase().includes('trendyol') ?? false;
     }
 
     getSelectedIntegrationName(): string {
-        const item = this.integrations.find(i => i.id === this.selectedIntegrationId);
+        const item = this.userIntegrations.find(ui => ui.id === this.selectedUserIntegrationId);
         return item?.integrationDescription || '—';
     }
 
     // ────── Request Builder ──────
     private buildRequest(): FeedSyncHealthRequest | null {
         const companyId = this.authState.profile?.companyId;
-        if (!companyId || !this.selectedIntegrationId) {
+        if (!companyId || !this.selectedUserIntegrationId) {
             return null;
         }
         return {
             companyId,
-            integrationId: this.selectedIntegrationId,
+            integrationId: this.selectedUserIntegrationId,
         };
     }
 
     // ────── Sağlık Kontrolü ──────
     async loadHealth(): Promise<void> {
-        if (!this.selectedIntegrationId) return;
+        if (!this.selectedUserIntegrationId) return;
         const request = this.buildRequest();
         if (!request) {
             this.healthError = 'Şirket bilgisi veya entegrasyon seçilmemiş.';
@@ -180,7 +184,7 @@ export class ProductSyncPage implements OnInit {
 
     // ────── Senkronizasyon ──────
     async runSync(): Promise<void> {
-        if (!this.selectedIntegrationId) return;
+        if (!this.selectedUserIntegrationId) return;
         const request = this.buildRequest();
         if (!request) {
             this.syncError = 'Şirket bilgisi veya entegrasyon seçilmemiş.';
@@ -358,10 +362,9 @@ export class ProductSyncPage implements OnInit {
     // ════════════════════════════════════════════════════════════════
 
     private getTrendyolIntegrationUserId(): string | null {
-        const item = this.integrations.find(i => i.id === this.selectedIntegrationId);
-        // Integration'dan integrationUserId'yi almalıyız
-        // Şimdilik item.id kullanıyoruz (bu değer integrationUserId olmalı)
-        return item?.id || null;
+        if (!this.selectedUserIntegrationId) return null;
+        // selectedUserIntegrationId zaten integrationUserId'dir
+        return this.selectedUserIntegrationId;
     }
 
     async loadTrendyolHealth(): Promise<void> {
