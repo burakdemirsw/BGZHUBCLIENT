@@ -2,7 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { ApiResponse } from '../models/api-response.model';
 import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
-import { ConversationListResponse, ConversationMessagesResponse, ConversationSidebarResponse, CreateTestConversationRequest } from '../models/conversation/conversation.models';
+import {
+    ConversationListResponse,
+    ConversationMessagesResponse,
+    ConversationResponse,
+    ConversationSidebarResponse,
+    CreateConversationRequest,
+    CreateTestConversationRequest,
+    UpdateConversationRequest,
+} from '../models/conversation/conversation.models';
 
 @Injectable({ providedIn: 'root' })
 export class ConversationsService {
@@ -50,6 +58,24 @@ export class ConversationsService {
             { controller: 'Conversations', action: 'create-test-conversation' },
             request,
         );
+    }
+
+    /** POST /api/Conversations — yeni sohbet oluştur */
+    create(request: CreateConversationRequest): Promise<ApiResponse<ConversationResponse>> {
+        return this.http.post<ConversationResponse>({ controller: 'Conversations' }, request);
+    }
+
+    /** POST /api/Conversations/update/{id} — sohbet güncelle */
+    update(id: string, request: UpdateConversationRequest): Promise<ApiResponse<object>> {
+        return this.http.post<object>(
+            { controller: 'Conversations', action: `update/${id}` },
+            request,
+        );
+    }
+
+    /** POST /api/Conversations/delete/{id} — sohbet sil */
+    remove(id: string): Promise<ApiResponse<object>> {
+        return this.http.post<object>({ controller: 'Conversations', action: `delete/${id}` }, {});
     }
 
     archive(id: string)     { return this.action(id, 'archive');     }

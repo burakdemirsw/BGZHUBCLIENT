@@ -1,0 +1,118 @@
+<div class="nac-shell">
+    <nac-sidebar
+        [collapsed]="sidebarCollapsed"
+        [mobileOpen]="sidebarMobileOpen"
+        [chats]="sidebarChats"
+        [activeChatId]="activeConversationId"
+        (toggleCollapse)="toggleSidebar()"
+        (closeMobile)="closeMobileSidebar()"
+        (newChat)="newChat()"
+        (selectChat)="onSelectChat($event)">
+    </nac-sidebar>
+
+    <div class="nac-content">
+        <header class="nac-header">
+            <div class="nac-header-left">
+                <!-- <button type="button" class="nac-icon-btn nac-hamburger" (click)="onHamburgerClick()" title="Sidebar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18M3 12h18M3 18h18"/>
+                    </svg>
+                </button> -->
+                <div class="nac-logo-mark">
+                    <span class="nac-dot"></span>
+                    <span class="nac-logo-text">Nebim AI</span>
+                </div>
+                <span class="nac-model-badge">api-live · v1</span>
+            </div>
+            <div class="nac-header-right">
+            </div>
+        </header>
+
+        <main class="nac-main">
+        @if (messages.length === 0) {
+            <section class="nac-empty">
+                <div class="nac-empty-inner">
+                    <div class="nac-empty-orb">
+                        <div class="nac-orb-glow"></div>
+                        <div class="nac-orb-core"></div>
+                    </div>
+                    <h1 class="nac-empty-title">Bugün sana nasıl yardımcı olabilirim?</h1>
+                    <p class="nac-empty-subtitle">Bir soru sor ya da aşağıdaki önerilerden birini dene.</p>
+
+                    <div class="nac-suggestions">
+                        @for (s of suggestions; track s.title) {
+                            <button type="button" class="nac-suggestion" (click)="useSuggestion(s.title)">
+                                <span class="nac-suggestion-title">{{ s.title }}</span>
+                                <span class="nac-suggestion-sub">{{ s.subtitle }}</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+            </section>
+        } @else {
+            <section class="nac-thread">
+                <div class="nac-thread-inner">
+                    @for (msg of messages; track msg.id) {
+                        <article class="nac-msg" [class.nac-msg-user]="msg.role === 'user'" [class.nac-msg-ai]="msg.role === 'assistant'">
+                            <div class="nac-avatar">
+                                @if (msg.role === 'user') {
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                    </svg>
+                                } @else {
+                                    <span class="nac-avatar-dot"></span>
+                                }
+                            </div>
+                            <div class="nac-bubble-wrap">
+                                <div class="nac-msg-role">{{ msg.role === 'user' ? 'Sen' : 'Nebim AI' }}</div>
+                                <div class="nac-bubble">{{ msg.content }}</div>
+                            </div>
+                        </article>
+                    }
+
+                    @if (isSending) {
+                        <article class="nac-msg nac-msg-ai">
+                            <div class="nac-avatar"><span class="nac-avatar-dot"></span></div>
+                            <div class="nac-bubble-wrap">
+                                <div class="nac-msg-role">Nebim AI</div>
+                                <div class="nac-bubble nac-typing">
+                                    <span></span><span></span><span></span>
+                                </div>
+                            </div>
+                        </article>
+                    }
+
+                    <div #scrollAnchor></div>
+                </div>
+            </section>
+        }
+    </main>
+
+    <footer class="nac-composer-wrap">
+        <div class="nac-composer">
+            <textarea
+                #textArea
+                class="nac-textarea"
+                rows="1"
+                placeholder="Nebim AI'a bir mesaj gönder..."
+                [(ngModel)]="input"
+                (keydown.enter)="onEnter($event)"
+                (input)="autoResize()"></textarea>
+
+            <button
+                type="button"
+                class="nac-send"
+                [disabled]="!input.trim() || isSending"
+                (click)="send()"
+                title="Gönder">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14"/>
+                    <path d="M13 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </div>
+        <div class="nac-hint">Enter ile gönder · Shift + Enter ile yeni satır</div>
+    </footer>
+    </div>
+</div>

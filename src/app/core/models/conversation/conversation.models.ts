@@ -152,3 +152,45 @@ export interface CreateTestConversationRequest {
     userIntSmaId?: string | null;
 }
 
+// ========================
+// Create / Update Conversation Requests
+// ========================
+
+export interface CreateConversationRequest {
+    userIntegrationUserSocialMediaAccountId: string;
+    customerId: string;
+    companyId: string;
+    conversationTypeId: string;
+}
+
+export interface UpdateConversationRequest {
+    userIntegrationUserSocialMediaAccountId: string;
+    customerId: string;
+    companyId: string;
+    conversationTypeId: string;
+    lastMessageDate?: string | null;
+    isFavorite: boolean;
+    isBlocked: boolean;
+    isArchived: boolean;
+    isLocked: boolean;
+    isEscalateToHuman: boolean;
+}
+
+export interface ConversationResponse {
+    id: string;
+    userIntegrationUserSocialMediaAccountId: string;
+    customerId: string;
+    companyId: string;
+    conversationTypeId: string;
+    customerName?: string;
+    lastMessageDate?: string | null;
+    isFavorite: boolean;
+    isBlocked: boolean;
+    isArchived: boolean;
+    isLocked: boolean;
+    isEscalateToHuman: boolean;
+    isTest: boolean;
+    createdDate: string;
+    updatedDate: string;
+}
+

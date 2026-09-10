@@ -14,6 +14,18 @@ export const routes: Routes = [
         data: {title: 'SellenticAI — AI Destekli Müşteri İletişim Platformu'}
     },
     {
+        path: 'nebim-ai-chat',
+        loadComponent: () =>
+            import('./views/admin/nebim-ai-chat/nebim-ai-chat/nebim-ai-chat').then(m => m.NebimAiChatPage),
+        data: {title: 'Nebim AI Chat'}
+    },
+    {
+        path: 'c/:conversationId',
+        loadComponent: () =>
+            import('./views/admin/nebim-ai-chat/nebim-ai-chat/nebim-ai-chat').then(m => m.NebimAiChatPage),
+        data: {title: 'Nebim AI Chat'}
+    },
+    {
         path: '',
         component: MainLayout,
         loadChildren: () => import('./views/views.route').then((mod) => mod.VIEWS_ROUTES)

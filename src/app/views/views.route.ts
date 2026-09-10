@@ -66,6 +66,6 @@ export const VIEWS_ROUTES: Routes = [
     // },
     {
         path: '',
-        loadChildren: () => import('./admin/admin.route').then((mod) => mod.ADMIN_ROUTES)
+        loadChildren: () => import('@/app/views/admin/admin.route').then((mod) => mod.ADMIN_ROUTES)
     },
 ];

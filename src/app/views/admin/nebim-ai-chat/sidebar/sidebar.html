@@ -1,0 +1,94 @@
+<aside
+    class="sidebar"
+    [class.collapsed]="collapsed"
+    [class.mobile-open]="mobileOpen">
+
+    <!-- HEADER -->
+    <header class="sidebar-header">
+        <div class="brand">
+            <span class="brand-mark"></span>
+            <span class="brand-name" *ngIf="!collapsed">Nebim AI</span>
+        </div>
+        <div class="header-actions" *ngIf="!collapsed">
+            <button type="button" class="icon-btn" title="Ara">
+                <span [innerHTML]="safeSearchIcon"></span>
+            </button>
+            <button
+                type="button"
+                class="icon-btn"
+                (click)="onCollapseClick()"
+                title="Sidebar'ı gizle">
+                <span [innerHTML]="safeSidebarIcon"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Collapsed: floating expand button just below brand -->
+    <button
+        *ngIf="collapsed"
+        type="button"
+        class="collapsed-toggle"
+        (click)="onCollapseClick()"
+        title="Sidebar'ı aç">
+        <span [innerHTML]="safeSidebarIcon"></span>
+    </button>
+
+    <!-- SCROLLABLE BODY -->
+    <div class="sidebar-body">
+        <!-- MAIN NAV -->
+        <nav class="main-nav">
+            @for (item of mainNav; track item.id) {
+                <nac-nav-item
+                    [label]="item.label"
+                    [iconSvg]="item.iconSvg"
+                    [badge]="item.badge"
+                    [collapsed]="collapsed"
+                    (click)="onNavClick(item)">
+                </nac-nav-item>
+            }
+        </nav>
+
+        <!-- PINNED -->
+        <nac-sidebar-section title="Sabitlenenler" [collapsed]="collapsed">
+            @for (item of pinned; track item.id) {
+                <nac-nav-item
+                    [label]="item.label"
+                    [iconSvg]="item.iconSvg"
+                    [collapsed]="collapsed">
+                </nac-nav-item>
+            }
+        </nac-sidebar-section>
+
+        <!-- PROJECTS -->
+        <nac-sidebar-section title="Projeler" [collapsed]="collapsed">
+            @for (item of projects; track item.id) {
+                <nac-nav-item
+                    [label]="item.label"
+                    [iconSvg]="item.iconSvg"
+                    [collapsed]="collapsed">
+                </nac-nav-item>
+            }
+        </nac-sidebar-section>
+
+        <!-- CHAT HISTORY -->
+        <nac-sidebar-section title="Sohbetler" [collapsed]="collapsed">
+            @for (chat of chats; track chat.id) {
+                <button
+                    type="button"
+                    class="chat-item"
+                    [class.active]="activeChatId === chat.id"
+                    [attr.title]="collapsed ? chat.label : null"
+                    (click)="onChatSelect(chat)">
+                    <span class="chat-dot" *ngIf="collapsed"></span>
+                    <span class="chat-label" *ngIf="!collapsed">{{ chat.label }}</span>
+                </button>
+            }
+        </nac-sidebar-section>
+    </div>
+
+    <!-- USER -->
+    <nac-user-profile [collapsed]="collapsed"></nac-user-profile>
+</aside>
+
+<!-- MOBILE OVERLAY -->
+<div class="mobile-overlay" *ngIf="mobileOpen" (click)="onCloseMobile()"></div>
