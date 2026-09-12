@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 
 @Component({
     selector: 'nac-user-profile',
@@ -7,12 +8,12 @@ import { CommonModule } from '@angular/common';
     imports: [CommonModule],
     template: `
         <div class="user-profile" [class.collapsed]="collapsed">
-            <div class="avatar" [attr.title]="collapsed ? name : null">
+            <div class="avatar" [attr.title]="collapsed ? displayName : null">
                 {{ initials }}
             </div>
             <div class="user-info" *ngIf="!collapsed">
-                <div class="name">{{ name }}</div>
-                <div class="plan">{{ plan }}</div>
+                <div class="name">{{ displayName }}</div>
+                <div class="plan">{{ displayPlan }}</div>
             </div>
             <button *ngIf="!collapsed" type="button" class="upgrade-btn" title="Yükselt">
                 Yükselt
@@ -78,12 +79,33 @@ import { CommonModule } from '@angular/common';
     `]
 })
 export class UserProfileComponent {
-    @Input() name = 'kadir can';
-    @Input() plan = 'Free';
+    @Input() name = '';
+    @Input() plan = '';
     @Input() collapsed = false;
 
+    constructor(private authState: AuthStateService) {}
+
+    get displayName(): string {
+        const inputName = this.name.trim();
+        if (inputName) {
+            return inputName;
+        }
+
+        const fullName = this.authState.fullName.trim();
+        return fullName || 'Kullanıcı';
+    }
+
+    get displayPlan(): string {
+        const inputPlan = this.plan.trim();
+        if (inputPlan) {
+            return inputPlan;
+        }
+
+        return this.authState.activePlan?.planName?.trim() || 'Plan bilgisi yok';
+    }
+
     get initials(): string {
-        return this.name
+        return this.displayName
             .split(' ')
             .map(p => p.charAt(0).toUpperCase())
             .slice(0, 2)

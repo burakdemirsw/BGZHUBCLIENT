@@ -5,6 +5,14 @@
 
     <!-- HEADER -->
     <header class="sidebar-header">
+        <button
+            type="button"
+            class="icon-btn left-reload"
+            (click)="onReloadClick()"
+            title="Sohbetleri yenile">
+            <span [innerHTML]="safeRefreshIcon"></span>
+        </button>
+
         <div class="brand">
             <span class="brand-mark"></span>
             <span class="brand-name" *ngIf="!collapsed">Nebim AI</span>
@@ -47,28 +55,6 @@
                 </nac-nav-item>
             }
         </nav>
-
-        <!-- PINNED -->
-        <nac-sidebar-section title="Sabitlenenler" [collapsed]="collapsed">
-            @for (item of pinned; track item.id) {
-                <nac-nav-item
-                    [label]="item.label"
-                    [iconSvg]="item.iconSvg"
-                    [collapsed]="collapsed">
-                </nac-nav-item>
-            }
-        </nac-sidebar-section>
-
-        <!-- PROJECTS -->
-        <nac-sidebar-section title="Projeler" [collapsed]="collapsed">
-            @for (item of projects; track item.id) {
-                <nac-nav-item
-                    [label]="item.label"
-                    [iconSvg]="item.iconSvg"
-                    [collapsed]="collapsed">
-                </nac-nav-item>
-            }
-        </nac-sidebar-section>
 
         <!-- CHAT HISTORY -->
         <nac-sidebar-section title="Sohbetler" [collapsed]="collapsed">

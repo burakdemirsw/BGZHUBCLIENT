@@ -50,6 +50,7 @@ export interface ConversationHeader {
     isFavorite: boolean;
     isLocked?: boolean;
     isEscalateToHuman?: boolean;
+    isTest?: boolean;
 }
 
 // ========================
@@ -75,6 +76,13 @@ export interface ChatMessage {
     imageUrl?: string;
     isRead: boolean;
     createdDate?: string;
+    responseType?: AiChatResponseType | null;
+    blocks?: AiChatContentBlock[] | null;
+    toolPayloads?: AiChatToolPayload[] | null;
+    hasImage?: boolean;
+    aiImageUrl?: string | null;
+    hasExcel?: boolean;
+    excelUrl?: string | null;
 }
 
 // ========================
@@ -90,6 +98,64 @@ export interface ConversationMessagesResponse {
     notes: ConversationNoteItem[];
     orders: ConversationOrderSummary[];
     totalCount: number;
+}
+
+export type AiChatResponseType = 'text' | 'table' | 'image' | 'imageGallery' | 'mixed';
+export type AiChatBlockType = 'text' | 'table' | 'image' | 'imageGallery';
+
+export interface AiChatTableData {
+    columns: string[];
+    rows: Record<string, string | null>[];
+    totalRowCount: number | null;
+    isTruncated: boolean;
+}
+
+export interface AiChatImageData {
+    url: string;
+    caption: string | null;
+    alt: string | null;
+}
+
+export interface AiChatContentBlock {
+    type: AiChatBlockType;
+    title: string | null;
+    order: number;
+    text: string | null;
+    table: AiChatTableData | null;
+    images: AiChatImageData[] | null;
+}
+
+export interface AiChatToolPayload {
+    success: boolean;
+    toolName: string | null;
+    queryKey: string | null;
+    routeType: string | null;
+    responseJson: string | null;
+    rowCount: number | null;
+    durationMs: number | null;
+    error: string | null;
+}
+
+export interface AiChatResponse {
+    success: boolean;
+    response: string | null;
+    error: string | null;
+    responseType: AiChatResponseType;
+    blocks: AiChatContentBlock[] | null;
+    toolPayloads: AiChatToolPayload[] | null;
+}
+
+export interface ConversationReplyResponse {
+    conversation: ConversationMessagesResponse;
+    aiResponse: AiChatResponse;
+}
+
+export interface ConversationReplyRequest {
+    companyId: string;
+    message: string;
+    assistantId?: string | null;
+    file?: string | null;
+    fileType?: string | null;
 }
 
 // ========================

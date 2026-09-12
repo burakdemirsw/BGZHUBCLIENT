@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { ApiResponse } from '../models/api-response.model';
 import {
+    AiChatResponse,
     AiMessageResponse,
+    AiReplyByConversationRequest,
     ChatCompletionRequest,
     ChatCompletionResponse,
     CreateAiMessageRequest,
@@ -33,6 +35,26 @@ export class AiMessagesService {
         return this.http.post<ChatCompletionResponse>(
             { controller: 'Ai', action: 'chat/completions' },
             request,
+        );
+    }
+
+    /** POST /api/Ai/reply/{conversationId} */
+    replyByConversation(
+        conversationId: string,
+        request: AiReplyByConversationRequest,
+    ): Promise<ApiResponse<AiChatResponse>> {
+        const payload = {
+            CompanyId: request.companyId,
+            Message: request.message,
+            UserId: request.userId ?? null,
+            AssistantId: request.assistantId ?? null,
+            File: request.file ?? null,
+            FileType: request.fileType ?? null,
+        };
+
+        return this.http.post<AiChatResponse>(
+            { controller: 'Ai', action: `reply/${conversationId}` },
+            payload,
         );
     }
 }

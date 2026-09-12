@@ -5,6 +5,7 @@
         [chats]="sidebarChats"
         [activeChatId]="activeConversationId"
         (toggleCollapse)="toggleSidebar()"
+        (reloadChats)="reloadConversationList()"
         (closeMobile)="closeMobileSidebar()"
         (newChat)="newChat()"
         (selectChat)="onSelectChat($event)">
@@ -66,7 +67,129 @@
                             </div>
                             <div class="nac-bubble-wrap">
                                 <div class="nac-msg-role">{{ msg.role === 'user' ? 'Sen' : 'Nebim AI' }}</div>
-                                <div class="nac-bubble">{{ msg.content }}</div>
+                                @if (msg.role === 'assistant') {
+                                    <div class="nac-bubble nac-bubble-ai" [class.nac-bubble-error]="msg.isError">
+                                        @if (msg.blocks?.length) {
+                                            <div class="nac-blocks">
+                                                @for (block of msg.blocks; track $index) {
+                                                    <section class="nac-block" [class.nac-block-text]="block.type === 'text'" [class.nac-block-table]="block.type === 'table'" [class.nac-block-image]="block.type === 'image' || block.type === 'imageGallery'">
+                                                        @if (block.title) {
+                                                            <div class="nac-block-title">{{ block.title }}</div>
+                                                        }
+
+                                                        @switch (block.type) {
+                                                            @case ('text') {
+                                                                @if (block.text) {
+                                                                    <div class="nac-block-text-content">{{ block.text }}</div>
+                                                                }
+                                                            }
+                                                            @case ('table') {
+                                                                @if (hasRenderableTable(block.table)) {
+                                                                    <div class="nac-table-wrap">
+                                                                        <table class="nac-table">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    @for (column of block.table!.columns; track column) {
+                                                                                        <th>{{ column }}</th>
+                                                                                    }
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                @for (row of block.table!.rows; track $index) {
+                                                                                    <tr>
+                                                                                        @for (column of block.table!.columns; track column) {
+                                                                                            <td>
+                                                                                                @if (isCellLink(row, column)) {
+                                                                                                    <a
+                                                                                                        class="nac-table-link"
+                                                                                                        [href]="getCellLink(row, column)!"
+                                                                                                        [title]="getCellValue(row, column)"
+                                                                                                        target="_blank"
+                                                                                                        rel="noopener noreferrer">
+                                                                                                        {{ getCellLinkLabel(row, column) }}
+                                                                                                    </a>
+                                                                                                } @else {
+                                                                                                    {{ getCellValue(row, column) }}
+                                                                                                }
+                                                                                            </td>
+                                                                                        }
+                                                                                    </tr>
+                                                                                }
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                    @if (block.table!.isTruncated) {
+                                                                        <div class="nac-block-note">Yalnızca ilk kayıtlar gösteriliyor.</div>
+                                                                    }
+                                                                }
+                                                            }
+                                                            @case ('image') {
+                                                                @if (hasRenderableImages(block.images)) {
+                                                                    @for (image of block.images!; track image.url) {
+                                                                        <figure class="nac-media-card">
+                                                                            <img class="nac-media-image" [src]="image.url" [alt]="image.alt || image.caption || 'AI gorseli'" loading="lazy">
+                                                                            @if (image.caption) {
+                                                                                <figcaption class="nac-media-caption">{{ image.caption }}</figcaption>
+                                                                            }
+                                                                        </figure>
+                                                                    }
+                                                                }
+                                                            }
+                                                            @case ('imageGallery') {
+                                                                @if (hasRenderableImages(block.images)) {
+                                                                    <div class="nac-gallery-grid">
+                                                                        @for (image of block.images!; track image.url) {
+                                                                            <figure class="nac-media-card nac-media-card-gallery">
+                                                                                <img class="nac-media-image" [src]="image.url" [alt]="image.alt || image.caption || 'AI gorseli'" loading="lazy">
+                                                                                @if (image.caption) {
+                                                                                    <figcaption class="nac-media-caption">{{ image.caption }}</figcaption>
+                                                                                }
+                                                                            </figure>
+                                                                        }
+                                                                    </div>
+                                                                }
+                                                            }
+                                                        }
+                                                    </section>
+                                                }
+                                            </div>
+
+                                        }
+
+                                        @if (canShareOnWhatsApp(msg)) {
+                                            <div class="nac-message-actions">
+                                                <a class="nac-action-chip" [href]="getWhatsAppShareUrl(msg)" target="_blank" rel="noopener noreferrer">
+                                                    <span>WhatsApp ile Paylas</span>
+                                                </a>
+                                            </div>
+                                        }
+
+                                        @if (hasExcelExport(msg)) {
+                                            <div class="nac-message-actions">
+                                                <a class="nac-action-chip" [href]="msg.excelUrl!" target="_blank" rel="noopener noreferrer">
+                                                    <span>Excel indir</span>
+                                                </a>
+                                            </div>
+                                        }
+
+                                        @if (hasExternalAiImage(msg)) {
+                                            <figure class="nac-media-card nac-media-card-external">
+                                                <img class="nac-media-image" [src]="msg.aiImageUrl!" alt="AI gorseli" loading="lazy">
+                                                <figcaption class="nac-media-caption">
+                                                    <a class="nac-action-chip" [href]="msg.aiImageUrl!" target="_blank" rel="noopener noreferrer">
+                                                        <span>Gorseli ac</span>
+                                                    </a>
+                                                </figcaption>
+                                            </figure>
+                                        }
+
+                                        @if (!(msg.blocks?.length ?? 0) && msg.content) {
+                                            <div class="nac-block-text-content">{{ msg.content }}</div>
+                                        }
+                                    </div>
+                                } @else {
+                                    <div class="nac-bubble">{{ msg.content }}</div>
+                                }
                             </div>
                         </article>
                     }
@@ -112,6 +235,9 @@
                 </svg>
             </button>
         </div>
+        @if (errorMessage) {
+            <div class="nac-error">{{ errorMessage }}</div>
+        }
         <div class="nac-hint">Enter ile gönder · Shift + Enter ile yeni satır</div>
     </footer>
     </div>

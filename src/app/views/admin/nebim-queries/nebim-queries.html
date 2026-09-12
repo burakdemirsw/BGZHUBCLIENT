@@ -1,0 +1,622 @@
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm nq-surface">
+            <div class="card-body p-3 p-lg-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+                    <div>
+                        <h4 class="card-title mb-1"><i class="fa-solid fa-database me-2"></i>Nebim Query Merkezi</h4>
+                        <p class="text-muted small mb-0">Sorgu ve kategori yapılarını sekmeli görünümde yönetin.</p>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (activeView === 'queries') {
+                            <button class="btn btn-primary btn-sm" (click)="openCreate()">
+                                <i class="fa-solid fa-plus me-1"></i>Yeni Sorgu
+                            </button>
+                        }
+                        @if (activeView === 'categories') {
+                            <button class="btn btn-primary btn-sm" (click)="openCreateCategory()">
+                                <i class="fa-solid fa-plus me-1"></i>Yeni Kategori
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <ul class="nav nav-tabs nav-bordered nq-tabs mb-4">
+                    <li class="nav-item">
+                        <button class="nav-link" [class.active]="activeView === 'queries'" (click)="switchView('queries')">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i>Sorgular
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" [class.active]="activeView === 'categories'" (click)="switchView('categories')">
+                            <i class="fa-solid fa-tags me-1"></i>Kategoriler
+                        </button>
+                    </li>
+                </ul>
+
+                @if (activeView === 'queries') {
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="card border nq-panel h-100">
+                                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                    <div>
+                                        <h5 class="card-title mb-1">Nebim Sorguları</h5>
+                                        <p class="text-muted small mb-0">Tool kayıtlarını filtreleyin, kopyalayın ve detaylarını yönetin.</p>
+                                    </div>
+                                    <div class="small text-muted">Toplam: {{ filteredItems.length }} kayıt</div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3 align-items-center mb-3">
+                                        <div class="col-md-6 col-lg-4">
+                                            <input type="text" class="form-control form-control-sm" placeholder="Tool adı, açıklama, route veya query key ara..." [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+                                        </div>
+                                    </div>
+
+                                    @if (loading) {
+                                        <div class="text-center py-4">
+                                            <div class="spinner-border text-primary" role="status"></div>
+                                            <p class="mt-2 text-muted mb-0">Sorgular yükleniyor...</p>
+                                        </div>
+                                    } @else {
+                                        <div class="table-responsive">
+                                            <table class="table table-centered table-hover mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th class="text-end nq-actions-column">İşlemler</th>
+                                                        <th>#</th>
+                                                        <th>Query Key</th>
+                                                        <th>Tool</th>
+                                                        <th>Açıklama</th>
+                                                        <th>Kategoriler</th>
+                                                        <th>Result Mode</th>
+                                                        <th>Route</th>
+                                                        <th>Timeout</th>
+                                                        <th class="text-center">Durum</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @for (item of pagedItems; track item.id; let idx = $index) {
+                                                        <tr [class.table-active]="activeQuery?.id === item.id">
+                                                            <td class="text-end nq-actions-column">
+                                                                <div class="nq-actions-group">
+                                                                    <button class="btn btn-soft-primary btn-sm" (click)="selectQuery(item)" title="Detay">
+                                                                        <i class="fa-solid fa-sliders"></i>
+                                                                    </button>
+                                                                    <button class="btn btn-soft-primary btn-sm" (click)="copyQuery(item)" title="Kopyala">
+                                                                        <i class="fa-regular fa-copy"></i>
+                                                                    </button>
+                                                                    <button class="btn btn-soft-primary btn-sm" (click)="openEdit(item)" title="Düzenle">
+                                                                        <i class="fa-solid fa-pen-to-square"></i>
+                                                                    </button>
+                                                                    <button class="btn btn-soft-danger btn-sm" (click)="deleteQuery(item)" title="Sil">
+                                                                        <i class="fa-solid fa-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                            <td><span class="badge bg-primary-subtle text-primary">{{ (currentPage - 1) * pageSize + idx + 1 }}</span></td>
+                                                            <td><strong>{{ item.queryKey }}</strong></td>
+                                                            <td>{{ item.toolName }}</td>
+                                                            <td class="nq-description">{{ item.toolDescription }}</td>
+                                                            <td>
+                                                                <div class="d-flex flex-wrap gap-1">
+                                                                    @for (category of item.categories || []; track category.id) {
+                                                                        <span class="badge bg-secondary-subtle text-secondary">{{ category.name }}</span>
+                                                                    } @empty {
+                                                                        <span class="text-muted small">Kategori yok</span>
+                                                                    }
+                                                                </div>
+                                                            </td>
+                                                            <td>{{ item.resultMode }}</td>
+                                                            <td>{{ item.routeType }}</td>
+                                                            <td>{{ item.timeoutSeconds }} sn</td>
+                                                            <td class="text-center">
+                                                                @if (item.isActive) {
+                                                                    <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                                } @else {
+                                                                    <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                                }
+                                                                @if (item.isReadOnly) {
+                                                                    <span class="badge bg-info-subtle text-info ms-1">ReadOnly</span>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    } @empty {
+                                                        <tr>
+                                                            <td colspan="10" class="text-center text-muted py-4">Nebim sorgusu bulunamadı.</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div class="small text-muted">Sayfa {{ currentPage }} / {{ totalPages }}</div>
+                                            <nav>
+                                                <ul class="pagination pagination-sm mb-0">
+                                                    <li class="page-item" [class.disabled]="currentPage === 1"><button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button></li>
+                                                    @for (page of totalPagesArray; track page) {
+                                                        <li class="page-item" [class.active]="page === currentPage"><button class="page-link" (click)="setPage(page)">{{ page }}</button></li>
+                                                    }
+                                                    <li class="page-item" [class.disabled]="currentPage === totalPages"><button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button></li>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (activeQuery) {
+                            <div class="col-12">
+                                <div class="card border nq-panel">
+                                    <div class="card-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+                                        <div>
+                                            <h5 class="card-title mb-1">{{ activeQuery.toolName }}</h5>
+                                            <p class="text-muted small mb-0">{{ activeQuery.toolDescription || 'Açıklama yok' }}</p>
+                                        </div>
+                                        <div class="nq-summary-grid">
+                                            <div class="nq-summary-item">
+                                                <span class="nq-summary-label">Query Key</span>
+                                                <strong>{{ activeQuery.queryKey }}</strong>
+                                            </div>
+                                            <div class="nq-summary-item">
+                                                <span class="nq-summary-label">Result Mode</span>
+                                                <strong>{{ activeQuery.resultMode }}</strong>
+                                            </div>
+                                            <div class="nq-summary-item">
+                                                <span class="nq-summary-label">Son Güncelleme</span>
+                                                <strong>{{ formatDate(activeQuery.updatedDate) }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="nav nav-tabs nav-bordered nq-subtabs mb-4">
+                                            <li class="nav-item">
+                                                <button class="nav-link" [class.active]="activeQueryDetailView === 'parameters'" (click)="switchQueryDetailView('parameters')">
+                                                    <i class="fa-solid fa-sliders me-1"></i>Parametreler
+                                                </button>
+                                            </li>
+                                            <li class="nav-item">
+                                                <button class="nav-link" [class.active]="activeQueryDetailView === 'test'" (click)="switchQueryDetailView('test')">
+                                                    <i class="fa-solid fa-play me-1"></i>Test Çalıştır
+                                                </button>
+                                            </li>
+                                        </ul>
+
+                                        @if (activeQueryDetailView === 'parameters') {
+                                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                                <div class="small text-muted">Toplam: {{ filteredParameters.length }} parametre</div>
+                                                <button class="btn btn-primary btn-sm" (click)="openCreateParameter()">
+                                                    <i class="fa-solid fa-plus me-1"></i>Parametre Ekle
+                                                </button>
+                                            </div>
+                                            <div class="row g-3 align-items-center mb-3">
+                                                <div class="col-md-7 col-lg-5">
+                                                    <input type="text" class="form-control form-control-sm" placeholder="Parametre adı, json key, tip veya açıklama ara..." [(ngModel)]="parameterFilterText" (ngModelChange)="onParameterFilterChange()">
+                                                </div>
+                                            </div>
+
+                                            @if (parametersLoading) {
+                                                <div class="text-center py-4">
+                                                    <div class="spinner-border text-primary" role="status"></div>
+                                                    <p class="mt-2 text-muted mb-0">Parametreler yükleniyor...</p>
+                                                </div>
+                                            } @else {
+                                                <div class="table-responsive">
+                                                    <table class="table table-centered table-hover mb-0">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th class="text-end nq-actions-column">İşlemler</th>
+                                                                <th>#</th>
+                                                                <th>Parametre</th>
+                                                                <th>JSON Adı</th>
+                                                                <th>Tip</th>
+                                                                <th>Varsayılan</th>
+                                                                <th class="text-center">Zorunlu</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @for (item of pagedParameters; track item.id; let idx = $index) {
+                                                                <tr>
+                                                                    <td class="text-end nq-actions-column">
+                                                                        <div class="nq-actions-group nq-actions-group-compact">
+                                                                            <button class="btn btn-soft-primary btn-sm" (click)="openEditParameter(item)"><i class="fa-solid fa-pen-to-square"></i></button>
+                                                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteParameter(item)"><i class="fa-solid fa-trash"></i></button>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td><span class="badge bg-primary-subtle text-primary">{{ (parameterCurrentPage - 1) * parameterPageSize + idx + 1 }}</span></td>
+                                                                    <td><div class="fw-semibold">{{ item.parameterName }}</div><div class="small text-muted">Sıra: {{ item.sortOrder }}</div></td>
+                                                                    <td>{{ item.jsonName }}</td>
+                                                                    <td>{{ item.dataType }}</td>
+                                                                    <td class="nq-value">{{ item.defaultValue || '-' }}</td>
+                                                                    <td class="text-center">
+                                                                        @if (item.isRequired) {
+                                                                            <span class="badge bg-warning-subtle text-warning">Evet</span>
+                                                                        } @else {
+                                                                            <span class="badge bg-light text-body-secondary">Hayır</span>
+                                                                        }
+                                                                    </td>
+                                                                </tr>
+                                                            } @empty {
+                                                                <tr><td colspan="7" class="text-center text-muted py-4">Bu sorgu için parametre yok.</td></tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                                    <div class="small text-muted">Sayfa {{ parameterCurrentPage }} / {{ parameterTotalPages }}</div>
+                                                    <nav>
+                                                        <ul class="pagination pagination-sm mb-0">
+                                                            <li class="page-item" [class.disabled]="parameterCurrentPage === 1"><button class="page-link" (click)="setParameterPage(parameterCurrentPage - 1)">&laquo;</button></li>
+                                                            @for (page of parameterTotalPagesArray; track page) {
+                                                                <li class="page-item" [class.active]="page === parameterCurrentPage"><button class="page-link" (click)="setParameterPage(page)">{{ page }}</button></li>
+                                                            }
+                                                            <li class="page-item" [class.disabled]="parameterCurrentPage === parameterTotalPages"><button class="page-link" (click)="setParameterPage(parameterCurrentPage + 1)">&raquo;</button></li>
+                                                        </ul>
+                                                    </nav>
+                                                </div>
+                                            }
+                                        } @else {
+                                            <div class="row g-3">
+                                                <div class="col-12 col-xl-4">
+                                                    <div class="nq-exec-meta border rounded-3 p-3 h-100">
+                                                        <div class="small text-muted mb-2">Çalıştırılacak sorgu özeti</div>
+                                                        <div class="mb-2"><strong>Tool:</strong> {{ activeQuery.toolName }}</div>
+                                                        <div class="mb-2"><strong>Query Key:</strong> {{ activeQuery.queryKey }}</div>
+                                                        <div><strong>Güncelleme:</strong> {{ formatDate(activeQuery.updatedDate) }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-xl-8">
+                                                    <label class="form-label">Arguments JSON</label>
+                                                    <textarea class="form-control nq-code" rows="14" [(ngModel)]="executionArgumentsJson" name="executionArgumentsJson"></textarea>
+                                                    <div class="d-flex justify-content-end mt-3">
+                                                        <button class="btn btn-primary" [disabled]="executing" (click)="executeQuery()">
+                                                            @if (executing) {
+                                                                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                                            }
+                                                            <i class="fa-solid fa-play me-1"></i>Çalıştır
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            @if (executionResult) {
+                                                <div class="border rounded-3 p-3 nq-result mt-4" [class.nq-result-error]="!executionResult.success">
+                                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                                        <div>
+                                                            @if (executionResult.success) {
+                                                                <span class="badge bg-success-subtle text-success">Başarılı</span>
+                                                            } @else {
+                                                                <span class="badge bg-danger-subtle text-danger">Hatalı</span>
+                                                            }
+                                                        </div>
+                                                        <div class="small text-muted">Süre: {{ executionResult.durationMs ?? 0 }} ms | Satır: {{ executionResult.rowCount ?? 0 }}</div>
+                                                    </div>
+
+                                                    @if (executionResult.error) {
+                                                        <div class="alert alert-danger py-2 px-3 small mb-3">{{ executionResult.error }}</div>
+                                                    }
+
+                                                    <label class="form-label small text-muted">Response JSON</label>
+                                                    <pre class="mb-0 nq-pre">{{ executionResult.responseJson || '{}' }}</pre>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (activeView === 'categories') {
+                    <div class="card border nq-panel">
+                        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <div>
+                                <h5 class="card-title mb-1">Nebim Kategorileri</h5>
+                                <p class="text-muted mb-0 small">Sorgular için kullanılan kategori kayıtlarını yönetin.</p>
+                            </div>
+                            <div class="small text-muted">Toplam: {{ filteredCategories.length }} kayıt</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3 align-items-center mb-3">
+                                <div class="col-md-6 col-lg-4">
+                                    <input type="text" class="form-control form-control-sm" placeholder="Kategori adı, açıklama veya keyword ara..." [(ngModel)]="categoryFilterText" (ngModelChange)="onCategoryFilterChange()">
+                                </div>
+                            </div>
+
+                            @if (categoriesLoading) {
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                    <p class="mt-2 text-muted mb-0">Kategoriler yükleniyor...</p>
+                                </div>
+                            } @else {
+                                <div class="table-responsive">
+                                    <table class="table table-centered table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="text-end nq-actions-column">İşlemler</th>
+                                                <th>#</th>
+                                                <th>Ad</th>
+                                                <th>Açıklama</th>
+                                                <th>Keywords</th>
+                                                <th class="text-center">Durum</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (item of pagedCategories; track item.id; let idx = $index) {
+                                                <tr>
+                                                    <td class="text-end nq-actions-column">
+                                                        <div class="nq-actions-group nq-actions-group-compact">
+                                                            <button class="btn btn-soft-primary btn-sm" (click)="openEditCategory(item)"><i class="fa-solid fa-pen-to-square"></i></button>
+                                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteCategory(item)"><i class="fa-solid fa-trash"></i></button>
+                                                        </div>
+                                                    </td>
+                                                    <td><span class="badge bg-primary-subtle text-primary">{{ (categoryCurrentPage - 1) * categoryPageSize + idx + 1 }}</span></td>
+                                                    <td class="fw-semibold">{{ item.name }}</td>
+                                                    <td>{{ item.description || '-' }}</td>
+                                                    <td class="nq-value">{{ item.keywords || '-' }}</td>
+                                                    <td class="text-center">
+                                                        @if (item.isActive) {
+                                                            <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                        } @else {
+                                                            <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            } @empty {
+                                                <tr><td colspan="6" class="text-center text-muted py-4">Nebim kategorisi bulunamadı.</td></tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div class="small text-muted">Sayfa {{ categoryCurrentPage }} / {{ categoryTotalPages }}</div>
+                                    <nav>
+                                        <ul class="pagination pagination-sm mb-0">
+                                            <li class="page-item" [class.disabled]="categoryCurrentPage === 1"><button class="page-link" (click)="setCategoryPage(categoryCurrentPage - 1)">&laquo;</button></li>
+                                            @for (page of categoryTotalPagesArray; track page) {
+                                                <li class="page-item" [class.active]="page === categoryCurrentPage"><button class="page-link" (click)="setCategoryPage(page)">{{ page }}</button></li>
+                                            }
+                                            <li class="page-item" [class.disabled]="categoryCurrentPage === categoryTotalPages"><button class="page-link" (click)="setCategoryPage(categoryCurrentPage + 1)">&raquo;</button></li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (showModal) {
+    <div class="modal fade show d-block nq-modal-backdrop" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ editMode ? 'Nebim Sorgu Düzenle' : 'Yeni Nebim Sorgu' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Query Key</label>
+                                <input type="text" class="form-control" [(ngModel)]="queryForm.queryKey" (ngModelChange)="onQueryMetaChanged()" name="queryKey" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tool Name</label>
+                                <input type="text" class="form-control" [(ngModel)]="queryForm.toolName" (ngModelChange)="onQueryMetaChanged()" name="toolName" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Tool Description</label>
+                                <input type="text" class="form-control" [(ngModel)]="queryForm.toolDescription" name="toolDescription" required>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                    <label class="form-label mb-0">Kategoriler</label>
+                                    <button type="button" class="btn btn-soft-primary btn-sm" (click)="autoSelectCategoriesFromQueryMeta()">
+                                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Query Key / Tool Name'dan Seç
+                                    </button>
+                                </div>
+                                <div class="border rounded-3 p-3 bg-light-subtle">
+                                    @if (categoriesLoading) {
+                                        <div class="small text-muted">Kategoriler yükleniyor...</div>
+                                    } @else if (categories.length) {
+                                        <div class="row g-2">
+                                            @for (category of categories; track category.id) {
+                                                <div class="col-md-6 col-xl-4">
+                                                    <label class="form-check border rounded-2 p-2 h-100 bg-white">
+                                                        <input
+                                                            class="form-check-input me-2"
+                                                            type="checkbox"
+                                                            [checked]="isCategorySelected(category.id)"
+                                                            (change)="onCategorySelectionChange(category.id, $any($event.target).checked)">
+                                                        <span class="form-check-label">
+                                                            <span class="fw-semibold d-block">{{ category.name }}</span>
+                                                            <span class="small text-muted">{{ category.description || 'Açıklama yok' }}</span>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            }
+                                        </div>
+                                    } @else {
+                                        <div class="small text-muted">Tanımlı aktif kategori bulunamadı.</div>
+                                    }
+                                </div>
+                                <div class="form-text">Kategori adı ve keyword alanlarına göre otomatik eşleşme yapılır.</div>
+                                @if (getUnselectedSuggestedCategories().length) {
+                                    <div class="alert alert-warning mt-2 mb-0 py-2 px-3 small">
+                                        <div class="fw-semibold mb-1">Önerilen ama seçilmeyen kategoriler var:</div>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @for (category of getUnselectedSuggestedCategories(); track category.id) {
+                                                <span class="badge bg-warning-subtle text-warning">{{ category.name }}</span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Result Mode</label>
+                                <select class="form-select" [(ngModel)]="queryForm.resultMode" name="resultMode" required>
+                                    @for (option of resultModeOptions; track option) {
+                                        <option [value]="option">{{ option }}</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Route Type</label>
+                                <input type="text" class="form-control" [(ngModel)]="queryForm.routeType" name="routeType" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Timeout</label>
+                                <input type="number" class="form-control" [(ngModel)]="queryForm.timeoutSeconds" name="timeoutSeconds" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Max Rows</label>
+                                <input type="number" class="form-control" [(ngModel)]="queryForm.maxRows" name="maxRows">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Query Text</label>
+                                <textarea class="form-control nq-code" rows="8" [(ngModel)]="queryForm.queryText" name="queryText" required></textarea>
+                                <div class="form-text">Sorgu SELECT veya WITH ile başlamalı, FOR JSON PATH içermemelidir.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                    <label class="form-label mb-0">Schema JSON</label>
+                                    <button type="button" class="btn btn-soft-primary btn-sm" (click)="generateSchemaJsonFromQuery()">
+                                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Query'den Üret
+                                    </button>
+                                </div>
+                                <textarea class="form-control nq-code" rows="8" [(ngModel)]="queryForm.schemaJson" name="schemaJson"></textarea>
+                                <div class="form-text">SELECT alanları parse edilerek schema otomatik üretilebilir.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Example Prompt</label>
+                                <textarea class="form-control" rows="8" [(ngModel)]="queryForm.examplePrompt" name="examplePrompt"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="queryForm.isActive" name="isActive" id="nebimQueryIsActive">
+                                    <label class="form-check-label" for="nebimQueryIsActive">Aktif</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="queryForm.isReadOnly" name="isReadOnly" id="nebimQueryIsReadOnly">
+                                    <label class="form-check-label" for="nebimQueryIsReadOnly">ReadOnly</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" (click)="save()">{{ editMode ? 'Güncelle' : 'Kaydet' }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showParameterModal) {
+    <div class="modal fade show d-block nq-modal-backdrop" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ parameterEditMode ? 'Parametre Düzenle' : 'Yeni Parametre' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeParameterModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Parametre Adı</label>
+                                <input type="text" class="form-control" [(ngModel)]="parameterForm.parameterName" name="parameterName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">JSON Adı</label>
+                                <input type="text" class="form-control" [(ngModel)]="parameterForm.jsonName" name="jsonName" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Veri Tipi</label>
+                                <select class="form-select" [(ngModel)]="parameterForm.dataType" name="dataType" required>
+                                    @for (option of dataTypeOptions; track option) {
+                                        <option [value]="option">{{ option }}</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Sıra</label>
+                                <input type="number" class="form-control" [(ngModel)]="parameterForm.sortOrder" name="sortOrder" required>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="parameterForm.isRequired" name="isRequired" id="nebimParameterIsRequired">
+                                    <label class="form-check-label" for="nebimParameterIsRequired">Zorunlu</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Açıklama</label>
+                                <textarea class="form-control" rows="3" [(ngModel)]="parameterForm.description" name="description"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Varsayılan Değer</label>
+                                <textarea class="form-control nq-code" rows="4" [(ngModel)]="parameterForm.defaultValue" name="defaultValue"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeParameterModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" (click)="saveParameter()">{{ parameterEditMode ? 'Güncelle' : 'Kaydet' }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showCategoryModal) {
+    <div class="modal fade show d-block nq-modal-backdrop" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ categoryEditMode ? 'Kategori Düzenle' : 'Yeni Kategori' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeCategoryModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Kategori Adı</label>
+                                <input type="text" class="form-control" [(ngModel)]="categoryForm.name" name="categoryName" required>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-end">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="categoryForm.isActive" name="categoryIsActive" id="nebimCategoryIsActive">
+                                    <label class="form-check-label" for="nebimCategoryIsActive">Aktif</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Açıklama</label>
+                                <textarea class="form-control" rows="4" [(ngModel)]="categoryForm.description" name="categoryDescription"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Keywords</label>
+                                <textarea class="form-control" rows="4" [(ngModel)]="categoryForm.keywords" name="categoryKeywords"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeCategoryModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" (click)="saveCategory()">{{ categoryEditMode ? 'Güncelle' : 'Kaydet' }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

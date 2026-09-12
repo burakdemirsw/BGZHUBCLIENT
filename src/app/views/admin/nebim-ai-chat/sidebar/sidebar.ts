@@ -18,12 +18,6 @@ export interface PinnedEntry {
     iconSvg: string;
 }
 
-export interface ProjectEntry {
-    id: string;
-    label: string;
-    iconSvg: string;
-}
-
 export interface ChatHistoryEntry {
     id: string;
     label: string;
@@ -38,8 +32,7 @@ const ICON_CODE = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" s
 const ICON_DOTS = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>`;
 const ICON_PIN = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6 6 1-4.5 4 1 6L12 16l-5.5 3 1-6L3 9l6-1z"/></svg>`;
 const ICON_CIRCLE = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/></svg>`;
-const ICON_FOLDER = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`;
-const ICON_GRAD_CAP = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 8l10 5 10-5-10-5z"/><path d="M6 10v5c3 2 9 2 12 0v-5"/></svg>`;
+const ICON_REFRESH = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>`;
 const ICON_SEARCH = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>`;
 const ICON_SIDEBAR = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>`;
 
@@ -59,8 +52,10 @@ export class SidebarComponent {
     @Output() toggleCollapse = new EventEmitter<void>();
     @Output() closeMobile = new EventEmitter<void>();
     @Output() newChat = new EventEmitter<void>();
+    @Output() reloadChats = new EventEmitter<void>();
     @Output() selectChat = new EventEmitter<string>();
 
+    readonly iconRefresh = ICON_REFRESH;
     readonly iconSearch = ICON_SEARCH;
     readonly iconSidebar = ICON_SIDEBAR;
 
@@ -68,6 +63,10 @@ export class SidebarComponent {
 
     get safeSearchIcon(): SafeHtml {
         return this.sanitizer.bypassSecurityTrustHtml(this.iconSearch);
+    }
+
+    get safeRefreshIcon(): SafeHtml {
+        return this.sanitizer.bypassSecurityTrustHtml(this.iconRefresh);
     }
 
     get safeSidebarIcon(): SafeHtml {
@@ -85,19 +84,11 @@ export class SidebarComponent {
         // { id: 'more', label: 'Daha fazla', iconSvg: ICON_DOTS }
     ];
 
-    readonly pinned: PinnedEntry[] = [
-        // { id: 'p1', label: 'SELİNAY', iconSvg: ICON_FOLDER },
-        // { id: 'p2', label: 'Marka Logo Promptu', iconSvg: ICON_CIRCLE },
-        // { id: 'p3', label: 'Proje Ödevi Talimatları', iconSvg: ICON_CIRCLE }
-    ];
-
-    readonly projects: ProjectEntry[] = [
-        { id: 'pr1', label: 'Ev Ödevi', iconSvg: ICON_GRAD_CAP },
-        { id: 'pr2', label: 'Flutter', iconSvg: ICON_FOLDER }
-    ];
+    readonly pinned: PinnedEntry[] = [];
 
     onCollapseClick(): void { this.toggleCollapse.emit(); }
     onCloseMobile(): void { this.closeMobile.emit(); }
+    onReloadClick(): void { this.reloadChats.emit(); }
 
     onNavClick(entry: NavEntry): void {
         if (entry.id === 'new-chat') this.newChat.emit();

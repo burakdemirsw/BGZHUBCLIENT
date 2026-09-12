@@ -55,3 +55,30 @@ export interface ChatCompletionResponse {
     userMessage: AiMessageResponse;
     assistantMessage: AiMessageResponse;
 }
+
+// ========================
+// AiController Reply (/api/Ai/reply/{conversationId})
+// ========================
+
+export interface AiReplyByConversationRequest {
+    companyId: string;
+    message: string;
+    userId?: string | null;
+    assistantId?: string | null;
+    file?: string | null;
+    fileType?: string | null;
+}
+
+export interface AiChatResponse {
+    success: boolean;
+    response?: string | null;
+    error?: string | null;
+    model?: string | null;
+    inputTokens?: number | null;
+    outputTokens?: number | null;
+    totalTokens?: number | null;
+    costUsd?: number | null;
+    userMessageId?: string | null;
+    assistantMessageId?: string | null;
+    aiMessageId?: string | null;
+}

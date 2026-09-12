@@ -3,8 +3,10 @@ import { HttpClientService } from './http-client.service';
 import { ApiResponse } from '../models/api-response.model';
 import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
 import {
+    ConversationReplyResponse,
     ConversationListResponse,
     ConversationMessagesResponse,
+    ConversationReplyRequest,
     ConversationResponse,
     ConversationSidebarResponse,
     CreateConversationRequest,
@@ -28,8 +30,7 @@ export class ConversationsService {
     }
 
     getList(type: string, page?: number, pageSize?: number, searchTerm?: string): Promise<ApiResponse<ConversationListResponse>> {
-        const apiType = this.toPascalCase(type);
-        const params: string[] = [`Type=${apiType}`];
+        const params: string[] = [`Type=${encodeURIComponent(type)}`];
         if (page) params.push(`Page=${page}`);
         if (pageSize) params.push(`PageSize=${pageSize}`);
         if (searchTerm) params.push(`SearchTerm=${searchTerm}`);
@@ -47,15 +48,33 @@ export class ConversationsService {
         });
     }
 
+    reply(
+        conversationId: string,
+        request: ConversationReplyRequest,
+    ): Promise<ApiResponse<ConversationReplyResponse>> {
+        const payload = {
+            CompanyId: request.companyId,
+            Message: request.message,
+            AssistantId: request.assistantId ?? null,
+            File: request.file ?? null,
+            FileType: request.fileType ?? null,
+        };
+
+        return this.http.post<ConversationReplyResponse>(
+            { controller: 'Conversations', action: `${conversationId}/reply` },
+            payload,
+        );
+    }
+
     // ── Action endpoints ──
     private action(id: string, action: string): Promise<ApiResponse<object>> {
         return this.http.post<object>({ controller: 'Conversations', action: `${id}/${action}` }, {});
     }
 
-    /** Test sohbeti oluşturur — POST create-test-conversation */
+    /** Test sohbeti oluşturur — POST create-conversation */
     createTestConversation(request: CreateTestConversationRequest): Promise<ApiResponse<string>> {
         return this.http.post<string>(
-            { controller: 'Conversations', action: 'create-test-conversation' },
+            { controller: 'Conversations', action: 'create-conversation' },
             request,
         );
     }
@@ -89,11 +108,4 @@ export class ConversationsService {
     escalate(id: string)    { return this.action(id, 'escalate');    }
     unescalate(id: string)  { return this.action(id, 'unescalate'); }
 
-    /** kebab-case → PascalCase dönüşümü (ör: "archived-messages" → "ArchivedMessages") */
-    private toPascalCase(value: string): string {
-        return value
-            .split('-')
-            .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-            .join('');
-    }
 }

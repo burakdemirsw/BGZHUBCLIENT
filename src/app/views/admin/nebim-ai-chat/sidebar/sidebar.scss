@@ -47,8 +47,20 @@
     gap: 8px;
 }
 .sidebar.collapsed .sidebar-header {
-    justify-content: center;
+    justify-content: space-between;
     padding: 12px 0;
+}
+
+.sidebar.collapsed .brand-mark {
+    display: none;
+}
+
+.left-reload {
+    flex-shrink: 0;
+}
+
+.sidebar.collapsed .left-reload {
+    margin-left: 8px;
 }
 
 /* Floating expand button under brand when collapsed */
