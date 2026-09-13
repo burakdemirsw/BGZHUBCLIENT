@@ -11,7 +11,7 @@ export const routes: Routes = [
     {
         path: 'home',
         component: Landing,
-        data: {title: 'SellenticAI — AI Destekli Müşteri İletişim Platformu'}
+        data: {title: 'Nebim AI — AI Destekli Müşteri İletişim Platformu'}
     },
     {
         path: 'nebim-ai-chat',

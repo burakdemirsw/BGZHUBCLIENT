@@ -25,7 +25,7 @@ export class Header {
         { label: 'Yorumlar', id: 'reviews' },
         { label: 'İletişim', id: 'contact' },
     ];
-    appName = 'SellenticAI';
+    appName = 'Nebim AI';
 
     @HostListener('window:scroll', [])
     onWindowScroll() {

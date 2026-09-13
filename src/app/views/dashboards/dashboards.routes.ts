@@ -1,6 +1,6 @@
 import {Routes} from '@angular/router';
-import {Dashboard1} from '@/app/views/dashboards/dashboard-1/dashboard-1';
-import {Dashboard2} from '@/app/views/dashboards/dashboard-2/dashboard-2';
+import {Dashboard1} from './dashboard-1/dashboard-1';
+import {Dashboard2} from './dashboard-2/dashboard-2';
 import {AuthGuard} from '@/app/core/guards/auth.guard';
 
 export const DASHBOARDS_ROUTES: Routes = [

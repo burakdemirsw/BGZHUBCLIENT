@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 import { NavItemComponent } from './nav-item';
 import { SidebarSectionComponent } from './sidebar-section';
 import { UserProfileComponent } from './user-profile';
@@ -21,6 +22,8 @@ export interface PinnedEntry {
 export interface ChatHistoryEntry {
     id: string;
     label: string;
+    preview?: string;
+    dateText?: string;
 }
 
 const ICON_PLUS = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>`;
@@ -35,6 +38,7 @@ const ICON_CIRCLE = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"
 const ICON_REFRESH = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>`;
 const ICON_SEARCH = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>`;
 const ICON_SIDEBAR = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>`;
+const ICON_HOME = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/></svg>`;
 
 @Component({
     selector: 'nac-sidebar',
@@ -47,6 +51,8 @@ export class SidebarComponent {
     @Input() collapsed = false;
     @Input() mobileOpen = false;
     @Input() chats: ChatHistoryEntry[] = [];
+    @Input() hasMoreChats = false;
+    @Input() isLoadingMoreChats = false;
     @Input() activeChatId: string | null = null;
 
     @Output() toggleCollapse = new EventEmitter<void>();
@@ -54,12 +60,14 @@ export class SidebarComponent {
     @Output() newChat = new EventEmitter<void>();
     @Output() reloadChats = new EventEmitter<void>();
     @Output() selectChat = new EventEmitter<string>();
+    @Output() loadMoreChats = new EventEmitter<void>();
 
     readonly iconRefresh = ICON_REFRESH;
     readonly iconSearch = ICON_SEARCH;
     readonly iconSidebar = ICON_SIDEBAR;
+    private lastLoadMoreEmitAt = 0;
 
-    constructor(private sanitizer: DomSanitizer) {}
+    constructor(private sanitizer: DomSanitizer, private router: Router) {}
 
     get safeSearchIcon(): SafeHtml {
         return this.sanitizer.bypassSecurityTrustHtml(this.iconSearch);
@@ -74,8 +82,9 @@ export class SidebarComponent {
     }
 
 
-    readonly mainNav: NavEntry[] = [  
-        { id: 'new-chat', label: 'Yeni sohbet', iconSvg: ICON_PLUS }
+    readonly mainNav: NavEntry[] = [
+        { id: 'new-chat', label: 'Yeni sohbet', iconSvg: ICON_PLUS },
+        { id: 'dashboard', label: 'Dashboard', iconSvg: ICON_HOME }
         // { id: 'visualize', label: 'Görselleştirme', iconSvg: ICON_IMAGE, badge: 'YENİ' },
         // { id: 'library', label: 'Kitaplık', iconSvg: ICON_BOOK },
         // { id: 'scheduled', label: 'Zamanlanmış', iconSvg: ICON_CLOCK },
@@ -92,6 +101,33 @@ export class SidebarComponent {
 
     onNavClick(entry: NavEntry): void {
         if (entry.id === 'new-chat') this.newChat.emit();
+        if (entry.id === 'dashboard') {
+            void this.router.navigate(['/dashboard']);
+        }
+    }
+
+    onBodyScroll(event: Event): void {
+        if (!this.hasMoreChats || this.isLoadingMoreChats) {
+            return;
+        }
+
+        const container = event.target as HTMLElement;
+        const remaining = container.scrollHeight - container.scrollTop - container.clientHeight;
+        if (remaining > 64) {
+            return;
+        }
+
+        const now = Date.now();
+        if (now - this.lastLoadMoreEmitAt < 250) {
+            return;
+        }
+
+        this.lastLoadMoreEmitAt = now;
+        this.loadMoreChats.emit();
+    }
+
+    onLoadMoreChats(): void {
+        this.loadMoreChats.emit();
     }
 
     onChatSelect(chat: ChatHistoryEntry): void {

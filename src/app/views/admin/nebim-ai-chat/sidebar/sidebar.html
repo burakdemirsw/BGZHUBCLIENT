@@ -13,14 +13,7 @@
             <span [innerHTML]="safeRefreshIcon"></span>
         </button>
 
-        <div class="brand">
-            <span class="brand-mark"></span>
-            <span class="brand-name" *ngIf="!collapsed">Nebim AI</span>
-        </div>
         <div class="header-actions" *ngIf="!collapsed">
-            <button type="button" class="icon-btn" title="Ara">
-                <span [innerHTML]="safeSearchIcon"></span>
-            </button>
             <button
                 type="button"
                 class="icon-btn"
@@ -31,7 +24,7 @@
         </div>
     </header>
 
-    <!-- Collapsed: floating expand button just below brand -->
+    <!-- Collapsed: floating expand button just below header -->
     <button
         *ngIf="collapsed"
         type="button"
@@ -42,7 +35,7 @@
     </button>
 
     <!-- SCROLLABLE BODY -->
-    <div class="sidebar-body">
+    <div class="sidebar-body" (scroll)="onBodyScroll($event)">
         <!-- MAIN NAV -->
         <nav class="main-nav">
             @for (item of mainNav; track item.id) {
@@ -66,8 +59,23 @@
                     [attr.title]="collapsed ? chat.label : null"
                     (click)="onChatSelect(chat)">
                     <span class="chat-dot" *ngIf="collapsed"></span>
-                    <span class="chat-label" *ngIf="!collapsed">{{ chat.label }}</span>
+                    <div class="chat-meta" *ngIf="!collapsed">
+                        <div class="chat-meta-head">
+                            <span class="chat-label">{{ chat.label }}</span>
+                            <span class="chat-date" *ngIf="chat.dateText">{{ chat.dateText }}</span>
+                        </div>
+                        <span class="chat-preview" *ngIf="chat.preview">{{ chat.preview }}</span>
+                    </div>
                 </button>
+            }
+
+            @if (!collapsed && isLoadingMoreChats) {
+                <div class="chat-loading" aria-live="polite" aria-label="Sohbetler yükleniyor">
+                    <span class="chat-loading-dot"></span>
+                    <span class="chat-loading-dot"></span>
+                    <span class="chat-loading-dot"></span>
+                    <span class="chat-loading-text">Yükleniyor...</span>
+                </div>
             }
         </nac-sidebar-section>
     </div>

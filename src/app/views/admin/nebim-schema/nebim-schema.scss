@@ -1,0 +1,39 @@
+.nebim-schema-page {
+    background: #f7f7f9;
+    min-height: calc(100vh - 120px);
+}
+
+.filter-input {
+    min-width: 280px;
+    max-width: 420px;
+}
+
+.status-filter {
+    min-width: 180px;
+}
+
+.table thead th {
+    white-space: nowrap;
+}
+
+.sort-link {
+    color: inherit;
+    font-weight: 600;
+}
+
+.sort-link:hover {
+    color: var(--bs-primary);
+}
+
+.modal .modal-content {
+    border: 0;
+    box-shadow: 0 0.5rem 1rem rgba(15, 23, 42, 0.1);
+}
+
+.matched-list-card {
+    background: #ffffff;
+}
+
+.clickable-row {
+    cursor: pointer;
+}

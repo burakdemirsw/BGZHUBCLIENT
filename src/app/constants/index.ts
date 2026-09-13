@@ -9,12 +9,12 @@ export const currentYear = new Date().getFullYear()
 
 export const credits = {
   website: 'https://SellenticAI.com/',
-  name: 'SellenticAI',
+  name: 'Nebim AI',
 }
 
-export const appName = 'SellenticAI'
-export const appTitle = 'SellenticAI'
-export const appDescription: string = 'SellenticAI'
+export const appName = 'Nebim AI'
+export const appTitle = 'Nebim AI'
+export const appDescription: string = 'Nebim AI'
 
 export const basePath: string = ''
 

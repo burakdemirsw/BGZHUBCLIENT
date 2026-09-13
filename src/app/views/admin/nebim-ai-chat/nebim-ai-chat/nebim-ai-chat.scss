@@ -19,9 +19,27 @@
     flex-direction: row;
     height: 100%;
     width: 100%;
+    animation: nacPageEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
     background:
         radial-gradient(1200px 600px at 50% -10%, rgba(99, 102, 241, 0.06), transparent 60%),
         #ffffff;
+}
+
+@keyframes nacPageEnter {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.995);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nac-shell {
+        animation: none;
+    }
 }
 
 .nac-content {
@@ -174,33 +192,66 @@
 .nac-suggestions {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    max-width: 620px;
+    gap: 14px;
+    max-width: 860px;
     margin: 0 auto;
 }
 
 .nac-suggestion {
     text-align: left;
-    background: #fff;
+    background: linear-gradient(180deg, #ffffff 0%, #f7f7f9 100%);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 14px;
-    padding: 14px 16px;
+    padding: 14px 16px 15px;
     cursor: pointer;
-    transition: all 0.18s ease;
+    transition: transform 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease, background 0.24s ease;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
+    position: relative;
+    overflow: hidden;
+    animation: nacSuggestionIn 0.44s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--suggestion-order, 0) * 70ms);
+}
+
+.nac-suggestion::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0) 25%, rgba(255, 255, 255, 0.5) 46%, rgba(255, 255, 255, 0) 67%);
+    transform: translateX(-120%);
+    transition: transform 0.58s ease;
+    pointer-events: none;
 }
 
 .nac-suggestion:hover {
-    background: #f7f7f9;
-    border-color: rgba(99, 102, 241, 0.35);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px -12px rgba(99, 102, 241, 0.35);
+    background: linear-gradient(180deg, #ffffff 0%, #f3f5ff 100%);
+    border-color: rgba(99, 102, 241, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 26px -14px rgba(59, 130, 246, 0.38);
+}
+
+.nac-suggestion:hover::after {
+    transform: translateX(120%);
+}
+
+.nac-suggestion-chip {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #1d4ed8;
+    background: rgba(37, 99, 235, 0.1);
+    border: 1px solid rgba(37, 99, 235, 0.16);
 }
 
 .nac-suggestion-title {
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 600;
     color: #0f172a;
 }
@@ -209,6 +260,18 @@
     font-size: 12.5px;
     color: #6b7280;
     line-height: 1.4;
+    margin: 0;
+}
+
+@keyframes nacSuggestionIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.985);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .nac-table-link {
@@ -231,6 +294,24 @@
     background: rgba(37, 99, 235, 0.12);
 }
 
+.nac-table-image-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    background: #ffffff;
+}
+
+.nac-table-image {
+    display: block;
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    background: #f1f5f9;
+}
+
 /* Thread */
 .nac-thread {
     padding: 32px 20px 40px;
@@ -249,6 +330,22 @@
     gap: 14px;
     align-items: flex-start;
     animation: nacFadeIn 0.25s ease;
+}
+
+.nac-msg-user {
+    flex-direction: row-reverse;
+}
+
+.nac-msg-user .nac-bubble-wrap {
+    align-items: flex-end;
+}
+
+.nac-msg-user .nac-msg-role {
+    text-align: right;
+}
+
+.nac-msg-ai .nac-bubble-wrap {
+    align-items: flex-start;
 }
 
 @keyframes nacFadeIn {
@@ -315,6 +412,11 @@
     border-radius: 18px;
     padding: 14px 16px;
     box-shadow: 0 12px 28px -22px rgba(15, 23, 42, 0.4);
+    position: relative;
+}
+
+.nac-bubble-has-actions {
+    padding-bottom: 58px;
 }
 
 .nac-bubble-error {
@@ -327,6 +429,53 @@
     flex-wrap: wrap;
     gap: 10px;
     margin-top: 14px;
+}
+
+.nac-message-actions-floating {
+    position: absolute;
+    right: 14px;
+    bottom: 12px;
+    margin-top: 0;
+    gap: 8px;
+}
+
+.nac-action-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: 1px solid transparent;
+    font-size: 16px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.nac-action-icon:hover {
+    transform: translateY(-1px);
+}
+
+.nac-action-whatsapp {
+    background: #ecfdf3;
+    color: #16a34a;
+    border-color: rgba(22, 163, 74, 0.24);
+}
+
+.nac-action-whatsapp:hover {
+    background: #dcfce7;
+    box-shadow: 0 8px 16px -12px rgba(22, 163, 74, 0.65);
+}
+
+.nac-action-excel {
+    background: #eefbf2;
+    color: #15803d;
+    border-color: rgba(21, 128, 61, 0.24);
+}
+
+.nac-action-excel:hover {
+    background: #dcfce7;
+    box-shadow: 0 8px 16px -12px rgba(21, 128, 61, 0.65);
 }
 
 .nac-action-chip {
@@ -417,6 +566,21 @@
     color: #0f172a;
 }
 
+.nac-table-cell-action {
+    cursor: pointer;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nac-table-cell-action:hover {
+    background: #eef6ff;
+}
+
+.nac-table-cell-action:focus-visible {
+    outline: none;
+    background: #eef6ff;
+    box-shadow: inset 0 0 0 2px #3b82f6;
+}
+
 .nac-block-note {
     font-size: 12px;
     color: #64748b;
@@ -468,8 +632,8 @@
     background: #f4f4f5;
     padding: 10px 14px;
     border-radius: 14px;
-    align-self: flex-start;
-    max-width: 100%;
+    align-self: flex-end;
+    max-width: min(100%, 78%);
 }
 
 /* Typing indicator */
@@ -496,6 +660,12 @@
     30% { transform: translateY(-5px); opacity: 1; }
 }
 
+@keyframes nacAutoFieldLineSpin {
+    0% { left: 8%; }
+    50% { left: 50%; }
+    100% { left: 8%; }
+}
+
 /* Composer */
 .nac-composer-wrap {
     padding: 12px 20px 22px;
@@ -518,6 +688,29 @@
         0 1px 2px rgba(0, 0, 0, 0.04),
         0 12px 40px -18px rgba(0, 0, 0, 0.18);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nac-auto-field {
+    position: relative;
+    border: 1px dashed rgba(59, 130, 246, 0.18);
+    background: rgba(239, 246, 255, 0.45);
+}
+
+.nac-auto-field::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 8%;
+    width: 42%;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent 0%, #60a5fa 20%, #2563eb 50%, #60a5fa 80%, transparent 100%);
+    opacity: 0;
+}
+
+.nac-auto-field-active::before {
+    opacity: 1;
+    animation: nacAutoFieldLineSpin 1.8s linear infinite;
 }
 
 .nac-composer:focus-within {

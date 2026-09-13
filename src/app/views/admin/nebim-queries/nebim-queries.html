@@ -32,6 +32,11 @@
                             <i class="fa-solid fa-tags me-1"></i>Kategoriler
                         </button>
                     </li>
+                    <li class="nav-item">
+                        <button class="nav-link" [class.active]="activeView === 'schema'" (click)="switchView('schema')">
+                            <i class="fa-solid fa-circle-nodes me-1"></i>Sematik Baglar
+                        </button>
+                    </li>
                 </ul>
 
                 @if (activeView === 'queries') {
@@ -46,6 +51,27 @@
                                     <div class="small text-muted">Toplam: {{ filteredItems.length }} kayıt</div>
                                 </div>
                                 <div class="card-body">
+                                    <div class="nq-query-category-strip mb-3">
+                                        <button
+                                            type="button"
+                                            class="nq-query-category-chip"
+                                            [class.active]="selectedQueryCategoryId === ''"
+                                            (click)="setQueryCategoryFilter('')">
+                                            <span class="nq-query-category-name">Tum Kategoriler</span>
+                                            <span class="nq-query-category-count">{{ queries.length }}</span>
+                                        </button>
+                                        @for (category of getSortedQueryCategories(); track category.id) {
+                                            <button
+                                                type="button"
+                                                class="nq-query-category-chip"
+                                                [class.active]="isQueryCategorySelected(category.id)"
+                                                (click)="setQueryCategoryFilter(category.id)">
+                                                <span class="nq-query-category-name">{{ category.name || 'Adsiz Kategori' }}</span>
+                                                <span class="nq-query-category-count">{{ getQueryCountByCategory(category.id) }}</span>
+                                            </button>
+                                        }
+                                    </div>
+
                                     <div class="row g-3 align-items-center mb-3">
                                         <div class="col-md-6 col-lg-4">
                                             <input type="text" class="form-control form-control-sm" placeholder="Tool adı, açıklama, route veya query key ara..." [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
@@ -88,13 +114,13 @@
                                                                     <button class="btn btn-soft-primary btn-sm" (click)="openEdit(item)" title="Düzenle">
                                                                         <i class="fa-solid fa-pen-to-square"></i>
                                                                     </button>
-                                                                    <button class="btn btn-soft-danger btn-sm" (click)="deleteQuery(item)" title="Sil">
+                                                                    <button class="btn btn-soft-danger btn-sm" (click)="requestDeleteQuery(item)" title="Sil">
                                                                         <i class="fa-solid fa-trash"></i>
                                                                     </button>
                                                                 </div>
                                                             </td>
                                                             <td><span class="badge bg-primary-subtle text-primary">{{ (currentPage - 1) * pageSize + idx + 1 }}</span></td>
-                                                            <td><strong>{{ item.queryKey }}</strong></td>
+                                                            <td><strong [class.text-danger]="hasCopyInQueryKey(item.queryKey)">{{ item.queryKey }}</strong></td>
                                                             <td>{{ item.toolName }}</td>
                                                             <td class="nq-description">{{ item.toolDescription }}</td>
                                                             <td>
@@ -146,14 +172,16 @@
                             </div>
                         </div>
 
-                        @if (activeQuery) {
-                            <div class="col-12">
-                                <div class="card border nq-panel">
+                        @if (activeQuery && showQueryDetailModal) {
+                            <div class="modal fade show d-block nq-modal-backdrop" tabindex="-1">
+                                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                                    <div class="modal-content border nq-panel">
                                     <div class="card-header d-flex flex-wrap justify-content-between align-items-start gap-3">
                                         <div>
                                             <h5 class="card-title mb-1">{{ activeQuery.toolName }}</h5>
                                             <p class="text-muted small mb-0">{{ activeQuery.toolDescription || 'Açıklama yok' }}</p>
                                         </div>
+                                        <button type="button" class="btn-close" (click)="closeQueryDetailModal()"></button>
                                         <div class="nq-summary-grid">
                                             <div class="nq-summary-item">
                                                 <span class="nq-summary-label">Query Key</span>
@@ -186,9 +214,14 @@
                                         @if (activeQueryDetailView === 'parameters') {
                                             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                                                 <div class="small text-muted">Toplam: {{ filteredParameters.length }} parametre</div>
-                                                <button class="btn btn-primary btn-sm" (click)="openCreateParameter()">
-                                                    <i class="fa-solid fa-plus me-1"></i>Parametre Ekle
-                                                </button>
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-light btn-sm" (click)="openQuickAddParameterModal()">
+                                                        <i class="fa-solid fa-bolt me-1"></i>Hizli Ekle
+                                                    </button>
+                                                    <button class="btn btn-primary btn-sm" (click)="openCreateParameter()">
+                                                        <i class="fa-solid fa-plus me-1"></i>Parametre Ekle
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div class="row g-3 align-items-center mb-3">
                                                 <div class="col-md-7 col-lg-5">
@@ -306,6 +339,7 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
                         }
                     </div>
                 }
@@ -388,6 +422,94 @@
                         </div>
                     </div>
                 }
+
+                @if (activeView === 'schema') {
+                    <div class="card border nq-panel">
+                        <div class="card-header d-flex flex-wrap justify-content-between align-items-start gap-2">
+                            <div>
+                                <h5 class="card-title mb-1">Kategori Baglantı Semasi</h5>
+                                <p class="text-muted small mb-0">Cizgi kalınlıgı ortak sorgu sayısını, daire buyuklugu kategori yogunlugunu gosterir.</p>
+                            </div>
+                            <div class="small text-muted">
+                                Dugum: {{ schemaGraph.nodes.length }} | Bag: {{ schemaGraph.edges.length }}
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            @if (!schemaGraph.nodes.length) {
+                                <div class="text-center text-muted py-5">
+                                    Semayi olusturmak icin once kategori ve sorgu baglantisi olusturun.
+                                </div>
+                            } @else {
+                                <div class="row g-3 mb-3">
+                                    @for (node of topSchemaNodes; track node.id) {
+                                        <div class="col-12 col-md-6 col-xl-4">
+                                            <div class="nq-schema-stat" [class.nq-schema-stat-selected]="isSchemaNodeSelected(node.id)">
+                                                <div class="nq-schema-stat-title">{{ node.label }}</div>
+                                                <div class="nq-schema-stat-meta">Sorgu: {{ node.queryCount }} | Bag: {{ node.connectionCount }} | Ortak: {{ node.sharedWeight }}</div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                                @if (selectedSchemaNode) {
+                                    <div class="alert alert-info py-2 px-3 small d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                        <span><strong>{{ selectedSchemaNode.label }}</strong> secili. Daireyi surukleyerek konumunu degistirebilirsin.</span>
+                                        <span class="text-muted">Sorgu: {{ selectedSchemaNode.queryCount }} | Bag: {{ selectedSchemaNode.connectionCount }}</span>
+                                    </div>
+                                }
+
+                                <div class="nq-schema-wrap">
+                                    <svg #schemaSvg class="nq-schema-svg" viewBox="0 0 960 560" role="img" aria-label="Kategori baglanti semasi">
+                                        @for (edge of schemaGraph.edges; track edge.key) {
+                                            <line
+                                                class="nq-schema-edge"
+                                                [attr.x1]="edge.fromX"
+                                                [attr.y1]="edge.fromY"
+                                                [attr.x2]="edge.toX"
+                                                [attr.y2]="edge.toY"
+                                                [attr.stroke]="edge.stroke"
+                                                [attr.stroke-width]="edge.strokeWidth"
+                                                [attr.opacity]="edge.opacity"></line>
+                                        }
+
+                                        @for (node of schemaGraph.nodes; track node.id) {
+                                            <g
+                                                class="nq-schema-node-group"
+                                                [class.nq-schema-node-selected]="isSchemaNodeSelected(node.id)"
+                                                [attr.transform]="'translate(' + node.x + ',' + node.y + ')'"
+                                                (mousedown)="onSchemaNodeMouseDown(node, $event)">
+                                                <circle
+                                                    class="nq-schema-node"
+                                                    [attr.r]="node.radius"
+                                                    [attr.fill]="node.fill"
+                                                    [attr.stroke]="node.stroke"
+                                                    stroke-width="3"></circle>
+                                                @if (isSchemaNodeSelected(node.id)) {
+                                                    <circle class="nq-schema-node-halo" [attr.r]="node.radius + 8"></circle>
+                                                }
+                                                <text
+                                                    class="nq-schema-node-label"
+                                                    [attr.fill]="node.textColor"
+                                                    text-anchor="middle"
+                                                    dominant-baseline="middle"
+                                                    [attr.style]="'font-size:' + (node.radius > 40 ? 15 : 13) + 'px'">
+                                                    {{ node.shortLabel }}
+                                                </text>
+                                                <text
+                                                    class="nq-schema-node-sub"
+                                                    fill="#0f172a"
+                                                    text-anchor="middle"
+                                                    [attr.y]="node.radius + 18">
+                                                    {{ node.queryCount }} sorgu
+                                                </text>
+                                            </g>
+                                        }
+                                    </svg>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -395,33 +517,61 @@
 
 @if (showModal) {
     <div class="modal fade show d-block nq-modal-backdrop" tabindex="-1">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-dialog modal-dialog-scrollable" [class.modal-fullscreen]="editMode" [class.modal-xl]="!editMode">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ editMode ? 'Nebim Sorgu Düzenle' : 'Yeni Nebim Sorgu' }}</h5>
                     <button type="button" class="btn-close" (click)="closeModal()"></button>
                 </div>
                 <div class="modal-body">
+                    @if (showPassiveEditNotice) {
+                        <div class="alert alert-warning py-2 px-3 small" role="alert">
+                            Bu sorgu su anda <strong>Pasif</strong> durumda duzenleniyor.
+                        </div>
+                    }
+                    @if (confettiPieces.length) {
+                        <div class="nq-confetti-layer" aria-hidden="true">
+                            @for (piece of confettiPieces; track piece.id) {
+                                <span class="nq-confetti-piece" [ngStyle]="getConfettiStyle(piece)"></span>
+                            }
+                        </div>
+                    }
+                    <div class="d-flex justify-content-end mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" [(ngModel)]="autoActionsEnabled" (ngModelChange)="onAutoActionsToggleChanged()" name="autoActionsEnabled" id="nebimAutoActionsEnabled">
+                            <label class="form-check-label" for="nebimAutoActionsEnabled">Otomatik islemler acik</label>
+                        </div>
+                    </div>
                     <form>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Query Key</label>
                                 <input type="text" class="form-control" [(ngModel)]="queryForm.queryKey" (ngModelChange)="onQueryMetaChanged()" name="queryKey" required>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 nq-auto-field" [class.nq-auto-field-active]="autoActionsEnabled">
                                 <label class="form-label">Tool Name</label>
-                                <input type="text" class="form-control" [(ngModel)]="queryForm.toolName" (ngModelChange)="onQueryMetaChanged()" name="toolName" required>
+                                <input type="text" class="form-control" [(ngModel)]="queryForm.toolName" name="toolName" required readonly>
                             </div>
-                            <div class="col-12">
-                                <label class="form-label">Tool Description</label>
+                            <div class="col-12 nq-auto-field" [class.nq-auto-field-active]="autoActionsEnabled">
+                                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                    <label class="form-label mb-0">Tool Description</label>
+                                    <button type="button" class="btn btn-light btn-sm" (click)="copyQueryKeyToToolDescription()">
+                                        <i class="fa-solid fa-arrow-down-a-z me-1"></i>Query Key'den Doldur
+                                    </button>
+                                </div>
                                 <input type="text" class="form-control" [(ngModel)]="queryForm.toolDescription" name="toolDescription" required>
                             </div>
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
                                     <label class="form-label mb-0">Kategoriler</label>
-                                    <button type="button" class="btn btn-soft-primary btn-sm" (click)="autoSelectCategoriesFromQueryMeta()">
-                                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Query Key / Tool Name'dan Seç
-                                    </button>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button type="button" class="btn btn-light btn-sm" (click)="openCreateCategory('queryModal')">
+                                            <i class="fa-solid fa-folder-plus me-1"></i>Yeni Kategori
+                                        </button>
+                                        <button type="button" class="btn btn-soft-primary btn-sm" (click)="autoSelectCategoriesFromQueryMeta()">
+                                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Query Key / Tool Name'dan Seç
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="border rounded-3 p-3 bg-light-subtle">
                                     @if (categoriesLoading) {
@@ -449,7 +599,12 @@
                                     }
                                 </div>
                                 <div class="form-text">Kategori adı ve keyword alanlarına göre otomatik eşleşme yapılır.</div>
-                                @if (getUnselectedSuggestedCategories().length) {
+                                @if (autoCategorySelectionNotice) {
+                                    <div class="alert alert-success mt-2 mb-0 py-2 px-3 small">
+                                        {{ autoCategorySelectionNotice }}
+                                    </div>
+                                }
+                                @if (!autoActionsEnabled && getUnselectedSuggestedCategories().length) {
                                     <div class="alert alert-warning mt-2 mb-0 py-2 px-3 small">
                                         <div class="fw-semibold mb-1">Önerilen ama seçilmeyen kategoriler var:</div>
                                         <div class="d-flex flex-wrap gap-1">
@@ -482,15 +637,28 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Query Text</label>
-                                <textarea class="form-control nq-code" rows="8" [(ngModel)]="queryForm.queryText" name="queryText" required></textarea>
+                                <textarea class="form-control nq-code" rows="8" [(ngModel)]="queryForm.queryText" (ngModelChange)="onQueryTextChanged()" name="queryText" required></textarea>
                                 <div class="form-text">Sorgu SELECT veya WITH ile başlamalı, FOR JSON PATH içermemelidir.</div>
+                                @if (!editMode && getDetectedParameterNamesForQueryForm().length) {
+                                    <div class="alert alert-info mt-2 mb-0 py-2 px-3 small">
+                                        Bu sorguda <strong>{{ getDetectedParameterNamesForQueryForm().length }}</strong> adet <code>@param</code> bulundu.
+                                        Kaydetten sonra parametre dialogu otomatik açılacaktır.
+                                    </div>
+                                }
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 nq-auto-field" [class.nq-auto-field-active]="autoActionsEnabled">
                                 <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
                                     <label class="form-label mb-0">Schema JSON</label>
-                                    <button type="button" class="btn btn-soft-primary btn-sm" (click)="generateSchemaJsonFromQuery()">
-                                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Query'den Üret
-                                    </button>
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if (schemaGenerationNotice) {
+                                            <span class="small" [class.text-success]="schemaGenerationNoticeType === 'success'" [class.text-warning]="schemaGenerationNoticeType === 'warning'">
+                                                {{ schemaGenerationNotice }}
+                                            </span>
+                                        }
+                                        <button type="button" class="btn btn-soft-primary btn-sm" (click)="generateSchemaJsonFromQuery()">
+                                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Query'den Üret
+                                        </button>
+                                    </div>
                                 </div>
                                 <textarea class="form-control nq-code" rows="8" [(ngModel)]="queryForm.schemaJson" name="schemaJson"></textarea>
                                 <div class="form-text">SELECT alanları parse edilerek schema otomatik üretilebilir.</div>
@@ -523,6 +691,102 @@
     </div>
 }
 
+@if (showQuickAddParameterModal) {
+    <div class="modal fade show d-block nq-modal-backdrop" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Hizli Parametre Ekle</h5>
+                    <button type="button" class="btn-close" (click)="closeQuickAddParameterModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 align-items-center mb-3">
+                        <div class="col-md-8">
+                            <input
+                                type="text"
+                                class="form-control"
+                                placeholder="Sorgu, parametre adı, json adı, tip veya açıklamaya göre filtrele..."
+                                [(ngModel)]="quickAddParameterFilterText"
+                                (ngModelChange)="onQuickAddParameterFilterChange()"
+                                name="quickAddParameterFilterText" />
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <span class="small text-muted">{{ selectedQuickAddParameterKeys.length }} seçili</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <button type="button" class="btn btn-light btn-sm" (click)="selectAllFilteredQuickAddParameters()">Filtredekileri Sec</button>
+                        <button type="button" class="btn btn-light btn-sm" (click)="clearAllQuickAddParameterSelections()">Secimi Temizle</button>
+                    </div>
+
+                    @if (quickAddParametersLoading) {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2 text-muted mb-0">Parametreler yükleniyor...</p>
+                        </div>
+                    } @else {
+                        <div class="table-responsive">
+                            <table class="table table-centered table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Sec</th>
+                                        <th>Kaynak Sorgu</th>
+                                        <th>Parametre Adi</th>
+                                        <th>JSON Adi</th>
+                                        <th>Tip</th>
+                                        <th>Aciklama</th>
+                                        <th>Zorunlu</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (item of filteredQuickAddParameters; track item.key) {
+                                        <tr>
+                                            <td>
+                                                <input
+                                                    type="checkbox"
+                                                    class="form-check-input"
+                                                    [checked]="isQuickAddParameterSelected(item.key)"
+                                                    (change)="toggleQuickAddParameterSelection(item.key)" />
+                                            </td>
+                                            <td>{{ item.sourceQueryLabel }}</td>
+                                            <td>{{ item.parameter.parameterName || '-' }}</td>
+                                            <td>{{ item.parameter.jsonName || '-' }}</td>
+                                            <td>{{ item.parameter.dataType || '-' }}</td>
+                                            <td>{{ item.parameter.description || '-' }}</td>
+                                            <td>
+                                                @if (item.parameter.isRequired) {
+                                                    <span class="badge bg-warning-subtle text-warning">Evet</span>
+                                                } @else {
+                                                    <span class="badge bg-light text-body-secondary">Hayir</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    } @empty {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">Eklenebilir parametre bulunamadi.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeQuickAddParameterModal()">Kapat</button>
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        [disabled]="quickAddParametersLoading || selectedQuickAddParameterKeys.length === 0"
+                        (click)="addSelectedQuickAddParameters()">
+                        Secilenleri Ekle
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @if (showParameterModal) {
     <div class="modal fade show d-block nq-modal-backdrop" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -536,11 +800,11 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Parametre Adı</label>
-                                <input type="text" class="form-control" [(ngModel)]="parameterForm.parameterName" name="parameterName" required>
+                                <input type="text" class="form-control" [(ngModel)]="parameterForm.parameterName" (ngModelChange)="onParameterNameChanged()" name="parameterName" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">JSON Adı</label>
-                                <input type="text" class="form-control" [(ngModel)]="parameterForm.jsonName" name="jsonName" required>
+                                <input type="text" class="form-control" [(ngModel)]="parameterForm.jsonName" name="jsonName" [readonly]="!parameterEditMode" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Veri Tipi</label>
@@ -562,7 +826,7 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Açıklama</label>
-                                <textarea class="form-control" rows="3" [(ngModel)]="parameterForm.description" name="description"></textarea>
+                                <textarea class="form-control" rows="3" [(ngModel)]="parameterForm.description" name="description" [readonly]="!parameterEditMode"></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Varsayılan Değer</label>
@@ -615,6 +879,29 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" (click)="closeCategoryModal()">İptal</button>
                     <button type="button" class="btn btn-primary" (click)="saveCategory()">{{ categoryEditMode ? 'Güncelle' : 'Kaydet' }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showDeleteQueryModal) {
+    <div class="modal fade show d-block nq-modal-backdrop" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sorgu Silme Onayı</h5>
+                    <button type="button" class="btn-close" (click)="closeDeleteQueryModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">
+                        <strong>{{ queryToDelete?.toolName || queryToDelete?.queryKey || 'Seçili sorgu' }}</strong>
+                        kaydını silmek istediğinize emin misiniz?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeDeleteQueryModal()">İptal</button>
+                    <button type="button" class="btn btn-danger" (click)="confirmDeleteQuery()">Sil</button>
                 </div>
             </div>
         </div>

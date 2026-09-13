@@ -47,11 +47,15 @@
     gap: 8px;
 }
 .sidebar.collapsed .sidebar-header {
-    justify-content: space-between;
+    justify-content: center;
     padding: 12px 0;
 }
 
 .sidebar.collapsed .brand-mark {
+    display: none;
+}
+
+.sidebar.collapsed .brand {
     display: none;
 }
 
@@ -60,7 +64,7 @@
 }
 
 .sidebar.collapsed .left-reload {
-    margin-left: 8px;
+    margin-left: 0;
 }
 
 /* Floating expand button under brand when collapsed */
@@ -170,19 +174,16 @@
     background: transparent;
     border: none;
     color: #d1d5db;
-    padding: 8px 10px;
+    padding: 9px 10px;
     border-radius: 8px;
     font-size: 13px;
     cursor: pointer;
     text-align: left;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
     transition: background 0.12s ease, color 0.12s ease;
     font-family: inherit;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .chat-item:hover {
@@ -197,9 +198,82 @@
 }
 
 .chat-label {
+    flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.chat-meta {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.chat-meta-head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.chat-date {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.chat-preview {
+    font-size: 11.5px;
+    color: #a3a3a3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chat-item.active .chat-preview {
+    color: #e5e7eb;
+}
+
+.chat-loading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    color: #9ca3af;
+    font-size: 11.5px;
+}
+
+.chat-loading-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #9ca3af;
+    animation: chatDotPulse 1s ease-in-out infinite;
+}
+
+.chat-loading-dot:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.chat-loading-dot:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.chat-loading-text {
+    margin-left: 2px;
+}
+
+@keyframes chatDotPulse {
+    0%, 100% {
+        opacity: 0.25;
+        transform: scale(0.86);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .chat-dot {

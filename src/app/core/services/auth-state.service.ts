@@ -24,14 +24,16 @@ export class AuthStateService {
 
   /** Kullanıcı adı soyadı birleşik */
   get fullName(): string {
-    return this._authData ? `${this._authData.name} ${this._authData.surname}` : '';
+    if (!this._authData) return '';
+    const lastName = this._authData.lastName?.trim() || this._authData.surname?.trim() || '';
+    return `${this._authData.name} ${lastName}`.trim();
   }
 
   /** Baş harfler (avatar yerine) */
   get initials(): string {
     if (!this._authData) return '';
     const n = this._authData.name?.charAt(0) ?? '';
-    const s = this._authData.surname?.charAt(0) ?? '';
+    const s = (this._authData.lastName?.charAt(0) ?? this._authData.surname?.charAt(0) ?? '');
     return (n + s).toUpperCase();
   }
 

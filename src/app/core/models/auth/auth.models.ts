@@ -44,6 +44,7 @@ export interface AuthResponse {
   refreshToken: string;
   expiration: string;
   name: string;
+  lastName?: string;
   surname: string;
   lastLoginDate: string;
   activePlan: ActivePlanInfo | null;

@@ -66,7 +66,19 @@ interface StoredUserProfile {
     userId?: string;
     companyId?: string;
     name?: string;
-    surname?: string;
+    lastName?: string;
+}
+
+interface SuggestionItem {
+    title: string;
+    subtitle: string;
+    prompt: string;
+    category: string;
+}
+
+interface ConversationPageResult {
+    conversations: ConversationHeader[];
+    totalCount: number;
 }
 
 @Component({
@@ -83,6 +95,9 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
 
     messages: UiChatMessage[] = [];
     sidebarChats: ChatHistoryEntry[] = [];
+    hasMoreSidebarChats = false;
+    isLoadingMoreChats = false;
+
     input = '';
     isSending = false;
     isLoadingThread = false;
@@ -93,12 +108,59 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
     errorMessage = '';
 
     private shouldScroll = false;
+    private sidebarOpenedManually = false;
+    private sidebarCurrentPage = 1;
+    private readonly sidebarPageSize = 20;
 
-    readonly suggestions: { title: string; subtitle: string }[] = [
-        { title: 'Siparişler', subtitle: 'Sipariş durumu, teslimat ve iptal süreçleriyle ilgili destek al.' },
-        { title: 'Müşteri Bilgileri', subtitle: 'Müşteri detayları, iletişim bilgileri ve geçmiş etkileşimleri incele.' },
-        { title: 'Ürün Bilgileri', subtitle: 'Ürün özellikleri, stok durumu ve katalog içeriklerini sorgula.' },
-        { title: 'Finansal', subtitle: 'Ödeme, fatura, tahsilat ve finansal özet konularında yardım al.' }
+    readonly suggestions: SuggestionItem[] = [
+        {
+            title: 'Sipariş',
+            subtitle: 'Sipariş durumu, hazırlık adımları ve iptal sürecini hızlıca sorgula.',
+            prompt: 'Sipariş durumunu ve son işlem adımlarını getir.',
+            category: 'Operasyon'
+        },
+        {
+            title: 'Fatura',
+            subtitle: 'Faturalandırma, iade faturaları ve tahsilat kalemlerini incele.',
+            prompt: 'Fatura özetini ve açık kalan kayıtları listeler misin?',
+            category: 'Finans'
+        },
+        {
+            title: 'Sevkiyat',
+            subtitle: 'Kargo hazırlık, teslimat ve gecikme nedenlerini tek noktadan gör.',
+            prompt: 'Sevkiyat durumunu ve teslimat performansını özetle.',
+            category: 'Lojistik'
+        },
+        {
+            title: 'Transfer',
+            subtitle: 'Depolar arası transfer talepleri ve onay bekleyen hareketleri yönet.',
+            prompt: 'Transfer taleplerini ve bekleyen onayları getir.',
+            category: 'Depo'
+        },
+        {
+            title: 'Müşteri',
+            subtitle: 'Müşteri geçmişi, iletişim kayıtları ve son alışveriş trendini analiz et.',
+            prompt: 'Müşteri geçmişini ve son etkileşim notlarını göster.',
+            category: 'CRM'
+        },
+        {
+            title: 'Ürün',
+            subtitle: 'Ürün kartı detayları, varyant bilgileri ve katalog metinlerini sorgula.',
+            prompt: 'Ürün bilgilerini ve varyant detaylarını listeler misin?',
+            category: 'Katalog'
+        },
+        {
+            title: 'Stok',
+            subtitle: 'Anlık stok, kritik seviye uyarıları ve devir hızını karşılaştır.',
+            prompt: 'Stok seviyelerini ve kritik ürünleri raporla.',
+            category: 'Envanter'
+        },
+        {
+            title: 'WMS',
+            subtitle: 'Toplama, yerleştirme, sayım ve lokasyon verimliliğini takip et.',
+            prompt: 'WMS operasyon durumunu ve lokasyon verimliliğini paylaş.',
+            category: 'Warehouse'
+        }
     ];
 
     constructor(
@@ -116,6 +178,12 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
             this.activeConversationId = routeConversationId;
             await this.loadThread(routeConversationId);
         }
+
+        // Ensure initial render lands at the latest message on page open.
+        this.shouldScroll = true;
+        setTimeout(() => {
+            this.scrollAnchor?.nativeElement.scrollIntoView({ behavior: 'auto', block: 'end' });
+        }, 0);
     }   
 
     ngAfterViewChecked(): void {
@@ -145,6 +213,15 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
         if (!el) return;
         el.style.height = 'auto';
         el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+    }
+
+    onComposerInput(): void {
+        this.autoResize();
+
+        if (this.input.length > 0 && !this.sidebarOpenedManually) {
+            this.sidebarCollapsed = true;
+            this.sidebarMobileOpen = false;
+        }
     }
 
     send(): void {
@@ -226,8 +303,14 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
         try {
             const payload: CreateTestConversationRequest = {
                 companyId,
-                firstName: this.authState.profile?.name || this.getStoredProfile()?.name || 'Test',
-                lastName: this.authState.profile?.surname || this.getStoredProfile()?.surname || 'User',
+                firstName:
+                    this.authState.profile?.name ||
+                    this.getStoredProfile()?.name ||
+                    'Test',
+                lastName:
+                    this.authState.profile?.surname ||
+                    this.getStoredProfile()?.lastName ||
+                    'User',
                 userIntSmaId: null,
             };
             const res = await this.conversationsService.createTestConversation(payload);
@@ -297,16 +380,24 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
 
     private async loadConversationList(): Promise<void> {
         try {
-            const conversations = (await this.fetchConversationHeadersByType('messages'))
+            this.sidebarCurrentPage = 1;
+
+            const page = await this.fetchConversationHeadersByType('messages', this.sidebarCurrentPage, this.sidebarPageSize);
+            const conversations = page.conversations
                 .sort((a, b) => this.toEpoch(b.lastMessageDate) - this.toEpoch(a.lastMessageDate));
 
             this.sidebarChats = conversations.map((conversation, index) => ({
                 id: conversation.id,
                 label: this.toConversationLabel(conversation, index),
+                preview: this.toConversationPreview(conversation),
+                dateText: this.toConversationDateText(conversation),
             }));
+
+            this.hasMoreSidebarChats = this.sidebarChats.length < page.totalCount;
         } catch (err) {
             console.warn('[NebimAiChat] Sohbet listesi yüklenemedi:', err);
             this.sidebarChats = [];
+            this.hasMoreSidebarChats = false;
         }
     }
 
@@ -314,9 +405,50 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
         await this.loadConversationList();
     }
 
-    private async fetchConversationHeadersByType(type: string): Promise<ConversationHeader[]> {
-        const res = await this.conversationsService.getList(type, 1, 50);
-        return this.extractConversationHeaders(res.data);
+    private async fetchConversationHeadersByType(type: string, page: number, pageSize: number): Promise<ConversationPageResult> {
+        const res = await this.conversationsService.getList(type, page, pageSize);
+        const conversations = this.extractConversationHeaders(res.data);
+        const totalFromPayload = this.extractConversationTotalCount(res.data);
+        const totalCount = this.toFiniteNumber(res.dataCount) || totalFromPayload || conversations.length;
+
+        return {
+            conversations,
+            totalCount,
+        };
+    }
+
+    async onLoadMoreChats(): Promise<void> {
+        if (!this.hasMoreSidebarChats || this.isLoadingMoreChats) {
+            return;
+        }
+
+        this.isLoadingMoreChats = true;
+        try {
+            const nextPage = this.sidebarCurrentPage + 1;
+            const page = await this.fetchConversationHeadersByType('messages', nextPage, this.sidebarPageSize);
+            if (!page.conversations.length) {
+                this.hasMoreSidebarChats = false;
+                return;
+            }
+
+            const existingIds = new Set(this.sidebarChats.map((chat) => chat.id));
+            const appended = page.conversations
+                .filter((conversation) => !existingIds.has(conversation.id))
+                .map((conversation, index) => ({
+                    id: conversation.id,
+                    label: this.toConversationLabel(conversation, this.sidebarChats.length + index),
+                    preview: this.toConversationPreview(conversation),
+                    dateText: this.toConversationDateText(conversation),
+                }));
+
+            this.sidebarChats = [...this.sidebarChats, ...appended];
+            this.sidebarCurrentPage = nextPage;
+            this.hasMoreSidebarChats = this.sidebarChats.length < page.totalCount;
+        } catch (err) {
+            console.warn('[NebimAiChat] Ek sohbetler yüklenemedi:', err);
+        } finally {
+            this.isLoadingMoreChats = false;
+        }
     }
 
     private async loadThread(conversationId: string): Promise<void> {
@@ -365,6 +497,26 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
         return this.extractArray<ConversationHeader>(rawConversations);
     }
 
+    private extractConversationTotalCount(response: unknown): number {
+        if (!response || typeof response !== 'object') return 0;
+        const record = response as Record<string, unknown>;
+        const totalRaw = record['totalCount'] ?? record['TotalCount'];
+        return this.toFiniteNumber(totalRaw);
+    }
+
+    private toFiniteNumber(value: unknown): number {
+        if (typeof value === 'number' && Number.isFinite(value)) {
+            return value;
+        }
+
+        if (typeof value === 'string' && value.trim()) {
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        return 0;
+    }
+
     private extractConversationMessages(response: ConversationMessagesResponse | null): ConversationApiMessage[] {
         if (!response || typeof response !== 'object') return [];
         const record = response as unknown as Record<string, unknown>;
@@ -408,7 +560,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
             .filter((block) => this.isSupportedBlockType(block?.type))
             .map((block, index) => ({
                 type: block.type,
-                title: block.title ?? null,
+                title: this.normalizeBlockTitle(block.title),
                 order: Number.isFinite(block.order) ? block.order : index,
                 text: block.text ?? null,
                 table: this.normalizeTable(block.table),
@@ -416,6 +568,31 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
             }))
             .sort((left, right) => left.order - right.order)
             .filter((block) => this.hasRenderableBlockContent(block));
+    }
+
+    private normalizeBlockTitle(title: string | null | undefined): string | null {
+        const normalizedTitle = (title || '').trim();
+        if (!normalizedTitle) {
+            return null;
+        }
+
+        const hiddenToolTitles = new Set([
+            'get_invoice_by_customercode',
+            'get_inner_list_by_innerprocesscode_startdate_enddate',
+        ]);
+        const loweredTitle = normalizedTitle.toLocaleLowerCase('tr-TR');
+        const isTechnicalToolTitle =
+            hiddenToolTitles.has(loweredTitle)
+            || loweredTitle.startsWith('func.tool')
+            || loweredTitle.startsWith('tool.')
+            || loweredTitle.startsWith('function.')
+            || /^get_[a-z0-9_]+$/i.test(normalizedTitle);
+
+        if (isTechnicalToolTitle) {
+            return null;
+        }
+
+        return normalizedTitle;
     }
 
     private normalizeMessageBlocks(message: ConversationApiMessage): AiChatContentBlock[] {
@@ -512,8 +689,42 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
         return row[column] ?? '-';
     }
 
+    insertTableCellValue(value: string, event?: Event): void {
+        event?.preventDefault();
+
+        const normalizedValue = value.trim();
+        if (!normalizedValue || normalizedValue === '-') {
+            return;
+        }
+
+        const currentInput = this.input.trimEnd();
+        this.input = currentInput ? `${currentInput} ${normalizedValue}` : normalizedValue;
+        this.onComposerInput();
+        setTimeout(() => this.textArea?.nativeElement.focus(), 0);
+    }
+
     isCellLink(row: Record<string, string | null>, column: string): boolean {
         return this.getCellLink(row, column) !== null;
+    }
+
+    isCellImage(row: Record<string, string | null>, column: string): boolean {
+        const link = this.getCellLink(row, column);
+        if (!link) {
+            return false;
+        }
+
+        if (this.isImageUrl(link)) {
+            return true;
+        }
+
+        const normalizedColumn = column.toLocaleLowerCase('tr-TR');
+        return (
+            normalizedColumn.includes('image') ||
+            normalizedColumn.includes('foto') ||
+            normalizedColumn.includes('gorsel') ||
+            normalizedColumn.includes('photo') ||
+            normalizedColumn.includes('picture')
+        );
     }
 
     getCellLink(row: Record<string, string | null>, column: string): string | null {
@@ -562,6 +773,16 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
         }
 
         return 'Linki Ac';
+    }
+
+    private isImageUrl(url: string): boolean {
+        try {
+            const parsed = new URL(url);
+            const normalizedPath = parsed.pathname.toLocaleLowerCase('tr-TR');
+            return /\.(png|jpe?g|gif|webp|bmp|svg|avif)$/i.test(normalizedPath);
+        } catch {
+            return false;
+        }
     }
 
     private toUiChatMessage(message: ConversationApiMessage): UiChatMessage {
@@ -659,9 +880,50 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
         const record = conversation as unknown as Record<string, unknown>;
         const customerName = this.readString(record['customerName'] ?? record['CustomerName']);
         const lastMessage = this.readString(record['lastMessage'] ?? record['LastMessage']);
+        const lastMessages = this.readString(record['lastMessages'] ?? record['LastMessages']);
         if (customerName) return customerName;
         if (lastMessage) return lastMessage;
+        if (lastMessages) return lastMessages;
         return `Sohbet ${index + 1}`;
+    }
+
+    private toConversationPreview(conversation: ConversationHeader): string {
+        const record = conversation as unknown as Record<string, unknown>;
+        return this.readString(
+            record['lastMessage']
+            ?? record['LastMessage']
+            ?? record['lastMessages']
+            ?? record['LastMessages']
+        );
+    }
+
+    private toConversationDateText(conversation: ConversationHeader): string {
+        const record = conversation as unknown as Record<string, unknown>;
+        const rawDate = this.readString(
+            record['lastMessageDate']
+            ?? record['LastMessageDate']
+            ?? record['updatedDate']
+            ?? record['UpdatedDate']
+            ?? record['createdDate']
+            ?? record['CreatedDate']
+        );
+
+        if (!rawDate) return '';
+
+        const date = new Date(rawDate);
+        if (Number.isNaN(date.getTime())) return '';
+
+        const now = new Date();
+        const sameDay =
+            date.getFullYear() === now.getFullYear()
+            && date.getMonth() === now.getMonth()
+            && date.getDate() === now.getDate();
+
+        if (sameDay) {
+            return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        return date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' });
     }
 
     private readString(value: unknown): string {
@@ -685,19 +947,23 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
 
     toggleSidebar(): void {
         this.sidebarCollapsed = !this.sidebarCollapsed;
+        this.sidebarOpenedManually = !this.sidebarCollapsed;
     }
 
     /** Header hamburger: mobil'de drawer, desktop'ta collapse toggle */
     onHamburgerClick(): void {
         if (window.matchMedia('(max-width: 768px)').matches) {
             this.sidebarMobileOpen = true;
+            this.sidebarOpenedManually = true;
         } else {
             this.sidebarCollapsed = !this.sidebarCollapsed;
+            this.sidebarOpenedManually = !this.sidebarCollapsed;
         }
     }
 
     openMobileSidebar(): void {
         this.sidebarMobileOpen = true;
+        this.sidebarOpenedManually = true;
     }
 
     closeMobileSidebar(): void {

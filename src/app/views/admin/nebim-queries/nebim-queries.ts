@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { NebimQueriesService } from '@/app/core/services/nebim-queries.service';
@@ -17,7 +17,7 @@ import {
   UpdateNebimQueryRequest,
 } from '@/app/core/models/nebim/nebim-query.models';
 
-type AdminView = 'queries' | 'categories';
+type AdminView = 'queries' | 'categories' | 'schema';
 type QueryDetailView = 'parameters' | 'test';
 
 interface NebimQueryForm {
@@ -53,6 +53,58 @@ interface NebimCategoryForm {
   isActive: boolean;
 }
 
+interface ConfettiPiece {
+  id: number;
+  left: number;
+  delayMs: number;
+  durationMs: number;
+  rotateDeg: number;
+  color: string;
+}
+
+interface QuickAddParameterItem {
+  key: string;
+  sourceQueryId: string;
+  sourceQueryLabel: string;
+  parameter: NebimQueryParameter;
+}
+
+interface CategorySchemaNode {
+  id: string;
+  label: string;
+  shortLabel: string;
+  queryCount: number;
+  connectionCount: number;
+  sharedWeight: number;
+  x: number;
+  y: number;
+  radius: number;
+  fill: string;
+  stroke: string;
+  textColor: string;
+}
+
+interface CategorySchemaEdge {
+  key: string;
+  fromId: string;
+  toId: string;
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+  weight: number;
+  strokeWidth: number;
+  opacity: number;
+  stroke: string;
+}
+
+interface CategorySchemaGraph {
+  nodes: CategorySchemaNode[];
+  edges: CategorySchemaEdge[];
+  maxNodeWeight: number;
+  maxEdgeWeight: number;
+}
+
 @Component({
   selector: 'app-nebim-queries-page',
   standalone: true,
@@ -61,6 +113,8 @@ interface NebimCategoryForm {
   styleUrls: ['./nebim-queries.scss'],
 })
 export class NebimQueriesPage implements OnInit {
+  @ViewChild('schemaSvg') schemaSvg?: ElementRef<SVGSVGElement>;
+
   readonly resultModeOptions: string[] = ['list', 'object'];
   readonly defaultResultMode = 'list';
   readonly defaultRouteType = 'live_query';
@@ -81,17 +135,28 @@ export class NebimQueriesPage implements OnInit {
   showModal = false;
   editMode = false;
   selectedQuery: NebimQuery | null = null;
+  showQueryDetailModal = false;
 
   showParameterModal = false;
   parameterEditMode = false;
   selectedParameter: NebimQueryParameter | null = null;
   activeQuery: NebimQuery | null = null;
+  showQuickAddParameterModal = false;
+  quickAddParametersLoading = false;
+  quickAddParameterFilterText = '';
+  quickAddParameters: QuickAddParameterItem[] = [];
+  filteredQuickAddParameters: QuickAddParameterItem[] = [];
+  selectedQuickAddParameterKeys: string[] = [];
 
   showCategoryModal = false;
   categoryEditMode = false;
   selectedCategory: NebimQueryCategory | null = null;
+  categoryModalSource: 'categoriesView' | 'queryModal' = 'categoriesView';
+  showDeleteQueryModal = false;
+  queryToDelete: NebimQuery | null = null;
 
   filterText = '';
+  selectedQueryCategoryId = '';
   filteredItems: NebimQuery[] = [];
   pagedItems: NebimQuery[] = [];
   currentPage = 1;
@@ -121,6 +186,19 @@ export class NebimQueriesPage implements OnInit {
   suggestedCategoryIds: string[] = [];
   executionArgumentsJson = '{}';
   executionResult: NebimToolExecutionResponse | null = null;
+  pendingAutoParameterNames: string[] = [];
+  autoParameterDialogFlowActive = false;
+  schemaGenerationNotice = '';
+  schemaGenerationNoticeType: 'success' | 'warning' = 'success';
+  autoActionsEnabled = true;
+  autoCategorySelectionNotice = '';
+  confettiPieces: ConfettiPiece[] = [];
+  schemaGraph: CategorySchemaGraph = { nodes: [], edges: [], maxNodeWeight: 0, maxEdgeWeight: 0 };
+  selectedSchemaNodeId: string | null = null;
+  private draggingSchemaNodeId: string | null = null;
+  private readonly schemaWidth = 960;
+  private readonly schemaHeight = 560;
+  private autoActionAudio = new Audio('assets/sounds/incoming-message-sound.mp3');
 
   constructor(
     private nebimQueriesService: NebimQueriesService,
@@ -154,14 +232,48 @@ export class NebimQueriesPage implements OnInit {
     }
 
     this.queryForm.schemaJson = generatedSchema;
+    this.setSchemaGenerationNotice('Schema Query Text üzerinden üretildi.', 'success');
+  }
+
+  onQueryTextChanged(): void {
+    if (!this.autoActionsEnabled) {
+      return;
+    }
+
+    this.autoGenerateSchemaFromQueryText();
   }
 
   onQueryMetaChanged(): void {
+    this.applyQueryKeyToToolName();
+
+    if (this.autoActionsEnabled) {
+      this.applyQueryKeyToToolDescription();
+    }
+
     this.evaluateSuggestedCategories();
+    this.autoSelectSuggestedCategoriesIfNeeded();
+  }
+
+  copyQueryKeyToToolDescription(): void {
+    this.applyQueryKeyToToolDescription();
+  }
+
+  onAutoActionsToggleChanged(): void {
+    if (!this.autoActionsEnabled) {
+      this.autoCategorySelectionNotice = '';
+      this.autoParameterDialogFlowActive = false;
+      this.pendingAutoParameterNames = [];
+      return;
+    }
+
+    this.evaluateSuggestedCategories();
+    this.applyQueryKeyToToolDescription();
+    this.autoSelectSuggestedCategoriesIfNeeded();
+    this.autoGenerateSchemaFromQueryText();
   }
 
   autoSelectCategoriesFromQueryMeta(): void {
-    const sourceText = `${this.queryForm.queryKey} ${this.queryForm.toolName}`.trim();
+    const sourceText = `${this.queryForm.queryKey} ${this.queryForm.toolName} ${this.queryForm.queryText}`.trim();
     if (!sourceText) {
       alert('Önce Query Key veya Tool Name girin.');
       return;
@@ -182,6 +294,32 @@ export class NebimQueriesPage implements OnInit {
     this.applyFilterAndPaging();
   }
 
+  setQueryCategoryFilter(categoryId: string): void {
+    this.selectedQueryCategoryId = categoryId;
+    this.currentPage = 1;
+    this.applyFilterAndPaging();
+  }
+
+  getSortedQueryCategories(): NebimQueryCategory[] {
+    return [...this.categories].sort((left, right) => (left.name || '').localeCompare(right.name || '', 'tr'));
+  }
+
+  getQueryCountByCategory(categoryId: string): number {
+    return this.queries.filter((query) => this.queryHasCategory(query, categoryId)).length;
+  }
+
+  isQueryCategorySelected(categoryId: string): boolean {
+    return this.selectedQueryCategoryId === categoryId;
+  }
+
+  hasCopyInQueryKey(queryKey: string | null | undefined): boolean {
+    return (queryKey || '').toLowerCase().includes('_copy');
+  }
+
+  get showPassiveEditNotice(): boolean {
+    return this.editMode && !this.queryForm.isActive;
+  }
+
   setPage(page: number): void {
     if (page < 1 || page > this.totalPages) {
       return;
@@ -200,6 +338,10 @@ export class NebimQueriesPage implements OnInit {
       || (item.resultMode || '').toLowerCase().includes(filter)
       || (item.routeType || '').toLowerCase().includes(filter),
     );
+
+    if (this.selectedQueryCategoryId) {
+      this.filteredItems = this.filteredItems.filter((item) => this.queryHasCategory(item, this.selectedQueryCategoryId));
+    }
 
     this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
     this.totalPagesArray = Array.from({ length: this.totalPages }, (_, index) => index + 1);
@@ -281,6 +423,7 @@ export class NebimQueriesPage implements OnInit {
     if (!companyId) {
       this.queries = [];
       this.applyFilterAndPaging();
+      this.refreshCategorySchemaGraph();
       return;
     }
 
@@ -289,17 +432,19 @@ export class NebimQueriesPage implements OnInit {
       const response = await this.nebimQueriesService.getByCompany(companyId);
       this.queries = this.extractArray<NebimQuery>(response);
       this.applyFilterAndPaging();
+      this.refreshCategorySchemaGraph();
 
       if (this.activeQuery) {
         const refreshedQuery = this.queries.find((item) => item.id === this.activeQuery?.id) || null;
         if (refreshedQuery) {
-          await this.selectQuery(refreshedQuery);
+          await this.selectQuery(refreshedQuery, this.showQueryDetailModal);
         } else {
           this.clearSelection();
         }
       }
     } catch (error) {
       console.error('Nebim queries load error:', error);
+      this.refreshCategorySchemaGraph();
     } finally {
       this.loading = false;
     }
@@ -311,10 +456,16 @@ export class NebimQueriesPage implements OnInit {
       const response = await this.nebimQueriesService.getCategories();
       this.categories = this.extractArray<NebimQueryCategory>(response);
       this.applyCategoryFilterAndPaging();
+      this.refreshCategorySchemaGraph();
+      if (this.showModal) {
+        this.evaluateSuggestedCategories();
+        this.autoSelectSuggestedCategoriesIfNeeded();
+      }
     } catch (error) {
       console.error('Nebim query categories load error:', error);
       this.categories = [];
       this.applyCategoryFilterAndPaging();
+      this.refreshCategorySchemaGraph();
     } finally {
       this.categoriesLoading = false;
     }
@@ -335,16 +486,18 @@ export class NebimQueriesPage implements OnInit {
     return this.queryForm.categoryIds.includes(categoryId);
   }
 
-  openCreateCategory(): void {
+  openCreateCategory(source: 'categoriesView' | 'queryModal' = 'categoriesView'): void {
     this.categoryEditMode = false;
     this.selectedCategory = null;
     this.categoryForm = this.createEmptyCategoryForm();
+    this.categoryModalSource = source;
     this.showCategoryModal = true;
   }
 
   openEditCategory(category: NebimQueryCategory): void {
     this.categoryEditMode = true;
     this.selectedCategory = category;
+    this.categoryModalSource = 'categoriesView';
     this.categoryForm = {
       name: category.name || '',
       description: category.description || '',
@@ -357,17 +510,30 @@ export class NebimQueriesPage implements OnInit {
   async saveCategory(): Promise<void> {
     const payload = this.toCategoryPayload();
     try {
+      let createdCategoryId: string | null = null;
       if (this.categoryEditMode && this.selectedCategory) {
         const request: UpdateNebimQueryCategoryRequest = payload;
         await this.nebimQueriesService.updateCategory(this.selectedCategory.id, request);
       } else {
         const request: CreateNebimQueryCategoryRequest = payload;
-        await this.nebimQueriesService.createCategory(request);
+        const response = await this.nebimQueriesService.createCategory(request);
+        createdCategoryId = response.data?.id || null;
       }
 
       this.showCategoryModal = false;
       await this.loadCategories();
       await this.loadQueries();
+
+      if (!this.categoryEditMode && this.categoryModalSource === 'queryModal') {
+        const payloadName = (payload.name || '').trim().toLowerCase();
+        const fallbackCategory = this.categories.find((item) =>
+          (item.name || '').trim().toLowerCase() === payloadName,
+        );
+        const categoryIdToSelect = createdCategoryId || fallbackCategory?.id || null;
+        if (categoryIdToSelect) {
+          this.onCategorySelectionChange(categoryIdToSelect, true);
+        }
+      }
     } catch (error) {
       console.error('Nebim query category save error:', error);
     }
@@ -388,12 +554,13 @@ export class NebimQueriesPage implements OnInit {
     }
   }
 
-  async selectQuery(query: NebimQuery): Promise<void> {
+  async selectQuery(query: NebimQuery, openDetailModal = true): Promise<void> {
     this.activeQuery = query;
     this.activeQueryDetailView = 'parameters';
     this.executionResult = null;
     this.executionArgumentsJson = this.buildArgumentsJson(query.parameters || []);
     await this.loadParameters(query.id);
+    this.showQueryDetailModal = openDetailModal;
   }
 
   async loadParameters(nebimQueryId: string): Promise<void> {
@@ -417,14 +584,18 @@ export class NebimQueriesPage implements OnInit {
     this.selectedQuery = null;
     this.queryForm = this.createEmptyQueryForm();
     this.suggestedCategoryIds = [];
+    this.schemaGenerationNotice = '';
+    this.autoCategorySelectionNotice = '';
+    this.autoActionsEnabled = true;
     this.showModal = true;
   }
 
   openEdit(query: NebimQuery): void {
     this.editMode = true;
     this.selectedQuery = query;
+    const normalizedQueryKey = this.removeCopyTokenFromQueryKey(query.queryKey || '');
     this.queryForm = {
-      queryKey: query.queryKey || '',
+      queryKey: normalizedQueryKey,
       toolName: query.toolName || '',
       toolDescription: query.toolDescription || '',
       queryText: query.queryText || '',
@@ -439,6 +610,11 @@ export class NebimQueriesPage implements OnInit {
       categoryIds: (query.categories || []).map((category) => category.id),
     };
     this.evaluateSuggestedCategories();
+    this.schemaGenerationNotice = '';
+    this.autoCategorySelectionNotice = '';
+    this.autoActionsEnabled = true;
+    this.applyQueryKeyToToolName();
+    this.autoSelectSuggestedCategoriesIfNeeded();
     this.showModal = true;
   }
 
@@ -448,7 +624,16 @@ export class NebimQueriesPage implements OnInit {
       return;
     }
 
+    if (this.editMode) {
+      const queryKeyValidationError = this.validateQueryKeyForEdit(this.queryForm.queryKey);
+      if (queryKeyValidationError) {
+        alert(queryKeyValidationError);
+        return;
+      }
+    }
+
     this.evaluateSuggestedCategories();
+    this.applyQueryKeyToToolName();
 
     const queryValidationError = this.validateQueryText(this.queryForm.queryText);
     if (queryValidationError) {
@@ -464,10 +649,13 @@ export class NebimQueriesPage implements OnInit {
     const payload = this.toQueryPayload(companyId);
     try {
       if (this.editMode && this.selectedQuery) {
+        this.autoParameterDialogFlowActive = false;
+        this.pendingAutoParameterNames = [];
         const request: UpdateNebimQueryRequest = payload;
         await this.nebimQueriesService.update(this.selectedQuery.id, request);
       } else {
         const request: CreateNebimQueryRequest = payload;
+        const detectedParameterNames = this.extractSqlParameterNames(payload.queryText || '');
         const createResponse = await this.nebimQueriesService.create(request);
         const createdQueryId = createResponse.data?.id || null;
 
@@ -480,6 +668,14 @@ export class NebimQueriesPage implements OnInit {
 
         if (createdQuery) {
           await this.selectQuery(createdQuery);
+
+          if (detectedParameterNames.length > 0) {
+            this.pendingAutoParameterNames = detectedParameterNames.filter((name) =>
+              !this.parameters.some((parameter) => this.normalizeParameterName(parameter.jsonName || parameter.parameterName || '') === this.normalizeParameterName(name)),
+            );
+            this.autoParameterDialogFlowActive = this.autoActionsEnabled && this.pendingAutoParameterNames.length > 0;
+            this.openNextAutoParameterDialog();
+          }
         }
         return;
       }
@@ -491,16 +687,22 @@ export class NebimQueriesPage implements OnInit {
     }
   }
 
-  async deleteQuery(query: NebimQuery): Promise<void> {
-    if (!confirm(`"${query.toolName || query.queryKey || 'Sorgu'}" sorgusunu silmek istediğinize emin misiniz?`)) {
+  requestDeleteQuery(query: NebimQuery): void {
+    this.queryToDelete = query;
+    this.showDeleteQueryModal = true;
+  }
+
+  async confirmDeleteQuery(): Promise<void> {
+    if (!this.queryToDelete) {
       return;
     }
 
     try {
-      await this.nebimQueriesService.delete(query.id);
-      if (this.activeQuery?.id === query.id) {
+      await this.nebimQueriesService.delete(this.queryToDelete.id);
+      if (this.activeQuery?.id === this.queryToDelete.id) {
         this.clearSelection();
       }
+      this.closeDeleteQueryModal();
       await this.loadQueries();
     } catch (error) {
       console.error('Nebim query delete error:', error);
@@ -508,6 +710,10 @@ export class NebimQueriesPage implements OnInit {
   }
 
   async copyQuery(query: NebimQuery): Promise<void> {
+    if (!confirm(`"${query.toolName || query.queryKey || 'Sorgu'}" kaydini kopyalamak istediginize emin misiniz?`)) {
+      return;
+    }
+
     const companyId = this.authStateService.profile?.companyId || '';
     if (!companyId) {
       return;
@@ -539,7 +745,7 @@ export class NebimQueriesPage implements OnInit {
         routeType: this.defaultRouteType,
         schemaJson: query.schemaJson || '',
         examplePrompt: query.examplePrompt || '',
-        isActive: query.isActive,
+        isActive: false,
         isReadOnly: query.isReadOnly,
         timeoutSeconds: query.timeoutSeconds,
         maxRows: query.maxRows,
@@ -574,7 +780,7 @@ export class NebimQueriesPage implements OnInit {
       await this.loadQueries();
       const copiedQuery = this.queries.find((item) => item.id === createdQueryId) || null;
       if (copiedQuery) {
-        await this.selectQuery(copiedQuery);
+        await this.selectQuery(copiedQuery, false);
       }
     } catch (error) {
       if (createdQueryId) {
@@ -602,6 +808,161 @@ export class NebimQueriesPage implements OnInit {
     this.showParameterModal = true;
   }
 
+  async openQuickAddParameterModal(): Promise<void> {
+    if (!this.activeQuery) {
+      return;
+    }
+
+    this.showQuickAddParameterModal = true;
+    this.quickAddParametersLoading = true;
+    this.quickAddParameterFilterText = '';
+    this.quickAddParameters = [];
+    this.filteredQuickAddParameters = [];
+    this.selectedQuickAddParameterKeys = [];
+
+    const existingKeys = new Set(
+      this.parameters.map((parameter) =>
+        this.normalizeParameterName(parameter.jsonName || parameter.parameterName || ''),
+      ),
+    );
+
+    const sourceQueries = this.queries.filter((query) => query.id !== this.activeQuery?.id);
+    const results = await Promise.allSettled(
+      sourceQueries.map(async (query) => ({
+        query,
+        response: await this.nebimQueriesService.getParametersByQuery(query.id),
+      })),
+    );
+
+    const list: QuickAddParameterItem[] = [];
+    for (const result of results) {
+      if (result.status !== 'fulfilled') {
+        continue;
+      }
+
+      const sourceQuery = result.value.query;
+      const sourceLabel = sourceQuery.toolName || sourceQuery.queryKey || 'Adsiz Sorgu';
+      const sourceParams = this.extractArray<NebimQueryParameter>(result.value.response)
+        .sort((left, right) => left.sortOrder - right.sortOrder);
+
+      for (const sourceParam of sourceParams) {
+        const normalized = this.normalizeParameterName(sourceParam.jsonName || sourceParam.parameterName || '');
+        if (!normalized || existingKeys.has(normalized)) {
+          continue;
+        }
+
+        list.push({
+          key: `${sourceQuery.id}:${sourceParam.id}`,
+          sourceQueryId: sourceQuery.id,
+          sourceQueryLabel: sourceLabel,
+          parameter: sourceParam,
+        });
+      }
+    }
+
+    this.quickAddParameters = list.sort((left, right) => {
+      const byQuery = left.sourceQueryLabel.localeCompare(right.sourceQueryLabel, 'tr');
+      if (byQuery !== 0) {
+        return byQuery;
+      }
+      return left.parameter.sortOrder - right.parameter.sortOrder;
+    });
+
+    this.applyQuickAddParameterFilter();
+    this.quickAddParametersLoading = false;
+  }
+
+  closeQuickAddParameterModal(): void {
+    this.showQuickAddParameterModal = false;
+    this.quickAddParametersLoading = false;
+    this.quickAddParameterFilterText = '';
+    this.quickAddParameters = [];
+    this.filteredQuickAddParameters = [];
+    this.selectedQuickAddParameterKeys = [];
+  }
+
+  onQuickAddParameterFilterChange(): void {
+    this.applyQuickAddParameterFilter();
+  }
+
+  isQuickAddParameterSelected(key: string): boolean {
+    return this.selectedQuickAddParameterKeys.includes(key);
+  }
+
+  toggleQuickAddParameterSelection(key: string): void {
+    if (this.isQuickAddParameterSelected(key)) {
+      this.selectedQuickAddParameterKeys = this.selectedQuickAddParameterKeys.filter((item) => item !== key);
+      return;
+    }
+
+    this.selectedQuickAddParameterKeys = [...this.selectedQuickAddParameterKeys, key];
+  }
+
+  selectAllFilteredQuickAddParameters(): void {
+    const visibleKeys = this.filteredQuickAddParameters.map((item) => item.key);
+    this.selectedQuickAddParameterKeys = Array.from(new Set([...this.selectedQuickAddParameterKeys, ...visibleKeys]));
+  }
+
+  clearAllQuickAddParameterSelections(): void {
+    this.selectedQuickAddParameterKeys = [];
+  }
+
+  async addSelectedQuickAddParameters(): Promise<void> {
+    if (!this.activeQuery || this.selectedQuickAddParameterKeys.length === 0) {
+      return;
+    }
+
+    const selectedItems = this.filteredQuickAddParameters.length === this.quickAddParameters.length
+      ? this.quickAddParameters.filter((item) => this.selectedQuickAddParameterKeys.includes(item.key))
+      : this.quickAddParameters.filter((item) => this.selectedQuickAddParameterKeys.includes(item.key));
+
+    const existingKeys = new Set(
+      this.parameters.map((parameter) =>
+        this.normalizeParameterName(parameter.jsonName || parameter.parameterName || ''),
+      ),
+    );
+    let sortOrder = this.parameters.length
+      ? Math.max(...this.parameters.map((parameter) => parameter.sortOrder)) + 1
+      : 1;
+
+    for (const selected of selectedItems) {
+      const sourceParameter = selected.parameter;
+      const normalized = this.normalizeParameterName(sourceParameter.jsonName || sourceParameter.parameterName || '');
+      if (!normalized || existingKeys.has(normalized)) {
+        continue;
+      }
+
+      const request: CreateNebimQueryParameterRequest = {
+        nebimQueryId: this.activeQuery.id,
+        parameterName: sourceParameter.parameterName || '',
+        jsonName: sourceParameter.jsonName || sourceParameter.parameterName || '',
+        dataType: sourceParameter.dataType || 'string',
+        description: sourceParameter.description || sourceParameter.parameterName || '',
+        isRequired: sourceParameter.isRequired,
+        defaultValue: sourceParameter.defaultValue || '',
+        sortOrder,
+      };
+
+      await this.nebimQueriesService.createParameter(request);
+      existingKeys.add(normalized);
+      sortOrder += 1;
+    }
+
+    this.closeQuickAddParameterModal();
+    await this.loadParameters(this.activeQuery.id);
+    await this.loadQueries();
+  }
+
+  onParameterNameChanged(): void {
+    if (this.parameterEditMode) {
+      return;
+    }
+
+    const value = this.parameterForm.parameterName || '';
+    this.parameterForm.jsonName = value;
+    this.parameterForm.description = value;
+  }
+
   openEditParameter(parameter: NebimQueryParameter): void {
     this.parameterEditMode = true;
     this.selectedParameter = parameter;
@@ -622,6 +983,10 @@ export class NebimQueriesPage implements OnInit {
       return;
     }
 
+    if (!this.parameterEditMode) {
+      this.onParameterNameChanged();
+    }
+
     const payload = this.toParameterPayload(this.activeQuery.id);
     try {
       if (this.parameterEditMode && this.selectedParameter) {
@@ -635,6 +1000,10 @@ export class NebimQueriesPage implements OnInit {
       this.showParameterModal = false;
       await this.loadParameters(this.activeQuery.id);
       await this.loadQueries();
+
+      if (!this.parameterEditMode && this.autoParameterDialogFlowActive && this.pendingAutoParameterNames.length > 0) {
+        this.openNextAutoParameterDialog();
+      }
     } catch (error) {
       console.error('Nebim query parameter save error:', error);
     }
@@ -688,14 +1057,28 @@ export class NebimQueriesPage implements OnInit {
   closeModal(): void {
     this.showModal = false;
     this.suggestedCategoryIds = [];
+    this.schemaGenerationNotice = '';
+    this.autoCategorySelectionNotice = '';
+  }
+
+  closeQueryDetailModal(): void {
+    this.showQueryDetailModal = false;
   }
 
   closeParameterModal(): void {
     this.showParameterModal = false;
+    this.pendingAutoParameterNames = [];
+    this.autoParameterDialogFlowActive = false;
   }
 
   closeCategoryModal(): void {
     this.showCategoryModal = false;
+    this.categoryModalSource = 'categoriesView';
+  }
+
+  closeDeleteQueryModal(): void {
+    this.showDeleteQueryModal = false;
+    this.queryToDelete = null;
   }
 
   formatDate(value?: string): string {
@@ -711,8 +1094,74 @@ export class NebimQueriesPage implements OnInit {
     return this.categories.filter((category) => this.suggestedCategoryIds.includes(category.id) && !selectedIds.has(category.id));
   }
 
+  get topSchemaNodes(): CategorySchemaNode[] {
+    return [...this.schemaGraph.nodes]
+      .sort((left, right) => {
+        if (right.sharedWeight !== left.sharedWeight) {
+          return right.sharedWeight - left.sharedWeight;
+        }
+        return right.queryCount - left.queryCount;
+      })
+      .slice(0, 6);
+  }
+
+  get selectedSchemaNode(): CategorySchemaNode | null {
+    if (!this.selectedSchemaNodeId) {
+      return null;
+    }
+
+    return this.schemaGraph.nodes.find((node) => node.id === this.selectedSchemaNodeId) || null;
+  }
+
+  isSchemaNodeSelected(nodeId: string): boolean {
+    return this.selectedSchemaNodeId === nodeId;
+  }
+
+  onSchemaNodeMouseDown(node: CategorySchemaNode, event: MouseEvent): void {
+    event.preventDefault();
+    this.selectedSchemaNodeId = node.id;
+    this.draggingSchemaNodeId = node.id;
+  }
+
+  @HostListener('window:mousemove', ['$event'])
+  onSchemaWindowMouseMove(event: MouseEvent): void {
+    if (!this.draggingSchemaNodeId) {
+      return;
+    }
+
+    const svgEl = this.schemaSvg?.nativeElement;
+    if (!svgEl) {
+      return;
+    }
+
+    const targetNode = this.schemaGraph.nodes.find((node) => node.id === this.draggingSchemaNodeId);
+    if (!targetNode) {
+      return;
+    }
+
+    const rect = svgEl.getBoundingClientRect();
+    if (!rect.width || !rect.height) {
+      return;
+    }
+
+    const scaleX = this.schemaWidth / rect.width;
+    const scaleY = this.schemaHeight / rect.height;
+    const rawX = (event.clientX - rect.left) * scaleX;
+    const rawY = (event.clientY - rect.top) * scaleY;
+
+    targetNode.x = this.clamp(rawX, targetNode.radius + 8, this.schemaWidth - targetNode.radius - 8);
+    targetNode.y = this.clamp(rawY, targetNode.radius + 8, this.schemaHeight - targetNode.radius - 20);
+    this.updateSchemaEdgeCoordinates();
+  }
+
+  @HostListener('window:mouseup')
+  onSchemaWindowMouseUp(): void {
+    this.draggingSchemaNodeId = null;
+  }
+
   private clearSelection(): void {
     this.activeQuery = null;
+    this.showQueryDetailModal = false;
     this.parameters = [];
     this.filteredParameters = [];
     this.pagedParameters = [];
@@ -821,6 +1270,196 @@ export class NebimQueriesPage implements OnInit {
     return value === 'object' ? 'object' : this.defaultResultMode;
   }
 
+  private refreshCategorySchemaGraph(): void {
+    const categoryItems = this.categories
+      .filter((category) => !!category.id)
+      .map((category) => ({
+        id: category.id,
+        label: (category.name || 'Adsiz Kategori').trim() || 'Adsiz Kategori',
+      }));
+
+    if (categoryItems.length === 0) {
+      this.schemaGraph = { nodes: [], edges: [], maxNodeWeight: 0, maxEdgeWeight: 0 };
+      return;
+    }
+
+    const queryIdsByCategory = new Map<string, Set<string>>();
+    const coOccurrence = new Map<string, number>();
+
+    for (const category of categoryItems) {
+      queryIdsByCategory.set(category.id, new Set<string>());
+    }
+
+    for (const query of this.queries) {
+      const queryId = query.id;
+      if (!queryId) {
+        continue;
+      }
+
+      const categoryIds = (query.categories || [])
+        .map((category) => category.id)
+        .filter((id): id is string => !!id && queryIdsByCategory.has(id));
+
+      for (const categoryId of categoryIds) {
+        queryIdsByCategory.get(categoryId)?.add(queryId);
+      }
+
+      for (let i = 0; i < categoryIds.length; i += 1) {
+        for (let j = i + 1; j < categoryIds.length; j += 1) {
+          const first = categoryIds[i];
+          const second = categoryIds[j];
+          const key = first < second ? `${first}__${second}` : `${second}__${first}`;
+          coOccurrence.set(key, (coOccurrence.get(key) || 0) + 1);
+        }
+      }
+    }
+
+    const nodeWeights = categoryItems.map((category) => queryIdsByCategory.get(category.id)?.size || 0);
+    const maxNodeWeight = Math.max(1, ...nodeWeights);
+    const edgeWeights = Array.from(coOccurrence.values());
+    const maxEdgeWeight = Math.max(1, ...edgeWeights, 1);
+
+    const sharedWeightByCategory = new Map<string, number>();
+    const connectionCountByCategory = new Map<string, number>();
+    for (const category of categoryItems) {
+      sharedWeightByCategory.set(category.id, 0);
+      connectionCountByCategory.set(category.id, 0);
+    }
+
+    for (const [pairKey, pairWeight] of coOccurrence.entries()) {
+      const [first, second] = pairKey.split('__');
+      sharedWeightByCategory.set(first, (sharedWeightByCategory.get(first) || 0) + pairWeight);
+      sharedWeightByCategory.set(second, (sharedWeightByCategory.get(second) || 0) + pairWeight);
+      connectionCountByCategory.set(first, (connectionCountByCategory.get(first) || 0) + 1);
+      connectionCountByCategory.set(second, (connectionCountByCategory.get(second) || 0) + 1);
+    }
+
+    const ranked = categoryItems
+      .map((category) => {
+        const queryCount = queryIdsByCategory.get(category.id)?.size || 0;
+        const sharedWeight = sharedWeightByCategory.get(category.id) || 0;
+        const connectionCount = connectionCountByCategory.get(category.id) || 0;
+        const score = queryCount * 1.8 + sharedWeight * 1.2 + connectionCount;
+        return {
+          ...category,
+          queryCount,
+          sharedWeight,
+          connectionCount,
+          score,
+        };
+      })
+      .sort((left, right) => right.score - left.score);
+
+    const width = this.schemaWidth;
+    const height = this.schemaHeight;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const innerRadius = Math.min(width, height) * 0.24;
+    const outerRadius = Math.min(width, height) * 0.39;
+    const firstRingCount = Math.max(0, Math.ceil((ranked.length - 1) * 0.45));
+
+    const palette = [18, 32, 96, 148, 205, 268, 334];
+    const nodes: CategorySchemaNode[] = ranked.map((entry, index) => {
+      let x = centerX;
+      let y = centerY;
+
+      if (index > 0) {
+        const inFirstRing = index <= firstRingCount;
+        const ringItems = inFirstRing ? firstRingCount : ranked.length - 1 - firstRingCount;
+        const ringIndex = inFirstRing ? index - 1 : index - firstRingCount - 1;
+        const radius = inFirstRing ? innerRadius : outerRadius;
+        const angle = (ringItems > 0 ? (ringIndex / ringItems) * Math.PI * 2 : 0) - Math.PI / 2;
+        x = centerX + Math.cos(angle) * radius;
+        y = centerY + Math.sin(angle) * radius;
+      }
+
+      const weightRatio = entry.queryCount / maxNodeWeight;
+      const sharedRatio = entry.sharedWeight / Math.max(1, maxEdgeWeight * 2);
+      const visualRatio = Math.min(1, weightRatio * 0.7 + sharedRatio * 0.3);
+      const radius = 28 + visualRatio * 24;
+      const hue = palette[index % palette.length];
+      const fillLightness = Math.round(52 - visualRatio * 17);
+      const strokeLightness = Math.round(38 - visualRatio * 16);
+
+      return {
+        id: entry.id,
+        label: entry.label,
+        shortLabel: entry.label.length > 18 ? `${entry.label.slice(0, 16)}..` : entry.label,
+        queryCount: entry.queryCount,
+        connectionCount: entry.connectionCount,
+        sharedWeight: entry.sharedWeight,
+        x,
+        y,
+        radius,
+        fill: `hsl(${hue} 72% ${fillLightness}%)`,
+        stroke: `hsl(${hue} 78% ${strokeLightness}%)`,
+        textColor: '#ffffff',
+      };
+    });
+
+    const nodeById = new Map(nodes.map((node) => [node.id, node]));
+    const edges: CategorySchemaEdge[] = Array.from(coOccurrence.entries())
+      .map(([pairKey, weight]) => {
+        const [fromId, toId] = pairKey.split('__');
+        const fromNode = nodeById.get(fromId);
+        const toNode = nodeById.get(toId);
+        if (!fromNode || !toNode) {
+          return null;
+        }
+
+        const ratio = weight / maxEdgeWeight;
+        const edgeHue = 214 - Math.round(ratio * 178);
+        return {
+          key: pairKey,
+          fromId,
+          toId,
+          fromX: fromNode.x,
+          fromY: fromNode.y,
+          toX: toNode.x,
+          toY: toNode.y,
+          weight,
+          strokeWidth: 1.2 + ratio * 4.4,
+          opacity: 0.2 + ratio * 0.68,
+          stroke: `hsl(${edgeHue} 82% 45%)`,
+        };
+      })
+      .filter((edge): edge is CategorySchemaEdge => edge !== null)
+      .sort((left, right) => left.weight - right.weight);
+
+    this.schemaGraph = {
+      nodes,
+      edges,
+      maxNodeWeight,
+      maxEdgeWeight,
+    };
+
+    if (!this.selectedSchemaNodeId || !nodes.some((node) => node.id === this.selectedSchemaNodeId)) {
+      this.selectedSchemaNodeId = nodes[0]?.id || null;
+    }
+
+    this.updateSchemaEdgeCoordinates();
+  }
+
+  private updateSchemaEdgeCoordinates(): void {
+    const nodeById = new Map(this.schemaGraph.nodes.map((node) => [node.id, node]));
+    for (const edge of this.schemaGraph.edges) {
+      const from = nodeById.get(edge.fromId);
+      const to = nodeById.get(edge.toId);
+      if (!from || !to) {
+        continue;
+      }
+
+      edge.fromX = from.x;
+      edge.fromY = from.y;
+      edge.toX = to.x;
+      edge.toY = to.y;
+    }
+  }
+
+  private clamp(value: number, min: number, max: number): number {
+    return Math.max(min, Math.min(max, value));
+  }
+
   private buildCopyValue(
     value: string | null | undefined,
     formatter: (baseValue: string, index: number) => string,
@@ -838,6 +1477,82 @@ export class NebimQueriesPage implements OnInit {
     return candidate;
   }
 
+  getDetectedParameterNamesForQueryForm(): string[] {
+    return this.extractSqlParameterNames(this.queryForm.queryText || '');
+  }
+
+  private openNextAutoParameterDialog(): void {
+    if (!this.activeQuery || this.pendingAutoParameterNames.length === 0) {
+      this.pendingAutoParameterNames = [];
+      this.autoParameterDialogFlowActive = false;
+      return;
+    }
+
+    const nextParamName = this.pendingAutoParameterNames[0];
+    this.pendingAutoParameterNames = this.pendingAutoParameterNames.slice(1);
+    this.parameterEditMode = false;
+    this.selectedParameter = null;
+    this.parameterForm = {
+      parameterName: nextParamName,
+      jsonName: nextParamName,
+      dataType: 'string',
+      description: '',
+      isRequired: true,
+      defaultValue: '',
+      sortOrder: this.parameters.length + 1,
+    };
+    this.showParameterModal = true;
+  }
+
+  private extractSqlParameterNames(queryText: string): string[] {
+    const source = queryText || '';
+    const found: string[] = [];
+    const seen = new Set<string>();
+    const pattern = /(^|[^@\w])@([A-Za-z_][A-Za-z0-9_]*)/g;
+
+    let match: RegExpExecArray | null = pattern.exec(source);
+    while (match) {
+      const rawName = match[2] || '';
+      const normalizedName = this.normalizeParameterName(rawName);
+      if (normalizedName && !seen.has(normalizedName)) {
+        seen.add(normalizedName);
+        found.push(rawName);
+      }
+      match = pattern.exec(source);
+    }
+
+    return found;
+  }
+
+  private normalizeParameterName(name: string): string {
+    return (name || '').replace(/^@+/, '').trim().toLowerCase();
+  }
+
+  private applyQueryKeyToToolDescription(): void {
+    const normalized = (this.queryForm.queryKey || '')
+      .replace(/_/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    this.queryForm.toolDescription = normalized;
+  }
+
+  private applyQueryKeyToToolName(): void {
+    this.queryForm.toolName = (this.queryForm.queryKey || '').trim();
+  }
+
+  private removeCopyTokenFromQueryKey(queryKey: string): string {
+    return (queryKey || '')
+      .replace(/_copy/gi, '')
+      .replace(/__+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .trim();
+  }
+
+  private queryHasCategory(query: NebimQuery, categoryId: string): boolean {
+    return (query.categories || []).some((category) => category.id === categoryId);
+  }
+
   private validateQueryText(queryText: string): string | null {
     const normalizedQuery = queryText.trim().toLowerCase();
 
@@ -851,6 +1566,52 @@ export class NebimQueriesPage implements OnInit {
 
     if (!normalizedQuery.startsWith('select') && !normalizedQuery.startsWith('with')) {
       return 'Sorgu mutlaka SELECT veya WITH ile başlamalıdır.';
+    }
+
+    return null;
+  }
+
+  private autoGenerateSchemaFromQueryText(): void {
+    const queryText = this.queryForm.queryText || '';
+    if (!queryText.trim()) {
+      this.queryForm.schemaJson = '';
+      this.schemaGenerationNotice = '';
+      return;
+    }
+
+    const validationError = this.validateQueryText(queryText);
+    if (validationError) {
+      this.setSchemaGenerationNotice('Query Text geçerli olduğunda schema otomatik üretilecektir.', 'warning');
+      return;
+    }
+
+    const generatedSchema = this.buildSchemaJsonFromQuery(queryText);
+    if (!generatedSchema) {
+      this.setSchemaGenerationNotice('Schema otomatik üretilemedi. Query\'den Üret butonu ile tekrar deneyin.', 'warning');
+      return;
+    }
+
+    this.queryForm.schemaJson = generatedSchema;
+    this.setSchemaGenerationNotice('Schema otomatik güncellendi.', 'success');
+  }
+
+  private setSchemaGenerationNotice(message: string, type: 'success' | 'warning'): void {
+    this.schemaGenerationNotice = message;
+    this.schemaGenerationNoticeType = type;
+  }
+
+  private validateQueryKeyForEdit(queryKey: string): string | null {
+    const normalized = (queryKey || '').trim();
+    if (!normalized) {
+      return 'Query Key bos olamaz.';
+    }
+
+    if (/\s/.test(normalized)) {
+      return 'Query Key bosluk iceremez.';
+    }
+
+    if (normalized.toLowerCase().includes('copy')) {
+      return 'Query Key icinde "copy" gecemez.';
     }
 
     return null;
@@ -939,10 +1700,25 @@ export class NebimQueriesPage implements OnInit {
     }
 
     if (fromIndex < 0) {
+      return this.extractSelectClauseByFallback(queryText);
+    }
+
+    const clause = queryText.slice(selectIndex + 'select'.length, fromIndex).trim();
+    if (clause) {
+      return clause;
+    }
+
+    return this.extractSelectClauseByFallback(queryText);
+  }
+
+  private extractSelectClauseByFallback(queryText: string): string | null {
+    const fallbackMatch = queryText.match(/\bselect\b([\s\S]*?)\bfrom\b/i);
+    if (!fallbackMatch?.[1]) {
       return null;
     }
 
-    return queryText.slice(selectIndex + 'select'.length, fromIndex).trim();
+    const clause = fallbackMatch[1].trim();
+    return clause || null;
   }
 
   private splitTopLevelCsv(value: string): string[] {
@@ -1209,8 +1985,70 @@ export class NebimQueriesPage implements OnInit {
     this.suggestedCategoryIds = this.getSuggestedCategoryIds();
   }
 
+  private autoSelectSuggestedCategoriesIfNeeded(): void {
+    if (!this.autoActionsEnabled) {
+      this.autoCategorySelectionNotice = '';
+      return;
+    }
+
+    const unselected = this.getUnselectedSuggestedCategories();
+    if (!unselected.length) {
+      this.autoCategorySelectionNotice = '';
+      return;
+    }
+
+    const selectedIds = new Set(this.queryForm.categoryIds);
+    for (const category of unselected) {
+      selectedIds.add(category.id);
+    }
+    this.queryForm.categoryIds = Array.from(selectedIds);
+
+    const selectedNames = unselected
+      .map((category) => category.name || 'Adsiz kategori')
+      .join(', ');
+    this.autoCategorySelectionNotice = `Otomatik secildi: ${selectedNames}`;
+    this.triggerAutoSelectionConfetti();
+    this.playAutoSelectionSound();
+  }
+
+  private playAutoSelectionSound(): void {
+    try {
+      this.autoActionAudio.currentTime = 0;
+      this.autoActionAudio.volume = 0.5;
+      void this.autoActionAudio.play();
+    } catch {
+      // Audio support is optional; ignore playback errors.
+    }
+  }
+
+  getConfettiStyle(piece: ConfettiPiece): Record<string, string> {
+    return {
+      left: `${piece.left}%`,
+      animationDelay: `${piece.delayMs}ms`,
+      animationDuration: `${piece.durationMs}ms`,
+      transform: `rotate(${piece.rotateDeg}deg)`,
+      backgroundColor: piece.color,
+    };
+  }
+
+  private triggerAutoSelectionConfetti(): void {
+    const palette = ['#16a34a', '#2563eb', '#f59e0b', '#ec4899', '#14b8a6', '#7c3aed'];
+    this.confettiPieces = Array.from({ length: 28 }, (_, index) => ({
+      id: Date.now() + index,
+      left: Math.round(Math.random() * 100),
+      delayMs: Math.round(Math.random() * 220),
+      durationMs: 850 + Math.round(Math.random() * 500),
+      rotateDeg: Math.round(Math.random() * 360),
+      color: palette[index % palette.length],
+    }));
+
+    setTimeout(() => {
+      this.confettiPieces = [];
+    }, 1800);
+  }
+
   private getSuggestedCategoryIds(): string[] {
-    const sourceText = `${this.queryForm.queryKey} ${this.queryForm.toolName}`.trim();
+    const sourceText = `${this.queryForm.queryKey} ${this.queryForm.toolName} ${this.queryForm.queryText}`.trim();
     if (!sourceText) {
       return [];
     }
@@ -1218,6 +2056,22 @@ export class NebimQueriesPage implements OnInit {
     return this.categories
       .filter((category) => this.matchesCategory(sourceText, category))
       .map((category) => category.id);
+  }
+
+  private applyQuickAddParameterFilter(): void {
+    const filter = (this.quickAddParameterFilterText || '').toLocaleLowerCase('tr-TR').trim();
+    if (!filter) {
+      this.filteredQuickAddParameters = [...this.quickAddParameters];
+      return;
+    }
+
+    this.filteredQuickAddParameters = this.quickAddParameters.filter((item) =>
+      (item.sourceQueryLabel || '').toLocaleLowerCase('tr-TR').includes(filter)
+      || (item.parameter.parameterName || '').toLocaleLowerCase('tr-TR').includes(filter)
+      || (item.parameter.jsonName || '').toLocaleLowerCase('tr-TR').includes(filter)
+      || (item.parameter.description || '').toLocaleLowerCase('tr-TR').includes(filter)
+      || (item.parameter.dataType || '').toLocaleLowerCase('tr-TR').includes(filter),
+    );
   }
 
   private tokenizeCategoryKeywords(value: string): string[] {

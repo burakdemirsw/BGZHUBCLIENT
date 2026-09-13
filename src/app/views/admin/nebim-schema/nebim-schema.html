@@ -1,0 +1,544 @@
+<div class="nebim-schema-page container-fluid py-3">
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h4 class="card-title mb-1"><i class="fa-solid fa-table-columns me-2"></i>Nebim Schema Yönetimi</h4>
+                <p class="text-muted mb-0">Objects, Columns, Categories ve Object Categories yönetimi</p>
+            </div>
+            <button class="btn btn-soft-primary" (click)="loadAll()">
+                <i class="fa-solid fa-rotate me-1"></i>Yenile
+            </button>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+        <div class="alert alert-danger">{{ errorMessage }}</div>
+    }
+
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <div class="btn-group w-100 flex-wrap" role="group">
+                <button class="btn" [class.btn-primary]="activeTab === 'objects'" [class.btn-outline-primary]="activeTab !== 'objects'" (click)="activeTab = 'objects'">Objects</button>
+                <button class="btn" [class.btn-primary]="activeTab === 'columns'" [class.btn-outline-primary]="activeTab !== 'columns'" (click)="activeTab = 'columns'">Columns</button>
+                <button class="btn" [class.btn-primary]="activeTab === 'categories'" [class.btn-outline-primary]="activeTab !== 'categories'" (click)="activeTab = 'categories'">Categories</button>
+                <button class="btn" [class.btn-primary]="activeTab === 'categoryMaps'" [class.btn-outline-primary]="activeTab !== 'categoryMaps'" (click)="activeTab = 'categoryMaps'">Object Categories</button>
+            </div>
+        </div>
+    </div>
+
+    @if (activeTab === 'objects') {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2 justify-content-between mb-3">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <input class="form-control filter-input" [(ngModel)]="filterText" (ngModelChange)="onFilterChange()" placeholder="Object ara..." />
+                        <select class="form-select status-filter" [(ngModel)]="objectStatusFilter" (ngModelChange)="onObjectStatusFilterChange()">
+                            <option value="all">Tumu</option>
+                            <option value="active">Sadece Aktif</option>
+                            <option value="passive">Sadece Pasif</option>
+                        </select>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-light" (click)="selectAllFilteredObjects()">Tumunu Sec</button>
+                        <button class="btn btn-light" (click)="selectAllVisibleObjects()">Sayfadakileri Sec</button>
+                        <button class="btn btn-light" (click)="clearVisibleObjects()">Sayfadakileri Kaldir</button>
+                        <button class="btn btn-soft-danger" [disabled]="selectedObjectIds.length === 0" (click)="deleteSelectedObjects()">
+                            <i class="fa-regular fa-trash-can me-1"></i>Secilileri Sil ({{ selectedObjectIds.length }})
+                        </button>
+                        <button class="btn btn-soft-primary" (click)="openCreateObject()">
+                            <i class="fa-solid fa-plus me-1"></i>Yeni Object
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-centered table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Sec</th>
+                                <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleObjectSort('schemaName')">Schema {{ getSortIndicator('schemaName', objectSortKey, objectSortDirection) }}</button></th>
+                                <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleObjectSort('objectName')">Object {{ getSortIndicator('objectName', objectSortKey, objectSortDirection) }}</button></th>
+                                <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleObjectSort('objectType')">Tür {{ getSortIndicator('objectType', objectSortKey, objectSortDirection) }}</button></th>
+                                <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleObjectSort('domain')">Domain {{ getSortIndicator('domain', objectSortKey, objectSortDirection) }}</button></th>
+                                <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleObjectSort('businessName')">Business Name {{ getSortIndicator('businessName', objectSortKey, objectSortDirection) }}</button></th>
+                                <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleObjectSort('priority')">Priority {{ getSortIndicator('priority', objectSortKey, objectSortDirection) }}</button></th>
+                                <th>Kolon Sayisi</th>
+                                <th>Durum</th>
+                                <th class="text-end">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of pagedItems; track item.id) {
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input" [checked]="isObjectSelected(item.id)" (change)="toggleObjectSelection(item.id)" />
+                                    </td>
+                                    <td>{{ item.schemaName || '-' }}</td>
+                                    <td>{{ item.objectName || '-' }}</td>
+                                    <td>{{ item.objectType || '-' }}</td>
+                                    <td>{{ item.domain || '-' }}</td>
+                                    <td>{{ item.businessName || '-' }}</td>
+                                    <td>{{ item.priority }}</td>
+                                    <td>{{ getObjectColumnCount(item.id) }}</td>
+                                    <td>
+                                        <span class="badge" [class.bg-success-subtle]="item.isAllowed" [class.text-success]="item.isAllowed" [class.bg-danger-subtle]="!item.isAllowed" [class.text-danger]="!item.isAllowed">
+                                            {{ item.isAllowed ? 'Aktif' : 'Pasif' }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-light me-1" (click)="openObjectColumns(item)">Kolonlar</button>
+                                        <button class="btn btn-sm btn-soft-primary me-1" (click)="openEditObject(item)"><i class="fa-regular fa-pen-to-square"></i></button>
+                                        <button class="btn btn-sm btn-soft-danger" (click)="deleteObject(item)"><i class="fa-regular fa-trash-can"></i></button>
+                                    </td>
+                                </tr>
+                            } @empty {
+                                <tr><td colspan="10" class="text-center text-muted py-4">Kayıt bulunamadı.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <small class="text-muted">Toplam {{ filteredItems.length }} kayıt</small>
+                        @if (selectedObjectIds.length > 0) {
+                            <span class="badge bg-primary-subtle text-primary">Secili {{ selectedObjectIds.length }}</span>
+                            <button class="btn btn-sm btn-light" (click)="clearAllObjectSelections()">Tum Secimi Temizle</button>
+                        }
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="btn btn-sm btn-light" [disabled]="currentPage <= 1" (click)="setPage(currentPage - 1)">Geri</button>
+                        @for (p of totalPagesArray; track p) {
+                            <button class="btn btn-sm" [class.btn-primary]="p === currentPage" [class.btn-light]="p !== currentPage" (click)="setPage(p)">{{ p }}</button>
+                        }
+                        <button class="btn btn-sm btn-light" [disabled]="currentPage >= totalPages" (click)="setPage(currentPage + 1)">İleri</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (activeTab === 'columns') {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2 justify-content-between mb-3">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <input class="form-control filter-input" [(ngModel)]="columnFilterText" (ngModelChange)="onColumnFilterChange()" placeholder="Column ara..." />
+                        <select class="form-select status-filter" [(ngModel)]="columnStatusFilter" (ngModelChange)="onColumnStatusFilterChange()">
+                            <option value="all">Tumu</option>
+                            <option value="active">Sadece Aktif</option>
+                            <option value="passive">Sadece Pasif</option>
+                        </select>
+                        @if (selectedColumnObjectId) {
+                            <span class="badge bg-primary-subtle text-primary d-flex align-items-center">Object: {{ selectedColumnObjectName }}</span>
+                            <button class="btn btn-light" (click)="clearSelectedColumnObject()">Object Filtresini Kaldir</button>
+                        }
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-light" (click)="selectAllFilteredColumns()">Tumunu Sec</button>
+                        <button class="btn btn-light" (click)="selectAllVisibleColumns()">Sayfadakileri Sec</button>
+                        <button class="btn btn-light" (click)="clearVisibleColumns()">Sayfadakileri Kaldir</button>
+                        <button class="btn btn-soft-danger" [disabled]="selectedColumnIds.length === 0" (click)="deleteSelectedColumns()">
+                            <i class="fa-regular fa-trash-can me-1"></i>Secilileri Sil ({{ selectedColumnIds.length }})
+                        </button>
+                        <button class="btn btn-soft-primary" (click)="openCreateColumn()"><i class="fa-solid fa-plus me-1"></i>Yeni Column</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-centered table-hover mb-0">
+                        <thead><tr><th>Sec</th><th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleColumnSort('objectName')">Object {{ getSortIndicator('objectName', columnSortKey, columnSortDirection) }}</button></th><th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleColumnSort('columnName')">Column {{ getSortIndicator('columnName', columnSortKey, columnSortDirection) }}</button></th><th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleColumnSort('dataType')">Type {{ getSortIndicator('dataType', columnSortKey, columnSortDirection) }}</button></th><th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleColumnSort('businessName')">Business Name {{ getSortIndicator('businessName', columnSortKey, columnSortDirection) }}</button></th><th>Durum</th><th class="text-end">İşlem</th></tr></thead>
+                        <tbody>
+                            @for (item of pagedColumns; track item.id) {
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input" [checked]="isColumnSelected(item.id)" (change)="toggleColumnSelection(item.id)" />
+                                    </td>
+                                    <td>{{ item.objectName || '-' }}</td>
+                                    <td>{{ item.columnName || '-' }}</td>
+                                    <td>{{ item.dataType || '-' }}</td>
+                                    <td>{{ item.businessName || '-' }}</td>
+                                    <td>
+                                        <span class="badge" [class.bg-success-subtle]="item.isAllowed" [class.text-success]="item.isAllowed" [class.bg-danger-subtle]="!item.isAllowed" [class.text-danger]="!item.isAllowed">
+                                            {{ item.isAllowed ? 'Aktif' : 'Pasif' }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-soft-primary me-1" (click)="openEditColumn(item)"><i class="fa-regular fa-pen-to-square"></i></button>
+                                        <button class="btn btn-sm btn-soft-danger" (click)="deleteColumn(item)"><i class="fa-regular fa-trash-can"></i></button>
+                                    </td>
+                                </tr>
+                            } @empty {
+                                <tr><td colspan="7" class="text-center text-muted py-4">Kayıt bulunamadı.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <small class="text-muted">Toplam {{ filteredColumns.length }} kayıt</small>
+                        @if (selectedColumnIds.length > 0) {
+                            <span class="badge bg-primary-subtle text-primary">Secili {{ selectedColumnIds.length }}</span>
+                            <button class="btn btn-sm btn-light" (click)="clearAllColumnSelections()">Tum Secimi Temizle</button>
+                        }
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="btn btn-sm btn-light" [disabled]="columnCurrentPage <= 1" (click)="setColumnPage(columnCurrentPage - 1)">Geri</button>
+                        @for (p of columnTotalPagesArray; track p) {
+                            <button class="btn btn-sm" [class.btn-primary]="p === columnCurrentPage" [class.btn-light]="p !== columnCurrentPage" (click)="setColumnPage(p)">{{ p }}</button>
+                        }
+                        <button class="btn btn-sm btn-light" [disabled]="columnCurrentPage >= columnTotalPages" (click)="setColumnPage(columnCurrentPage + 1)">İleri</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (activeTab === 'categories') {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2 justify-content-between mb-3">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <input class="form-control filter-input" [(ngModel)]="categoryFilterText" (ngModelChange)="onCategoryFilterChange()" placeholder="Category ara..." />
+                        <select class="form-select status-filter" [(ngModel)]="categoryStatusFilter" (ngModelChange)="onCategoryStatusFilterChange()">
+                            <option value="all">Tumu</option>
+                            <option value="active">Sadece Aktif</option>
+                            <option value="passive">Sadece Pasif</option>
+                        </select>
+                        <select class="form-select status-filter" [(ngModel)]="categorySelectionFilter" (ngModelChange)="onCategorySelectionFilterChange()">
+                            <option value="all">Secim: Tumu</option>
+                            <option value="selected">Secim: Secili</option>
+                            <option value="unselected">Secim: Secili Olmayan</option>
+                        </select>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-light" (click)="selectAllVisibleCategoriesFromCategoryTable()">Sayfadakileri Sec</button>
+                        <button class="btn btn-light" (click)="clearVisibleCategoriesFromCategoryTable()">Sayfadakileri Kaldir</button>
+                        <button class="btn btn-soft-primary" [disabled]="selectedMapCategoryIds.length === 0" (click)="goToObjectCategoryMapping()">
+                            Eslestirme Tabina Git ({{ selectedMapCategoryIds.length }})
+                        </button>
+                        <button class="btn btn-soft-primary" (click)="openCreateCategory()"><i class="fa-solid fa-plus me-1"></i>Yeni Category</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-centered table-hover mb-0">
+                        <thead><tr><th>Sec</th><th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleCategorySort('name')">Category {{ getSortIndicator('name', categorySortKey, categorySortDirection) }}</button></th><th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleCategorySort('description')">Açıklama {{ getSortIndicator('description', categorySortKey, categorySortDirection) }}</button></th><th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleCategorySort('keywords')">Keywords {{ getSortIndicator('keywords', categorySortKey, categorySortDirection) }}</button></th><th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleCategorySort('isActive')">Durum {{ getSortIndicator('isActive', categorySortKey, categorySortDirection) }}</button></th><th class="text-end">İşlem</th></tr></thead>
+                        <tbody>
+                            @for (item of pagedCategories; track item.id) {
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input" [checked]="isCategorySelected(item.id)" (change)="toggleCategorySelection(item.id)" />
+                                    </td>
+                                    <td>{{ item.name || '-' }}</td>
+                                    <td>{{ item.description || '-' }}</td>
+                                    <td>{{ item.keywords || '-' }}</td>
+                                    <td>
+                                        <span class="badge" [class.bg-success-subtle]="item.isActive" [class.text-success]="item.isActive" [class.bg-danger-subtle]="!item.isActive" [class.text-danger]="!item.isActive">
+                                            {{ item.isActive ? 'Aktif' : 'Pasif' }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-soft-primary me-1" (click)="openEditCategory(item)"><i class="fa-regular fa-pen-to-square"></i></button>
+                                        <button class="btn btn-sm btn-soft-danger" (click)="deleteCategory(item)"><i class="fa-regular fa-trash-can"></i></button>
+                                    </td>
+                                </tr>
+                            } @empty {
+                                <tr><td colspan="6" class="text-center text-muted py-4">Kayıt bulunamadı.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-2">
+                    <small class="text-muted">Toplam {{ filteredCategories.length }} kayıt</small>
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="btn btn-sm btn-light" [disabled]="categoryCurrentPage <= 1" (click)="setCategoryPage(categoryCurrentPage - 1)">Geri</button>
+                        @for (p of categoryTotalPagesArray; track p) {
+                            <button class="btn btn-sm" [class.btn-primary]="p === categoryCurrentPage" [class.btn-light]="p !== categoryCurrentPage" (click)="setCategoryPage(p)">{{ p }}</button>
+                        }
+                        <button class="btn btn-sm btn-light" [disabled]="categoryCurrentPage >= categoryTotalPages" (click)="setCategoryPage(categoryCurrentPage + 1)">İleri</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (activeTab === 'categoryMaps') {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="card border mb-3">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">Nebim Schema Objects</h6>
+                            <input class="form-control filter-input" [(ngModel)]="mapObjectFilterText" (ngModelChange)="onMapObjectFilterChange()" placeholder="Object ara..." />
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-centered table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Sec</th>
+                                        <th>Object</th>
+                                        <th>Schema</th>
+                                        <th>Type</th>
+                                        <th>Domain</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (obj of pagedMapObjects; track obj.id) {
+                                        <tr class="clickable-row" [class.table-primary]="isMapObjectSelected(obj.id)" (click)="toggleMapObjectSelection(obj.id)">
+                                            <td>
+                                                <input type="checkbox" class="form-check-input" [checked]="isMapObjectSelected(obj.id)" />
+                                            </td>
+                                            <td>{{ obj.objectName || '-' }}</td>
+                                            <td>{{ obj.schemaName || '-' }}</td>
+                                            <td>{{ obj.objectType || '-' }}</td>
+                                            <td>{{ obj.domain || '-' }}</td>
+                                        </tr>
+                                    } @empty {
+                                        <tr><td colspan="5" class="text-center text-muted py-3">Object bulunamadi.</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mt-2 gap-2">
+                            <small class="text-muted">Toplam {{ filteredMapObjects.length }} object</small>
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-sm btn-light" (click)="selectAllVisibleMapObjects()">Sayfadaki Objectleri Sec</button>
+                                <button class="btn btn-sm btn-light" (click)="clearVisibleMapObjects()">Sayfadaki Objectleri Kaldir</button>
+                                <button class="btn btn-sm btn-light" (click)="clearAllMapObjects()">Tum Object Secimini Temizle</button>
+                            </div>
+                            <div class="d-flex align-items-center gap-1">
+                                <button class="btn btn-sm btn-light" [disabled]="mapObjectCurrentPage <= 1" (click)="setMapObjectPage(mapObjectCurrentPage - 1)">Geri</button>
+                                @for (p of mapObjectTotalPagesArray; track p) {
+                                    <button class="btn btn-sm" [class.btn-primary]="p === mapObjectCurrentPage" [class.btn-light]="p !== mapObjectCurrentPage" (click)="setMapObjectPage(p)">{{ p }}</button>
+                                }
+                                <button class="btn btn-sm btn-light" [disabled]="mapObjectCurrentPage >= mapObjectTotalPages" (click)="setMapObjectPage(mapObjectCurrentPage + 1)">Ileri</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 justify-content-between mb-3">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <input class="form-control filter-input" [(ngModel)]="mapFilterText" (ngModelChange)="onMapFilterChange()" placeholder="Category ara..." />
+                        <select class="form-select status-filter" [(ngModel)]="mapAssignmentFilter" (ngModelChange)="onMapAssignmentFilterChange()">
+                            <option value="all">Tum Kayitlar</option>
+                            <option value="selected">Sadece Eslesenler</option>
+                            <option value="unselected">Sadece Eslesmeyenler</option>
+                        </select>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-soft-primary" [disabled]="selectedMapObjectIds.length === 0" (click)="saveObjectCategories()">
+                            <i class="fa-solid fa-floppy-disk me-1"></i>Eslesmeleri Kaydet
+                        </button>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+                    <span class="badge bg-primary-subtle text-primary">Secili Object: {{ selectedMapObjectIds.length }} ({{ getSelectedObjectName() }})</span>
+                    <span class="badge bg-success-subtle text-success">Secili Category: {{ selectedMapCategoryIds.length }}</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-centered table-hover mb-0">
+                        <thead><tr><th>Atama</th><th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleMapSort('name')">Category {{ getSortIndicator('name', mapSortKey, mapSortDirection) }}</button></th><th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleMapSort('description')">Aciklama {{ getSortIndicator('description', mapSortKey, mapSortDirection) }}</button></th><th><button type="button" class="btn btn-link p-0 text-decoration-none sort-link" (click)="toggleMapSort('keywords')">Keywords {{ getSortIndicator('keywords', mapSortKey, mapSortDirection) }}</button></th><th class="text-end">Eslesme</th></tr></thead>
+                        <tbody>
+                            @for (item of pagedMaps; track item.id) {
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input" [checked]="isCategorySelected(item.id)" [disabled]="selectedMapObjectIds.length === 0" (change)="toggleCategorySelection(item.id)" />
+                                    </td>
+                                    <td>{{ item.name || '-' }}</td>
+                                    <td>{{ item.description || '-' }}</td>
+                                    <td>{{ item.keywords || '-' }}</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-soft-primary" (click)="viewCategoryMatches(item.id)">
+                                            Eslesmeleri Getir
+                                        </button>
+                                    </td>
+                                </tr>
+                            } @empty {
+                                <tr><td colspan="5" class="text-center text-muted py-4">Kayıt bulunamadı.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-2">
+                    <small class="text-muted">Toplam {{ filteredMaps.length }} kayıt</small>
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="btn btn-sm btn-light" [disabled]="mapCurrentPage <= 1" (click)="setMapPage(mapCurrentPage - 1)">Geri</button>
+                        @for (p of mapTotalPagesArray; track p) {
+                            <button class="btn btn-sm" [class.btn-primary]="p === mapCurrentPage" [class.btn-light]="p !== mapCurrentPage" (click)="setMapPage(p)">{{ p }}</button>
+                        }
+                        <button class="btn btn-sm btn-light" [disabled]="mapCurrentPage >= mapTotalPages" (click)="setMapPage(mapCurrentPage + 1)">İleri</button>
+                    </div>
+                </div>
+
+                <div class="card border mt-3 matched-list-card">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">Eslestirilen Kategoriler</h6>
+                            <input class="form-control filter-input" [(ngModel)]="matchedFilterText" (ngModelChange)="onMatchedFilterChange()" placeholder="Eslesen category ara..." />
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-centered table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Aciklama</th>
+                                        <th>Keywords</th>
+                                        <th class="text-end">Islem</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (item of getMatchedCategories(); track item.id) {
+                                        <tr>
+                                            <td>{{ item.name || '-' }}</td>
+                                            <td>{{ item.description || '-' }}</td>
+                                            <td>{{ item.keywords || '-' }}</td>
+                                            <td class="text-end">
+                                                <button class="btn btn-sm btn-soft-danger" [disabled]="selectedMapObjectIds.length === 0" (click)="removeMatchedCategory(item.id)">
+                                                    <i class="fa-regular fa-trash-can me-1"></i>Sil
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    } @empty {
+                                        <tr><td colspan="4" class="text-center text-muted py-3">Eslestirilmis category bulunamadi.</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if (activeMatchedCategoryId) {
+                            <hr class="my-3" />
+                            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">{{ activeMatchedCategoryName }} kategorisine eslesen objectler</h6>
+                                <input class="form-control filter-input" [(ngModel)]="matchedObjectFilterText" (ngModelChange)="onMatchedObjectFilterChange()" placeholder="Eslesen object ara..." />
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-2">
+                                <small class="text-muted">Secili object: {{ selectedMatchedObjectIds.length }}</small>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button class="btn btn-sm btn-light" (click)="selectAllVisibleMatchedObjects()">Gorunenleri Sec</button>
+                                    <button class="btn btn-sm btn-light" (click)="clearVisibleMatchedObjects()">Gorunenleri Kaldir</button>
+                                    <button class="btn btn-sm btn-light" (click)="clearAllMatchedObjectSelections()">Tum Secimi Temizle</button>
+                                    <button class="btn btn-sm btn-soft-danger" [disabled]="selectedMatchedObjectIds.length === 0" (click)="removeSelectedMatchedObjectsFromActiveCategory()">
+                                        <i class="fa-regular fa-trash-can me-1"></i>Secilileri Sil
+                                    </button>
+                                </div>
+                            </div>
+
+                            @if (matchedCategoryLoading) {
+                                <div class="text-muted small">Eslesmeler yukleniyor...</div>
+                            } @else {
+                                <div class="table-responsive">
+                                    <table class="table table-centered table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Sec</th>
+                                                <th>Object</th>
+                                                <th>Schema</th>
+                                                <th>Type</th>
+                                                <th>Domain</th>
+                                                <th class="text-end">Islem</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (obj of getMatchedCategoryObjects(); track obj.id) {
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" class="form-check-input" [checked]="isMatchedObjectSelected(obj.id)" (change)="toggleMatchedObjectSelection(obj.id)" />
+                                                    </td>
+                                                    <td>{{ obj.objectName || '-' }}</td>
+                                                    <td>{{ obj.schemaName || '-' }}</td>
+                                                    <td>{{ obj.objectType || '-' }}</td>
+                                                    <td>{{ obj.domain || '-' }}</td>
+                                                    <td class="text-end">
+                                                        <button class="btn btn-sm btn-soft-danger" (click)="removeMatchedObjectFromActiveCategory(obj.id)">
+                                                            <i class="fa-regular fa-trash-can me-1"></i>Sil
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            } @empty {
+                                                <tr><td colspan="6" class="text-center text-muted py-3">Bu kategori icin eslesme bulunamadi.</td></tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (showObjectModal) {
+        <div class="modal fade show d-block" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">{{ objectEditMode ? 'Object Düzenle' : 'Object Ekle' }}</h5><button class="btn-close" (click)="closeAllModals()"></button></div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label">Domain</label><input class="form-control" [(ngModel)]="objectForm.domain" /></div>
+                        <div class="col-md-6"><label class="form-label">Business Name</label><input class="form-control" [(ngModel)]="objectForm.businessName" /></div>
+                        <div class="col-12"><label class="form-label">Açıklama</label><textarea class="form-control" rows="3" [(ngModel)]="objectForm.description"></textarea></div>
+                        <div class="col-md-4"><label class="form-label">Priority</label><input type="number" class="form-control" [(ngModel)]="objectForm.priority" /></div>
+                        <div class="col-md-4 d-flex align-items-end"><div class="form-check"><input class="form-check-input" type="checkbox" [(ngModel)]="objectForm.isAllowed" /><label class="form-check-label">Aktif</label></div></div>
+                    </div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-light" (click)="closeAllModals()">Vazgeç</button><button class="btn btn-soft-primary" (click)="saveObject()">Kaydet</button></div>
+            </div></div>
+        </div>
+        <div class="modal-backdrop fade show"></div>
+    }
+
+    @if (showColumnModal) {
+        <div class="modal fade show d-block" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">{{ columnEditMode ? 'Column Düzenle' : 'Column Ekle' }}</h5><button class="btn-close" (click)="closeAllModals()"></button></div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Object</label>
+                            <select class="form-select" [(ngModel)]="columnForm.schemaObjectId">
+                                <option value="">Object seçiniz</option>
+                                @for (obj of objects; track obj.id) {
+                                    <option [value]="obj.id">{{ obj.objectName || '-' }}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6"><label class="form-label">Business Name</label><input class="form-control" [(ngModel)]="columnForm.businessName" /></div>
+                        <div class="col-12"><label class="form-label">Açıklama</label><textarea class="form-control" rows="3" [(ngModel)]="columnForm.description"></textarea></div>
+                        <div class="col-md-4"><label class="form-label">Core Order</label><input type="number" class="form-control" [(ngModel)]="columnForm.coreOrder" /></div>
+                        <div class="col-md-8 d-flex flex-wrap align-items-end gap-3">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" [(ngModel)]="columnForm.isFilterable" /><label class="form-check-label">Filterable</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" [(ngModel)]="columnForm.isSortable" /><label class="form-check-label">Sortable</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" [(ngModel)]="columnForm.isGroupable" /><label class="form-check-label">Groupable</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" [(ngModel)]="columnForm.isMetricSource" /><label class="form-check-label">Metric Source</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" [(ngModel)]="columnForm.isDateField" /><label class="form-check-label">Date Field</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" [(ngModel)]="columnForm.isCoreColumn" /><label class="form-check-label">Core Column</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" [(ngModel)]="columnForm.isAllowed" /><label class="form-check-label">Aktif</label></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-light" (click)="closeAllModals()">Vazgeç</button><button class="btn btn-soft-primary" (click)="saveColumn()">Kaydet</button></div>
+            </div></div>
+        </div>
+        <div class="modal-backdrop fade show"></div>
+    }
+
+    @if (showCategoryModal) {
+        <div class="modal fade show d-block" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">{{ categoryEditMode ? 'Category Düzenle' : 'Category Ekle' }}</h5><button class="btn-close" (click)="closeAllModals()"></button></div>
+                <div class="modal-body">
+                    <div class="mb-3"><label class="form-label">Name</label><input class="form-control" [(ngModel)]="categoryForm.name" /></div>
+                    <div class="mb-3"><label class="form-label">Açıklama</label><textarea class="form-control" rows="3" [(ngModel)]="categoryForm.description"></textarea></div>
+                    <div class="mb-3"><label class="form-label">Keywords</label><input class="form-control" [(ngModel)]="categoryForm.keywords" /></div>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" [(ngModel)]="categoryForm.isActive" /><label class="form-check-label">Aktif</label></div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-light" (click)="closeAllModals()">Vazgeç</button><button class="btn btn-soft-primary" (click)="saveCategory()">Kaydet</button></div>
+            </div></div>
+        </div>
+        <div class="modal-backdrop fade show"></div>
+    }
+</div>

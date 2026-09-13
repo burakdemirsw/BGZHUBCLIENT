@@ -13,7 +13,7 @@ export class Testimonials {
             avatar: 'assets/images/users/user-1.jpg',
             name: 'Ahmet Yılmaz',
             title: 'Müşteri iletişimimiz tamamen değişti!',
-            description: 'SellenticAI sayesinde müşteri yanıt süremiz %80 düştü. AI chatbot gerçekten insan gibi konuşuyor!',
+            description: 'Nebim AI sayesinde müşteri yanıt süremiz %80 düştü. AI chatbot gerçekten insan gibi konuşuyor!',
             rating: 5
         },
         {

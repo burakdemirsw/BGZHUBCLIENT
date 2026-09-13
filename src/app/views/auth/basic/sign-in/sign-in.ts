@@ -63,9 +63,8 @@ export class SignIn {
             // Kullanıcı menülerini yükle
             await this.userMenuService.loadUserMenus();
 
-            // returnUrl varsa oraya, yoksa dashboard'a yönlendir
-            const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
-            this.router.navigateByUrl(returnUrl);
+            // Login sonrası her zaman Nebim AI sohbet ekranına yönlendir
+            this.router.navigateByUrl('/nebim-ai-chat');
         } catch (err: any) {
             this.loading = false;
             this.errorMessage = err?.error?.message || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.';
@@ -75,7 +74,6 @@ export class SignIn {
     devLogin() {
         localStorage.setItem('accessToken', 'dev-token');
         localStorage.setItem('refreshToken', 'dev-refresh-token');
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
-        this.router.navigateByUrl(returnUrl);
+        this.router.navigateByUrl('/nebim-ai-chat');
     }
 }

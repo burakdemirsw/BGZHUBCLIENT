@@ -3,11 +3,14 @@
         [collapsed]="sidebarCollapsed"
         [mobileOpen]="sidebarMobileOpen"
         [chats]="sidebarChats"
+        [hasMoreChats]="hasMoreSidebarChats"
+        [isLoadingMoreChats]="isLoadingMoreChats"
         [activeChatId]="activeConversationId"
         (toggleCollapse)="toggleSidebar()"
         (reloadChats)="reloadConversationList()"
         (closeMobile)="closeMobileSidebar()"
         (newChat)="newChat()"
+        (loadMoreChats)="onLoadMoreChats()"
         (selectChat)="onSelectChat($event)">
     </nac-sidebar>
 
@@ -23,7 +26,7 @@
                     <span class="nac-dot"></span>
                     <span class="nac-logo-text">Nebim AI</span>
                 </div>
-                <span class="nac-model-badge">api-live · v1</span>
+                <!-- <span class="nac-model-badge">api-live · v1</span> -->
             </div>
             <div class="nac-header-right">
             </div>
@@ -41,8 +44,13 @@
                     <p class="nac-empty-subtitle">Bir soru sor ya da aşağıdaki önerilerden birini dene.</p>
 
                     <div class="nac-suggestions">
-                        @for (s of suggestions; track s.title) {
-                            <button type="button" class="nac-suggestion" (click)="useSuggestion(s.title)">
+                        @for (s of suggestions; track s.title; let idx = $index) {
+                            <button
+                                type="button"
+                                class="nac-suggestion"
+                                [style.--suggestion-order]="idx"
+                                (click)="useSuggestion(s.prompt)">
+                                <span class="nac-suggestion-chip">{{ s.category }}</span>
                                 <span class="nac-suggestion-title">{{ s.title }}</span>
                                 <span class="nac-suggestion-sub">{{ s.subtitle }}</span>
                             </button>
@@ -68,7 +76,7 @@
                             <div class="nac-bubble-wrap">
                                 <div class="nac-msg-role">{{ msg.role === 'user' ? 'Sen' : 'Nebim AI' }}</div>
                                 @if (msg.role === 'assistant') {
-                                    <div class="nac-bubble nac-bubble-ai" [class.nac-bubble-error]="msg.isError">
+                                    <div class="nac-bubble nac-bubble-ai" [class.nac-bubble-error]="msg.isError" [class.nac-bubble-has-actions]="canShareOnWhatsApp(msg) || hasExcelExport(msg)">
                                         @if (msg.blocks?.length) {
                                             <div class="nac-blocks">
                                                 @for (block of msg.blocks; track $index) {
@@ -98,8 +106,28 @@
                                                                                 @for (row of block.table!.rows; track $index) {
                                                                                     <tr>
                                                                                         @for (column of block.table!.columns; track column) {
-                                                                                            <td>
-                                                                                                @if (isCellLink(row, column)) {
+                                                                                            <td
+                                                                                                class="nac-table-cell-action"
+                                                                                                tabindex="0"
+                                                                                                title="Sohbete ekle"
+                                                                                                [attr.aria-label]="getCellValue(row, column) + ' değerini sohbete ekle'"
+                                                                                                (click)="insertTableCellValue(getCellValue(row, column))"
+                                                                                                (keydown.enter)="insertTableCellValue(getCellValue(row, column), $event)"
+                                                                                                (keydown.space)="insertTableCellValue(getCellValue(row, column), $event)">
+                                                                                                @if (isCellImage(row, column)) {
+                                                                                                    <a
+                                                                                                        class="nac-table-image-link"
+                                                                                                        [href]="getCellLink(row, column)!"
+                                                                                                        [title]="getCellValue(row, column)"
+                                                                                                        target="_blank"
+                                                                                                        rel="noopener noreferrer">
+                                                                                                        <img
+                                                                                                            class="nac-table-image"
+                                                                                                            [src]="getCellLink(row, column)!"
+                                                                                                            [alt]="column + ' gorseli'"
+                                                                                                            loading="lazy" />
+                                                                                                    </a>
+                                                                                                } @else if (isCellLink(row, column)) {
                                                                                                     <a
                                                                                                         class="nac-table-link"
                                                                                                         [href]="getCellLink(row, column)!"
@@ -156,19 +184,19 @@
 
                                         }
 
-                                        @if (canShareOnWhatsApp(msg)) {
-                                            <div class="nac-message-actions">
-                                                <a class="nac-action-chip" [href]="getWhatsAppShareUrl(msg)" target="_blank" rel="noopener noreferrer">
-                                                    <span>WhatsApp ile Paylas</span>
-                                                </a>
-                                            </div>
-                                        }
+                                        @if (canShareOnWhatsApp(msg) || hasExcelExport(msg)) {
+                                            <div class="nac-message-actions nac-message-actions-floating">
+                                                @if (canShareOnWhatsApp(msg)) {
+                                                    <a class="nac-action-icon nac-action-whatsapp" [href]="getWhatsAppShareUrl(msg)" target="_blank" rel="noopener noreferrer" title="WhatsApp ile paylas" aria-label="WhatsApp ile paylas">
+                                                        <i class="fa-brands fa-whatsapp"></i>
+                                                    </a>
+                                                }
 
-                                        @if (hasExcelExport(msg)) {
-                                            <div class="nac-message-actions">
-                                                <a class="nac-action-chip" [href]="msg.excelUrl!" target="_blank" rel="noopener noreferrer">
-                                                    <span>Excel indir</span>
-                                                </a>
+                                                @if (hasExcelExport(msg)) {
+                                                    <a class="nac-action-icon nac-action-excel" [href]="msg.excelUrl!" target="_blank" rel="noopener noreferrer" title="Excel indir" aria-label="Excel indir">
+                                                        <i class="fa-solid fa-file-excel"></i>
+                                                    </a>
+                                                }
                                             </div>
                                         }
 
@@ -213,7 +241,7 @@
     </main>
 
     <footer class="nac-composer-wrap">
-        <div class="nac-composer">
+        <div class="nac-composer nac-auto-field" [class.nac-auto-field-active]="input.trim().length > 0">
             <textarea
                 #textArea
                 class="nac-textarea"
@@ -221,7 +249,7 @@
                 placeholder="Nebim AI'a bir mesaj gönder..."
                 [(ngModel)]="input"
                 (keydown.enter)="onEnter($event)"
-                (input)="autoResize()"></textarea>
+                (input)="onComposerInput()"></textarea>
 
             <button
                 type="button"

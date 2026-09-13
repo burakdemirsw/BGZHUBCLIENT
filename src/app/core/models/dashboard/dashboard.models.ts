@@ -35,6 +35,47 @@ export interface DailyAiRepliesResponse {
   items: DailyAiReplyItem[];
 }
 
+// ─── Daily Conversations ───────────────────────────────────────────────────
+export interface DailyConversationItem {
+  date: string;
+  conversationCount: number;
+}
+
+export interface DailyConversationsResponse {
+  days: number;
+  items: DailyConversationItem[];
+}
+
+// ─── Conversation Usage Report ─────────────────────────────────────────────
+export interface ConversationUsageByDayItem {
+  date: string;
+  conversationCount?: number;
+  aiReplyCount?: number;
+  unansweredCount?: number;
+}
+
+export interface ConversationUsageReportResponse {
+  totalConversations?: number;
+  totalAiReplies?: number;
+  totalUnanswered?: number;
+  usageByDay?: ConversationUsageByDayItem[];
+  [key: string]: unknown;
+}
+
+// ─── Unanswered Operations Report ──────────────────────────────────────────
+export interface UnansweredOperationItem {
+  operationName?: string;
+  count?: number;
+  lastSeenDate?: string;
+  [key: string]: unknown;
+}
+
+export interface UnansweredOperationsReportResponse {
+  totalUnanswered?: number;
+  items?: UnansweredOperationItem[];
+  [key: string]: unknown;
+}
+
 // ─── Subscription Summary ──────────────────────────────────────────────────
 export interface SubscriptionSummaryResponse {
   subscriptionId: string;

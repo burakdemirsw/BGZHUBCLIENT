@@ -13,11 +13,7 @@ import { AuthStateService } from '@/app/core/services/auth-state.service';
             </div>
             <div class="user-info" *ngIf="!collapsed">
                 <div class="name">{{ displayName }}</div>
-                <div class="plan">{{ displayPlan }}</div>
             </div>
-            <button *ngIf="!collapsed" type="button" class="upgrade-btn" title="Yükselt">
-                Yükselt
-            </button>
         </div>
     `,
     styles: [`
@@ -59,28 +55,10 @@ import { AuthStateService } from '@/app/core/services/auth-state.service';
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .plan {
-            font-size: 11px;
-            color: #9ca3af;
-        }
-        .upgrade-btn {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #f5f5f5;
-            border-radius: 999px;
-            padding: 4px 10px;
-            font-size: 11.5px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.12s ease;
-            font-family: inherit;
-        }
-        .upgrade-btn:hover { background: rgba(255,255,255,0.14); }
     `]
 })
 export class UserProfileComponent {
     @Input() name = '';
-    @Input() plan = '';
     @Input() collapsed = false;
 
     constructor(private authState: AuthStateService) {}
@@ -91,17 +69,15 @@ export class UserProfileComponent {
             return inputName;
         }
 
-        const fullName = this.authState.fullName.trim();
-        return fullName || 'Kullanıcı';
-    }
-
-    get displayPlan(): string {
-        const inputPlan = this.plan.trim();
-        if (inputPlan) {
-            return inputPlan;
+        const profileName = this.authState.profile?.name?.trim() || '';
+        const profileLastName = this.authState.profile?.lastName?.trim() || this.authState.profile?.surname?.trim() || '';
+        const profileFullName = `${profileName} ${profileLastName}`.trim();
+        if (profileFullName) {
+            return profileFullName;
         }
 
-        return this.authState.activePlan?.planName?.trim() || 'Plan bilgisi yok';
+        const fullName = this.authState.fullName.trim();
+        return fullName || 'Kullanıcı';
     }
 
     get initials(): string {

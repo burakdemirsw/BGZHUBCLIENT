@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, HostListener, inject, OnInit} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import * as tablerIcons from '@ng-icons/tabler-icons';
 import * as tablerIconsFill from '@ng-icons/tabler-icons/fill';
@@ -37,8 +37,26 @@ export class App implements OnInit {
             .subscribe(data => {
                 if (data['title']) {
                     this.titleService.setTitle(data['title'] +
-                        ' | SellenticAI');
+                        ' | Nebim AI');
                 }
             });
+    }
+
+    @HostListener('document:keydown.escape', ['$event'])
+    onEscapePressed(event: Event): void {
+        const keyboardEvent = event as KeyboardEvent;
+        const openModals = Array.from(document.querySelectorAll('.modal.show')) as HTMLElement[];
+        if (!openModals.length) {
+            return;
+        }
+
+        const topModal = openModals[openModals.length - 1];
+        const closeButton = topModal.querySelector('button.btn-close') as HTMLButtonElement | null;
+        if (!closeButton) {
+            return;
+        }
+
+        keyboardEvent.preventDefault();
+        closeButton.click();
     }
 }

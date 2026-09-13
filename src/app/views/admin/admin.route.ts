@@ -22,7 +22,8 @@ import { ConversationTypesPage } from './conversation-types/conversation-types';
 import { MailSettingsPage } from './mail-settings/mail-settings';
 import { MenusPage } from './menus/menus';
 import { NetGsmSettingsPage } from './netgsm-settings/netgsm-settings';
-import { NebimQueriesPage } from './nebim-queries/nebim-queries';
+import { NebimQueriesPage } from '@/app/views/admin/nebim-queries/nebim-queries';
+import { NebimSchemaPage } from './nebim-schema/nebim-schema';
 import { PlansPage } from './plans/plans';
 import { PromptAiAssistantsPage } from './prompt-ai-assistants/prompt-ai-assistants';
 import { PromptsPage } from './prompts/prompts';
@@ -72,6 +73,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/nebim-queries',
         component: NebimQueriesPage,
         data: { title: 'Nebim Sorguları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/nebim-schema',
+        component: NebimSchemaPage,
+        data: { title: 'Nebim Schema' },
         canActivate: [AuthGuard],
     },
     {
