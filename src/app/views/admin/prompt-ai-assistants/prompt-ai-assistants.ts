@@ -8,6 +8,7 @@ import { PromptsService } from '@/app/core/services/prompts.service';
 import { PromptTypesService } from '@/app/core/services/prompt-types.service';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
+import { PagedResult } from '@/app/core/models/pagination.model';
 import { Prompt, PromptType, PromptAiAssistant, CreatePromptAiAssistantRequest, UpdatePromptAiAssistantRequest, UpdatePromptRequest } from '@/app/core/models/ai-assistant/prompt.models';
 import { AiAssistant } from '@/app/core/models/ai-assistant/ai-assistant.models';
 
@@ -76,17 +77,17 @@ export class PromptAiAssistantsPage implements OnInit {
     async loadInitialData(): Promise<void> {
         this.loading = true;
         try {
+            const companyId = this.getCompanyId() ?? '';
             const [promptsResp, assistantsResp, typesResp] = await Promise.all([
-                this.promptsService.getPaged({ companyId: this.authState.profile?.companyId ?? '', pageNumber: 1, pageSize: 10000 }),
-                this.aiProvidersService.getAssistantsPaged({ companyId: this.authState.profile?.companyId ?? '',    pageNumber: 1, pageSize: 10000 }),
-                this.promptTypesService.getPaged({ companyId: this.authState.profile?.companyId ?? '', pageNumber: 1, pageSize: 10000 }),
+                this.promptsService.getPaged({ companyId, pageNumber: 1, pageSize: 10000 }),
+                this.loadAssistantsResponse(companyId),
+                this.promptTypesService.getPaged({ companyId, pageNumber: 1, pageSize: 10000 }),
             ]);
-            const promptsData = promptsResp?.data;
-            const assistantsData = assistantsResp?.data;
-            const typesData = typesResp?.data;
-            this.prompts = this.extractArray(promptsData);
-            this.assistants = this.extractArray(assistantsData);
-            this.promptTypes = this.extractArray(typesData);
+            this.prompts = PagedResult.from<Prompt>(promptsResp).items;
+            this.assistants = assistantsResp
+                .filter(assistant => !assistant.isBlocked)
+                .sort((left, right) => (left.order ?? 0) - (right.order ?? 0));
+            this.promptTypes = PagedResult.from<PromptType>(typesResp).items;
         } catch (err) {
             console.error('LoadInitialData error:', err);
         } finally {
@@ -94,12 +95,111 @@ export class PromptAiAssistantsPage implements OnInit {
         }
     }
 
-    private extractArray(response: any): any[] {
-        if (Array.isArray(response)) return response;
-        if (response?.$values) return response.$values;
-        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
-        if (response?.items) return response.items;
-        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
+    private async loadAssistantsResponse(companyId: string): Promise<AiAssistant[]> {
+        if (companyId) {
+            const pagedResp = await this.aiProvidersService.getAssistantsPaged({
+                companyId,
+                pageNumber: 1,
+                pageSize: 10000,
+            });
+            const paged = PagedResult.from<AiAssistant>(pagedResp);
+            const pagedItems = this.extractArray<AiAssistant>(paged.items);
+            if (pagedItems.length > 0) {
+                return pagedItems;
+            }
+        }
+
+        const userId = this.getUserId();
+        if (userId) {
+            const response = await this.aiProvidersService.getAssistantsByUser(userId);
+            return this.extractArray<AiAssistant>(response?.data);
+        }
+
+        return [];
+    }
+
+    private getCompanyId(): string | null {
+        const fromAuth = this.authState.profile?.companyId;
+        if (fromAuth && this.isGuid(fromAuth) && !this.isEmptyGuid(fromAuth)) {
+            return fromAuth;
+        }
+
+        const fromUserProfile = this.getProfileFromStorage('userProfile')?.companyId;
+        if (fromUserProfile && this.isGuid(fromUserProfile) && !this.isEmptyGuid(fromUserProfile)) {
+            return fromUserProfile;
+        }
+
+        const fromAuthData = this.getProfileFromStorage('authData')?.companyId;
+        if (fromAuthData && this.isGuid(fromAuthData) && !this.isEmptyGuid(fromAuthData)) {
+            return fromAuthData;
+        }
+
+        return null;
+    }
+
+    private getUserId(): string | null {
+        const fromAuth = this.authState.profile?.userId;
+        if (fromAuth && this.isGuid(fromAuth) && !this.isEmptyGuid(fromAuth)) {
+            return fromAuth;
+        }
+
+        const fromUserProfile = this.getProfileFromStorage('userProfile')?.userId;
+        if (fromUserProfile && this.isGuid(fromUserProfile) && !this.isEmptyGuid(fromUserProfile)) {
+            return fromUserProfile;
+        }
+
+        const fromAuthData = this.getProfileFromStorage('authData')?.userId;
+        if (fromAuthData && this.isGuid(fromAuthData) && !this.isEmptyGuid(fromAuthData)) {
+            return fromAuthData;
+        }
+
+        return null;
+    }
+
+    private getProfileFromStorage(storageKey: string): { companyId?: string | null; userId?: string | null } | null {
+        try {
+            const raw = localStorage.getItem(storageKey);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw) as { companyId?: string | null; userId?: string | null };
+            return parsed && typeof parsed === 'object' ? parsed : null;
+        } catch {
+            return null;
+        }
+    }
+
+    private isGuid(value: string): boolean {
+        return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
+    }
+
+    private isEmptyGuid(value: string): boolean {
+        return value.toLowerCase() === '00000000-0000-0000-0000-000000000000';
+    }
+
+    private extractArray<T>(response: unknown): T[] {
+        if (Array.isArray(response)) return response as T[];
+
+        const valueMap = response as { $values?: unknown; data?: unknown; items?: unknown; result?: unknown };
+        if (Array.isArray(valueMap?.$values)) return valueMap.$values as T[];
+
+        if (valueMap?.items) {
+            if (Array.isArray(valueMap.items)) return valueMap.items as T[];
+            const nestedItems = valueMap.items as { $values?: unknown };
+            if (Array.isArray(nestedItems?.$values)) return nestedItems.$values as T[];
+        }
+
+        if (valueMap?.data) {
+            if (Array.isArray(valueMap.data)) return valueMap.data as T[];
+            const nestedData = valueMap.data as { $values?: unknown; items?: unknown };
+            if (Array.isArray(nestedData?.$values)) return nestedData.$values as T[];
+            if (Array.isArray(nestedData?.items)) return nestedData.items as T[];
+        }
+
+        if (valueMap?.result) {
+            if (Array.isArray(valueMap.result)) return valueMap.result as T[];
+            const nestedResult = valueMap.result as { $values?: unknown };
+            if (Array.isArray(nestedResult?.$values)) return nestedResult.$values as T[];
+        }
+
         return [];
     }
 
@@ -115,7 +215,7 @@ export class PromptAiAssistantsPage implements OnInit {
         this.loadingPrompts = true;
         try {
             const resp = await this.promptAiAssistantsService.getByAssistant(this.selectedAssistantId);
-            this.assistantPrompts = this.extractArray(resp?.data);
+            this.assistantPrompts = this.extractArray<PromptAiAssistant>(resp?.data);
         } catch (err) {
             console.error('LoadAssistantPrompts error:', err);
         } finally {

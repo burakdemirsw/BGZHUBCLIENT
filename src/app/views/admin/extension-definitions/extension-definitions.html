@@ -1,0 +1,149 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-puzzle-piece me-2"></i>Extension Tanimlari</h4>
+                <button class="btn btn-primary btn-sm" (click)="openCreate()">
+                    <i class="fa-solid fa-plus me-1"></i>Yeni Tanim
+                </button>
+            </div>
+            <div class="card-body page-surface">
+                <div class="d-flex mb-3">
+                    <input
+                        type="text"
+                        class="form-control form-control-sm w-auto"
+                        placeholder="Kod, ad, kategori, mention veya foto URL ara..."
+                        [(ngModel)]="filterText"
+                        (ngModelChange)="onFilterChange()">
+                </div>
+
+                @if (loading) {  
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yukleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Kod</th>
+                                    <th>Ad</th>
+                                    <th>Kategori</th>
+                                    <th>Mention</th>
+                                    <th>Gorsel</th>
+                                    <th class="text-center">Durum</th>
+                                    <th>Olusturma Tarihi</th>
+                                    <th class="text-end">Islemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of pagedItems; track item.id; let idx = $index) {
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">{{ (currentPage - 1) * pageSize + idx + 1 }}</span>
+                                        </td>
+                                        <td><code>{{ item.code }}</code></td>
+                                        <td><strong>{{ item.name }}</strong></td>
+                                        <td>{{ item.category }}</td>
+                                        <td><code>{{ item.mention || '-' }}</code></td>
+                                        <td>
+                                            @if (item.photoUrl) {
+                                                <img [src]="item.photoUrl" alt="{{ item.name }}" class="extension-thumb" />
+                                            } @else {
+                                                <span class="small text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            @if (item.isActive) {
+                                                <span class="badge bg-success-subtle text-success">Aktif</span>
+                                            } @else {
+                                                <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                            }
+                                        </td>
+                                        <td class="small text-muted">{{ item.createdDate | date:'dd.MM.yyyy HH:mm' }}</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(item)">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </button>
+                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteItem(item)">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="9" class="text-center text-muted">Kayit bulunamadi.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="small text-muted">Toplam: {{ filteredItems.length }} kayit</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track $index) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (showModal) {
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ editMode ? 'Tanim Duzenle' : 'Yeni Tanim' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Kod</label>
+                            <input type="text" class="form-control" [(ngModel)]="form.code" name="code" [readonly]="editMode" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ad</label>
+                            <input type="text" class="form-control" [(ngModel)]="form.name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Kategori</label>
+                            <input type="text" class="form-control" [(ngModel)]="form.category" name="category" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mention</label>
+                            <input type="text" class="form-control" [(ngModel)]="form.mention" name="mention" placeholder="@nebim gibi mention değeri">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Foto URL</label>
+                            <input type="text" class="form-control" [(ngModel)]="form.photoUrl" name="photoUrl" placeholder="https://...">
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" [(ngModel)]="form.isActive" name="isActive" id="isActiveSwitch">
+                            <label class="form-check-label" for="isActiveSwitch">Aktif</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Iptal</button>
+                    <button type="button" class="btn btn-primary" (click)="save()">{{ editMode ? 'Guncelle' : 'Kaydet' }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

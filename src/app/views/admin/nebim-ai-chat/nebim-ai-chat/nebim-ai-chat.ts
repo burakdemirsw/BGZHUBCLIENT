@@ -7,7 +7,10 @@ import { ChatHistoryEntry, SidebarComponent } from '../sidebar/sidebar';
 import { ConversationsService } from '@/app/core/services/conversations.service';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
+import { ExtensionManagementService } from '@/app/core/services/extension-management.service';
 import { AiAssistant } from '@/app/core/models/ai-assistant/ai-assistant.models';
+import { CompanyExtension } from '@/app/core/models/extension/company-extension.models';
+import { ExtensionDefinition } from '@/app/core/models/extension/extension-definition.models';
 import {
     AiChatContentBlock,
     AiChatImageData,
@@ -29,6 +32,7 @@ interface UiChatMessage {
     role: 'user' | 'assistant';
     content: string;
     createdAt: Date;
+    mentions?: MentionChipItem[];
     blocks?: AiChatContentBlock[];
     isError?: boolean;
     hasImage?: boolean;
@@ -76,16 +80,27 @@ interface StoredUserProfile {
     lastName?: string;
 }
 
-interface SuggestionItem {
-    title: string;
-    subtitle: string;
-    prompt: string;
-    category: string;
-}
-
 interface ConversationPageResult {
     conversations: ConversationHeader[];
     totalCount: number;
+}
+
+interface ActiveExtensionShortcut {
+    id: string;
+    name: string;
+    mention: string;
+    category: string;
+    subtitle: string;
+    prompt: string;
+    isEnabled: boolean;
+    photoUrl?: string;
+}
+
+interface MentionChipItem {
+    id: string;
+    name: string;
+    mention: string;
+    photoUrl?: string;
 }
 
 @Component({
@@ -109,6 +124,12 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     assistants: AiAssistant[] = [];
     selectedAssistantId = '';
     assistantMenuOpen = false;
+    extensionMenuOpen = false;
+    mentionAutocompleteQuery: string | null = null;
+    extensionMenuFilterText = '';
+    isLoadingExtensions = false;
+    activeExtensionShortcuts: ActiveExtensionShortcut[] = [];
+    selectedMentionChips: MentionChipItem[] = [];
     isSending = false;
     isLoadingThread = false;
     sidebarCollapsed = false;
@@ -118,67 +139,84 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     errorMessage = '';
 
     private shouldScroll = false;
+    /**
+     * Bu sayfadan yeni baslatilan sohbetin id'si. Route degisimi tetiklendiginde
+     * backend henuz ilk mesaji kaydetmedigi icin getMessages bos donuyor ve
+     * optimistic mesajlar siliniyordu. Bu id icin route kaynakli yukleme atlanir.
+     */
+    private locallyStartedConversationId: string | null = null;
+    private assistantWaitConversationId: string | null = null;
+    private extensionMenuOpenedByMention = false;
     private sidebarOpenedManually = false;
     private sidebarCurrentPage = 1;
     private readonly sidebarPageSize = 20;
     private routeConversationSub: Subscription | null = null;
     private viewportSyncCleanup: (() => void) | null = null;
 
-    readonly suggestions: SuggestionItem[] = [
-        {
-            title: 'Sipariş',
-            subtitle: 'Sipariş durumu, hazırlık adımları ve iptal sürecini hızlıca sorgula.',
-            prompt: 'Sipariş durumunu ve son işlem adımlarını getir.',
-            category: 'Operasyon'
+    private readonly extensionContentByKey: Record<string, { category: string; title: string; subtitle: string; prompt: string; order: number }> = {
+        siparis: {
+            category: 'Operasyon',
+            title: 'Siparis',
+            subtitle: 'Siparis durumu, hazirlik adimlari ve iptal surecini hizlica sorgula.',
+            prompt: 'Siparis durumunu ve son islem adimlarini getir.',
+            order: 1,
         },
-        {
+        fatura: {
+            category: 'Finans',
             title: 'Fatura',
-            subtitle: 'Faturalandırma, iade faturaları ve tahsilat kalemlerini incele.',
-            prompt: 'Fatura özetini ve açık kalan kayıtları listeler misin?',
-            category: 'Finans'
+            subtitle: 'Faturalandirma, iade faturalari ve tahsilat kalemlerini incele.',
+            prompt: 'Fatura ozetini ve acik kalan kayitlari listeler misin?',
+            order: 2,
         },
-        {
+        sevkiyat: {
+            category: 'Lojistik',
             title: 'Sevkiyat',
-            subtitle: 'Kargo hazırlık, teslimat ve gecikme nedenlerini tek noktadan gör.',
-            prompt: 'Sevkiyat durumunu ve teslimat performansını özetle.',
-            category: 'Lojistik'
+            subtitle: 'Kargo hazirlik, teslimat ve gecikme nedenlerini tek noktadan gor.',
+            prompt: 'Sevkiyat durumunu ve teslimat performansini ozetle.',
+            order: 3,
         },
-        {
+        transfer: {
+            category: 'Depo',
             title: 'Transfer',
-            subtitle: 'Depolar arası transfer talepleri ve onay bekleyen hareketleri yönet.',
-            prompt: 'Transfer taleplerini ve bekleyen onayları getir.',
-            category: 'Depo'
+            subtitle: 'Depolar arasi transfer talepleri ve onay bekleyen hareketleri yonet.',
+            prompt: 'Transfer taleplerini ve bekleyen onaylari getir.',
+            order: 4,
         },
-        {
-            title: 'Müşteri',
-            subtitle: 'Müşteri geçmişi, iletişim kayıtları ve son alışveriş trendini analiz et.',
-            prompt: 'Müşteri geçmişini ve son etkileşim notlarını göster.',
-            category: 'CRM'
+        musteri: {
+            category: 'CRM',
+            title: 'Musteri',
+            subtitle: 'Musteri gecmisi, iletisim kayitlari ve son alisveris trendini analiz et.',
+            prompt: 'Musteri gecmisini ve son etkilesim notlarini goster.',
+            order: 5,
         },
-        {
-            title: 'Ürün',
-            subtitle: 'Ürün kartı detayları, varyant bilgileri ve katalog metinlerini sorgula.',
-            prompt: 'Ürün bilgilerini ve varyant detaylarını listeler misin?',
-            category: 'Katalog'
+        urun: {
+            category: 'Katalog',
+            title: 'Urun',
+            subtitle: 'Urun karti detaylari, varyant bilgileri ve katalog metinlerini sorgula.',
+            prompt: 'Urun bilgilerini ve varyant detaylarini listeler misin?',
+            order: 6,
         },
-        {
+        stok: {
+            category: 'Envanter',
             title: 'Stok',
-            subtitle: 'Anlık stok, kritik seviye uyarıları ve devir hızını karşılaştır.',
-            prompt: 'Stok seviyelerini ve kritik ürünleri raporla.',
-            category: 'Envanter'
+            subtitle: 'Anlik stok, kritik seviye uyarilari ve devir hizini karsilastir.',
+            prompt: 'Stok seviyelerini ve kritik urunleri raporla.',
+            order: 7,
         },
-        {
+        wms: {
+            category: 'Warehouse',
             title: 'WMS',
-            subtitle: 'Toplama, yerleştirme, sayım ve lokasyon verimliliğini takip et.',
-            prompt: 'WMS operasyon durumunu ve lokasyon verimliliğini paylaş.',
-            category: 'Warehouse'
-        }
-    ];
+            subtitle: 'Toplama, yerlestirme, sayim ve lokasyon verimliligini takip et.',
+            prompt: 'WMS operasyon durumunu ve lokasyon verimliligini paylas.',
+            order: 8,
+        },
+    };
 
     constructor(
         private conversationsService: ConversationsService,
         private aiProvidersService: AiProvidersService,
         private authState: AuthStateService,
+        private extensionManagementService: ExtensionManagementService,
         private router: Router,
         private route: ActivatedRoute,
         private hostRef: ElementRef<HTMLElement>,
@@ -187,7 +225,12 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     async ngOnInit(): Promise<void> {
         this.startViewportSync();
 
-        await Promise.all([this.loadSidebar(), this.loadConversationList(), this.loadAssistants()]);
+        await Promise.all([
+            this.loadSidebar(),
+            this.loadConversationList(),
+            this.loadAssistants(),
+            this.loadActiveExtensionShortcuts(),
+        ]);
 
         await this.syncConversationFromRoute(this.route.snapshot.paramMap.get('conversationId'));
         this.routeConversationSub = this.route.paramMap.subscribe((paramMap) => {
@@ -251,7 +294,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
             window.removeEventListener('orientationchange', applyViewportMetrics);
         };
     }
-
+  
     private isMobileViewport(): boolean {
         return typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
     }
@@ -264,12 +307,16 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     }
 
     get selectedAssistantLabel(): string {
-        if (!this.selectedAssistantId) {
-            return 'Otomatik';
+        const selectedAssistant = this.assistants.find((assistant) => assistant.id === this.selectedAssistantId);
+        if (selectedAssistant?.name?.trim()) {
+            return selectedAssistant.name.trim();
         }
 
-        const selectedAssistant = this.assistants.find((assistant) => assistant.id === this.selectedAssistantId);  
-        return selectedAssistant?.name?.trim() || 'Otomatik';
+        if (this.assistants.length > 0) {
+            return this.assistants[0].name?.trim() || 'Asistan sec';
+        }
+
+        return 'Asistan sec';
     }
 
     toggleAssistantMenu(): void {
@@ -281,20 +328,242 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         this.assistantMenuOpen = false;
     }
 
+    onExtensionShortcutClick(): void {
+        if (this.isLoadingExtensions) return;
+
+        const enabledShortcuts = this.getEnabledExtensionShortcuts();
+        if (!enabledShortcuts.length) {
+            this.errorMessage = 'Aktif extension bulunamadi.';
+            return;
+        }
+
+        if (enabledShortcuts.length === 1) {
+            this.insertMentionToInput(enabledShortcuts[0].mention, enabledShortcuts[0]);
+            return;
+        }
+
+        this.extensionMenuOpen = !this.extensionMenuOpen;
+        if (this.extensionMenuOpen) {
+            this.mentionAutocompleteQuery = null;
+            this.extensionMenuFilterText = '';
+            this.extensionMenuOpenedByMention = false;
+            this.assistantMenuOpen = false;
+        }
+    }
+
+    selectExtensionShortcut(shortcut: ActiveExtensionShortcut): void {
+        if (!shortcut.isEnabled) {
+            this.errorMessage = 'Bu extension pasif durumda oldugu icin secilemez.';
+            return;
+        }
+        this.insertMentionToInput(shortcut.mention, shortcut);
+        this.extensionMenuOpen = false;
+        this.extensionMenuOpenedByMention = false;
+    }
+
+    useExtensionShortcutCard(shortcut: ActiveExtensionShortcut): void {
+        if (!shortcut.isEnabled) {
+            this.errorMessage = `${shortcut.name} su anda pasif durumda.`;
+            return;
+        }
+
+        this.insertMentionToInput(shortcut.mention, shortcut);
+        if (!this.input.includes(shortcut.prompt)) {
+            const base = this.input.trimEnd();
+            this.input = `${base} ${shortcut.prompt}`.trim();
+        }
+
+        setTimeout(() => {
+            this.textArea?.nativeElement.focus();
+            this.autoResize();
+        }, 0);
+    }
+
+    hasExtensionShortcuts(): boolean {
+        return this.getEnabledExtensionShortcuts().length > 0;
+    }
+
+    isSingleExtensionShortcut(): boolean {
+        return this.getEnabledExtensionShortcuts().length === 1;
+    }
+
+    private getEnabledExtensionShortcuts(): ActiveExtensionShortcut[] {
+        return this.activeExtensionShortcuts.filter(item => item.isEnabled);
+    }
+
+    get filteredExtensionShortcuts(): ActiveExtensionShortcut[] {
+        const enabledShortcuts = this.getEnabledExtensionShortcuts();
+        const autocompleteQuery = this.mentionAutocompleteQuery;
+        const manualFilterQuery = this.toLookupKey(this.extensionMenuFilterText);
+        const query = autocompleteQuery !== null ? autocompleteQuery : manualFilterQuery;
+
+        if (query === null) {
+            return enabledShortcuts;
+        }
+
+        if (!query) {
+            return enabledShortcuts;
+        }
+
+        return enabledShortcuts.filter(item => {
+            const mentionKey = this.toLookupKey((item.mention || '').replace('@', ''));
+            const nameKey = this.toLookupKey(item.name || '');
+            return mentionKey.includes(query) || nameKey.includes(query);
+        });
+    }
+
+    onExtensionMenuFilterInput(): void {
+        if (!this.extensionMenuOpen) {
+            return;
+        }
+
+        this.mentionAutocompleteQuery = null;
+    }
+
+    private insertMentionToInput(mention: string, shortcut?: ActiveExtensionShortcut): void {
+        const token = this.normalizeMention(mention);
+        if (!token) {
+            this.errorMessage = 'Bu extension icin mention tanimi bulunamadi.';
+            return;
+        }
+
+        if (!shortcut) {
+            this.errorMessage = 'Mention secimi icin extension bulunamadi.';
+            return;
+        }
+
+        if (this.selectedMentionChips.some(item => item.id === shortcut.id || item.mention === token)) {
+            this.errorMessage = `${token} zaten secili.`;
+            return;
+        }
+
+        this.selectedMentionChips = [
+            ...this.selectedMentionChips,
+            {
+                id: shortcut.id,
+                name: shortcut.name,
+                mention: token,
+                photoUrl: shortcut.photoUrl,
+            },
+        ];
+        this.errorMessage = '';
+
+        setTimeout(() => {
+            this.textArea?.nativeElement.focus();
+            this.autoResize();
+        }, 0);
+    }
+
+    private normalizeMention(mention: string | null | undefined): string {
+        const raw = (mention || '').trim();
+        if (!raw) return '';
+        return raw.startsWith('@') ? raw : `@${raw}`;
+    }
+
+    removeMentionChip(chip: MentionChipItem): void {
+        this.selectedMentionChips = this.selectedMentionChips.filter(item => item.id !== chip.id);
+        this.autoResize();
+    }
+
+    private getSelectedMentionTokens(): string[] {
+        return Array.from(new Set(this.selectedMentionChips.map(item => this.normalizeMention(item.mention)).filter(Boolean)));
+    }
+
     isAssistantSelected(assistantId: string): boolean {
         return this.selectedAssistantId === assistantId;
     }
 
     @HostListener('document:click', ['$event'])
     onDocumentClick(event: MouseEvent): void {
-        if (!this.assistantMenuOpen) return;
-
         const target = event.target as HTMLElement | null;
         if (!target) return;
 
-        if (!target.closest('.nac-assistant-picker')) {
+        if (this.assistantMenuOpen && !target.closest('.nac-assistant-picker')) {
             this.assistantMenuOpen = false;
         }
+
+        if (this.extensionMenuOpen && !target.closest('.nac-extension-picker')) {
+            this.extensionMenuOpen = false;
+            this.extensionMenuOpenedByMention = false;
+            this.mentionAutocompleteQuery = null;
+        }
+    }
+
+    private async loadActiveExtensionShortcuts(): Promise<void> {
+        const companyId = this.getCompanyId();
+        if (!companyId) {
+            this.activeExtensionShortcuts = [];
+            return;
+        }
+
+        this.isLoadingExtensions = true;
+        try {
+            const [companyExtensionsResponse, definitionsResponse] = await Promise.all([
+                this.extensionManagementService.getCompanyExtensions(companyId),
+                this.extensionManagementService.getExtensionDefinitions(),
+            ]);
+
+            const companyExtensions = this.extractArray<CompanyExtension>(companyExtensionsResponse?.data)
+                .filter(item => !item.isBlocked);
+            const definitions = this.extractArray<ExtensionDefinition>(definitionsResponse?.data)
+                .filter(item => item.isActive && !item.isBlocked);
+
+            this.activeExtensionShortcuts = companyExtensions
+                .map(item => {
+                    const definition = definitions.find(def => def.id === item.extensionId);
+                    if (!definition?.mention) return null;
+
+                    const content = this.getExtensionContent(definition.name, definition.mention);
+
+                    return {
+                        id: item.extensionId,
+                        name: content.title || definition.name || item.extensionName || 'Extension',
+                        mention: definition.mention,
+                        category: content.category,
+                        subtitle: content.subtitle,
+                        prompt: content.prompt,
+                        isEnabled: item.isEnabled,
+                        photoUrl: definition.photoUrl || item.photoUrl,
+                    } as ActiveExtensionShortcut;
+                })
+                .filter((item): item is ActiveExtensionShortcut => item !== null)
+                .sort((a, b) => {
+                    if (a.isEnabled !== b.isEnabled) {
+                        return a.isEnabled ? -1 : 1;
+                    }
+                    return this.getContentOrder(a) - this.getContentOrder(b);
+                });
+        } catch (err) {
+            console.error('[NebimAiChat] Extension kisayollari yuklenemedi:', err);
+            this.activeExtensionShortcuts = [];
+        } finally {
+            this.isLoadingExtensions = false;
+        }
+    }
+
+    private getExtensionContent(name: string | null | undefined, mention: string | null | undefined): { category: string; title: string; subtitle: string; prompt: string; order: number } {
+        const mentionKey = this.toLookupKey((mention || '').replace('@', ''));
+        const nameKey = this.toLookupKey(name || '');
+        return this.extensionContentByKey[mentionKey] || this.extensionContentByKey[nameKey] || {
+            category: 'Genel',
+            title: name || 'Extension',
+            subtitle: 'Bu extension ile ilgili sorularinizi mention ekleyerek sorabilirsiniz.',
+            prompt: 'Bu extension ile ilgili guncel bilgileri paylas.',
+            order: 99,
+        };
+    }
+
+    private getContentOrder(item: ActiveExtensionShortcut): number {
+        const key = this.toLookupKey((item.mention || '').replace('@', ''));
+        return this.extensionContentByKey[key]?.order ?? 99;
+    }
+
+    private toLookupKey(value: string): string {
+        return (value || '')
+            .toLowerCase()
+            .trim()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
     }
 
     useSuggestion(text: string): void {
@@ -312,6 +581,23 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         this.send();
     }
 
+    onComposerTab(event: Event): void {
+        const keyboardEvent = event as KeyboardEvent;
+        if (!this.extensionMenuOpen || !this.extensionMenuOpenedByMention) {
+            return;
+        }
+
+        const suggestion = this.filteredExtensionShortcuts[0];
+        if (!suggestion) {
+            return;
+        }
+
+        keyboardEvent.preventDefault();
+        this.selectExtensionShortcut(suggestion);
+        this.removeCurrentMentionTokenFromInput();
+        this.onComposerInput();
+    }
+
     autoResize(): void {
         const el = this.textArea?.nativeElement;
         if (!el) return;
@@ -321,11 +607,69 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
 
     onComposerInput(): void {
         this.autoResize();
+        this.updateMentionAutocompleteMenu();
 
         if (this.input.length > 0 && !this.sidebarOpenedManually && !this.isMobileViewport()) {
             this.sidebarCollapsed = true;
             this.sidebarMobileOpen = false;
         }
+    }
+
+    private updateMentionAutocompleteMenu(): void {
+        const query = this.extractMentionQueryAtCaret();
+        this.mentionAutocompleteQuery = query;
+
+        if (query === null) {
+            if (this.extensionMenuOpenedByMention) {
+                this.extensionMenuOpen = false;
+                this.extensionMenuOpenedByMention = false;
+            }
+            return;
+        }
+
+        const suggestions = this.filteredExtensionShortcuts;
+        if (!suggestions.length) {
+            if (this.extensionMenuOpenedByMention) {
+                this.extensionMenuOpen = false;
+                this.extensionMenuOpenedByMention = false;
+            }
+            return;
+        }
+
+        this.extensionMenuOpen = true;
+        this.extensionMenuOpenedByMention = true;
+        this.assistantMenuOpen = false;
+    }
+
+    private extractMentionQueryAtCaret(): string | null {
+        const el = this.textArea?.nativeElement;
+        const cursor = el?.selectionStart ?? this.input.length;
+        const inputBeforeCursor = this.input.slice(0, cursor);
+        const match = inputBeforeCursor.match(/(^|\s)@([^\s@]*)$/);
+
+        if (!match) {
+            return null;
+        }
+
+        return this.toLookupKey(match[2] || '');
+    }
+
+    private removeCurrentMentionTokenFromInput(): void {
+        const el = this.textArea?.nativeElement;
+        const cursor = el?.selectionStart ?? this.input.length;
+        const before = this.input.slice(0, cursor);
+        const after = this.input.slice(cursor);
+        const nextBefore = before.replace(/(^|\s)@[^\s@]*$/, '$1');
+        this.input = `${nextBefore}${after}`;
+
+        setTimeout(() => {
+            const textArea = this.textArea?.nativeElement;
+            if (!textArea) return;
+            const nextCursor = nextBefore.length;
+            textArea.focus();
+            textArea.setSelectionRange(nextCursor, nextCursor);
+            this.autoResize();
+        }, 0);
     }
 
     send(): void {
@@ -336,21 +680,38 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         const content = this.input.trim();
         if (!content || this.isSending) return;
 
+        const mentionTokens = this.getSelectedMentionTokens();
+        if (!mentionTokens.length) {
+            this.errorMessage = 'Mesaj gonderebilmek icin en az bir mention eklemelisiniz (orn: @nebim).';
+            return;
+        }
+
+        const outgoingContent = `${mentionTokens.join(' ')} ${content}`.trim();
+
         // 1) Aktif sohbet yoksa yeni sohbet oluştur
         if (!this.activeConversationId) {
             const created = await this.ensureConversation();
             if (!created) return;
             this.activeConversationId = created;
+            this.locallyStartedConversationId = created;
             await this.navigateToConversation(created);
         }
 
         const conversationId = this.activeConversationId!;
+        const optimisticMentions = this.selectedMentionChips.map((chip) => ({ ...chip }));
 
         // 2) UI'a kullanıcı mesajını optimistic ekle
         this.messages = [
             ...this.messages,
-            { id: this.uid(), role: 'user', content, createdAt: new Date() }
+            {
+                id: this.uid(),
+                role: 'user',
+                content,
+                createdAt: new Date(),
+                mentions: optimisticMentions,
+            }
         ];
+        this.selectedMentionChips = [];
         this.input = '';
         this.isSending = true;
         this.errorMessage = '';
@@ -372,7 +733,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
             // 3) Conversations/{conversationId}/reply ile kullanıcı + AI akışını tek istekte çalıştır
             const replyRequest: ConversationReplyRequest = {
                 companyId,
-                message: content,
+                message: outgoingContent,
                 assistantId: this.selectedAssistantId || null,
                 file: null,
                 fileType: null,
@@ -382,13 +743,20 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
             // 4) Sohbet listesini yenile
             await this.loadConversationList();
 
-            // 5) Endpoint güncel konuşma detayını döndürür; tek kaynak bu response olmalı
-            if (!replyRes.isSuccess || !replyRes.data) {
+            if (!replyRes.isSuccess) {
                 this.errorMessage = 'AI yanıtı alınamadı. Lütfen tekrar deneyin.';
                 return;
             }
 
-            this.applyConversationReplyResponse(replyRes.data);
+            if (replyRes.data) {
+                this.applyConversationReplyResponse(replyRes.data);
+            }
+
+            // Backend ilk yaniti asenkron uretebiliyor; F5 gerektirmemesi icin
+            // kisa sureli messages polling fallback'i uygula.
+            if (this.isAwaitingAssistantReply(this.messages)) {
+                await this.waitForAssistantMessage(conversationId);
+            }
         } catch (err) {
             console.error('[NebimAiChat] Mesaj gönderilemedi:', err);
             this.errorMessage = 'Mesaj gönderilemedi. Lütfen tekrar deneyin.';
@@ -584,16 +952,30 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         this.errorMessage = '';
         try {
             const res = await this.conversationsService.getMessages(conversationId);
-            if (res.data) {
-                this.applyConversationMessagesResponse(res.data);
-            } else {
-                this.messages = [];
+
+            // Yanit geldiginde kullanici baska bir sohbete gecmis olabilir.
+            if (this.activeConversationId !== conversationId) {
+                return;
             }
+
+            const loaded = res.data ? this.mapConversationMessages(res.data) : [];
+
+            // Bos yanit gelirse ekrandaki optimistic mesajlari silme.
+            if (loaded.length === 0 && this.messages.length > 0) {
+                return;
+            }
+
+            this.messages = loaded;
             this.shouldScroll = true;
+
+            // Sayfa yenileme gibi durumlarda thread ilk etapta sadece kullanici mesaji
+            // donebilir; AI mesaji gelene kadar kisa sureli takip et.
+            if (this.isAwaitingAssistantReply(this.messages)) {
+                void this.waitForAssistantMessage(conversationId);
+            }
         } catch (err) {
             console.error('[NebimAiChat] Thread yüklenemedi:', err);
             this.errorMessage = 'Sohbet mesajları yüklenemedi.';
-            this.messages = [];
         } finally {
             this.isLoadingThread = false;
         }
@@ -968,12 +1350,14 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     private toUiChatMessage(message: ConversationApiMessage): UiChatMessage {
         const blocks = this.normalizeMessageBlocks(message);
         const content = this.resolveMessageText(message);
+        const mentions = this.extractMessageMentions(content);
 
         return {
             id: message.id ?? this.uid(),
             role: this.resolveRole(message),
             content,
             createdAt: message.createdDate ? new Date(message.createdDate) : new Date(),
+            mentions,
             blocks,
             isError: false,
             hasImage: Boolean(message.hasImage),
@@ -983,6 +1367,39 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
             isLiked: this.resolveReactionValue(message),
             isReactionSaving: false,
         };
+    }
+
+    private extractMessageMentions(content: string | null | undefined): MentionChipItem[] {
+        const text = (content || '').trim();
+        if (!text) {
+            return [];
+        }
+
+        const tokens: string[] = [];
+        const tokenRegex = /(^|\s)@([^\s@]+)/g;
+        let match: RegExpExecArray | null = null;
+
+        while ((match = tokenRegex.exec(text)) !== null) {
+            const token = this.normalizeMention(match[2]);
+            if (!token || tokens.includes(token)) {
+                continue;
+            }
+
+            tokens.push(token);
+        }
+
+        return tokens.map((token) => {
+            const relatedExtension = this.activeExtensionShortcuts.find(
+                (item) => this.normalizeMention(item.mention) === token,
+            );
+
+            return {
+                id: relatedExtension?.id || token,
+                name: relatedExtension?.name || token.replace('@', ''),
+                mention: token,
+                photoUrl: relatedExtension?.photoUrl,
+            };
+        });
     }
 
     private resolveReactionValue(message: ConversationApiMessage): boolean | null {
@@ -1050,8 +1467,74 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     }
 
     private applyConversationMessagesResponse(response: ConversationMessagesResponse): void {
-        const list = this.extractConversationMessages(response);
-        this.messages = list
+        const mapped = this.mapConversationMessages(response);
+
+        // Bos yanit ekrandaki mevcut mesajlari silmemeli.
+        if (mapped.length === 0 && this.messages.length > 0) {
+            return;
+        }
+
+        this.messages = mapped;
+    }
+
+    private isAwaitingAssistantReply(messages: UiChatMessage[]): boolean {
+        if (messages.length === 0) {
+            return false;
+        }
+
+        const lastMessage = messages[messages.length - 1];
+        return lastMessage.role === 'user';
+    }
+
+    private async waitForAssistantMessage(conversationId: string): Promise<void> {
+        if (this.assistantWaitConversationId === conversationId) {
+            return;
+        }
+
+        this.assistantWaitConversationId = conversationId;
+        const maxAttempts = 12;
+        const attemptDelayMs = 800;
+
+        try {
+            for (let attempt = 0; attempt < maxAttempts; attempt++) {
+                if (this.activeConversationId !== conversationId) {
+                    return;
+                }
+
+                const res = await this.conversationsService.getMessages(conversationId);
+                if (!res.isSuccess || !res.data) {
+                    await this.sleep(attemptDelayMs);
+                    continue;
+                }
+
+                const loadedMessages = this.mapConversationMessages(res.data);
+                if (loadedMessages.length > 0) {
+                    this.messages = loadedMessages;
+                    this.shouldScroll = true;
+                }
+
+                if (!this.isAwaitingAssistantReply(loadedMessages)) {
+                    this.errorMessage = '';
+                    return;
+                }
+
+                await this.sleep(attemptDelayMs);
+            }
+        } catch (err) {
+            console.warn('[NebimAiChat] AI yaniti takip edilirken hata olustu:', err);
+        } finally {
+            if (this.assistantWaitConversationId === conversationId) {
+                this.assistantWaitConversationId = null;
+            }
+        }
+    }
+
+    private sleep(ms: number): Promise<void> {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    private mapConversationMessages(response: ConversationMessagesResponse): UiChatMessage[] {
+        return this.extractConversationMessages(response)
             .filter((message) => {
                 const content = this.resolveMessageText(message);
                 const blocks = this.normalizeMessageBlocks(message);
@@ -1194,6 +1677,16 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
             return;
         }
 
+        // Sohbet bu sayfadan yeni baslatildiysa sunucudan yuklemeye gerek yok;
+        // guncel icerik reply yanitindan gelecek.
+        if (this.locallyStartedConversationId === routeConversationId) {
+            this.activeConversationId = routeConversationId;
+            return;
+        }
+
+        // Baska bir sohbete gecildiginde "yeni baslatildi" isareti gecerliligini yitirir.
+        this.locallyStartedConversationId = null;
+
         this.activeConversationId = routeConversationId;
         await this.loadThread(routeConversationId);
     }
@@ -1202,6 +1695,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         this.messages = [];
         this.input = '';
         this.activeConversationId = null;
+        this.locallyStartedConversationId = null;
         this.errorMessage = '';
     }
 

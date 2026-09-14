@@ -1,0 +1,264 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-list-check me-2"></i>Extension Setting Key Tanimlari</h4>
+                <button class="btn btn-primary btn-sm" (click)="openCreate()" [disabled]="!selectedExtensionId">
+                    <i class="fa-solid fa-plus me-1"></i>Yeni Key
+                </button>
+            </div>
+            <div class="card-body page-surface">
+                @if (loading && !definitions.length) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yukleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="d-flex mb-3">
+                        <input
+                            type="text"
+                            class="form-control form-control-sm w-auto extension-filter-input"
+                            placeholder="Extension ara..."
+                            [(ngModel)]="extensionFilterText">
+                    </div>
+
+                    <div class="category-section">
+                        <div class="category-title">Extension Secimi</div>
+                        @for (group of groupedFilteredDefinitions; track group.category) {
+                            <div class="extension-category-group">
+                                <div class="extension-category-title">{{ group.category }}</div>
+                                <div class="row g-3">
+                                    @for (extension of group.items; track extension.id) {
+                                        <div class="col-12 col-md-6 col-xl-4">
+                                            <button
+                                                class="extension-box text-start"
+                                                [class.is-selected]="isExtensionSelected(extension.id)"
+                                                (click)="selectExtension(extension.id)">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="thumb-wrap">
+                                                        @if (getExtensionPhotoUrl(extension)) {
+                                                            <img [src]="getExtensionPhotoUrl(extension)" [alt]="extension.name" class="extension-thumb" />
+                                                        } @else {
+                                                            <div class="extension-thumb extension-thumb-fallback">
+                                                                <i class="fa-solid fa-puzzle-piece"></i>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                    <div class="flex-grow-1 min-w-0">
+                                                        <h5 class="mb-1 extension-title">{{ extension.name }}</h5>
+                                                        <div class="small text-muted mb-1">{{ extension.code }}</div>
+                                                        <div class="d-flex gap-2 flex-wrap">
+                                                            <span class="badge bg-primary-subtle text-primary">{{ extension.category || 'Genel' }}</span>
+                                                            @if (extension.mention) {
+                                                                <span class="badge bg-success-subtle text-success">{{ extension.mention }}</span>
+                                                            }
+                                                            <span class="badge" [class.bg-success-subtle]="extension.isActive" [class.text-success]="extension.isActive" [class.bg-danger-subtle]="!extension.isActive" [class.text-danger]="!extension.isActive">
+                                                                {{ extension.isActive ? 'Aktif' : 'Pasif' }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        } @empty {
+                            <div class="col-12 text-center text-muted py-4">Extension bulunamadi.</div>
+                        }
+                    </div>
+
+                    <div class="key-list-surface mt-3">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                            <div>
+                                <h5 class="mb-0">{{ selectedExtensionName }} Key Listesi</h5>
+                                <div class="small text-muted">Secili extension icin setting key tanimlari</div>
+                            </div>
+                            <div class="key-search-wrap">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Key, gorunen ad, input tipi, placeholder veya default deger ara..."
+                                    [(ngModel)]="filterText"
+                                    (ngModelChange)="onFilterChange()">
+                            </div>
+                        </div>
+
+                        @if (loading) {
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <p class="mt-2 text-muted">Yukleniyor...</p>
+                            </div>
+                        } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Key</th>
+                                    <th>Gorunen Ad</th>
+                                    <th>Input Tipi</th>
+                                    <th class="text-center">Zorunlu</th>
+                                    <th>Placeholder</th>
+                                    <th>Default</th>
+                                    <th>Sira</th>
+                                    <th class="text-center">Durum</th>
+                                    <th class="text-end">Islemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of pagedItems; track item.id; let idx = $index) {
+                                    <tr>
+                                        <td><span class="badge bg-primary-subtle text-primary">{{ (currentPage - 1) * pageSize + idx + 1 }}</span></td>
+                                        <td>
+                                            <div class="setting-key-cell">
+                                                <code>{{ item.key }}</code>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-soft-primary btn-sm setting-key-copy"
+                                                    (click)="copyKey(item)">
+                                                    Copy
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td><strong>{{ item.displayName }}</strong></td>
+                                        <td>{{ item.inputType }}</td>
+                                        <td class="text-center">
+                                            @if (item.isRequired) {
+                                                <span class="badge bg-danger-subtle text-danger">Evet</span>
+                                            } @else {
+                                                <span class="badge bg-secondary-subtle text-secondary">Hayir</span>
+                                            }
+                                        </td>
+                                        <td class="small text-muted">{{ item.placeholder || '-' }}</td>
+                                        <td class="small text-muted">{{ item.defaultValue || '-' }}</td>
+                                        <td>{{ item.sortOrder }}</td>
+                                        <td class="text-center">
+                                            @if (item.isActive) {
+                                                <span class="badge bg-success-subtle text-success">Aktif</span>
+                                            } @else {
+                                                <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(item)">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </button>
+                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteItem(item)">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="10" class="text-center text-muted">Kayit bulunamadi.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="small text-muted">Toplam: {{ filteredItems.length }} kayit</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track $index) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (showModal) {
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ editMode ? 'Key Duzenle' : 'Yeni Key' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Extension</label>
+                                <select class="form-select" [(ngModel)]="form.extensionId" name="extensionId" [disabled]="editMode" required>
+                                    <option value="">Seciniz...</option>
+                                    @for (extension of definitions; track extension.id) {
+                                        <option [value]="extension.id">{{ extension.name }}</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Input Tipi</label>
+                                <select class="form-select" [(ngModel)]="form.inputType" name="inputType" required>
+                                    @for (inputType of inputTypeOptions; track inputType) {
+                                        <option [value]="inputType">{{ inputType }}</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Key</label>
+                                <input type="text" class="form-control" [(ngModel)]="form.key" name="key" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Gorunen Ad</label>
+                                <input type="text" class="form-control" [(ngModel)]="form.displayName" name="displayName" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Placeholder</label>
+                                <input type="text" class="form-control" [(ngModel)]="form.placeholder" name="placeholder">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Default Deger</label>
+                                <input type="text" class="form-control" [(ngModel)]="form.defaultValue" name="defaultValue">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Sira</label>
+                                <input type="number" class="form-control" [(ngModel)]="form.sortOrder" name="sortOrder" required>
+                            </div>
+                            <div class="col-md-4 mb-3 d-flex align-items-end">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="form.isRequired" name="isRequired" id="isRequiredSwitch">
+                                    <label class="form-check-label" for="isRequiredSwitch">Zorunlu</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3 d-flex align-items-end">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="form.isActive" name="isActive" id="isActiveSettingDefSwitch">
+                                    <label class="form-check-label" for="isActiveSettingDefSwitch">Aktif</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Iptal</button>
+                    <button type="button" class="btn btn-primary" (click)="save()">{{ editMode ? 'Guncelle' : 'Kaydet' }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

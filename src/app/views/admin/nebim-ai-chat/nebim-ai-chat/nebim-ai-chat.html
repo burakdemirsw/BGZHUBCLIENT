@@ -35,25 +35,50 @@
         <main class="nac-main">
         @if (messages.length === 0) {
             <section class="nac-empty">
-                <div class="nac-empty-inner">
+                <div class="nac-empty-inner" [class.nac-empty-inner-wide]="activeExtensionShortcuts.length > 0">
                     <div class="nac-empty-orb">
                         <div class="nac-orb-glow"></div>
                         <div class="nac-orb-core"></div>
                     </div>
                     <h1 class="nac-empty-title">Bugün sana nasıl yardımcı olabilirim?</h1>
-                    <p class="nac-empty-subtitle">Bir soru sor ya da aşağıdaki önerilerden birini dene.</p>
+                    <p class="nac-empty-subtitle">Bir soru sor ya da asagidaki kullanilabilir extensionlardan birini sec.</p>
+
+                    <div class="nac-extension-showcase-head">
+                        <span class="nac-extension-showcase-title">Kullanilabilir Extensionlar</span>
+                        <span class="nac-extension-showcase-count">{{ activeExtensionShortcuts.length }} kayit</span>
+                    </div>
 
                     <div class="nac-suggestions">
-                        @for (s of suggestions; track s.title; let idx = $index) {
+                        @for (s of activeExtensionShortcuts; track s.id; let idx = $index) {
                             <button
                                 type="button"
                                 class="nac-suggestion"
+                                [class.is-passive]="!s.isEnabled"
                                 [style.--suggestion-order]="idx"
-                                (click)="useSuggestion(s.prompt)">
-                                <span class="nac-suggestion-chip">{{ s.category }}</span>
-                                <span class="nac-suggestion-title">{{ s.title }}</span>
+                                [disabled]="!s.isEnabled"
+                                (click)="useExtensionShortcutCard(s)">
+                                <div class="nac-suggestion-top">
+                                    <span class="nac-suggestion-chip">{{ s.category }}</span>
+                                    <span class="nac-suggestion-state" [class.is-passive]="!s.isEnabled">{{ s.isEnabled ? 'Aktif' : 'Pasif' }}</span>
+                                </div>
+                                <span class="nac-suggestion-title-wrap">
+                                    @if (s.photoUrl) {
+                                        <img class="nac-suggestion-img" [src]="s.photoUrl" [alt]="s.name + ' gorseli'" />
+                                    } @else {
+                                        <span class="nac-suggestion-img-fallback"><i class="fa-solid fa-puzzle-piece"></i></span>
+                                    }
+                                    <span class="nac-suggestion-title">{{ s.name }}</span>
+                                </span>
                                 <span class="nac-suggestion-sub">{{ s.subtitle }}</span>
+                                <div class="nac-suggestion-bottom">
+                                    <span class="nac-suggestion-mention">{{ s.mention }}</span>
+                                    <span class="nac-suggestion-cta">Kullanmak icin tikla</span>
+                                </div>
                             </button>
+                        } @empty {
+                            <div class="nac-empty-extension-note">
+                                Aktif mention tanimli extension bulunamadi. Yonetim panelinden extension mention ayarlarini kontrol edin.
+                            </div>
                         }
                     </div>
                 </div>
@@ -75,6 +100,20 @@
                             </div>
                             <div class="nac-bubble-wrap">
                                 <div class="nac-msg-role">{{ msg.role === 'user' ? 'Sen' : 'Nebim AI' }}</div>
+                                @if (msg.mentions?.length) {
+                                    <div class="nac-msg-mentions" [class.nac-msg-mentions-user]="msg.role === 'user'">
+                                        @for (mention of msg.mentions!; track mention.id + mention.mention) {
+                                            <span class="nac-msg-mention-chip">
+                                                @if (mention.photoUrl) {
+                                                    <img class="nac-msg-mention-img" [src]="mention.photoUrl" [alt]="mention.name + ' gorseli'" />
+                                                } @else {
+                                                    <span class="nac-msg-mention-fallback"><i class="fa-solid fa-puzzle-piece"></i></span>
+                                                }
+                                                <span class="nac-msg-mention-text">{{ mention.mention }}</span>
+                                            </span>
+                                        }
+                                    </div>
+                                }
                                 @if (msg.role === 'assistant') {
                                     <div class="nac-bubble nac-bubble-ai" [class.nac-bubble-error]="msg.isError" [class.nac-bubble-has-actions]="canShareOnWhatsApp(msg) || hasExcelExport(msg) || canReactToMessage(msg)">
                                         @if (msg.blocks?.length) {
@@ -266,6 +305,72 @@
 
     <footer class="nac-composer-wrap">
         <div class="nac-composer nac-auto-field" [class.nac-auto-field-active]="input.trim().length > 0">
+            <div class="nac-extension-picker" title="Extension mention ekle">
+                <button
+                    type="button"
+                    class="nac-extension-trigger"
+                    [disabled]="!hasExtensionShortcuts() || isLoadingExtensions"
+                    [attr.aria-expanded]="extensionMenuOpen"
+                    (click)="onExtensionShortcutClick()"
+                    aria-label="Extension mention ekle">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+
+                @if (extensionMenuOpen) {
+                    <div class="nac-extension-menu" role="listbox" aria-label="Extension mention listesi">
+                        <div class="nac-extension-filter-row">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                            <input
+                                type="text"
+                                class="nac-extension-filter-input"
+                                placeholder="Extension ara..."
+                                [(ngModel)]="extensionMenuFilterText"
+                                (input)="onExtensionMenuFilterInput()" />
+                        </div>
+
+                        @for (ext of filteredExtensionShortcuts; track ext.id) {
+                            <button
+                                type="button"
+                                class="nac-extension-option"
+                                [class.is-passive]="!ext.isEnabled"
+                                [disabled]="!ext.isEnabled"
+                                (click)="selectExtensionShortcut(ext)">
+                                @if (ext.photoUrl) {
+                                    <img class="nac-extension-option-img" [src]="ext.photoUrl" [alt]="ext.name + ' gorseli'" />
+                                } @else {
+                                    <span class="nac-extension-option-fallback"><i class="fa-solid fa-puzzle-piece"></i></span>
+                                }
+                                <span class="nac-extension-option-text">
+                                    <strong>{{ ext.name }}</strong>
+                                    <small>{{ ext.mention }} · {{ ext.isEnabled ? 'Aktif' : 'Pasif' }}</small>
+                                </span>
+                            </button>
+                        } @empty {
+                            <div class="nac-extension-empty">Filtreye uygun extension bulunamadi.</div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="nac-textarea-stack">
+                @if (selectedMentionChips.length) {
+                    <div class="nac-mention-chips">
+                        @for (chip of selectedMentionChips; track chip.id) {
+                            <div class="nac-mention-chip">
+                                @if (chip.photoUrl) {
+                                    <img class="nac-mention-chip-img" [src]="chip.photoUrl" [alt]="chip.name + ' gorseli'" />
+                                } @else {
+                                    <span class="nac-mention-chip-fallback"><i class="fa-solid fa-puzzle-piece"></i></span>
+                                }
+                                <span class="nac-mention-chip-text">{{ chip.mention }}</span>
+                                <button type="button" class="nac-mention-chip-remove" (click)="removeMentionChip(chip)">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+
             <textarea
                 #textArea
                 class="nac-textarea"
@@ -273,8 +378,10 @@
                 placeholder="Nebim AI'a bir mesaj gönder..."
                 [(ngModel)]="input"
                 (keydown.enter)="onEnter($event)"
+                (keydown.tab)="onComposerTab($event)"
                 (focus)="onComposerFocus()"
                 (input)="onComposerInput()"></textarea>
+            </div>
 
             <div class="nac-assistant-picker" title="Asistan seç">
                 <button
@@ -290,14 +397,6 @@
 
                 @if (assistantMenuOpen) {
                     <div class="nac-assistant-menu" role="listbox" aria-label="Asistan listesi">
-                        <button
-                            type="button"
-                            class="nac-assistant-option"
-                            [class.is-selected]="!selectedAssistantId"
-                            (click)="selectAssistant('')">
-                            Otomatik
-                        </button>
-
                         @for (assistant of assistants; track assistant.id) {
                             <button
                                 type="button"

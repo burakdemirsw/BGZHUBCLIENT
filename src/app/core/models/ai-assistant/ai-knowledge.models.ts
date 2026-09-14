@@ -3,6 +3,7 @@ export interface AiKnowledgeResponse {
     companyId: string;
     userId: string;
     aiAssistantId: string;
+    extensionId: string;
     aiKnowledgeTypeId: string | null;
     integrationUserId: string | null;
     integrationDescription: string | null;
@@ -17,6 +18,7 @@ export interface CreateAiKnowledgeRequest {
     companyId: string;
     userId: string;
     aiAssistantId: string;
+    extensionId: string;
     aiKnowledgeTypeId: string | null;
     integrationUserId: string | null;
     prop: string;
@@ -28,6 +30,7 @@ export interface UpdateAiKnowledgeRequest {
     companyId: string;
     userId: string;
     aiAssistantId: string;
+    extensionId: string;
     aiKnowledgeTypeId: string | null;
     integrationUserId: string | null;
     prop: string;

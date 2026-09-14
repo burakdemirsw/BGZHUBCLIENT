@@ -697,6 +697,37 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfAiChatResponse"
       security:
         - Bearer: []
+  /api/Ai/chat/fine-tune/qwen/prepare:
+    post:
+      tags:
+        - Ai
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiRequestLogFineTunePrepareRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/AiRequestLogFineTunePrepareRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/AiRequestLogFineTunePrepareRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAiRequestLogFineTunePrepareResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAiRequestLogFineTunePrepareResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfAiRequestLogFineTunePrepareResponse"
+      security:
+        - Bearer: []
   /api/Ai/update/messages/{id}:
     post:
       tags:
@@ -2300,664 +2331,6 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfNebimCustomQueryResult"
-      security:
-        - Bearer: []
-  /api/NebimSchema/semantic-rules/seed:
-    post:
-      tags:
-        - NebimSchema
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/NebimSchemaSyncRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/NebimSchemaSyncRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/NebimSchemaSyncRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/NebimSchema/sync:
-    post:
-      tags:
-        - NebimSchema
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/NebimSchemaSyncRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/NebimSchemaSyncRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/NebimSchemaSyncRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaSyncResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaSyncResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaSyncResponse"
-      security:
-        - Bearer: []
-  /api/NebimSchema/objects/paged:
-    post:
-      tags:
-        - NebimSchema
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PaginationRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/PaginationRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/PaginationRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfNebimSchemaObjectResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfNebimSchemaObjectResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfNebimSchemaObjectResponse"
-      security:
-        - Bearer: []
-  /api/NebimSchema/objects/{id}:
-    get:
-      tags:
-        - NebimSchema
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaObjectResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaObjectResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaObjectResponse"
-      security:
-        - Bearer: []
-  /api/NebimSchema/objects/update/{id}:
-    post:
-      tags:
-        - NebimSchema
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaObjectRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaObjectRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaObjectRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/NebimSchema/objects/set-allowed:
-    post:
-      tags:
-        - NebimSchema
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaObjectsAllowedRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaObjectsAllowedRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaObjectsAllowedRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/NebimSchema/objects/delete/{id}:
-    post:
-      tags:
-        - NebimSchema
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/NebimSchema/categories:
-    get:
-      tags:
-        - NebimSchema
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfNebimSchemaCategoryResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfNebimSchemaCategoryResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfNebimSchemaCategoryResponse"
-      security:
-        - Bearer: []
-    post:
-      tags:
-        - NebimSchema
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateNebimSchemaCategoryRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/CreateNebimSchemaCategoryRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/CreateNebimSchemaCategoryRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaCategoryResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaCategoryResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaCategoryResponse"
-      security:
-        - Bearer: []
-  /api/NebimSchema/categories/{id}:
-    get:
-      tags:
-        - NebimSchema
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaCategoryResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaCategoryResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaCategoryResponse"
-      security:
-        - Bearer: []
-  /api/NebimSchema/categories/update/{id}:
-    post:
-      tags:
-        - NebimSchema
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaCategoryRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaCategoryRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaCategoryRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/NebimSchema/categories/delete/{id}:
-    post:
-      tags:
-        - NebimSchema
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/NebimSchema/objects/{schemaObjectId}/categories:
-    get:
-      tags:
-        - NebimSchema
-      parameters:
-        - name: schemaObjectId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfNebimSchemaCategoryResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfNebimSchemaCategoryResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfNebimSchemaCategoryResponse"
-      security:
-        - Bearer: []
-    post:
-      tags:
-        - NebimSchema
-      parameters:
-        - name: schemaObjectId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SetNebimSchemaObjectCategoriesRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/SetNebimSchemaObjectCategoriesRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/SetNebimSchemaObjectCategoriesRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/NebimSchema/columns/by-object/{schemaObjectId}:
-    get:
-      tags:
-        - NebimSchema
-      parameters:
-        - name: schemaObjectId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfNebimSchemaColumnResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfNebimSchemaColumnResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfNebimSchemaColumnResponse"
-      security:
-        - Bearer: []
-  /api/NebimSchema/columns/paged:
-    post:
-      tags:
-        - NebimSchema
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PaginationRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/PaginationRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/PaginationRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfNebimSchemaColumnResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfNebimSchemaColumnResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfNebimSchemaColumnResponse"
-      security:
-        - Bearer: []
-  /api/NebimSchema/columns/{id}:
-    get:
-      tags:
-        - NebimSchema
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaColumnResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaColumnResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfNebimSchemaColumnResponse"
-      security:
-        - Bearer: []
-  /api/NebimSchema/columns/update/{id}:
-    post:
-      tags:
-        - NebimSchema
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaColumnRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaColumnRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaColumnRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/NebimSchema/columns/set-allowed:
-    post:
-      tags:
-        - NebimSchema
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaColumnsAllowedRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaColumnsAllowedRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaColumnsAllowedRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/NebimSchema/columns/delete/{id}:
-    post:
-      tags:
-        - NebimSchema
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/NebimSchema/relations/by-object/{sourceObjectId}:
-    get:
-      tags:
-        - NebimSchema
-      parameters:
-        - name: sourceObjectId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfNebimSchemaRelationResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfNebimSchemaRelationResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfNebimSchemaRelationResponse"
-      security:
-        - Bearer: []
-  /api/NebimSchema/relations/update/{id}:
-    post:
-      tags:
-        - NebimSchema
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaRelationRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaRelationRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/UpdateNebimSchemaRelationRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
   /api/PromptAiAssistants/paged:
@@ -5201,6 +4574,50 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfConversationReplyResponse"
+      security:
+        - Bearer: []
+  /api/Conversations/{conversationId}/messages/{messageId}/reaction:
+    post:
+      tags:
+        - Conversations
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: messageId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationMessageReactionRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/ConversationMessageReactionRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/ConversationMessageReactionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
   /api/Conversations/{conversationId}/exports/download:
@@ -10476,6 +9893,491 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
+  /api/CompanyExtensions/definitions:
+    get:
+      tags:
+        - CompanyExtensions
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfExtensionDefinitionResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfExtensionDefinitionResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfExtensionDefinitionResponse"
+      security:
+        - Bearer: []
+    post:
+      tags:
+        - CompanyExtensions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExtensionDefinitionRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateExtensionDefinitionRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateExtensionDefinitionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfExtensionDefinitionResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfExtensionDefinitionResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfExtensionDefinitionResponse"
+      security:
+        - Bearer: []
+  /api/CompanyExtensions/definitions/update/{id}:
+    post:
+      tags:
+        - CompanyExtensions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateExtensionDefinitionRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateExtensionDefinitionRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateExtensionDefinitionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/CompanyExtensions/definitions/delete/{id}:
+    post:
+      tags:
+        - CompanyExtensions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/CompanyExtensions/by-company/{companyId}:
+    get:
+      tags:
+        - CompanyExtensions
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfCompanyExtensionResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfCompanyExtensionResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfCompanyExtensionResponse"
+      security:
+        - Bearer: []
+  /api/CompanyExtensions:
+    post:
+      tags:
+        - CompanyExtensions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyExtensionRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyExtensionRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyExtensionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanyExtensionResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanyExtensionResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanyExtensionResponse"
+      security:
+        - Bearer: []
+  /api/CompanyExtensions/update/{id}:
+    post:
+      tags:
+        - CompanyExtensions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCompanyExtensionRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCompanyExtensionRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateCompanyExtensionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/CompanyExtensions/delete/{id}:
+    post:
+      tags:
+        - CompanyExtensions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/CompanyExtensions/settings/{companyId}/{extensionId}:
+    get:
+      tags:
+        - CompanyExtensions
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: extensionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfCompanyExtensionSettingResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfCompanyExtensionSettingResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfCompanyExtensionSettingResponse"
+      security:
+        - Bearer: []
+  /api/CompanyExtensions/settings:
+    post:
+      tags:
+        - CompanyExtensions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyExtensionSettingRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyExtensionSettingRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyExtensionSettingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanyExtensionSettingResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanyExtensionSettingResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCompanyExtensionSettingResponse"
+      security:
+        - Bearer: []
+  /api/CompanyExtensions/settings/update/{id}:
+    post:
+      tags:
+        - CompanyExtensions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCompanyExtensionSettingRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCompanyExtensionSettingRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateCompanyExtensionSettingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/CompanyExtensions/settings/delete/{id}:
+    post:
+      tags:
+        - CompanyExtensions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/CompanyExtensions/definitions/{extensionId}/setting-keys:
+    get:
+      tags:
+        - CompanyExtensions
+      parameters:
+        - name: extensionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfExtensionSettingDefinitionRespon\
+                  se"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfExtensionSettingDefinitionRespon\
+                  se"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfExtensionSettingDefinitionRespon\
+                  se"
+      security:
+        - Bearer: []
+  /api/CompanyExtensions/definitions/setting-keys:
+    post:
+      tags:
+        - CompanyExtensions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExtensionSettingDefinitionRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateExtensionSettingDefinitionRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateExtensionSettingDefinitionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfExtensionSettingDefinitionResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfExtensionSettingDefinitionResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfExtensionSettingDefinitionResponse"
+      security:
+        - Bearer: []
+  /api/CompanyExtensions/definitions/setting-keys/update/{id}:
+    post:
+      tags:
+        - CompanyExtensions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateExtensionSettingDefinitionRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateExtensionSettingDefinitionRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateExtensionSettingDefinitionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/CompanyExtensions/definitions/setting-keys/delete/{id}:
+    post:
+      tags:
+        - CompanyExtensions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
   /api/CompanySettings/{id}:
     get:
       tags:
@@ -11131,6 +11033,7 @@ components:
         - userId
         - companyId
         - name
+        - order
         - aiProviderId
         - aiModelId
         - isBlocked
@@ -11151,6 +11054,12 @@ components:
           type:
             - "null"
             - string
+        order:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
         aiProviderId:
           type: string
           format: uuid
@@ -11625,6 +11534,7 @@ components:
         - companyId
         - userId
         - aiAssistantId
+        - extensionId
         - aiKnowledgeTypeId
         - knowledgeTypeName
         - prop
@@ -11644,6 +11554,9 @@ components:
           type: string
           format: uuid
         aiAssistantId:
+          type: string
+          format: uuid
+        extensionId:
           type: string
           format: uuid
         aiKnowledgeTypeId:
@@ -11795,6 +11708,7 @@ components:
       required:
         - id
         - aiProviderId
+        - priorityOrder
         - name
         - modelCode
         - inputTokenLimit
@@ -11813,6 +11727,12 @@ components:
         aiProviderId:
           type: string
           format: uuid
+        priorityOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
         name:
           type:
             - "null"
@@ -11917,6 +11837,74 @@ components:
         updatedDate:
           type: string
           format: date-time
+    AiRequestLogFineTunePrepareRequest:
+      required:
+        - companyId
+        - take
+        - executeTrainer
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        take:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        executeTrainer:
+          type:
+            - "null"
+            - boolean
+    AiRequestLogFineTunePrepareResponse:
+      required:
+        - success
+        - exportedSampleCount
+        - skippedSampleCount
+        - datasetPath
+        - trainerExecuted
+        - trainerExitCode
+        - trainerOutput
+        - message
+      type: object
+      properties:
+        success:
+          type: boolean
+        exportedSampleCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        skippedSampleCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        datasetPath:
+          type:
+            - "null"
+            - string
+        trainerExecuted:
+          type: boolean
+        trainerExitCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        trainerOutput:
+          type:
+            - "null"
+            - string
+        message:
+          type:
+            - "null"
+            - string
     AiRequestLogResponse:
       required:
         - id
@@ -12113,6 +12101,7 @@ components:
     AiSettingResponse:
       required:
         - id
+        - aiModelId
         - settingDescription
         - definition
         - value
@@ -12123,6 +12112,11 @@ components:
       properties:
         id:
           type: string
+          format: uuid
+        aiModelId:
+          type:
+            - "null"
+            - string
           format: uuid
         settingDescription:
           type:
@@ -12604,6 +12598,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfAiRequestLogFineTunePrepareResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/AiRequestLogFineTunePrepareResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfAiRequestLogResponse:
       type: object
       properties:
@@ -12903,6 +12929,70 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/CloudinarySettingResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfCompanyExtensionResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/CompanyExtensionResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfCompanyExtensionSettingResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/CompanyExtensionSettingResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -13370,6 +13460,70 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfExtensionDefinitionResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ExtensionDefinitionResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfExtensionSettingDefinitionResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ExtensionSettingDefinitionResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfFileUploadResult:
       type: object
       properties:
@@ -13742,6 +13896,74 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfListOfCompanyExtensionResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/CompanyExtensionResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfListOfCompanyExtensionSettingResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/CompanyExtensionSettingResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfListOfConversationListDescriptionResponse:
       type: object
       properties:
@@ -13927,6 +14149,74 @@ components:
             - array
           items:
             $ref: "#/components/schemas/ConversationTagResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfListOfExtensionDefinitionResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/ExtensionDefinitionResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfListOfExtensionSettingDefinitionResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/ExtensionSettingDefinitionResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -14165,108 +14455,6 @@ components:
             - array
           items:
             $ref: "#/components/schemas/NebimQueryResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfListOfNebimSchemaCategoryResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          type:
-            - "null"
-            - array
-          items:
-            $ref: "#/components/schemas/NebimSchemaCategoryResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfListOfNebimSchemaColumnResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          type:
-            - "null"
-            - array
-          items:
-            $ref: "#/components/schemas/NebimSchemaColumnResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfListOfNebimSchemaRelationResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          type:
-            - "null"
-            - array
-          items:
-            $ref: "#/components/schemas/NebimSchemaRelationResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -15154,134 +15342,6 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfNebimSchemaCategoryResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/NebimSchemaCategoryResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfNebimSchemaColumnResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/NebimSchemaColumnResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfNebimSchemaObjectResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/NebimSchemaObjectResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfNebimSchemaSyncResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/NebimSchemaSyncResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
     ApiResponseOfNebimToolExecutionResponse:
       type: object
       properties:
@@ -15932,70 +15992,6 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/PagedResultOfNebimQueryResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfPagedResultOfNebimSchemaColumnResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/PagedResultOfNebimSchemaColumnResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfPagedResultOfNebimSchemaObjectResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/PagedResultOfNebimSchemaObjectResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -17544,6 +17540,10 @@ components:
           type:
             - "null"
             - string
+        isLiked:
+          type:
+            - "null"
+            - boolean
     CheckInvitationUsableResponse:
       required:
         - isUsable
@@ -17600,6 +17600,84 @@ components:
           type: boolean
         isBlocked:
           type: boolean
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+    CompanyExtensionResponse:
+      required:
+        - id
+        - companyId
+        - extensionId
+        - extensionCode
+        - extensionName
+        - isEnabled
+        - priority
+        - createdDate
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        extensionId:
+          type: string
+          format: uuid
+        extensionCode:
+          type:
+            - "null"
+            - string
+        extensionName:
+          type:
+            - "null"
+            - string
+        isEnabled:
+          type: boolean
+        priority:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+    CompanyExtensionSettingResponse:
+      required:
+        - id
+        - companyId
+        - extensionId
+        - key
+        - value
+        - createdDate
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        extensionId:
+          type: string
+          format: uuid
+        key:
+          type:
+            - "null"
+            - string
+        value:
+          type:
+            - "null"
+            - string
         createdDate:
           type: string
           format: date-time
@@ -18049,6 +18127,15 @@ components:
         createdDate:
           type: string
           format: date-time
+    ConversationMessageReactionRequest:
+      required:
+        - isLiked
+      type: object
+      properties:
+        isLiked:
+          type:
+            - "null"
+            - boolean
     ConversationMessagesResponse:
       required:
         - conversationId
@@ -18539,6 +18626,7 @@ components:
         - userId
         - companyId
         - name
+        - order
         - aiProviderId
         - aiModelId
       type: object
@@ -18553,6 +18641,12 @@ components:
           type:
             - "null"
             - string
+        order:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
         aiProviderId:
           type: string
           format: uuid
@@ -18564,6 +18658,7 @@ components:
         - companyId
         - userId
         - aiAssistantId
+        - extensionId
         - aiKnowledgeTypeId
         - prop
         - value
@@ -18577,6 +18672,9 @@ components:
           type: string
           format: uuid
         aiAssistantId:
+          type: string
+          format: uuid
+        extensionId:
           type: string
           format: uuid
         aiKnowledgeTypeId:
@@ -18690,6 +18788,7 @@ components:
     CreateAiModelRequest:
       required:
         - aiProviderId
+        - priorityOrder
         - name
         - modelCode
         - inputTokenLimit
@@ -18702,6 +18801,12 @@ components:
         aiProviderId:
           type: string
           format: uuid
+        priorityOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
         name:
           type:
             - "null"
@@ -18773,11 +18878,17 @@ components:
           format: uuid
     CreateAiSettingRequest:
       required:
+        - aiModelId
         - settingDescription
         - definition
         - value
       type: object
       properties:
+        aiModelId:
+          type:
+            - "null"
+            - string
+          format: uuid
         settingDescription:
           type:
             - "null"
@@ -18850,6 +18961,50 @@ components:
             - string
         isActive:
           type: boolean
+    CreateCompanyExtensionRequest:
+      required:
+        - companyId
+        - extensionId
+        - isEnabled
+        - priority
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        extensionId:
+          type: string
+          format: uuid
+        isEnabled:
+          type: boolean
+        priority:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    CreateCompanyExtensionSettingRequest:
+      required:
+        - companyId
+        - extensionId
+        - key
+        - value
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        extensionId:
+          type: string
+          format: uuid
+        key:
+          type:
+            - "null"
+            - string
+        value:
+          type:
+            - "null"
+            - string
     CreateCompanyRequest:
       required:
         - name
@@ -19052,6 +19207,83 @@ components:
           type:
             - "null"
             - string
+    CreateExtensionDefinitionRequest:
+      required:
+        - code
+        - name
+        - category
+        - photoUrl
+      type: object
+      properties:
+        code:
+          type:
+            - "null"
+            - string
+        name:
+          type:
+            - "null"
+            - string
+        category:
+          type:
+            - "null"
+            - string
+        photoUrl:
+          type:
+            - "null"
+            - string
+        mention:
+          type:
+            - "null"
+            - string
+        isActive:
+          type: boolean
+          default: true
+    CreateExtensionSettingDefinitionRequest:
+      required:
+        - extensionId
+        - key
+        - displayName
+        - inputType
+        - isRequired
+        - placeholder
+        - defaultValue
+        - sortOrder
+      type: object
+      properties:
+        extensionId:
+          type: string
+          format: uuid
+        key:
+          type:
+            - "null"
+            - string
+        displayName:
+          type:
+            - "null"
+            - string
+        inputType:
+          type:
+            - "null"
+            - string
+        isRequired:
+          type: boolean
+        placeholder:
+          type:
+            - "null"
+            - string
+        defaultValue:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
+          default: true
     CreateInvitationMailRequest:
       required:
         - invitationId
@@ -19287,28 +19519,6 @@ components:
           items:
             type: string
             format: uuid
-    CreateNebimSchemaCategoryRequest:
-      required:
-        - name
-        - description
-        - keywords
-        - isActive
-      type: object
-      properties:
-        name:
-          type:
-            - "null"
-            - string
-        description:
-          type:
-            - "null"
-            - string
-        keywords:
-          type:
-            - "null"
-            - string
-        isActive:
-          type: boolean
     CreateNetGsmSettingRequest:
       required:
         - userName
@@ -19943,6 +20153,108 @@ components:
           type:
             - "null"
             - string
+    ExtensionDefinitionResponse:
+      required:
+        - id
+        - code
+        - name
+        - category
+        - photoUrl
+        - mention
+        - isActive
+        - createdDate
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type:
+            - "null"
+            - string
+        name:
+          type:
+            - "null"
+            - string
+        category:
+          type:
+            - "null"
+            - string
+        photoUrl:
+          type:
+            - "null"
+            - string
+        mention:
+          type:
+            - "null"
+            - string
+        isActive:
+          type: boolean
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+    ExtensionSettingDefinitionResponse:
+      required:
+        - id
+        - extensionId
+        - key
+        - displayName
+        - inputType
+        - isRequired
+        - placeholder
+        - defaultValue
+        - sortOrder
+        - isActive
+        - createdDate
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        extensionId:
+          type: string
+          format: uuid
+        key:
+          type:
+            - "null"
+            - string
+        displayName:
+          type:
+            - "null"
+            - string
+        inputType:
+          type:
+            - "null"
+            - string
+        isRequired:
+          type: boolean
+        placeholder:
+          type:
+            - "null"
+            - string
+        defaultValue:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
     FileUploadCategory:
       type: integer
     FileUploadResult:
@@ -20127,6 +20439,7 @@ components:
         - renderPayloadJson
         - source
         - isRead
+        - isLiked
         - createdUserId
         - createdDate
         - updatedDate
@@ -20162,6 +20475,10 @@ components:
             - string
         isRead:
           type: boolean
+        isLiked:
+          type:
+            - "null"
+            - boolean
         createdUserId:
           type:
             - "null"
@@ -20508,362 +20825,6 @@ components:
             - array
           items:
             $ref: "#/components/schemas/NebimQueryParameterResponse"
-    NebimSchemaCategoryResponse:
-      required:
-        - id
-        - name
-        - description
-        - keywords
-        - isActive
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type:
-            - "null"
-            - string
-        description:
-          type:
-            - "null"
-            - string
-        keywords:
-          type:
-            - "null"
-            - string
-        isActive:
-          type: boolean
-    NebimSchemaColumnResponse:
-      required:
-        - id
-        - companyId
-        - schemaObjectId
-        - objectName
-        - columnName
-        - dataType
-        - maxLength
-        - precision
-        - scale
-        - isNullable
-        - columnOrder
-        - businessName
-        - description
-        - isFilterable
-        - isSortable
-        - isGroupable
-        - isMetricSource
-        - isDateField
-        - isAllowed
-        - isCoreColumn
-        - coreOrder
-        - lastSyncedAt
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        companyId:
-          type: string
-          format: uuid
-        schemaObjectId:
-          type: string
-          format: uuid
-        objectName:
-          type:
-            - "null"
-            - string
-        columnName:
-          type:
-            - "null"
-            - string
-        dataType:
-          type:
-            - "null"
-            - string
-        maxLength:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        precision:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        scale:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        isNullable:
-          type: boolean
-        columnOrder:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        businessName:
-          type:
-            - "null"
-            - string
-        description:
-          type:
-            - "null"
-            - string
-        isFilterable:
-          type: boolean
-        isSortable:
-          type: boolean
-        isGroupable:
-          type: boolean
-        isMetricSource:
-          type: boolean
-        isDateField:
-          type: boolean
-        isAllowed:
-          type: boolean
-        isCoreColumn:
-          type: boolean
-        coreOrder:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        lastSyncedAt:
-          type: string
-          format: date-time
-    NebimSchemaObjectResponse:
-      required:
-        - id
-        - companyId
-        - schemaName
-        - objectName
-        - objectType
-        - procedureCount
-        - domain
-        - businessName
-        - description
-        - priority
-        - isAllowed
-        - lastSyncedAt
-        - columnCount
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        companyId:
-          type: string
-          format: uuid
-        schemaName:
-          type:
-            - "null"
-            - string
-        objectName:
-          type:
-            - "null"
-            - string
-        objectType:
-          type:
-            - "null"
-            - string
-        procedureCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        domain:
-          type:
-            - "null"
-            - string
-        businessName:
-          type:
-            - "null"
-            - string
-        description:
-          type:
-            - "null"
-            - string
-        priority:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        isAllowed:
-          type: boolean
-        lastSyncedAt:
-          type: string
-          format: date-time
-        columnCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-    NebimSchemaRelationResponse:
-      required:
-        - id
-        - companyId
-        - sourceObjectId
-        - sourceObjectName
-        - sourceColumnName
-        - targetSchemaName
-        - targetObjectName
-        - targetColumnName
-        - constraintName
-        - isAllowed
-        - lastSyncedAt
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        companyId:
-          type: string
-          format: uuid
-        sourceObjectId:
-          type: string
-          format: uuid
-        sourceObjectName:
-          type:
-            - "null"
-            - string
-        sourceColumnName:
-          type:
-            - "null"
-            - string
-        targetSchemaName:
-          type:
-            - "null"
-            - string
-        targetObjectName:
-          type:
-            - "null"
-            - string
-        targetColumnName:
-          type:
-            - "null"
-            - string
-        constraintName:
-          type:
-            - "null"
-            - string
-        isAllowed:
-          type: boolean
-        lastSyncedAt:
-          type: string
-          format: date-time
-    NebimSchemaSyncObjectResult:
-      required:
-        - schemaName
-        - objectName
-        - objectType
-        - procedureCount
-        - columnCount
-        - describedColumnCount
-      type: object
-      properties:
-        schemaName:
-          type:
-            - "null"
-            - string
-        objectName:
-          type:
-            - "null"
-            - string
-        objectType:
-          type:
-            - "null"
-            - string
-        procedureCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        columnCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        describedColumnCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-    NebimSchemaSyncRequest:
-      required:
-        - companyId
-        - top
-      type: object
-      properties:
-        companyId:
-          type: string
-          format: uuid
-        top:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-    NebimSchemaSyncResponse:
-      required:
-        - companyId
-        - requestedTop
-        - objectCount
-        - columnCount
-        - describedColumnCount
-        - syncedAt
-        - objects
-      type: object
-      properties:
-        companyId:
-          type: string
-          format: uuid
-        requestedTop:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        objectCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        columnCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        describedColumnCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        syncedAt:
-          type: string
-          format: date-time
-        objects:
-          type:
-            - "null"
-            - array
-          items:
-            $ref: "#/components/schemas/NebimSchemaSyncObjectResult"
     NebimToolExecutionResponse:
       required:
         - success
@@ -21771,96 +21732,6 @@ components:
             - array
           items:
             $ref: "#/components/schemas/NebimQueryResponse"
-        pageNumber:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        pageSize:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        totalCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        totalPages:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        hasPreviousPage:
-          type: boolean
-        hasNextPage:
-          type: boolean
-    PagedResultOfNebimSchemaColumnResponse:
-      required:
-        - items
-        - pageNumber
-        - pageSize
-        - totalCount
-        - totalPages
-        - hasPreviousPage
-        - hasNextPage
-      type: object
-      properties:
-        items:
-          type:
-            - "null"
-            - array
-          items:
-            $ref: "#/components/schemas/NebimSchemaColumnResponse"
-        pageNumber:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        pageSize:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        totalCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        totalPages:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        hasPreviousPage:
-          type: boolean
-        hasNextPage:
-          type: boolean
-    PagedResultOfNebimSchemaObjectResponse:
-      required:
-        - items
-        - pageNumber
-        - pageSize
-        - totalCount
-        - totalPages
-        - hasPreviousPage
-        - hasNextPage
-      type: object
-      properties:
-        items:
-          type:
-            - "null"
-            - array
-          items:
-            $ref: "#/components/schemas/NebimSchemaObjectResponse"
         pageNumber:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -23219,18 +23090,6 @@ components:
           items:
             type: string
             format: uuid
-    SetNebimSchemaObjectCategoriesRequest:
-      required:
-        - categoryIds
-      type: object
-      properties:
-        categoryIds:
-          type:
-            - "null"
-            - array
-          items:
-            type: string
-            format: uuid
     ShortcutResponse:
       required:
         - id
@@ -23827,6 +23686,7 @@ components:
         - userId
         - companyId
         - name
+        - order
         - aiProviderId
         - aiModelId
         - isBlocked
@@ -23842,6 +23702,12 @@ components:
           type:
             - "null"
             - string
+        order:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
         aiProviderId:
           type: string
           format: uuid
@@ -23855,6 +23721,7 @@ components:
         - companyId
         - userId
         - aiAssistantId
+        - extensionId
         - aiKnowledgeTypeId
         - prop
         - value
@@ -23868,6 +23735,9 @@ components:
           type: string
           format: uuid
         aiAssistantId:
+          type: string
+          format: uuid
+        extensionId:
           type: string
           format: uuid
         aiKnowledgeTypeId:
@@ -23984,6 +23854,7 @@ components:
     UpdateAiModelRequest:
       required:
         - aiProviderId
+        - priorityOrder
         - name
         - modelCode
         - inputTokenLimit
@@ -23997,6 +23868,12 @@ components:
         aiProviderId:
           type: string
           format: uuid
+        priorityOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
         name:
           type:
             - "null"
@@ -24073,12 +23950,18 @@ components:
           format: uuid
     UpdateAiSettingRequest:
       required:
+        - aiModelId
         - settingDescription
         - definition
         - value
         - isBlocked
       type: object
       properties:
+        aiModelId:
+          type:
+            - "null"
+            - string
+          format: uuid
         settingDescription:
           type:
             - "null"
@@ -24148,6 +24031,29 @@ components:
           type: boolean
         isBlocked:
           type: boolean
+    UpdateCompanyExtensionRequest:
+      required:
+        - isEnabled
+        - priority
+      type: object
+      properties:
+        isEnabled:
+          type: boolean
+        priority:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+    UpdateCompanyExtensionSettingRequest:
+      required:
+        - value
+      type: object
+      properties:
+        value:
+          type:
+            - "null"
+            - string
     UpdateCompanyRequest:
       required:
         - name
@@ -24340,6 +24246,69 @@ components:
             - string
         isActive:
           type: boolean
+    UpdateExtensionDefinitionRequest:
+      required:
+        - name
+        - category
+        - photoUrl
+        - isActive
+      type: object
+      properties:
+        name:
+          type:
+            - "null"
+            - string
+        category:
+          type:
+            - "null"
+            - string
+        photoUrl:
+          type:
+            - "null"
+            - string
+        isActive:
+          type: boolean
+        mention:
+          type:
+            - "null"
+            - string
+    UpdateExtensionSettingDefinitionRequest:
+      required:
+        - displayName
+        - inputType
+        - isRequired
+        - placeholder
+        - defaultValue
+        - sortOrder
+        - isActive
+      type: object
+      properties:
+        displayName:
+          type:
+            - "null"
+            - string
+        inputType:
+          type:
+            - "null"
+            - string
+        isRequired:
+          type: boolean
+        placeholder:
+          type:
+            - "null"
+            - string
+        defaultValue:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
     UpdateMailSettingRequest:
       required:
         - userName
@@ -24468,6 +24437,10 @@ components:
           type:
             - "null"
             - string
+        isLiked:
+          type:
+            - "null"
+            - boolean
     UpdateNebimQueryCategoryRequest:
       required:
         - name
@@ -24612,136 +24585,6 @@ components:
           items:
             type: string
             format: uuid
-    UpdateNebimSchemaCategoryRequest:
-      required:
-        - name
-        - description
-        - keywords
-        - isActive
-      type: object
-      properties:
-        name:
-          type:
-            - "null"
-            - string
-        description:
-          type:
-            - "null"
-            - string
-        keywords:
-          type:
-            - "null"
-            - string
-        isActive:
-          type: boolean
-    UpdateNebimSchemaColumnRequest:
-      required:
-        - businessName
-        - description
-        - isFilterable
-        - isSortable
-        - isGroupable
-        - isMetricSource
-        - isDateField
-        - isAllowed
-        - isCoreColumn
-        - coreOrder
-      type: object
-      properties:
-        businessName:
-          type:
-            - "null"
-            - string
-        description:
-          type:
-            - "null"
-            - string
-        isFilterable:
-          type: boolean
-        isSortable:
-          type: boolean
-        isGroupable:
-          type: boolean
-        isMetricSource:
-          type: boolean
-        isDateField:
-          type: boolean
-        isAllowed:
-          type: boolean
-        isCoreColumn:
-          type: boolean
-        coreOrder:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-    UpdateNebimSchemaColumnsAllowedRequest:
-      required:
-        - ids
-        - isAllowed
-      type: object
-      properties:
-        ids:
-          type:
-            - "null"
-            - array
-          items:
-            type: string
-            format: uuid
-        isAllowed:
-          type: boolean
-    UpdateNebimSchemaObjectRequest:
-      required:
-        - domain
-        - businessName
-        - description
-        - priority
-        - isAllowed
-      type: object
-      properties:
-        domain:
-          type:
-            - "null"
-            - string
-        businessName:
-          type:
-            - "null"
-            - string
-        description:
-          type:
-            - "null"
-            - string
-        priority:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        isAllowed:
-          type: boolean
-    UpdateNebimSchemaObjectsAllowedRequest:
-      required:
-        - ids
-        - isAllowed
-      type: object
-      properties:
-        ids:
-          type:
-            - "null"
-            - array
-          items:
-            type: string
-            format: uuid
-        isAllowed:
-          type: boolean
-    UpdateNebimSchemaRelationRequest:
-      required:
-        - isAllowed
-      type: object
-      properties:
-        isAllowed:
-          type: boolean
     UpdateNetGsmSettingRequest:
       required:
         - userName
@@ -25618,7 +25461,6 @@ tags:
   - name: AiRequestLogs
   - name: AiSettings
   - name: NebimQueries
-  - name: NebimSchema
   - name: PromptAiAssistants
   - name: Prompts
   - name: PromptTypes
@@ -25653,6 +25495,7 @@ tags:
   - name: SubscriptionUsages
   - name: Dashboard
   - name: Companies
+  - name: CompanyExtensions
   - name: CompanySettings
   - name: ConversationSegments
   - name: Segments

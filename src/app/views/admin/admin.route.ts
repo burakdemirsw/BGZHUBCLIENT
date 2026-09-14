@@ -11,6 +11,8 @@ import { AiKnowledgeTypesPage } from './ai-knowledge-types/ai-knowledge-types';
 import { AiRequestLogsPage } from './ai-request-logs/ai-request-logs';
 import { AwsS3SettingsPage } from './aws-s3-settings/aws-s3-settings';
 import { CloudinarySettingsPage } from './cloudinary-settings/cloudinary-settings';
+import { CompanyExtensionsPage } from './company-extensions/company-extensions';
+import { CompanyExtensionSettingsPage } from './company-extension-settings/company-extension-settings';
 import { CompaniesPage } from './companies/companies';
 import { CompanyDetailPage } from './companies/company-detail';
 import { ConversationListDescriptionsPage } from './conversation-list-descriptions/conversation-list-descriptions';
@@ -42,9 +44,36 @@ import { TeamUsersPage } from './team-users/team-users';
 import { TeamInvitationsPage } from './teams/team-invitations/team-invitations';
 import { TeamSettingsPage } from './teams/team-settings/team-settings';
 import { TeamsPage } from './teams/teams';
+import { ExtensionDefinitionsPage } from './extension-definitions/extension-definitions';
+import { ExtensionSettingDefinitionsPage } from './extension-setting-definitions/extension-setting-definitions';
 import { UserTypesPage } from './user-types/user-types';
 
 export const ADMIN_ROUTES: Routes = [
+    {
+        path: 'extension-definition',
+        redirectTo: 'admin/extension-definitions',
+        pathMatch: 'full',
+    },
+    {
+        path: 'extension-definitions',
+        redirectTo: 'admin/extension-definitions',
+        pathMatch: 'full',
+    },
+    {
+        path: 'company-extensions',
+        redirectTo: 'admin/company-extensions',
+        pathMatch: 'full',
+    },
+    {
+        path: 'company-extension-settings',
+        redirectTo: 'admin/company-extension-settings',
+        pathMatch: 'full',
+    },
+    {
+        path: 'extension-setting-definitions',
+        redirectTo: 'admin/extension-setting-definitions',
+        pathMatch: 'full',
+    },
     {
         path: 'admin/roles',
         component: RolesPage,
@@ -121,6 +150,35 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/ai-assistants',
         component: AiAssistantsPage,
         data: { title: 'AI Asistanlar' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/extension-definition',
+        redirectTo: 'admin/extension-definitions',
+        pathMatch: 'full',
+    },
+    {
+        path: 'admin/extension-definitions',
+        component: ExtensionDefinitionsPage,
+        data: { title: 'Extension Tanimlari' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/extension-setting-definitions',
+        component: ExtensionSettingDefinitionsPage,
+        data: { title: 'Extension Key Tanimlari' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/company-extensions',
+        component: CompanyExtensionsPage,
+        data: { title: 'Company Extensions' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/company-extension-settings',
+        component: CompanyExtensionSettingsPage,
+        data: { title: 'Company Extension Ayarlari' },
         canActivate: [AuthGuard],
     },
     {
