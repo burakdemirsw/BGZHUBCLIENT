@@ -62,7 +62,7 @@
             <section class="nac-thread">
                 <div class="nac-thread-inner">
                     @for (msg of messages; track msg.id) {
-                        <article class="nac-msg" [class.nac-msg-user]="msg.role === 'user'" [class.nac-msg-ai]="msg.role === 'assistant'">
+                        <article class="nac-msg" [class.nac-msg-user]="msg.role === 'user'" [class.nac-msg-ai]="msg.role === 'assistant'" [class.nac-msg-arrive]="msg.role === 'assistant' && isMessageArriving(msg.id)">
                             <div class="nac-avatar">
                                 @if (msg.role === 'user') {
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">

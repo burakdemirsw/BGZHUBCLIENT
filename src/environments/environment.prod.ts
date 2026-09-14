@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://investment-merchant-api.com/api',
+  apiBaseUrl: 'http://192.168.1.160:5018/api',
 };

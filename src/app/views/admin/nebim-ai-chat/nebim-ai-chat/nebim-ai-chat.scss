@@ -40,6 +40,11 @@
     .nac-shell {
         animation: none;
     }
+
+    .nac-msg-arrive .nac-bubble-ai,
+    .nac-msg-arrive .nac-avatar {
+        animation: none;
+    }
 }
 
 .nac-content {
@@ -348,9 +353,42 @@
     align-items: flex-start;
 }
 
+.nac-msg-arrive .nac-bubble-ai {
+    animation: nacAssistantBubbleIn 0.5s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+    transform-origin: left bottom;
+}
+
+.nac-msg-arrive .nac-avatar {
+    animation: nacAssistantAvatarIn 0.34s ease-out both;
+}
+
 @keyframes nacFadeIn {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes nacAssistantBubbleIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.985);
+        filter: blur(1.2px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes nacAssistantAvatarIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.88);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .nac-avatar {

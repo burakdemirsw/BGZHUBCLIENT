@@ -1545,7 +1545,7 @@ export class NebimQueriesPage implements OnInit {
     return (queryKey || '')
       .replace(/_copy/gi, '')
       .replace(/__+/g, '_')
-      .replace(/^_+|_+$/g, '')
+      .replace(/^_+|_+$/g, '')  
       .trim();
   }
 
@@ -1564,8 +1564,9 @@ export class NebimQueriesPage implements OnInit {
       return 'Sorgu içinde "FOR JSON PATH" kullanılamaz.';
     }
 
-    if (!normalizedQuery.startsWith('select') && !normalizedQuery.startsWith('with')) {
-      return 'Sorgu mutlaka SELECT veya WITH ile başlamalıdır.';
+    const hasTopLevelSelect = this.extractTopLevelSelectClauses(queryText).length > 0;
+    if (!hasTopLevelSelect) {
+      return 'Sorgu içinde en az bir ust seviye SELECT bulunmalidir.';
     }
 
     return null;
@@ -1646,18 +1647,58 @@ export class NebimQueriesPage implements OnInit {
   }
 
   private extractSelectClause(queryText: string): string | null {
-    const lowerQuery = queryText.toLowerCase();
-    const selectIndex = lowerQuery.indexOf('select');
-    if (selectIndex < 0) {
-      return null;
+    const topLevelClauses = this.extractTopLevelSelectClauses(queryText)
+      .filter((clause) => clause.trim().length > 0);
+
+    if (topLevelClauses.length > 0) {
+      const bestClause = topLevelClauses.reduce((best, current) => {
+        const bestColumnCount = this.splitTopLevelCsv(best).length;
+        const currentColumnCount = this.splitTopLevelCsv(current).length;
+        if (currentColumnCount > bestColumnCount) {
+          return current;
+        }
+
+        if (currentColumnCount === bestColumnCount && current.length > best.length) {
+          return current;
+        }
+
+        return best;
+      }, topLevelClauses[0]);
+
+      return bestClause;
     }
 
+    return this.extractSelectClauseByFallback(queryText);
+  }
+
+  private extractTopLevelSelectClauses(queryText: string): string[] {
+    const selectClauses: string[] = [];
+    const lowerQuery = queryText.toLowerCase();
+    const selectIndexes = this.findTopLevelKeywordIndexes(queryText, lowerQuery, 'select');
+
+    for (const selectIndex of selectIndexes) {
+      const fromIndex = this.findTopLevelFromAfterSelect(queryText, lowerQuery, selectIndex + 'select'.length);
+      if (fromIndex < 0) {
+        continue;
+      }
+
+      const clause = queryText.slice(selectIndex + 'select'.length, fromIndex).trim();
+      if (clause) {
+        selectClauses.push(clause);
+      }
+    }
+
+    return selectClauses;
+  }
+
+  private findTopLevelKeywordIndexes(queryText: string, lowerQuery: string, keyword: string): number[] {
+    const indexes: number[] = [];
+    const keywordLength = keyword.length;
     let depth = 0;
     let inSingleQuote = false;
     let inDoubleQuote = false;
-    let fromIndex = -1;
 
-    for (let index = selectIndex + 'select'.length; index < queryText.length; index += 1) {
+    for (let index = 0; index < queryText.length; index += 1) {
       const char = queryText[index];
       const nextChar = queryText[index + 1];
 
@@ -1689,26 +1730,78 @@ export class NebimQueriesPage implements OnInit {
         continue;
       }
 
-      if (depth === 0 && lowerQuery.slice(index, index + 4) === 'from') {
-        const prevChar = queryText[index - 1] || ' ';
-        const nextBoundaryChar = queryText[index + 4] || ' ';
-        if (/\s/.test(prevChar) && /\s/.test(nextBoundaryChar)) {
-          fromIndex = index;
-          break;
+      if (depth !== 0) {
+        continue;
+      }
+
+      if (lowerQuery.slice(index, index + keywordLength) !== keyword) {
+        continue;
+      }
+
+      if (!this.isSqlKeywordBoundary(queryText, index, keywordLength)) {
+        continue;
+      }
+
+      indexes.push(index);
+      index += keywordLength - 1;
+    }
+
+    return indexes;
+  }
+
+  private findTopLevelFromAfterSelect(queryText: string, lowerQuery: string, startIndex: number): number {
+    let depth = 0;
+    let inSingleQuote = false;
+    let inDoubleQuote = false;
+
+    for (let index = startIndex; index < queryText.length; index += 1) {
+      const char = queryText[index];
+      const nextChar = queryText[index + 1];
+
+      if (char === '\'' && !inDoubleQuote) {
+        if (inSingleQuote && nextChar === '\'') {
+          index += 1;
+          continue;
         }
+        inSingleQuote = !inSingleQuote;
+        continue;
+      }
+
+      if (char === '"' && !inSingleQuote) {
+        inDoubleQuote = !inDoubleQuote;
+        continue;
+      }
+
+      if (inSingleQuote || inDoubleQuote) {
+        continue;
+      }
+
+      if (char === '(') {
+        depth += 1;
+        continue;
+      }
+
+      if (char === ')') {
+        depth = Math.max(0, depth - 1);
+        continue;
+      }
+
+      if (depth !== 0) {
+        continue;
+      }
+
+      if (lowerQuery.slice(index, index + 4) === 'from' && this.isSqlKeywordBoundary(queryText, index, 4)) {
+        return index;
       }
     }
 
-    if (fromIndex < 0) {
-      return this.extractSelectClauseByFallback(queryText);
-    }
+    return -1;
+  }
 
-    const clause = queryText.slice(selectIndex + 'select'.length, fromIndex).trim();
-    if (clause) {
-      return clause;
-    }
-
-    return this.extractSelectClauseByFallback(queryText);
+  private isSqlKeywordBoundary(value: string, startIndex: number, keywordLength: number): boolean {
+    const before = value[startIndex - 1] || ' ';
+    const after = value[startIndex + keywordLength] || ' ';
+    return !/[a-zA-Z0-9_]/.test(before) && !/[a-zA-Z0-9_]/.test(after);
   }
 
   private extractSelectClauseByFallback(queryText: string): string | null {

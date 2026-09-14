@@ -1,7 +1,8 @@
-import { AfterViewChecked, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ChatHistoryEntry, SidebarComponent } from '../sidebar/sidebar';
 import { ConversationsService } from '@/app/core/services/conversations.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
@@ -88,7 +89,7 @@ interface ConversationPageResult {
     templateUrl: './nebim-ai-chat.html',
     styleUrl: './nebim-ai-chat.scss'
 })
-export class NebimAiChatPage implements OnInit, AfterViewChecked {
+export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     @ViewChild('scrollAnchor') scrollAnchor?: ElementRef<HTMLDivElement>;
     @ViewChild('textArea') textArea?: ElementRef<HTMLTextAreaElement>;
     @ViewChild(SidebarComponent) sidebar?: SidebarComponent;
@@ -111,6 +112,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
     private sidebarOpenedManually = false;
     private sidebarCurrentPage = 1;
     private readonly sidebarPageSize = 20;
+    private routeConversationSub: Subscription | null = null;
 
     readonly suggestions: SuggestionItem[] = [
         {
@@ -173,11 +175,10 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
     async ngOnInit(): Promise<void> {
         await Promise.all([this.loadSidebar(), this.loadConversationList()]);
 
-        const routeConversationId = this.route.snapshot.paramMap.get('conversationId');
-        if (routeConversationId) {
-            this.activeConversationId = routeConversationId;
-            await this.loadThread(routeConversationId);
-        }
+        await this.syncConversationFromRoute(this.route.snapshot.paramMap.get('conversationId'));
+        this.routeConversationSub = this.route.paramMap.subscribe((paramMap) => {
+            void this.syncConversationFromRoute(paramMap.get('conversationId'));
+        });
 
         // Ensure initial render lands at the latest message on page open.
         this.shouldScroll = true;
@@ -191,6 +192,11 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
             this.shouldScroll = false;
             this.scrollAnchor?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
+    }
+
+    ngOnDestroy(): void {
+        this.routeConversationSub?.unsubscribe();
+        this.routeConversationSub = null;
     }
 
     useSuggestion(text: string): void {
@@ -470,7 +476,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
             this.isLoadingThread = false;
         }
     }
-
+  
     private extractArray<T>(response: unknown): T[] {
         if (Array.isArray(response)) return response as T[];
         if (!response || typeof response !== 'object') return [];
@@ -922,7 +928,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
         if (sameDay) {
             return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
         }
-
+  
         return date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' });
     }
 
@@ -937,11 +943,9 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
     }
 
     newChat(): void {
-        this.messages = [];
-        this.input = '';
-        this.activeConversationId = null;
-        this.errorMessage = '';
+        this.resetConversationState();
         this.sidebarMobileOpen = false;
+        void this.router.navigate(['/nebim-ai-chat']);
         setTimeout(() => this.textArea?.nativeElement.focus(), 0);
     }
 
@@ -972,13 +976,32 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked {
 
     async onSelectChat(conversationId: string): Promise<void> {
         this.sidebarMobileOpen = false;
-        this.activeConversationId = conversationId;
         await this.navigateToConversation(conversationId);
-        await this.loadThread(conversationId);
     }
 
     private async navigateToConversation(conversationId: string): Promise<void> {
         await this.router.navigate(['/c', conversationId]);
+    }
+
+    private async syncConversationFromRoute(routeConversationId: string | null): Promise<void> {
+        if (!routeConversationId) {
+            this.resetConversationState();
+            return;
+        }
+
+        if (this.activeConversationId === routeConversationId && this.messages.length > 0) {
+            return;
+        }
+
+        this.activeConversationId = routeConversationId;
+        await this.loadThread(routeConversationId);
+    }
+
+    private resetConversationState(): void {
+        this.messages = [];
+        this.input = '';
+        this.activeConversationId = null;
+        this.errorMessage = '';
     }
 
     private uid(): string {
