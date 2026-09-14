@@ -29,6 +29,16 @@
                 <!-- <span class="nac-model-badge">api-live · v1</span> -->
             </div>
             <div class="nac-header-right">
+                <button
+                    type="button"
+                    class="nac-icon-btn nac-sound-toggle"
+                    (click)="toggleSound()"
+                    [attr.aria-pressed]="!soundEnabled"
+                    [title]="soundEnabled ? 'Sesi kapat' : 'Sesi ac'"
+                    aria-label="Ses durumu">
+                    <i class="fa-solid" [class.fa-volume-high]="soundEnabled" [class.fa-volume-xmark]="!soundEnabled"></i>
+                    <span>{{ soundEnabled ? 'Ses Acik' : 'Ses Kapali' }}</span>
+                </button>
             </div>
         </header>
 
@@ -41,10 +51,10 @@
                         <div class="nac-orb-core"></div>
                     </div>
                     <h1 class="nac-empty-title">Bugün sana nasıl yardımcı olabilirim?</h1>
-                    <p class="nac-empty-subtitle">Bir soru sor ya da asagidaki kullanilabilir extensionlardan birini sec.</p>
+                    <p class="nac-empty-subtitle">Bir soru sor ya da asagidaki kullanilabilir eklentilerden birini sec.</p>
 
                     <div class="nac-extension-showcase-head">
-                        <span class="nac-extension-showcase-title">Kullanilabilir Extensionlar</span>
+                        <span class="nac-extension-showcase-title">Kullanilabilir Eklentiler</span>
                         <span class="nac-extension-showcase-count">{{ activeExtensionShortcuts.length }} kayit</span>
                     </div>
 
@@ -77,7 +87,7 @@
                             </button>
                         } @empty {
                             <div class="nac-empty-extension-note">
-                                Aktif mention tanimli extension bulunamadi. Yonetim panelinden extension mention ayarlarini kontrol edin.
+                                Aktif etiket tanimli eklenti bulunamadi. Yonetim panelinden eklenti etiket ayarlarini kontrol edin.
                             </div>
                         }
                     </div>
@@ -305,25 +315,25 @@
 
     <footer class="nac-composer-wrap">
         <div class="nac-composer nac-auto-field" [class.nac-auto-field-active]="input.trim().length > 0">
-            <div class="nac-extension-picker" title="Extension mention ekle">
+            <div class="nac-extension-picker" title="Eklenti etiketi ekle">
                 <button
                     type="button"
                     class="nac-extension-trigger"
                     [disabled]="!hasExtensionShortcuts() || isLoadingExtensions"
                     [attr.aria-expanded]="extensionMenuOpen"
                     (click)="onExtensionShortcutClick()"
-                    aria-label="Extension mention ekle">
+                    aria-label="Eklenti etiketi ekle">
                     <i class="fa-solid fa-plus"></i>
                 </button>
 
                 @if (extensionMenuOpen) {
-                    <div class="nac-extension-menu" role="listbox" aria-label="Extension mention listesi">
+                    <div class="nac-extension-menu" role="listbox" aria-label="Eklenti etiket listesi">
                         <div class="nac-extension-filter-row">
                             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                             <input
                                 type="text"
                                 class="nac-extension-filter-input"
-                                placeholder="Extension ara..."
+                                placeholder="Eklenti ara..."
                                 [(ngModel)]="extensionMenuFilterText"
                                 (input)="onExtensionMenuFilterInput()" />
                         </div>
@@ -346,7 +356,7 @@
                                 </span>
                             </button>
                         } @empty {
-                            <div class="nac-extension-empty">Filtreye uygun extension bulunamadi.</div>
+                            <div class="nac-extension-empty">Filtreye uygun eklenti bulunamadi.</div>
                         }
                     </div>
                 }
@@ -377,6 +387,7 @@
                 rows="1"
                 placeholder="Nebim AI'a bir mesaj gönder..."
                 [(ngModel)]="input"
+                (keydown)="onComposerKeydown($event)"
                 (keydown.enter)="onEnter($event)"
                 (keydown.tab)="onComposerTab($event)"
                 (focus)="onComposerFocus()"

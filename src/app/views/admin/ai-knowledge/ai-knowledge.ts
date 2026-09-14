@@ -233,6 +233,30 @@ export class AiKnowledgePage implements OnInit {
         }
     }
 
+    async copyItem(item: AiKnowledgeResponse): Promise<void> {
+        try {
+            const userId = this.authState.profile?.userId || '';
+            const companyId = this.authState.profile?.companyId || '';
+            const request: CreateAiKnowledgeRequest = {
+                companyId,
+                userId,
+                aiAssistantId: item.aiAssistantId,
+                extensionId: item.extensionId,
+                aiKnowledgeTypeId: item.aiKnowledgeTypeId || null,
+                integrationUserId: item.integrationUserId || null,
+                prop: item.prop || '',
+                value: item.value || '',
+                shortDescription: item.shortDescription || null,
+            };
+
+            await this.knowledgeService.create(request);
+            await this.loadKnowledge();
+        } catch (err) {
+            console.error('Kopyalama hatası:', err);
+            alert('Bilgi kaydı kopyalanırken hata oluştu.');
+        }
+    }
+
     closeModal(): void {
         this.showModal = false;
     }

@@ -132,6 +132,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     selectedMentionChips: MentionChipItem[] = [];
     isSending = false;
     isLoadingThread = false;
+    soundEnabled = true;
     sidebarCollapsed = false;
     sidebarMobileOpen = false;
 
@@ -147,11 +148,15 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     private locallyStartedConversationId: string | null = null;
     private assistantWaitConversationId: string | null = null;
     private extensionMenuOpenedByMention = false;
+    private hasHydratedThread = false;
     private sidebarOpenedManually = false;
     private sidebarCurrentPage = 1;
     private readonly sidebarPageSize = 20;
     private routeConversationSub: Subscription | null = null;
     private viewportSyncCleanup: (() => void) | null = null;
+    private readonly soundPreferenceKey = 'nebim-ai-chat-sound-enabled';
+    private keyboardSound = new Audio('assets/sounds/keyboard.mp3');
+    private lastKeyboardSoundAt = 0;
 
     private readonly extensionContentByKey: Record<string, { category: string; title: string; subtitle: string; prompt: string; order: number }> = {
         siparis: {
@@ -224,6 +229,9 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
    
     async ngOnInit(): Promise<void> {
         this.startViewportSync();
+        this.loadSoundPreference();
+        this.keyboardSound.preload = 'auto';
+        this.keyboardSound.volume = 0.5;
 
         await Promise.all([
             this.loadSidebar(),
@@ -256,6 +264,12 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         this.routeConversationSub = null;
         this.viewportSyncCleanup?.();
         this.viewportSyncCleanup = null;
+        this.keyboardSound.pause();
+    }
+
+    toggleSound(): void {
+        this.soundEnabled = !this.soundEnabled;
+        this.persistSoundPreference();
     }
 
     /**
@@ -333,7 +347,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
 
         const enabledShortcuts = this.getEnabledExtensionShortcuts();
         if (!enabledShortcuts.length) {
-            this.errorMessage = 'Aktif extension bulunamadi.';
+            this.errorMessage = 'Aktif eklenti bulunamadi.';
             return;
         }
 
@@ -353,7 +367,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
 
     selectExtensionShortcut(shortcut: ActiveExtensionShortcut): void {
         if (!shortcut.isEnabled) {
-            this.errorMessage = 'Bu extension pasif durumda oldugu icin secilemez.';
+            this.errorMessage = 'Bu eklenti pasif durumda oldugu icin secilemez.';
             return;
         }
         this.insertMentionToInput(shortcut.mention, shortcut);
@@ -423,12 +437,12 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     private insertMentionToInput(mention: string, shortcut?: ActiveExtensionShortcut): void {
         const token = this.normalizeMention(mention);
         if (!token) {
-            this.errorMessage = 'Bu extension icin mention tanimi bulunamadi.';
+            this.errorMessage = 'Bu eklenti icin etiket tanimi bulunamadi.';
             return;
         }
 
         if (!shortcut) {
-            this.errorMessage = 'Mention secimi icin extension bulunamadi.';
+            this.errorMessage = 'Etiket secimi icin eklenti bulunamadi.';
             return;
         }
 
@@ -546,9 +560,9 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         const nameKey = this.toLookupKey(name || '');
         return this.extensionContentByKey[mentionKey] || this.extensionContentByKey[nameKey] || {
             category: 'Genel',
-            title: name || 'Extension',
-            subtitle: 'Bu extension ile ilgili sorularinizi mention ekleyerek sorabilirsiniz.',
-            prompt: 'Bu extension ile ilgili guncel bilgileri paylas.',
+            title: name || 'Eklenti',
+            subtitle: 'Bu eklenti ile ilgili sorularinizi etiket ekleyerek sorabilirsiniz.',
+            prompt: 'Bu eklenti ile ilgili guncel bilgileri paylas.',
             order: 99,
         };
     }
@@ -579,6 +593,31 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         if (keyboardEvent.shiftKey) return;
         keyboardEvent.preventDefault();
         this.send();
+    }
+
+    onComposerKeydown(event: Event): void {
+        const keyboardEvent = event as KeyboardEvent;
+        if (!this.soundEnabled) {
+            return;
+        }
+
+        if (keyboardEvent.ctrlKey || keyboardEvent.metaKey || keyboardEvent.altKey) {
+            return;
+        }
+
+        const key = keyboardEvent.key;
+        const isTypingLikeKey = key.length === 1 || key === 'Backspace' || key === 'Delete' || key === 'Enter';
+        if (!isTypingLikeKey) {
+            return;
+        }
+
+        const now = Date.now();
+        if (now - this.lastKeyboardSoundAt < 45) {
+            return;
+        }
+
+        this.lastKeyboardSoundAt = now;
+        this.playKeyboardSound();
     }
 
     onComposerTab(event: Event): void {
@@ -682,7 +721,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
 
         const mentionTokens = this.getSelectedMentionTokens();
         if (!mentionTokens.length) {
-            this.errorMessage = 'Mesaj gonderebilmek icin en az bir mention eklemelisiniz (orn: @nebim).';
+            this.errorMessage = 'Mesaj gonderebilmek icin en az bir etiket eklemelisiniz (orn: @nebim).';
             return;
         }
 
@@ -699,6 +738,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
 
         const conversationId = this.activeConversationId!;
         const optimisticMentions = this.selectedMentionChips.map((chip) => ({ ...chip }));
+        this.hasHydratedThread = true;
 
         // 2) UI'a kullanıcı mesajını optimistic ekle
         this.messages = [
@@ -711,6 +751,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
                 mentions: optimisticMentions,
             }
         ];
+        this.playKeyboardSound();
         this.selectedMentionChips = [];
         this.input = '';
         this.isSending = true;
@@ -965,7 +1006,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
                 return;
             }
 
-            this.messages = loaded;
+            this.setMessagesFromServer(loaded);
             this.shouldScroll = true;
 
             // Sayfa yenileme gibi durumlarda thread ilk etapta sadece kullanici mesaji
@@ -1474,7 +1515,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
             return;
         }
 
-        this.messages = mapped;
+        this.setMessagesFromServer(mapped);
     }
 
     private isAwaitingAssistantReply(messages: UiChatMessage[]): boolean {
@@ -1509,7 +1550,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
 
                 const loadedMessages = this.mapConversationMessages(res.data);
                 if (loadedMessages.length > 0) {
-                    this.messages = loadedMessages;
+                    this.setMessagesFromServer(loadedMessages);
                     this.shouldScroll = true;
                 }
 
@@ -1688,6 +1729,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         this.locallyStartedConversationId = null;
 
         this.activeConversationId = routeConversationId;
+        this.hasHydratedThread = false;
         await this.loadThread(routeConversationId);
     }
 
@@ -1697,6 +1739,64 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         this.activeConversationId = null;
         this.locallyStartedConversationId = null;
         this.errorMessage = '';
+        this.hasHydratedThread = false;
+    }
+
+    private persistSoundPreference(): void {
+        try {
+            localStorage.setItem(this.soundPreferenceKey, this.soundEnabled ? '1' : '0');
+        } catch {
+            // Storage not available; ignore.
+        }
+    }
+
+    private loadSoundPreference(): void {
+        try {
+            const raw = localStorage.getItem(this.soundPreferenceKey);
+            if (raw === '0') {
+                this.soundEnabled = false;
+            }
+            if (raw === '1') {
+                this.soundEnabled = true;
+            }
+        } catch {
+            // Storage not available; keep default.
+        }
+    }
+
+    private setMessagesFromServer(nextMessages: UiChatMessage[]): void {
+        if (!this.hasHydratedThread) {
+            this.messages = nextMessages;
+            this.hasHydratedThread = true;
+            return;
+        }
+
+        const previousIds = new Set(this.messages.map((item) => item.id));
+        const hasNewMessage = nextMessages.some((item) => !previousIds.has(item.id));
+        this.messages = nextMessages;
+
+        if (hasNewMessage) {
+            this.playKeyboardSound();
+        }
+    }
+
+    private playKeyboardSound(): void {
+        if (!this.soundEnabled) {
+            return;
+        }
+
+        try {
+            this.keyboardSound.currentTime = 0;
+            this.keyboardSound.volume = 0.5;
+            const playPromise = this.keyboardSound.play();
+            if (playPromise && typeof playPromise.catch === 'function') {
+                playPromise.catch(() => {
+                    // Audio playback may be blocked; ignore.
+                });
+            }
+        } catch {
+            // Audio playback may be blocked; ignore.
+        }
     }
 
     private uid(): string {

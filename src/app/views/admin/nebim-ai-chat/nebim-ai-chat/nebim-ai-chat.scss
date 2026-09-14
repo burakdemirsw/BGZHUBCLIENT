@@ -85,6 +85,17 @@
     gap: 14px;
 }
 
+.nac-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nac-sound-toggle {
+    padding: 7px 12px;
+    font-size: 12px;
+}
+
 .nac-logo-mark {
     display: inline-flex;
     align-items: center;
