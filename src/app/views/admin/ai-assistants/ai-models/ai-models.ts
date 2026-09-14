@@ -7,6 +7,18 @@ import { AiModel, CreateAiModelRequest, UpdateAiModelRequest } from '@/app/core/
 import { AiProvider } from '@/app/core/models/ai-assistant/ai-provider.models';
 import { PagedResult } from '@/app/core/models/pagination.model';
 
+interface AiModelForm {
+    aiProviderId: string;
+    name: string;
+    modelCode: string;
+    priorityOrder: number;
+    inputTokenLimit: number;
+    outputTokenLimit: number;
+    inputPrice: number;
+    outputPrice: number;
+    isBlocked: boolean;
+}
+
 @Component({
     selector: 'app-ai-models-page',
     imports: [CommonModule, FormsModule],
@@ -29,10 +41,11 @@ export class AiModelsPage implements OnInit {
     totalPages = 1;
     totalPagesArray: number[] = [];
 
-    form: any = {
+    form: AiModelForm = {
         aiProviderId: '',
         name: '',
         modelCode: '',
+        priorityOrder: 0,
         inputTokenLimit: 0,
         outputTokenLimit: 0,
         inputPrice: 0,
@@ -66,6 +79,7 @@ export class AiModelsPage implements OnInit {
         this.filteredItems = this.models.filter(item =>
             (item.name || '').toLowerCase().includes(filter) ||
             (item.modelCode || '').toLowerCase().includes(filter) ||
+            String(item.priorityOrder ?? '').includes(filter) ||
             (item.aiProvider?.firmDescription || '').toLowerCase().includes(filter)
         );
         this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
@@ -122,6 +136,7 @@ export class AiModelsPage implements OnInit {
             aiProviderId: '',
             name: '',
             modelCode: '',
+            priorityOrder: 0,
             inputTokenLimit: 0,
             outputTokenLimit: 0,
             inputPrice: 0,
@@ -138,6 +153,7 @@ export class AiModelsPage implements OnInit {
             aiProviderId: model.aiProviderId,
             name: model.name,
             modelCode: model.modelCode,
+            priorityOrder: model.priorityOrder,
             inputTokenLimit: model.inputTokenLimit,
             outputTokenLimit: model.outputTokenLimit,
             inputPrice: model.inputPrice,
@@ -154,6 +170,7 @@ export class AiModelsPage implements OnInit {
                     aiProviderId: this.form.aiProviderId,
                     name: this.form.name,
                     modelCode: this.form.modelCode,
+                    priorityOrder: Number(this.form.priorityOrder),
                     inputTokenLimit: Number(this.form.inputTokenLimit),
                     outputTokenLimit: Number(this.form.outputTokenLimit),
                     inputPrice: Number(this.form.inputPrice),
@@ -166,6 +183,7 @@ export class AiModelsPage implements OnInit {
                     aiProviderId: this.form.aiProviderId,
                     name: this.form.name,
                     modelCode: this.form.modelCode,
+                    priorityOrder: Number(this.form.priorityOrder),
                     inputTokenLimit: Number(this.form.inputTokenLimit),
                     outputTokenLimit: Number(this.form.outputTokenLimit),
                     inputPrice: Number(this.form.inputPrice),

@@ -4,6 +4,7 @@ export interface AiAssistant {
   name: string;
   aiProviderId: string;
   aiModelId: string;
+  order: number;
   isBlocked?: boolean;
   createdDate?: string;
   updatedDate?: string;
@@ -21,6 +22,7 @@ export interface CreateAiAssistantRequest {
   name: string;
   aiProviderId: string;
   aiModelId: string;
+  order: number;
 }
 
 export interface UpdateAiAssistantRequest {
@@ -29,6 +31,7 @@ export interface UpdateAiAssistantRequest {
   name: string;
   aiProviderId: string;
   aiModelId: string;
+  order: number;
   isBlocked: boolean;
 }
 

@@ -1,11 +1,13 @@
-import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ChatHistoryEntry, SidebarComponent } from '../sidebar/sidebar';
 import { ConversationsService } from '@/app/core/services/conversations.service';
+import { AiProvidersService } from '@/app/core/services/ai-providers.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
+import { AiAssistant } from '@/app/core/models/ai-assistant/ai-assistant.models';
 import {
     AiChatContentBlock,
     AiChatImageData,
@@ -14,6 +16,7 @@ import {
     AiChatTableData,
     AiChatToolPayload,
     ConversationReplyResponse,
+    ConversationMessageReactionRequest,
     ConversationHeader,
     ChatMessage,
     ConversationMessagesResponse,
@@ -32,6 +35,8 @@ interface UiChatMessage {
     aiImageUrl?: string | null;
     hasExcel?: boolean;
     excelUrl?: string | null;
+    isLiked?: boolean | null;
+    isReactionSaving?: boolean;
 }
 
 interface ConversationApiMessage {
@@ -50,6 +55,7 @@ interface ConversationApiMessage {
     aiImageUrl?: string | null;
     hasExcel?: boolean | null;
     excelUrl?: string | null;
+    isLiked?: boolean | null;
 }
 
 interface ConversationReplyResponseShape {
@@ -100,6 +106,9 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     isLoadingMoreChats = false;
 
     input = '';
+    assistants: AiAssistant[] = [];
+    selectedAssistantId = '';
+    assistantMenuOpen = false;
     isSending = false;
     isLoadingThread = false;
     sidebarCollapsed = false;
@@ -113,6 +122,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     private sidebarCurrentPage = 1;
     private readonly sidebarPageSize = 20;
     private routeConversationSub: Subscription | null = null;
+    private viewportSyncCleanup: (() => void) | null = null;
 
     readonly suggestions: SuggestionItem[] = [
         {
@@ -167,13 +177,17 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
 
     constructor(
         private conversationsService: ConversationsService,
+        private aiProvidersService: AiProvidersService,
         private authState: AuthStateService,
         private router: Router,
         private route: ActivatedRoute,
+        private hostRef: ElementRef<HTMLElement>,
     ) {}
    
     async ngOnInit(): Promise<void> {
-        await Promise.all([this.loadSidebar(), this.loadConversationList()]);
+        this.startViewportSync();
+
+        await Promise.all([this.loadSidebar(), this.loadConversationList(), this.loadAssistants()]);
 
         await this.syncConversationFromRoute(this.route.snapshot.paramMap.get('conversationId'));
         this.routeConversationSub = this.route.paramMap.subscribe((paramMap) => {
@@ -197,6 +211,90 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     ngOnDestroy(): void {
         this.routeConversationSub?.unsubscribe();
         this.routeConversationSub = null;
+        this.viewportSyncCleanup?.();
+        this.viewportSyncCleanup = null;
+    }
+
+    /**
+     * Mobil tarayicılarda yazılım klavyesi acıldıgında layout viewport degismedigi icin
+     * sabit konumlu chat kabugu klavyenin altında kalıyor. Gercek gorunur viewport
+     * olculeri CSS degiskenlerine yazılarak composer her zaman gorunur tutulur.
+     */
+    private startViewportSync(): void {
+        if (typeof window === 'undefined') return;
+
+        const visualViewport = window.visualViewport ?? null;
+        const applyViewportMetrics = () => {
+            const height = Math.round(visualViewport?.height ?? window.innerHeight);
+            const offsetTop = Math.round(visualViewport?.offsetTop ?? 0);
+            const hostStyle = this.hostRef.nativeElement.style;
+            hostStyle.setProperty('--nac-viewport-height', `${height}px`);
+            hostStyle.setProperty('--nac-viewport-offset', `${offsetTop}px`);
+        };
+
+        applyViewportMetrics();
+
+        if (visualViewport) {
+            visualViewport.addEventListener('resize', applyViewportMetrics);
+            visualViewport.addEventListener('scroll', applyViewportMetrics);
+            this.viewportSyncCleanup = () => {
+                visualViewport.removeEventListener('resize', applyViewportMetrics);
+                visualViewport.removeEventListener('scroll', applyViewportMetrics);
+            };
+            return;
+        }
+
+        window.addEventListener('resize', applyViewportMetrics);
+        window.addEventListener('orientationchange', applyViewportMetrics);
+        this.viewportSyncCleanup = () => {
+            window.removeEventListener('resize', applyViewportMetrics);
+            window.removeEventListener('orientationchange', applyViewportMetrics);
+        };
+    }
+
+    private isMobileViewport(): boolean {
+        return typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
+    }
+
+    onComposerFocus(): void {
+        // Klavye acilma animasyonu bittikten sonra son mesaja kaydir.
+        setTimeout(() => {
+            this.scrollAnchor?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }, 300);
+    }
+
+    get selectedAssistantLabel(): string {
+        if (!this.selectedAssistantId) {
+            return 'Otomatik';
+        }
+
+        const selectedAssistant = this.assistants.find((assistant) => assistant.id === this.selectedAssistantId);  
+        return selectedAssistant?.name?.trim() || 'Otomatik';
+    }
+
+    toggleAssistantMenu(): void {
+        this.assistantMenuOpen = !this.assistantMenuOpen;
+    }
+
+    selectAssistant(assistantId: string): void {  
+        this.selectedAssistantId = assistantId;
+        this.assistantMenuOpen = false;
+    }
+
+    isAssistantSelected(assistantId: string): boolean {
+        return this.selectedAssistantId === assistantId;
+    }
+
+    @HostListener('document:click', ['$event'])
+    onDocumentClick(event: MouseEvent): void {
+        if (!this.assistantMenuOpen) return;
+
+        const target = event.target as HTMLElement | null;
+        if (!target) return;
+
+        if (!target.closest('.nac-assistant-picker')) {
+            this.assistantMenuOpen = false;
+        }
     }
 
     useSuggestion(text: string): void {
@@ -224,7 +322,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     onComposerInput(): void {
         this.autoResize();
 
-        if (this.input.length > 0 && !this.sidebarOpenedManually) {
+        if (this.input.length > 0 && !this.sidebarOpenedManually && !this.isMobileViewport()) {
             this.sidebarCollapsed = true;
             this.sidebarMobileOpen = false;
         }
@@ -275,7 +373,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
             const replyRequest: ConversationReplyRequest = {
                 companyId,
                 message: content,
-                assistantId: null,
+                assistantId: this.selectedAssistantId || null,
                 file: null,
                 fileType: null,
             };
@@ -382,6 +480,30 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         } catch (err) {
             console.warn('[NebimAiChat] Sidebar yüklenemedi:', err);
         }  
+    }
+
+    private async loadAssistants(): Promise<void> {
+        try {
+            const companyId = this.authState.profile?.companyId || '';
+            const response = await this.aiProvidersService.getAssistantsPaged({
+                pageNumber: 1,
+                pageSize: 1000,
+                companyId,
+            });
+
+            const list = this.extractArray<AiAssistant>(response?.data)
+                .filter((assistant) => !assistant.isBlocked)
+                .sort((left, right) => (left.order ?? 0) - (right.order ?? 0));
+
+            this.assistants = list;
+            if (!this.selectedAssistantId && this.assistants.length > 0) {
+                this.selectedAssistantId = this.assistants[0].id;
+            }
+        } catch (err) {
+            console.warn('[NebimAiChat] Asistan listesi yüklenemedi:', err);
+            this.assistants = [];
+            this.selectedAssistantId = '';
+        }
     }
 
     private async loadConversationList(): Promise<void> {
@@ -678,8 +800,60 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         return !!message.hasImage && !!message.aiImageUrl;
     }
 
+    isMessageArriving(messageId: string): boolean {
+        const message = this.messages.find((item) => item.id === messageId);
+        if (!message || message.role !== 'assistant') {
+            return false;
+        }
+
+        const lastAssistantMessage = [...this.messages].reverse().find((item) => item.role === 'assistant');
+        if (!lastAssistantMessage || lastAssistantMessage.id !== messageId) {
+            return false;
+        }
+
+        const ageInMs = Date.now() - message.createdAt.getTime();
+        return ageInMs >= 0 && ageInMs < 1800;
+    }
+
     hasExcelExport(message: UiChatMessage): boolean {
         return !!message.hasExcel && !!message.excelUrl;
+    }
+
+    canReactToMessage(message: UiChatMessage): boolean {
+        return message.role === 'assistant' && !message.isError;
+    }
+
+    isReactionActive(message: UiChatMessage, reaction: 'like' | 'dislike'): boolean {
+        if (reaction === 'like') {
+            return message.isLiked === true;
+        }
+
+        return message.isLiked === false;
+    }
+
+    async setMessageReaction(message: UiChatMessage, isLiked: boolean): Promise<void> {
+        if (!this.activeConversationId || !this.canReactToMessage(message) || message.isReactionSaving) {
+            return;
+        }
+
+        if (message.isLiked === isLiked) {
+            return;
+        }
+
+        const previousReaction = message.isLiked ?? null;
+        message.isLiked = isLiked;
+        message.isReactionSaving = true;
+
+        const request: ConversationMessageReactionRequest = { isLiked };
+        try {
+            await this.conversationsService.setMessageReaction(this.activeConversationId, message.id, request);
+        } catch (err) {
+            message.isLiked = previousReaction;
+            console.error('[NebimAiChat] Mesaj reaction guncellenemedi:', err);
+            this.errorMessage = 'Mesaj reaction guncellenemedi. Lutfen tekrar deneyin.';
+        } finally {
+            message.isReactionSaving = false;
+        }
     }
 
     canShareOnWhatsApp(message: UiChatMessage): boolean {
@@ -806,7 +980,23 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
             aiImageUrl: message.aiImageUrl ?? null,
             hasExcel: Boolean(message.hasExcel),
             excelUrl: message.excelUrl ?? null,
+            isLiked: this.resolveReactionValue(message),
+            isReactionSaving: false,
         };
+    }
+
+    private resolveReactionValue(message: ConversationApiMessage): boolean | null {
+        if (typeof message.isLiked === 'boolean') {
+            return message.isLiked;
+        }
+
+        const record = message as unknown as Record<string, unknown>;
+        const rawValue = record['IsLiked'] ?? record['isLiked'];
+        if (typeof rawValue === 'boolean') {
+            return rawValue;
+        }
+
+        return null;
     }
 
     private buildWhatsAppShareText(message: UiChatMessage): string {
@@ -950,15 +1140,25 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     }
 
     toggleSidebar(): void {
+        if (this.isMobileViewport()) {
+            // Mobilde sidebar icindeki toggle drawer'i kapatir
+            this.sidebarMobileOpen = false;
+            return;
+        }
+
         this.sidebarCollapsed = !this.sidebarCollapsed;
         this.sidebarOpenedManually = !this.sidebarCollapsed;
     }
 
     /** Header hamburger: mobil'de drawer, desktop'ta collapse toggle */
     onHamburgerClick(): void {
-        if (window.matchMedia('(max-width: 768px)').matches) {
-            this.sidebarMobileOpen = true;
-            this.sidebarOpenedManually = true;
+        if (this.isMobileViewport()) {
+            this.sidebarMobileOpen = !this.sidebarMobileOpen;
+            if (this.sidebarMobileOpen) {
+                // Mobil drawer her zaman tam genislikte acilmali
+                this.sidebarCollapsed = false;
+                this.sidebarOpenedManually = true;
+            }
         } else {
             this.sidebarCollapsed = !this.sidebarCollapsed;
             this.sidebarOpenedManually = !this.sidebarCollapsed;
@@ -967,6 +1167,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
 
     openMobileSidebar(): void {
         this.sidebarMobileOpen = true;
+        this.sidebarCollapsed = false;
         this.sidebarOpenedManually = true;
     }
 

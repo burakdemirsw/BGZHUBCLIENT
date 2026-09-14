@@ -17,11 +17,11 @@
     <div class="nac-content">
         <header class="nac-header">
             <div class="nac-header-left">
-                <!-- <button type="button" class="nac-icon-btn nac-hamburger" (click)="onHamburgerClick()" title="Sidebar">
+                <button type="button" class="nac-icon-btn nac-hamburger" (click)="onHamburgerClick()" title="Sidebar" aria-label="Sidebar">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 6h18M3 12h18M3 18h18"/>
                     </svg>
-                </button> -->
+                </button>
                 <div class="nac-logo-mark">
                     <span class="nac-dot"></span>
                     <span class="nac-logo-text">Nebim AI</span>
@@ -76,7 +76,7 @@
                             <div class="nac-bubble-wrap">
                                 <div class="nac-msg-role">{{ msg.role === 'user' ? 'Sen' : 'Nebim AI' }}</div>
                                 @if (msg.role === 'assistant') {
-                                    <div class="nac-bubble nac-bubble-ai" [class.nac-bubble-error]="msg.isError" [class.nac-bubble-has-actions]="canShareOnWhatsApp(msg) || hasExcelExport(msg)">
+                                    <div class="nac-bubble nac-bubble-ai" [class.nac-bubble-error]="msg.isError" [class.nac-bubble-has-actions]="canShareOnWhatsApp(msg) || hasExcelExport(msg) || canReactToMessage(msg)">
                                         @if (msg.blocks?.length) {
                                             <div class="nac-blocks">
                                                 @for (block of msg.blocks; track $index) {
@@ -184,8 +184,32 @@
 
                                         }
 
-                                        @if (canShareOnWhatsApp(msg) || hasExcelExport(msg)) {
+                                        @if (canShareOnWhatsApp(msg) || hasExcelExport(msg) || canReactToMessage(msg)) {
                                             <div class="nac-message-actions nac-message-actions-floating">
+                                                @if (canReactToMessage(msg)) {
+                                                    <button
+                                                        type="button"
+                                                        class="nac-action-icon nac-action-reaction"
+                                                        [class.is-active]="isReactionActive(msg, 'like')"
+                                                        [disabled]="msg.isReactionSaving"
+                                                        (click)="setMessageReaction(msg, true)"
+                                                        title="Beğen"
+                                                        aria-label="Beğen">
+                                                        <i class="fa-regular fa-thumbs-up"></i>
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        class="nac-action-icon nac-action-reaction"
+                                                        [class.is-active]="isReactionActive(msg, 'dislike')"
+                                                        [disabled]="msg.isReactionSaving"
+                                                        (click)="setMessageReaction(msg, false)"
+                                                        title="Beğenme"
+                                                        aria-label="Beğenme">
+                                                        <i class="fa-regular fa-thumbs-down"></i>
+                                                    </button>
+                                                }
+
                                                 @if (canShareOnWhatsApp(msg)) {
                                                     <a class="nac-action-icon nac-action-whatsapp" [href]="getWhatsAppShareUrl(msg)" target="_blank" rel="noopener noreferrer" title="WhatsApp ile paylas" aria-label="WhatsApp ile paylas">
                                                         <i class="fa-brands fa-whatsapp"></i>
@@ -249,7 +273,43 @@
                 placeholder="Nebim AI'a bir mesaj gönder..."
                 [(ngModel)]="input"
                 (keydown.enter)="onEnter($event)"
+                (focus)="onComposerFocus()"
                 (input)="onComposerInput()"></textarea>
+
+            <div class="nac-assistant-picker" title="Asistan seç">
+                <button
+                    type="button"
+                    class="nac-assistant-trigger"
+                    (click)="toggleAssistantMenu()"
+                    [attr.aria-expanded]="assistantMenuOpen"
+                    aria-label="Asistan seç">
+                    <i class="fa-solid fa-robot nac-assistant-icon" aria-hidden="true"></i>
+                    <span class="nac-assistant-label">{{ selectedAssistantLabel }}</span>
+                    <i class="fa-solid fa-angle-down nac-assistant-caret" [class.is-open]="assistantMenuOpen" aria-hidden="true"></i>
+                </button>
+
+                @if (assistantMenuOpen) {
+                    <div class="nac-assistant-menu" role="listbox" aria-label="Asistan listesi">
+                        <button
+                            type="button"
+                            class="nac-assistant-option"
+                            [class.is-selected]="!selectedAssistantId"
+                            (click)="selectAssistant('')">
+                            Otomatik
+                        </button>
+
+                        @for (assistant of assistants; track assistant.id) {
+                            <button
+                                type="button"
+                                class="nac-assistant-option"
+                                [class.is-selected]="isAssistantSelected(assistant.id)"
+                                (click)="selectAssistant(assistant.id)">
+                                {{ assistant.name }}
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
 
             <button
                 type="button"

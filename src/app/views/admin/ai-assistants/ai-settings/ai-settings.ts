@@ -4,7 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { AiSetting, CreateAiSettingRequest, UpdateAiSettingRequest } from '@/app/core/models/ai-assistant/ai-setting.models';
+import { AiModel } from '@/app/core/models/ai-assistant/ai-model.models';
 import { PagedResult } from '@/app/core/models/pagination.model';
+
+interface AiSettingForm {
+    aiModelId: string;
+    settingDescription: string;
+    definition: string;
+    value: string;
+    isBlocked: boolean;
+}
 
 @Component({
     selector: 'app-ai-settings-page',
@@ -13,6 +22,7 @@ import { PagedResult } from '@/app/core/models/pagination.model';
 })
 export class AiSettingsPage implements OnInit {
     settings: AiSetting[] = [];
+    models: AiModel[] = [];
     loading = false;
     showModal = false;
     editMode = false;
@@ -27,7 +37,8 @@ export class AiSettingsPage implements OnInit {
     totalPages = 1;
     totalPagesArray: number[] = [];
 
-    form: any = {
+    form: AiSettingForm = {
+        aiModelId: '',
         settingDescription: '',
         definition: '',
         value: '',
@@ -41,6 +52,7 @@ export class AiSettingsPage implements OnInit {
 
     ngOnInit(): void {
         this.loadSettings();
+        this.loadModels();
     }
 
     onFilterChange(): void {
@@ -57,6 +69,7 @@ export class AiSettingsPage implements OnInit {
     applyFilterAndPaging(): void {
         const filter = (this.filterText || '').toLowerCase();
         this.filteredItems = this.settings.filter(item =>
+            this.getModelName(item.aiModelId).toLowerCase().includes(filter) ||
             (item.settingDescription || '').toLowerCase().includes(filter) ||
             (item.definition || '').toLowerCase().includes(filter) ||
             (item.value || '').toLowerCase().includes(filter)
@@ -83,6 +96,23 @@ export class AiSettingsPage implements OnInit {
         }
     }
 
+    async loadModels(): Promise<void> {
+        try {
+            const companyId = this.authStateService.profile?.companyId || '';
+            const response = await this.aiService.getModelsPaged({ pageNumber: 1, pageSize: 1000, companyId });
+            const paged = PagedResult.from<AiModel>(response);
+            this.models = paged.items;
+        } catch (err) {
+            console.error('AiModels load error:', err);
+            this.models = [];
+        }
+    }
+
+    getModelName(aiModelId: string): string {
+        const model = this.models.find(item => item.id === aiModelId);
+        return model?.name ?? 'Model bulunamadı';
+    }
+
     private extractArray(response: any): any[] {
         if (Array.isArray(response)) return response;
         if (response?.$values) return response.$values;
@@ -95,7 +125,13 @@ export class AiSettingsPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedSetting = null;
-        this.form = { settingDescription: '', definition: '', value: '', isBlocked: false };
+        this.form = {
+            aiModelId: '',
+            settingDescription: '',
+            definition: '',
+            value: '',
+            isBlocked: false,
+        };
         this.showModal = true;
     }
 
@@ -103,6 +139,7 @@ export class AiSettingsPage implements OnInit {
         this.editMode = true;
         this.selectedSetting = setting;
         this.form = {
+            aiModelId: setting.aiModelId,
             settingDescription: setting.settingDescription,
             definition: setting.definition ?? '',
             value: setting.value ?? '',
@@ -115,6 +152,7 @@ export class AiSettingsPage implements OnInit {
         try {
             if (this.editMode && this.selectedSetting) {
                 const req: UpdateAiSettingRequest = {
+                    aiModelId: this.form.aiModelId,
                     settingDescription: this.form.settingDescription,
                     definition: this.form.definition,
                     value: this.form.value,
@@ -123,6 +161,7 @@ export class AiSettingsPage implements OnInit {
                 await this.aiService.updateSetting(this.selectedSetting.id, req);
             } else {
                 const req: CreateAiSettingRequest = {
+                    aiModelId: this.form.aiModelId,
                     settingDescription: this.form.settingDescription,
                     definition: this.form.definition,
                     value: this.form.value,

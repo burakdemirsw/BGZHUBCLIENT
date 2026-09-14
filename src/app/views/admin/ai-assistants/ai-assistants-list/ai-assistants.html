@@ -25,6 +25,7 @@
                                     <th>Asistan Adı</th>
                                     <th>Sağlayıcı</th>
                                     <th>Model</th>
+                                    <th>Sıra</th>
                                     <th class="text-center">Durum</th>
                                     <th class="text-end">İşlemler</th>
                                 </tr>
@@ -38,6 +39,7 @@
                                         <td><strong>{{ item.name }}</strong></td>
                                         <td>{{ item.providerFirmDescription || getProviderName(item.aiProviderId) }}</td>
                                         <td>{{ item.modelName || getModelName(item.aiModelId) }}</td>
+                                        <td>{{ item.order }}</td>
                                         <td class="text-center">
                                             @if (item.isBlocked) {
                                                 <span class="badge bg-danger-subtle text-danger">Pasif</span>
@@ -55,7 +57,7 @@
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="6" class="text-center text-muted">Asistan bulunamadı.</td></tr>
+                                    <tr><td colspan="7" class="text-center text-muted">Asistan bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -103,7 +105,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Sağlayıcı</label>
                                 <select class="form-select" [(ngModel)]="form.aiProviderId" name="aiProviderId" (ngModelChange)="onProviderChange()" required>
                                     <option value="">Seçiniz...</option>
@@ -112,7 +114,7 @@
                                     }
                                 </select>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Model</label>
                                 <select class="form-select" [(ngModel)]="form.aiModelId" name="aiModelId" required>
                                     <option value="">Seçiniz...</option>
@@ -120,6 +122,10 @@
                                         <option [value]="model.id">{{ model.name }} ({{ model.modelCode }})</option>
                                     }
                                 </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Sıra</label>
+                                <input type="number" class="form-control" [(ngModel)]="form.order" name="order" required>
                             </div>
                         </div>
 

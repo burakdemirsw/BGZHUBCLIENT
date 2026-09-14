@@ -25,6 +25,7 @@
                                     <th>Sağlayıcı</th>
                                     <th>Model Adı</th>
                                     <th>Model Kodu</th>
+                                    <th>Öncelik</th>
                                     <th>Giriş Token</th>
                                     <th>Çıkış Token</th>
                                     <th>Giriş Fiyat</th>
@@ -42,6 +43,7 @@
                                         <td>{{ item.aiProvider?.firmDescription || getProviderName(item.aiProviderId) }}</td>
                                         <td><strong>{{ item.name }}</strong></td>
                                         <td><code>{{ item.modelCode }}</code></td>
+                                        <td>{{ item.priorityOrder }}</td>
                                         <td>{{ item.inputTokenLimit | number }}</td>
                                         <td>{{ item.outputTokenLimit | number }}</td>
                                         <td>{{ item.inputPrice | number:'1.2-6' }}</td>
@@ -63,7 +65,7 @@
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="10" class="text-center text-muted">Model bulunamadı.</td></tr>
+                                    <tr><td colspan="11" class="text-center text-muted">Model bulunamadı.</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -119,9 +121,13 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Model Kodu</label>
                                 <input type="text" class="form-control" [(ngModel)]="form.modelCode" name="modelCode" required>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Öncelik Sırası</label>
+                                <input type="number" class="form-control" [(ngModel)]="form.priorityOrder" name="priorityOrder" required>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">Giriş Token Limiti</label>

@@ -337,6 +337,7 @@ export class AiKnowledgePage implements OnInit {
                 name: this.renameAssistantName.trim(),
                 aiProviderId: assistant.aiProviderId,
                 aiModelId: assistant.aiModelId,
+                order: assistant.order ?? 0,
                 isBlocked: assistant.isBlocked ?? false,
             };
             await this.aiProvidersService.updateAssistant(this.renameAssistantId, req);

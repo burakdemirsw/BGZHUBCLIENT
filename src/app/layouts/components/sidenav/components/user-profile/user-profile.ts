@@ -9,7 +9,6 @@ import {LayoutStoreService} from '@core/services/layout-store.service';
 import {NotificationsService} from '@core/services/notifications.service';
 import {SubscriptionsService} from '@/app/core/services/subscriptions.service';
 import {CompanySubscriptionDetailResponse} from '@/app/core/models/subscription/subscription.models';
-import {DecimalPipe} from '@angular/common';
 
 @Component({
   selector: 'app-user-profile',
@@ -19,8 +18,7 @@ import {DecimalPipe} from '@angular/common';
     NgbDropdown,
     NgbDropdownToggle,
     NgbDropdownMenu,
-    NgIcon,
-    DecimalPipe
+    NgIcon
   ],
 
   templateUrl: './user-profile.html',

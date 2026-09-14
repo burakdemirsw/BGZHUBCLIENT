@@ -83,6 +83,7 @@ export interface ChatMessage {
     aiImageUrl?: string | null;
     hasExcel?: boolean;
     excelUrl?: string | null;
+    isLiked?: boolean | null;
 }
 
 // ========================
@@ -156,6 +157,10 @@ export interface ConversationReplyRequest {
     assistantId?: string | null;
     file?: string | null;
     fileType?: string | null;
+}
+
+export interface ConversationMessageReactionRequest {
+    isLiked: boolean;
 }
 
 // ========================

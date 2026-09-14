@@ -4,7 +4,7 @@
 
 .sidebar {
     width: 272px;
-    height: 100vh;
+    height: var(--nac-viewport-height, 100vh);
     background: #0d0d0d;
     color: #ececec;
     display: flex;
@@ -312,9 +312,11 @@
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
-        top: 0;
+        top: var(--nac-viewport-offset, 0px);
         left: 0;
-        z-index: 100;
+        z-index: 10000;
+        width: 272px;
+        max-width: 86vw;
         transform: translateX(-100%);
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     }
@@ -329,5 +331,6 @@
 
     .mobile-overlay {
         display: block;
+        z-index: 9999;
     }
 }

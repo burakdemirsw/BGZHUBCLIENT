@@ -9,6 +9,14 @@ import { UserMenuService } from '@/app/core/services/user-menu.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { PagedResult } from '@/app/core/models/pagination.model';
 
+interface AiAssistantForm {
+    name: string;
+    aiProviderId: string;
+    aiModelId: string;
+    order: number;
+    isBlocked: boolean;
+}
+
 @Component({
     selector: 'app-ai-assistants-page',
     imports: [CommonModule, FormsModule],
@@ -37,10 +45,11 @@ export class AiAssistantsPage implements OnInit {
     knowledgeList: AiKnowledge[] = [];
     newKnowledge: { prop: string; value: string }[] = [];
 
-    form: any = {
+    form: AiAssistantForm = {
         name: '',
         aiProviderId: '',
         aiModelId: '',
+        order: 0,
         isBlocked: false,
     };
 
@@ -189,6 +198,7 @@ export class AiAssistantsPage implements OnInit {
             name: '',
             aiProviderId: '',
             aiModelId: '',
+            order: 0,
             isBlocked: false,
         };
         this.filteredModels = this.models;
@@ -203,6 +213,7 @@ export class AiAssistantsPage implements OnInit {
             name: assistant.name,
             aiProviderId: assistant.aiProviderId,
             aiModelId: assistant.aiModelId,
+            order: assistant.order ?? 0,
             isBlocked: assistant.isBlocked ?? false,
         };
         this.onProviderChange();
@@ -227,6 +238,7 @@ export class AiAssistantsPage implements OnInit {
                     name: this.form.name,
                     aiProviderId: this.form.aiProviderId,
                     aiModelId: this.form.aiModelId,
+                    order: Number(this.form.order),
                     isBlocked: this.form.isBlocked,
                 };
                 await this.aiService.updateAssistant(this.selectedAssistant.id, req);
@@ -238,6 +250,7 @@ export class AiAssistantsPage implements OnInit {
                     name: this.form.name,
                     aiProviderId: this.form.aiProviderId,
                     aiModelId: this.form.aiModelId,
+                    order: Number(this.form.order),
                 };
                 try {
                     const res = await this.aiService.createAssistant(req);

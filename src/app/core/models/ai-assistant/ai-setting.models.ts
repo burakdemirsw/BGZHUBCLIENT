@@ -1,5 +1,6 @@
 export interface AiSetting {
   id: string;
+  aiModelId: string;
   settingDescription: string;
   definition?: string;
   value?: string;
@@ -9,12 +10,14 @@ export interface AiSetting {
 }
 
 export interface CreateAiSettingRequest {
+  aiModelId: string;
   settingDescription: string;
   definition?: string;
   value?: string;
 }
 
 export interface UpdateAiSettingRequest {
+  aiModelId: string;
   settingDescription: string;
   definition?: string;
   value?: string;

@@ -7,6 +7,7 @@ import {
     ConversationListResponse,
     ConversationMessagesResponse,
     ConversationReplyRequest,
+    ConversationMessageReactionRequest,
     ConversationResponse,
     ConversationSidebarResponse,
     CreateConversationRequest,
@@ -63,6 +64,17 @@ export class ConversationsService {
         return this.http.post<ConversationReplyResponse>(
             { controller: 'Conversations', action: `${conversationId}/reply` },
             payload,
+        );
+    }
+
+    setMessageReaction(
+        conversationId: string,
+        messageId: string,
+        request: ConversationMessageReactionRequest,
+    ): Promise<ApiResponse<object>> {
+        return this.http.post<object>(
+            { controller: 'Conversations', action: `${conversationId}/messages/${messageId}/reaction` },
+            request,
         );
     }
 
