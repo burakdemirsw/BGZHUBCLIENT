@@ -24,6 +24,7 @@ interface NebimQueryForm {
   queryKey: string;
   toolName: string;
   toolDescription: string;
+  procedureName: string;
   queryText: string;
   resultMode: string;
   routeType: string;
@@ -335,6 +336,7 @@ export class NebimQueriesPage implements OnInit {
       (item.queryKey || '').toLowerCase().includes(filter)
       || (item.toolName || '').toLowerCase().includes(filter)
       || (item.toolDescription || '').toLowerCase().includes(filter)
+      || (item.procedureName || '').toLowerCase().includes(filter)
       || (item.resultMode || '').toLowerCase().includes(filter)
       || (item.routeType || '').toLowerCase().includes(filter),
     );
@@ -598,6 +600,7 @@ export class NebimQueriesPage implements OnInit {
       queryKey: normalizedQueryKey,
       toolName: query.toolName || '',
       toolDescription: query.toolDescription || '',
+      procedureName: query.procedureName || '',
       queryText: query.queryText || '',
       resultMode: this.normalizeResultMode(query.resultMode),
       routeType: this.defaultRouteType,
@@ -740,6 +743,7 @@ export class NebimQueriesPage implements OnInit {
         queryKey: copyQueryKey,
         toolName: copyToolName,
         toolDescription: query.toolDescription || '',
+        procedureName: query.procedureName || '',
         queryText: sourceQueryText,
         resultMode: this.normalizeResultMode(query.resultMode),
         routeType: this.defaultRouteType,
@@ -1176,6 +1180,7 @@ export class NebimQueriesPage implements OnInit {
       queryKey: '',
       toolName: '',
       toolDescription: '',
+      procedureName: '',
       queryText: '',
       resultMode: this.defaultResultMode,
       routeType: this.defaultRouteType,
@@ -1216,6 +1221,7 @@ export class NebimQueriesPage implements OnInit {
       queryKey: this.queryForm.queryKey.trim(),
       toolName: this.queryForm.toolName.trim(),
       toolDescription: this.queryForm.toolDescription.trim(),
+      procedureName: this.queryForm.procedureName.trim() || null,
       queryText: this.queryForm.queryText,
       resultMode: this.normalizeResultMode(this.queryForm.resultMode),
       routeType: this.defaultRouteType,

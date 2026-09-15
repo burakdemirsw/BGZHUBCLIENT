@@ -4,6 +4,9 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0"><i class="fa-solid fa-plug-circle-check me-2"></i>Company Extensions</h4>
                 <div class="d-flex gap-2">
+                    <button class="btn btn-soft-success btn-sm" (click)="setSelectedActive()" [disabled]="getSelectedCount() === 0">
+                        <i class="fa-solid fa-check me-1"></i>Secilenleri Aktif Et ({{ getSelectedCount() }})
+                    </button>
                     <button class="btn btn-soft-danger btn-sm" (click)="setSelectedPassive()" [disabled]="getSelectedCount() === 0">
                         <i class="fa-solid fa-ban me-1"></i>Secilenleri Pasif Yap ({{ getSelectedCount() }})
                     </button>

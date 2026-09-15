@@ -92,6 +92,7 @@
                                                         <th>#</th>
                                                         <th>Query Key</th>
                                                         <th>Tool</th>
+                                                        <th>Procedure Name</th>
                                                         <th>Açıklama</th>
                                                         <th>Kategoriler</th>
                                                         <th>Result Mode</th>
@@ -122,6 +123,13 @@
                                                             <td><span class="badge bg-primary-subtle text-primary">{{ (currentPage - 1) * pageSize + idx + 1 }}</span></td>
                                                             <td><strong [class.text-danger]="hasCopyInQueryKey(item.queryKey)">{{ item.queryKey }}</strong></td>
                                                             <td>{{ item.toolName }}</td>
+                                                            <td>
+                                                                @if (item.procedureName) {
+                                                                    <code>{{ item.procedureName }}</code>
+                                                                } @else {
+                                                                    <span class="text-muted small">-</span>
+                                                                }
+                                                            </td>
                                                             <td class="nq-description">{{ item.toolDescription }}</td>
                                                             <td>
                                                                 <div class="d-flex flex-wrap gap-1">
@@ -187,6 +195,12 @@
                                                 <span class="nq-summary-label">Query Key</span>
                                                 <strong>{{ activeQuery.queryKey }}</strong>
                                             </div>
+                                            @if (activeQuery.procedureName) {
+                                                <div class="nq-summary-item">
+                                                    <span class="nq-summary-label">Procedure Name</span>
+                                                    <strong>{{ activeQuery.procedureName }}</strong>
+                                                </div>
+                                            }
                                             <div class="nq-summary-item">
                                                 <span class="nq-summary-label">Result Mode</span>
                                                 <strong>{{ activeQuery.resultMode }}</strong>
@@ -297,6 +311,9 @@
                                                         <div class="small text-muted mb-2">Çalıştırılacak sorgu özeti</div>
                                                         <div class="mb-2"><strong>Tool:</strong> {{ activeQuery.toolName }}</div>
                                                         <div class="mb-2"><strong>Query Key:</strong> {{ activeQuery.queryKey }}</div>
+                                                        @if (activeQuery.procedureName) {
+                                                            <div class="mb-2"><strong>Procedure Name:</strong> {{ activeQuery.procedureName }}</div>
+                                                        }
                                                         <div><strong>Güncelleme:</strong> {{ formatDate(activeQuery.updatedDate) }}</div>
                                                     </div>
                                                 </div>
@@ -544,13 +561,17 @@
                     </div>
                     <form>
                         <div class="row g-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label">Query Key</label>
                                 <input type="text" class="form-control" [(ngModel)]="queryForm.queryKey" (ngModelChange)="onQueryMetaChanged()" name="queryKey" required>
                             </div>
-                            <div class="col-md-6 nq-auto-field" [class.nq-auto-field-active]="autoActionsEnabled">
+                            <div class="col-md-4 nq-auto-field" [class.nq-auto-field-active]="autoActionsEnabled">
                                 <label class="form-label">Tool Name</label>
                                 <input type="text" class="form-control" [(ngModel)]="queryForm.toolName" name="toolName" required readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Procedure Name</label>
+                                <input type="text" class="form-control" [(ngModel)]="queryForm.procedureName" name="procedureName">
                             </div>
                             <div class="col-12 nq-auto-field" [class.nq-auto-field-active]="autoActionsEnabled">
                                 <div class="d-flex justify-content-between align-items-center gap-2 mb-2">

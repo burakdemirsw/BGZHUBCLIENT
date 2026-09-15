@@ -45,7 +45,7 @@
         <main class="nac-main">
         @if (messages.length === 0) {
             <section class="nac-empty">
-                <div class="nac-empty-inner" [class.nac-empty-inner-wide]="activeExtensionShortcuts.length > 0">
+                <div class="nac-empty-inner" [class.nac-empty-inner-wide]="enabledExtensionShortcuts.length > 0">
                     <div class="nac-empty-orb">
                         <div class="nac-orb-glow"></div>
                         <div class="nac-orb-core"></div>
@@ -55,42 +55,47 @@
 
                     <div class="nac-extension-showcase-head">
                         <span class="nac-extension-showcase-title">Kullanilabilir Eklentiler</span>
-                        <span class="nac-extension-showcase-count">{{ activeExtensionShortcuts.length }} kayit</span>
+                        <span class="nac-extension-showcase-count">{{ enabledExtensionShortcuts.length }} kayit</span>
                     </div>
 
-                    <div class="nac-suggestions">
-                        @for (s of activeExtensionShortcuts; track s.id; let idx = $index) {
-                            <button
-                                type="button"
-                                class="nac-suggestion"
-                                [class.is-passive]="!s.isEnabled"
-                                [style.--suggestion-order]="idx"
-                                [disabled]="!s.isEnabled"
-                                (click)="useExtensionShortcutCard(s)">
-                                <div class="nac-suggestion-top">
-                                    <span class="nac-suggestion-chip">{{ s.category }}</span>
-                                    <span class="nac-suggestion-state" [class.is-passive]="!s.isEnabled">{{ s.isEnabled ? 'Aktif' : 'Pasif' }}</span>
-                                </div>
-                                <span class="nac-suggestion-title-wrap">
-                                    @if (s.photoUrl) {
-                                        <img class="nac-suggestion-img" [src]="s.photoUrl" [alt]="s.name + ' gorseli'" />
-                                    } @else {
-                                        <span class="nac-suggestion-img-fallback"><i class="fa-solid fa-puzzle-piece"></i></span>
-                                    }
-                                    <span class="nac-suggestion-title">{{ s.name }}</span>
-                                </span>
-                                <span class="nac-suggestion-sub">{{ s.subtitle }}</span>
-                                <div class="nac-suggestion-bottom">
-                                    <span class="nac-suggestion-mention">{{ s.mention }}</span>
-                                    <span class="nac-suggestion-cta">Kullanmak icin tikla</span>
-                                </div>
-                            </button>
-                        } @empty {
-                            <div class="nac-empty-extension-note">
-                                Aktif etiket tanimli eklenti bulunamadi. Yonetim panelinden eklenti etiket ayarlarini kontrol edin.
+                    @for (group of groupedActiveExtensionShortcuts; track group.category) {
+                        <section class="nac-suggestion-group">
+                            <div class="nac-suggestion-group-title">{{ group.category }}</div>
+                            <div class="nac-suggestions">
+                                @for (s of group.items; track s.id; let idx = $index) {
+                                    <button
+                                        type="button"
+                                        class="nac-suggestion"
+                                        [class.is-passive]="!s.isEnabled"
+                                        [style.--suggestion-order]="idx"
+                                        [disabled]="!s.isEnabled"
+                                        (click)="useExtensionShortcutCard(s)">
+                                        <div class="nac-suggestion-top">
+                                            <span class="nac-suggestion-chip">{{ s.category }}</span>
+                                            <span class="nac-suggestion-state" [class.is-passive]="!s.isEnabled">{{ s.isEnabled ? 'Aktif' : 'Pasif' }}</span>
+                                        </div>
+                                        <span class="nac-suggestion-title-wrap">
+                                            @if (s.photoUrl) {
+                                                <img class="nac-suggestion-img" [src]="s.photoUrl" [alt]="s.name + ' gorseli'" />
+                                            } @else {
+                                                <span class="nac-suggestion-img-fallback"><i class="fa-solid fa-puzzle-piece"></i></span>
+                                            }
+                                            <span class="nac-suggestion-title">{{ s.name }}</span>
+                                        </span>
+                                        <span class="nac-suggestion-sub">{{ s.subtitle }}</span>
+                                        <div class="nac-suggestion-bottom">
+                                            <span class="nac-suggestion-mention">{{ s.mention }}</span>
+                                            <span class="nac-suggestion-cta">Kullanmak icin tikla</span>
+                                        </div>
+                                    </button>
+                                }
                             </div>
-                        }
-                    </div>
+                        </section>
+                    } @empty {
+                        <div class="nac-empty-extension-note">
+                            Aktif etiket tanimli eklenti bulunamadi. Yonetim panelinden eklenti etiket ayarlarini kontrol edin.
+                        </div>
+                    }
                 </div>
             </section>
         } @else {

@@ -21,7 +21,6 @@ import {
     ConversationReplyResponse,
     ConversationMessageReactionRequest,
     ConversationHeader,
-    ChatMessage,
     ConversationMessagesResponse,
     ConversationReplyRequest,
     CreateTestConversationRequest,
@@ -96,6 +95,11 @@ interface ActiveExtensionShortcut {
     photoUrl?: string;
 }
 
+interface ExtensionShortcutCategoryGroup {
+    category: string;
+    items: ActiveExtensionShortcut[];
+}
+
 interface MentionChipItem {
     id: string;
     name: string;
@@ -113,7 +117,6 @@ interface MentionChipItem {
 export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     @ViewChild('scrollAnchor') scrollAnchor?: ElementRef<HTMLDivElement>;
     @ViewChild('textArea') textArea?: ElementRef<HTMLTextAreaElement>;
-    @ViewChild(SidebarComponent) sidebar?: SidebarComponent;
 
     messages: UiChatMessage[] = [];
     sidebarChats: ChatHistoryEntry[] = [];
@@ -130,6 +133,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     isLoadingExtensions = false;
     activeExtensionShortcuts: ActiveExtensionShortcut[] = [];
     selectedMentionChips: MentionChipItem[] = [];
+    defaultMentionChip: MentionChipItem | null = null;
     isSending = false;
     isLoadingThread = false;
     soundEnabled = true;
@@ -382,10 +386,6 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         }
 
         this.insertMentionToInput(shortcut.mention, shortcut);
-        if (!this.input.includes(shortcut.prompt)) {
-            const base = this.input.trimEnd();
-            this.input = `${base} ${shortcut.prompt}`.trim();
-        }
 
         setTimeout(() => {
             this.textArea?.nativeElement.focus();
@@ -426,6 +426,25 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         });
     }
 
+    get enabledExtensionShortcuts(): ActiveExtensionShortcut[] {
+        return this.activeExtensionShortcuts.filter(item => item.isEnabled);
+    }
+
+    get groupedActiveExtensionShortcuts(): ExtensionShortcutCategoryGroup[] {
+        const groups = new Map<string, ActiveExtensionShortcut[]>();
+
+        for (const item of this.enabledExtensionShortcuts) {
+            const category = (item.category || '').trim() || 'Genel';
+            const list = groups.get(category) || [];
+            list.push(item);
+            groups.set(category, list);
+        }
+
+        return Array.from(groups.entries())
+            .map(([category, items]) => ({ category, items }))
+            .sort((a, b) => a.category.localeCompare(b.category, 'tr-TR'));
+    }
+
     onExtensionMenuFilterInput(): void {
         if (!this.extensionMenuOpen) {
             return;
@@ -460,6 +479,14 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
                 photoUrl: shortcut.photoUrl,
             },
         ];
+        if (!this.defaultMentionChip) {
+            this.defaultMentionChip = {
+                id: shortcut.id,
+                name: shortcut.name,
+                mention: token,
+                photoUrl: shortcut.photoUrl,
+            };
+        }
         this.errorMessage = '';
 
         setTimeout(() => {
@@ -476,11 +503,23 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
 
     removeMentionChip(chip: MentionChipItem): void {
         this.selectedMentionChips = this.selectedMentionChips.filter(item => item.id !== chip.id);
+        if (
+            this.defaultMentionChip
+            && this.defaultMentionChip.id === chip.id
+            && this.normalizeMention(this.defaultMentionChip.mention) === this.normalizeMention(chip.mention)
+        ) {
+            this.defaultMentionChip = null;
+        }
         this.autoResize();
     }
 
     private getSelectedMentionTokens(): string[] {
-        return Array.from(new Set(this.selectedMentionChips.map(item => this.normalizeMention(item.mention)).filter(Boolean)));
+        const chips = [...this.selectedMentionChips];
+        if (chips.length === 0 && this.defaultMentionChip) {
+            chips.push(this.defaultMentionChip);
+        }
+
+        return Array.from(new Set(chips.map(item => this.normalizeMention(item.mention)).filter(Boolean)));
     }
 
     isAssistantSelected(assistantId: string): boolean {
@@ -646,12 +685,60 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
 
     onComposerInput(): void {
         this.autoResize();
+        this.captureTypedTagsFromInput();
         this.updateMentionAutocompleteMenu();
 
         if (this.input.length > 0 && !this.sidebarOpenedManually && !this.isMobileViewport()) {
             this.sidebarCollapsed = true;
             this.sidebarMobileOpen = false;
         }
+    }
+
+    private captureTypedTagsFromInput(): void {
+        if (!this.input.includes('@')) {
+            return;
+        }
+
+        const enabledByMention = new Map(
+            this.getEnabledExtensionShortcuts().map((item) => [
+                this.normalizeMention(item.mention).toLowerCase(),
+                item,
+            ]),
+        );
+
+        let hasMutation = false;
+        const nextChips = [...this.selectedMentionChips];
+
+        const nextInput = this.input.replace(/(^|\s)(@[^\s@]+)/g, (full, leading: string, rawTag: string) => {
+            const normalizedTag = this.normalizeMention(rawTag).toLowerCase();
+            const matchedShortcut = enabledByMention.get(normalizedTag);
+            if (!matchedShortcut) {
+                return full;
+            }
+
+            const alreadySelected = nextChips.some(
+                (chip) => chip.id === matchedShortcut.id || this.normalizeMention(chip.mention).toLowerCase() === normalizedTag,
+            );
+
+            if (!alreadySelected) {
+                nextChips.push({
+                    id: matchedShortcut.id,
+                    name: matchedShortcut.name,
+                    mention: this.normalizeMention(matchedShortcut.mention),
+                    photoUrl: matchedShortcut.photoUrl,
+                });
+            }
+
+            hasMutation = true;
+            return leading;
+        });
+
+        if (!hasMutation) {
+            return;
+        }
+
+        this.selectedMentionChips = nextChips;
+        this.input = nextInput.replace(/\s{2,}/g, ' ').trimStart();
     }
 
     private updateMentionAutocompleteMenu(): void {
@@ -737,7 +824,14 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         }
 
         const conversationId = this.activeConversationId!;
-        const optimisticMentions = this.selectedMentionChips.map((chip) => ({ ...chip }));
+        const optimisticMentions = (this.selectedMentionChips.length
+            ? this.selectedMentionChips
+            : this.defaultMentionChip
+                ? [this.defaultMentionChip]
+                : []).map((chip) => ({ ...chip }));
+        if (!this.defaultMentionChip && optimisticMentions.length > 0) {
+            this.defaultMentionChip = { ...optimisticMentions[0] };
+        }
         this.hasHydratedThread = true;
 
         // 2) UI'a kullanıcı mesajını optimistic ekle
@@ -752,7 +846,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
             }
         ];
         this.playKeyboardSound();
-        this.selectedMentionChips = [];
+        this.selectedMentionChips = this.defaultMentionChip ? [{ ...this.defaultMentionChip }] : [];
         this.input = '';
         this.isSending = true;
         this.errorMessage = '';
@@ -1711,6 +1805,10 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     private async syncConversationFromRoute(routeConversationId: string | null): Promise<void> {
         if (!routeConversationId) {
             this.resetConversationState();
+            const newConversationId = await this.ensureConversation();
+            if (newConversationId) {
+                await this.navigateToConversation(newConversationId);
+            }
             return;
         }
 
@@ -1740,6 +1838,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         this.locallyStartedConversationId = null;
         this.errorMessage = '';
         this.hasHydratedThread = false;
+        this.selectedMentionChips = this.defaultMentionChip ? [{ ...this.defaultMentionChip }] : [];
     }
 
     private persistSoundPreference(): void {

@@ -317,7 +317,7 @@ export class ExtensionSettingDefinitionsPage implements OnInit {
     private buildCopiedKey(baseKey: string): string {
         const normalizedBase = (baseKey || '').trim();
         const fallbackBase = normalizedBase || 'newkey';
-        const initialKey = `${fallbackBase}copy`;
+        const initialKey = `${fallbackBase}_copy`;
 
         const existingKeys = new Set(
             this.items

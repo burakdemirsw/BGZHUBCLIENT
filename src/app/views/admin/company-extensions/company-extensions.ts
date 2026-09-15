@@ -247,6 +247,36 @@ export class CompanyExtensionsPage implements OnInit {
         }
     }
 
+    async setSelectedActive(): Promise<void> {
+        const selectedItems = this.items.filter(item => this.selectedIds.has(item.id));
+        const toActivate = selectedItems.filter(item => !item.isEnabled);
+
+        if (!selectedItems.length) return;
+        if (!toActivate.length) {
+            alert('Secili kayitlar zaten aktif durumda.');
+            return;
+        }
+
+        if (!confirm(`${toActivate.length} kayit aktif yapilsin mi?`)) return;
+
+        try {
+            await Promise.all(
+                toActivate.map(item => {
+                    const request: UpdateCompanyExtensionRequest = {
+                        isEnabled: true,
+                        priority: Number(item.priority),
+                        photoUrl: item.photoUrl,
+                    };
+                    return this.extensionService.updateCompanyExtension(item.id, request);
+                })
+            );
+
+            await this.loadItems();
+        } catch (err) {
+            console.error('CompanyExtensions bulk active error:', err);
+        }
+    }
+
     closeModal(): void {
         this.showModal = false;
     }

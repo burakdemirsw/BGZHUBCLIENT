@@ -40,6 +40,7 @@ export interface NebimQuery {
   queryKey: string | null;
   toolName: string | null;
   toolDescription: string | null;
+  procedureName: string | null;
   queryText: string | null;
   resultMode: string | null;
   routeType: string | null;
@@ -60,6 +61,7 @@ export interface CreateNebimQueryRequest {
   queryKey: string | null;
   toolName: string | null;
   toolDescription: string | null;
+  procedureName: string | null;
   queryText: string | null;
   resultMode: string | null;
   routeType: string | null;
@@ -77,6 +79,7 @@ export interface UpdateNebimQueryRequest {
   queryKey: string | null;
   toolName: string | null;
   toolDescription: string | null;
+  procedureName: string | null;
   queryText: string | null;
   resultMode: string | null;
   routeType: string | null;
