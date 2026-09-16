@@ -1,0 +1,182 @@
+:host {
+    display: block;
+}
+
+.ob-card {
+    /* Kart genişliği viewport'a değil mesaj balonuna bağlı; container query ile daraltılır. */
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 14px;
+    background: #f7f7f9;
+    font-size: 13.5px;
+    color: #0f172a;
+}
+
+.ob-head,
+.ob-head-main,
+.ob-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ob-head {
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.ob-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #eef6ff;
+    color: #3b82f6;
+}
+
+.ob-number {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.ob-meta,
+.ob-muted {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.ob-meta {
+    display: flex;
+    gap: 8px;
+}
+
+.ob-provider {
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.ob-total {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.ob-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.ob-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+    gap: 10px;
+}
+
+.ob-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #fff;
+    word-break: break-word;
+}
+
+.ob-label {
+    margin-bottom: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #64748b;
+}
+
+.ob-strong {
+    font-weight: 600;
+}
+
+.ob-link {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.ob-link:hover {
+    text-decoration: underline;
+}
+
+.ob-items {
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.ob-item {
+    padding: 10px 12px;
+}
+
+.ob-item + .ob-item {
+    border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.ob-item-img {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.ob-item-fallback {
+    display: grid;
+    place-items: center;
+    background: #f1f5f9;
+    color: #94a3b8;
+}
+
+.ob-item-body {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.ob-item-price {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.ob-note {
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: #fffbeb;
+    color: #92400e;
+}
+
+.ob-invoice,
+.ob-corporate {
+    align-self: flex-start;
+}
+
+@container (max-width: 340px) {
+    .ob-card {
+        padding: 12px;
+    }
+
+    .ob-item {
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .ob-item-price {
+        flex: 1 0 100%;
+        padding-left: 54px;
+        text-align: left;
+        white-space: normal;
+    }
+}

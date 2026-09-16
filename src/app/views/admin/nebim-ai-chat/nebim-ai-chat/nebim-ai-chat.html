@@ -7,222 +7,251 @@
         [isLoadingMoreChats]="isLoadingMoreChats"
         [activeChatId]="activeConversationId"
         (toggleCollapse)="toggleSidebar()"
-        (reloadChats)="reloadConversationList()"
+        (reloadChats)="loadConversationList()"
         (closeMobile)="closeMobileSidebar()"
         (newChat)="newChat()"
         (loadMoreChats)="onLoadMoreChats()"
-        (selectChat)="onSelectChat($event)">
-    </nac-sidebar>
+        (selectChat)="onSelectChat($event)" />
 
     <div class="nac-content">
         <header class="nac-header">
-            <div class="nac-header-left">
-                <button type="button" class="nac-icon-btn nac-hamburger" (click)="onHamburgerClick()" title="Sidebar" aria-label="Sidebar">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 6h18M3 12h18M3 18h18"/>
-                    </svg>
+            <div class="nac-header-side">
+                <button
+                    type="button"
+                    class="nac-icon-btn nac-mobile-only"
+                    (click)="toggleSidebar()"
+                    [attr.aria-expanded]="sidebarMobileOpen"
+                    aria-label="Menüyü aç">
+                    <i class="fa-solid fa-bars"></i>
                 </button>
                 <div class="nac-logo-mark">
                     <span class="nac-dot"></span>
                     <span class="nac-logo-text">Nebim AI</span>
                 </div>
-                <!-- <span class="nac-model-badge">api-live · v1</span> -->
             </div>
-            <div class="nac-header-right">
+            <div class="nac-header-side">
                 <button
                     type="button"
-                    class="nac-icon-btn nac-sound-toggle"
+                    class="nac-icon-btn nac-mobile-only"
+                    (click)="newChat()"
+                    title="Yeni sohbet"
+                    aria-label="Yeni sohbet">
+                    <i class="fa-regular fa-pen-to-square"></i>
+                </button>
+                <button
+                    type="button"
+                    class="nac-icon-btn"
+                    [class.is-muted]="!soundEnabled"
                     (click)="toggleSound()"
-                    [attr.aria-pressed]="!soundEnabled"
-                    [title]="soundEnabled ? 'Sesi kapat' : 'Sesi ac'"
-                    aria-label="Ses durumu">
+                    [title]="soundEnabled ? 'Sesi kapat' : 'Sesi aç'"
+                    [attr.aria-label]="soundEnabled ? 'Sesi kapat' : 'Sesi aç'">
                     <i class="fa-solid" [class.fa-volume-high]="soundEnabled" [class.fa-volume-xmark]="!soundEnabled"></i>
-                    <span>{{ soundEnabled ? 'Ses Acik' : 'Ses Kapali' }}</span>
+                    <span class="nac-icon-btn-label">{{ soundEnabled ? 'Ses açık' : 'Ses kapalı' }}</span>
                 </button>
             </div>
         </header>
 
-        <main class="nac-main">
-        @if (messages.length === 0) {
-            <section class="nac-empty">
-                <div class="nac-empty-inner" [class.nac-empty-inner-wide]="enabledExtensionShortcuts.length > 0">
-                    <div class="nac-empty-orb">
-                        <div class="nac-orb-glow"></div>
-                        <div class="nac-orb-core"></div>
-                    </div>
-                    <h1 class="nac-empty-title">Bugün sana nasıl yardımcı olabilirim?</h1>
-                    <p class="nac-empty-subtitle">Bir soru sor ya da asagidaki kullanilabilir eklentilerden birini sec.</p>
-
-                    <div class="nac-extension-showcase-head">
-                        <span class="nac-extension-showcase-title">Kullanilabilir Eklentiler</span>
-                        <span class="nac-extension-showcase-count">{{ enabledExtensionShortcuts.length }} kayit</span>
-                    </div>
-
-                    @for (group of groupedActiveExtensionShortcuts; track group.category) {
-                        <section class="nac-suggestion-group">
-                            <div class="nac-suggestion-group-title">{{ group.category }}</div>
-                            <div class="nac-suggestions">
-                                @for (s of group.items; track s.id; let idx = $index) {
-                                    <button
-                                        type="button"
-                                        class="nac-suggestion"
-                                        [class.is-passive]="!s.isEnabled"
-                                        [style.--suggestion-order]="idx"
-                                        [disabled]="!s.isEnabled"
-                                        (click)="useExtensionShortcutCard(s)">
-                                        <div class="nac-suggestion-top">
-                                            <span class="nac-suggestion-chip">{{ s.category }}</span>
-                                            <span class="nac-suggestion-state" [class.is-passive]="!s.isEnabled">{{ s.isEnabled ? 'Aktif' : 'Pasif' }}</span>
-                                        </div>
-                                        <span class="nac-suggestion-title-wrap">
-                                            @if (s.photoUrl) {
-                                                <img class="nac-suggestion-img" [src]="s.photoUrl" [alt]="s.name + ' gorseli'" />
-                                            } @else {
-                                                <span class="nac-suggestion-img-fallback"><i class="fa-solid fa-puzzle-piece"></i></span>
-                                            }
-                                            <span class="nac-suggestion-title">{{ s.name }}</span>
-                                        </span>
-                                        <span class="nac-suggestion-sub">{{ s.subtitle }}</span>
-                                        <div class="nac-suggestion-bottom">
-                                            <span class="nac-suggestion-mention">{{ s.mention }}</span>
-                                            <span class="nac-suggestion-cta">Kullanmak icin tikla</span>
-                                        </div>
-                                    </button>
-                                }
+        <main class="nac-main" #scroller>
+            @if (isLoadingThread && !messages.length) {
+                <section class="nac-thread" aria-busy="true" aria-label="Sohbet yükleniyor">
+                    <div class="nac-thread-inner">
+                        <div class="nac-skeleton is-user"><span class="nac-skeleton-line"></span></div>
+                        <div class="nac-skeleton">
+                            <span class="nac-skeleton-avatar"></span>
+                            <div class="nac-skeleton-body">
+                                <span class="nac-skeleton-line"></span>
+                                <span class="nac-skeleton-line"></span>
+                                <span class="nac-skeleton-line is-short"></span>
                             </div>
-                        </section>
-                    } @empty {
-                        <div class="nac-empty-extension-note">
-                            Aktif etiket tanimli eklenti bulunamadi. Yonetim panelinden eklenti etiket ayarlarini kontrol edin.
                         </div>
-                    }
-                </div>
-            </section>
-        } @else {
-            <section class="nac-thread">
-                <div class="nac-thread-inner">
-                    @for (msg of messages; track msg.id) {
-                        <article class="nac-msg" [class.nac-msg-user]="msg.role === 'user'" [class.nac-msg-ai]="msg.role === 'assistant'" [class.nac-msg-arrive]="msg.role === 'assistant' && isMessageArriving(msg.id)">
-                            <div class="nac-avatar">
-                                @if (msg.role === 'user') {
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                        <circle cx="12" cy="7" r="4"/>
-                                    </svg>
-                                } @else {
-                                    <span class="nac-avatar-dot"></span>
+                        <div class="nac-skeleton is-user"><span class="nac-skeleton-line"></span></div>
+                    </div>
+                </section>
+            } @else if (!messages.length) {
+                <section class="nac-empty">
+                    <div class="nac-empty-inner">
+                        <div class="nac-empty-orb" aria-hidden="true">
+                            <span class="nac-orb-glow"></span>
+                            <span class="nac-orb-core"></span>
+                        </div>
+                        <h1 class="nac-empty-title">Bugün sana nasıl yardımcı olabilirim?</h1>
+                        <p class="nac-empty-subtitle">Bir eklenti seç, ardından sorunu yaz.</p>
+
+                        @if (isLoadingExtensions) {
+                            <div class="nac-suggestions" aria-hidden="true">
+                                @for (placeholder of [0, 1, 2, 3]; track placeholder) {
+                                    <div class="nac-suggestion is-skeleton"></div>
                                 }
                             </div>
-                            <div class="nac-bubble-wrap">
-                                <div class="nac-msg-role">{{ msg.role === 'user' ? 'Sen' : 'Nebim AI' }}</div>
-                                @if (msg.mentions?.length) {
-                                    <div class="nac-msg-mentions" [class.nac-msg-mentions-user]="msg.role === 'user'">
-                                        @for (mention of msg.mentions!; track mention.id + mention.mention) {
-                                            <span class="nac-msg-mention-chip">
-                                                @if (mention.photoUrl) {
-                                                    <img class="nac-msg-mention-img" [src]="mention.photoUrl" [alt]="mention.name + ' gorseli'" />
-                                                } @else {
-                                                    <span class="nac-msg-mention-fallback"><i class="fa-solid fa-puzzle-piece"></i></span>
-                                                }
-                                                <span class="nac-msg-mention-text">{{ mention.mention }}</span>
-                                            </span>
+                        } @else {
+                            @if (extensionGroups.length) {
+                                <div class="nac-showcase-head">
+                                    <span class="nac-showcase-title">Kullanılabilir eklentiler</span>
+                                    <span class="nac-showcase-count">{{ enabledExtensionShortcuts.length }} eklenti</span>
+                                </div>
+                            }
+
+                            @for (group of extensionGroups; track group.category) {
+                                <section class="nac-suggestion-group">
+                                    <h2 class="nac-suggestion-group-title">{{ group.category }}</h2>
+                                    <div class="nac-suggestions">
+                                        @for (shortcut of group.items; track shortcut.id; let i = $index) {
+                                            <button
+                                                type="button"
+                                                class="nac-suggestion"
+                                                [class.is-selected]="shortcut.id === selectedMention?.id"
+                                                [style.--i]="group.startIndex + i"
+                                                (click)="selectExtensionShortcut(shortcut)">
+                                                <ng-container [ngTemplateOutlet]="extIcon" [ngTemplateOutletContext]="{ $implicit: shortcut }" />
+                                                <span class="nac-suggestion-body">
+                                                    <span class="nac-suggestion-title">{{ shortcut.name }}</span>
+                                                    <span class="nac-suggestion-sub">{{ shortcut.subtitle }}</span>
+                                                    <span class="nac-suggestion-mention">{{ shortcut.mention }}</span>
+                                                </span>
+                                                <i class="fa-solid fa-arrow-right nac-suggestion-arrow" aria-hidden="true"></i>
+                                            </button>
                                         }
                                     </div>
-                                }
-                                @if (msg.role === 'assistant') {
-                                    <div class="nac-bubble nac-bubble-ai" [class.nac-bubble-error]="msg.isError" [class.nac-bubble-has-actions]="canShareOnWhatsApp(msg) || hasExcelExport(msg) || canReactToMessage(msg)">
-                                        @if (msg.blocks?.length) {
-                                            <div class="nac-blocks">
-                                                @for (block of msg.blocks; track $index) {
-                                                    <section class="nac-block" [class.nac-block-text]="block.type === 'text'" [class.nac-block-table]="block.type === 'table'" [class.nac-block-image]="block.type === 'image' || block.type === 'imageGallery'">
-                                                        @if (block.title) {
-                                                            <div class="nac-block-title">{{ block.title }}</div>
-                                                        }
+                                </section>
+                            } @empty {
+                                <div class="nac-empty-note">
+                                    Aktif etiket tanımlı eklenti bulunamadı. Yönetim panelinden eklenti etiket ayarlarını kontrol edin.
+                                </div>
+                            }
+                        }
+                    </div>
+                </section>
+            } @else {
+                <section class="nac-thread">
+                    <div class="nac-thread-inner">
+                        @for (msg of messages; track msg.key) {
+                            <article
+                                class="nac-msg"
+                                [class.nac-msg-user]="msg.role === 'user'"
+                                [class.nac-msg-ai]="msg.role === 'assistant'"
+                                [class.is-new]="msg.animate">
+                                <div class="nac-avatar" aria-hidden="true">
+                                    @if (msg.role === 'user') {
+                                        <i class="fa-regular fa-user"></i>
+                                    } @else {
+                                        <span class="nac-avatar-dot"></span>
+                                    }
+                                </div>
+                                <div class="nac-bubble-wrap">
+                                    <div class="nac-msg-meta">
+                                        <span class="nac-msg-role">{{ msg.role === 'user' ? 'Sen' : 'Nebim AI' }}</span>
+                                        @if (msg.timeText) {
+                                            <time class="nac-msg-time">{{ msg.timeText }}</time>
+                                        }
+                                        @if (msg.isPending) {
+                                            <i class="fa-regular fa-clock nac-msg-pending" title="Gönderiliyor" aria-label="Gönderiliyor"></i>
+                                        }
+                                    </div>
 
-                                                        @switch (block.type) {
-                                                            @case ('text') {
-                                                                @if (block.text) {
-                                                                    <div class="nac-block-text-content">{{ block.text }}</div>
-                                                                }
+                                    @if (msg.mentions.length) {
+                                        <div class="nac-msg-mentions">
+                                            @for (mention of msg.mentions; track mention.mention) {
+                                                <span class="nac-mention-chip">
+                                                    <ng-container [ngTemplateOutlet]="extIcon" [ngTemplateOutletContext]="{ $implicit: mention }" />
+                                                    <span class="nac-mention-chip-text">{{ mention.mention }}</span>
+                                                </span>
+                                            }
+                                        </div>
+                                    }
+
+                                    @if (msg.role === 'user') {
+                                        @if (msg.content) {
+                                            <div class="nac-bubble nac-bubble-user">{{ msg.content }}</div>
+                                        }
+                                    } @else {
+                                        <div class="nac-bubble nac-bubble-ai">
+                                            @if (msg.blocks.length) {
+                                                <div class="nac-blocks">
+                                                    @for (block of msg.blocks; track $index) {
+                                                        <section class="nac-block">
+                                                            @if (block.title) {
+                                                                <h3 class="nac-block-title">{{ block.title }}</h3>
                                                             }
-                                                            @case ('table') {
-                                                                @if (hasRenderableTable(block.table)) {
-                                                                    <div class="nac-table-wrap">
-                                                                        <table class="nac-table">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    @for (column of block.table!.columns; track column) {
-                                                                                        <th>{{ column }}</th>
-                                                                                    }
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody>
-                                                                                @for (row of block.table!.rows; track $index) {
+
+                                                            @switch (block.type) {
+                                                                @case ('text') {
+                                                                    <div class="nac-text">{{ block.text }}</div>
+                                                                }
+                                                                @case ('table') {
+                                                                    @if (block.table; as table) {
+                                                                        <div class="nac-table-wrap">
+                                                                            <table class="nac-table">
+                                                                                <thead>
                                                                                     <tr>
-                                                                                        @for (column of block.table!.columns; track column) {
-                                                                                            <td
-                                                                                                class="nac-table-cell-action"
-                                                                                                tabindex="0"
-                                                                                                title="Sohbete ekle"
-                                                                                                [attr.aria-label]="getCellValue(row, column) + ' değerini sohbete ekle'"
-                                                                                                (click)="insertTableCellValue(getCellValue(row, column))"
-                                                                                                (keydown.enter)="insertTableCellValue(getCellValue(row, column), $event)"
-                                                                                                (keydown.space)="insertTableCellValue(getCellValue(row, column), $event)">
-                                                                                                @if (isCellImage(row, column)) {
-                                                                                                    <a
-                                                                                                        class="nac-table-image-link"
-                                                                                                        [href]="getCellLink(row, column)!"
-                                                                                                        [title]="getCellValue(row, column)"
-                                                                                                        target="_blank"
-                                                                                                        rel="noopener noreferrer">
-                                                                                                        <img
-                                                                                                            class="nac-table-image"
-                                                                                                            [src]="getCellLink(row, column)!"
-                                                                                                            [alt]="column + ' gorseli'"
-                                                                                                            loading="lazy" />
-                                                                                                    </a>
-                                                                                                } @else if (isCellLink(row, column)) {
-                                                                                                    <a
-                                                                                                        class="nac-table-link"
-                                                                                                        [href]="getCellLink(row, column)!"
-                                                                                                        [title]="getCellValue(row, column)"
-                                                                                                        target="_blank"
-                                                                                                        rel="noopener noreferrer">
-                                                                                                        {{ getCellLinkLabel(row, column) }}
-                                                                                                    </a>
-                                                                                                } @else {
-                                                                                                    {{ getCellValue(row, column) }}
-                                                                                                }
-                                                                                            </td>
+                                                                                        @for (column of table.columns; track $index) {
+                                                                                            <th scope="col">{{ column }}</th>
                                                                                         }
                                                                                     </tr>
-                                                                                }
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </div>
-                                                                    @if (block.table!.isTruncated) {
-                                                                        <div class="nac-block-note">Yalnızca ilk kayıtlar gösteriliyor.</div>
-                                                                    }
-                                                                }
-                                                            }
-                                                            @case ('image') {
-                                                                @if (hasRenderableImages(block.images)) {
-                                                                    @for (image of block.images!; track image.url) {
-                                                                        <figure class="nac-media-card">
-                                                                            <img class="nac-media-image" [src]="image.url" [alt]="image.alt || image.caption || 'AI gorseli'" loading="lazy">
-                                                                            @if (image.caption) {
-                                                                                <figcaption class="nac-media-caption">{{ image.caption }}</figcaption>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    @for (row of table.rows; track $index) {
+                                                                                        <tr>
+                                                                                            @for (cell of row; track $index; let col = $index) {
+                                                                                                <td
+                                                                                                    class="nac-cell"
+                                                                                                    tabindex="0"
+                                                                                                    title="Sohbete ekle"
+                                                                                                    [attr.aria-label]="cell.value + ' değerini sohbete ekle'"
+                                                                                                    (click)="insertTableCellValue(cell.value)"
+                                                                                                    (keydown.enter)="insertTableCellValue(cell.value, $event)"
+                                                                                                    (keydown.space)="insertTableCellValue(cell.value, $event)">
+                                                                                                    @if (cell.link && cell.isImage) {
+                                                                                                        <a
+                                                                                                            class="nac-table-image-link"
+                                                                                                            [href]="cell.link"
+                                                                                                            [title]="cell.value"
+                                                                                                            target="_blank"
+                                                                                                            rel="noopener noreferrer"
+                                                                                                            (click)="$event.stopPropagation()"
+                                                                                                            (keydown.enter)="$event.stopPropagation()">
+                                                                                                            <img class="nac-table-image" [src]="cell.link" [alt]="table.columns[col] + ' görseli'" loading="lazy" />
+                                                                                                        </a>
+                                                                                                    } @else if (cell.link) {
+                                                                                                        <a
+                                                                                                            class="nac-table-link"
+                                                                                                            [href]="cell.link"
+                                                                                                            [title]="cell.value"
+                                                                                                            target="_blank"
+                                                                                                            rel="noopener noreferrer"
+                                                                                                            (click)="$event.stopPropagation()"
+                                                                                                            (keydown.enter)="$event.stopPropagation()">
+                                                                                                            {{ cell.linkLabel }}
+                                                                                                        </a>
+                                                                                                    } @else {
+                                                                                                        {{ cell.value }}
+                                                                                                    }
+                                                                                                </td>
+                                                                                            }
+                                                                                        </tr>
+                                                                                    }
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                        <div class="nac-block-note">
+                                                                            @if (table.isTruncated) {
+                                                                                Yalnızca ilk kayıtlar gösteriliyor ·
                                                                             }
-                                                                        </figure>
+                                                                            Bir hücreye dokunarak değeri mesajına ekleyebilirsin.
+                                                                        </div>
                                                                     }
                                                                 }
-                                                            }
-                                                            @case ('imageGallery') {
-                                                                @if (hasRenderableImages(block.images)) {
-                                                                    <div class="nac-gallery-grid">
-                                                                        @for (image of block.images!; track image.url) {
-                                                                            <figure class="nac-media-card nac-media-card-gallery">
-                                                                                <img class="nac-media-image" [src]="image.url" [alt]="image.alt || image.caption || 'AI gorseli'" loading="lazy">
+                                                                @case ('order') {
+                                                                    @for (order of block.orders; track $index) {
+                                                                        <app-order-block [order]="order" />
+                                                                    }
+                                                                }
+                                                                @default {
+                                                                    <div class="nac-gallery" [class.is-grid]="block.type === 'imageGallery'">
+                                                                        @for (image of block.images; track $index) {
+                                                                            <figure class="nac-media-card">
+                                                                                <a [href]="image.url" target="_blank" rel="noopener noreferrer">
+                                                                                    <img class="nac-media-image" [src]="image.url" [alt]="image.alt || image.caption || 'AI görseli'" loading="lazy" />
+                                                                                </a>
                                                                                 @if (image.caption) {
                                                                                     <figcaption class="nac-media-caption">{{ image.caption }}</figcaption>
                                                                                 }
@@ -231,217 +260,299 @@
                                                                     </div>
                                                                 }
                                                             }
-                                                        }
-                                                    </section>
-                                                }
-                                            </div>
+                                                        </section>
+                                                    }
+                                                </div>
+                                            } @else if (msg.content) {
+                                                <div class="nac-text">{{ msg.content }}</div>
+                                            }
 
-                                        }
+                                            @if (msg.aiImageUrl) {
+                                                <figure class="nac-media-card nac-media-external">
+                                                    <img class="nac-media-image" [src]="msg.aiImageUrl" alt="AI görseli" loading="lazy" />
+                                                    <figcaption class="nac-media-caption">
+                                                        <a class="nac-action-chip" [href]="msg.aiImageUrl" target="_blank" rel="noopener noreferrer">
+                                                            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                                                            Görseli aç
+                                                        </a>
+                                                    </figcaption>
+                                                </figure>
+                                            }
 
-                                        @if (canShareOnWhatsApp(msg) || hasExcelExport(msg) || canReactToMessage(msg)) {
-                                            <div class="nac-message-actions nac-message-actions-floating">
-                                                @if (canReactToMessage(msg)) {
-                                                    <button
-                                                        type="button"
-                                                        class="nac-action-icon nac-action-reaction"
-                                                        [class.is-active]="isReactionActive(msg, 'like')"
-                                                        [disabled]="msg.isReactionSaving"
-                                                        (click)="setMessageReaction(msg, true)"
-                                                        title="Beğen"
-                                                        aria-label="Beğen">
-                                                        <i class="fa-regular fa-thumbs-up"></i>
-                                                    </button>
+                                            <footer class="nac-msg-actions">
+                                                <button
+                                                    type="button"
+                                                    class="nac-action"
+                                                    [class.is-active]="msg.isLiked === true"
+                                                    [disabled]="msg.isReactionSaving"
+                                                    [attr.aria-pressed]="msg.isLiked === true"
+                                                    (click)="toggleReaction(msg, true)"
+                                                    title="Beğen"
+                                                    aria-label="Beğen">
+                                                    <i class="fa-thumbs-up" [class.fa-solid]="msg.isLiked === true" [class.fa-regular]="msg.isLiked !== true"></i>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    class="nac-action"
+                                                    [class.is-active]="msg.isLiked === false"
+                                                    [disabled]="msg.isReactionSaving"
+                                                    [attr.aria-pressed]="msg.isLiked === false"
+                                                    (click)="toggleReaction(msg, false)"
+                                                    title="Beğenme"
+                                                    aria-label="Beğenme">
+                                                    <i class="fa-thumbs-down" [class.fa-solid]="msg.isLiked === false" [class.fa-regular]="msg.isLiked !== false"></i>
+                                                </button>
 
-                                                    <button
-                                                        type="button"
-                                                        class="nac-action-icon nac-action-reaction"
-                                                        [class.is-active]="isReactionActive(msg, 'dislike')"
-                                                        [disabled]="msg.isReactionSaving"
-                                                        (click)="setMessageReaction(msg, false)"
-                                                        title="Beğenme"
-                                                        aria-label="Beğenme">
-                                                        <i class="fa-regular fa-thumbs-down"></i>
-                                                    </button>
-                                                }
-
-                                                @if (canShareOnWhatsApp(msg)) {
-                                                    <a class="nac-action-icon nac-action-whatsapp" [href]="getWhatsAppShareUrl(msg)" target="_blank" rel="noopener noreferrer" title="WhatsApp ile paylas" aria-label="WhatsApp ile paylas">
+                                                @if (msg.shareUrl) {
+                                                    <a class="nac-action is-whatsapp" [href]="msg.shareUrl" target="_blank" rel="noopener noreferrer" title="WhatsApp ile paylaş" aria-label="WhatsApp ile paylaş">
                                                         <i class="fa-brands fa-whatsapp"></i>
                                                     </a>
                                                 }
 
-                                                @if (hasExcelExport(msg)) {
-                                                    <a class="nac-action-icon nac-action-excel" [href]="msg.excelUrl!" target="_blank" rel="noopener noreferrer" title="Excel indir" aria-label="Excel indir">
+                                                @if (msg.excelUrl) {
+                                                    <a class="nac-action is-excel" [href]="msg.excelUrl" target="_blank" rel="noopener noreferrer" title="Excel indir" aria-label="Excel indir">
                                                         <i class="fa-solid fa-file-excel"></i>
                                                     </a>
                                                 }
-                                            </div>
-                                        }
+                                            </footer>
+                                        </div>
+                                    }
+                                </div>
+                            </article>
+                        }
 
-                                        @if (hasExternalAiImage(msg)) {
-                                            <figure class="nac-media-card nac-media-card-external">
-                                                <img class="nac-media-image" [src]="msg.aiImageUrl!" alt="AI gorseli" loading="lazy">
-                                                <figcaption class="nac-media-caption">
-                                                    <a class="nac-action-chip" [href]="msg.aiImageUrl!" target="_blank" rel="noopener noreferrer">
-                                                        <span>Gorseli ac</span>
-                                                    </a>
-                                                </figcaption>
-                                            </figure>
-                                        }
-
-                                        @if (!(msg.blocks?.length ?? 0) && msg.content) {
-                                            <div class="nac-block-text-content">{{ msg.content }}</div>
-                                        }
+                        @if (isAssistantTyping) {
+                            <article class="nac-msg nac-msg-ai is-new" role="status">
+                                <div class="nac-avatar is-thinking" aria-hidden="true"><span class="nac-avatar-dot"></span></div>
+                                <div class="nac-bubble-wrap">
+                                    <div class="nac-msg-meta"><span class="nac-msg-role">Nebim AI</span></div>
+                                    <div class="nac-bubble nac-bubble-ai nac-typing">
+                                        <span class="nac-typing-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                                        <span class="nac-typing-text">Yanıt hazırlanıyor</span>
                                     </div>
-                                } @else {
-                                    <div class="nac-bubble">{{ msg.content }}</div>
-                                }
-                            </div>
-                        </article>
-                    }
+                                </div>
+                            </article>
+                        }
+                    </div>
+                </section>
+            }
+        </main>
 
-                    @if (isSending) {
-                        <article class="nac-msg nac-msg-ai">
-                            <div class="nac-avatar"><span class="nac-avatar-dot"></span></div>
-                            <div class="nac-bubble-wrap">
-                                <div class="nac-msg-role">Nebim AI</div>
-                                <div class="nac-bubble nac-typing">
-                                    <span></span><span></span><span></span>
+        <footer class="nac-composer-wrap">
+            @if (showScrollDown && messages.length) {
+                <button type="button" class="nac-scroll-down" (click)="scrollToBottom()" aria-label="En son mesaja git">
+                    <i class="fa-solid fa-arrow-down"></i>
+                </button>
+            }
+
+            <div class="nac-composer" [class.is-typing]="!!input.trim()" [class.is-flash]="composerFlash">
+                <textarea
+                    #textArea
+                    class="nac-textarea"
+                    rows="1"
+                    aria-label="Mesaj"
+                    [placeholder]="composerPlaceholder"
+                    [(ngModel)]="input"
+                    (keydown)="onComposerKeydown($event)"
+                    (paste)="onComposerPaste($event)"
+                    (focus)="onComposerFocus()"
+                    (input)="onComposerInput()"></textarea>
+
+                <div class="nac-composer-toolbar">
+                    <div class="nac-extension-picker">
+                        <button
+                            type="button"
+                            class="nac-tool-btn nac-extension-trigger"
+                            [class.is-open]="extensionMenuOpen"
+                            [disabled]="!enabledExtensionShortcuts.length"
+                            [attr.aria-expanded]="extensionMenuOpen"
+                            aria-haspopup="menu"
+                            (click)="onExtensionTriggerClick()"
+                            title="Eklenti etiketi ekle"
+                            aria-label="Eklenti etiketi ekle">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+
+                        @if (extensionMenuOpen) {
+                            <div class="nac-menu nac-extension-menu" role="menu" aria-label="Eklenti listesi">
+                                <label class="nac-extension-filter">
+                                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                                    <input
+                                        type="text"
+                                        class="nac-extension-filter-input"
+                                        placeholder="Eklenti ara..."
+                                        aria-label="Eklenti ara"
+                                        [(ngModel)]="extensionMenuFilterText"
+                                        (input)="onExtensionMenuFilterInput()" />
+                                </label>
+
+                                <div class="nac-extension-options">
+                                    @for (ext of filteredExtensionShortcuts; track ext.id; let i = $index) {
+                                        <button
+                                            type="button"
+                                            role="menuitem"
+                                            class="nac-extension-option"
+                                            [class.is-highlighted]="i === 0 && isMentionAutocomplete"
+                                            [class.is-selected]="ext.id === selectedMention?.id"
+                                            [style.--i]="i"
+                                            (click)="selectExtensionShortcut(ext)">
+                                            <ng-container [ngTemplateOutlet]="extIcon" [ngTemplateOutletContext]="{ $implicit: ext }" />
+                                            <span class="nac-extension-option-text">
+                                                <strong>{{ ext.name }}</strong>
+                                                <small>{{ ext.mention }}</small>
+                                            </span>
+                                            @if (i === 0 && isMentionAutocomplete) {
+                                                <kbd class="nac-kbd">Tab</kbd>
+                                            }
+                                        </button>
+                                    } @empty {
+                                        <div class="nac-extension-empty">Filtreye uygun eklenti bulunamadı.</div>
+                                    }
                                 </div>
                             </div>
-                        </article>
+                        }
+                    </div>
+
+                    @if (selectedMention; as chip) {
+                        <span class="nac-mention-chip is-removable" [title]="chip.name">
+                            <ng-container [ngTemplateOutlet]="extIcon" [ngTemplateOutletContext]="{ $implicit: chip }" />
+                            <span class="nac-mention-chip-text">{{ chip.mention }}</span>
+                            <button type="button" class="nac-mention-chip-remove" (click)="removeSelectedMention()" [attr.aria-label]="chip.mention + ' etiketini kaldır'">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </span>
                     }
 
-                    <div #scrollAnchor></div>
-                </div>
-            </section>
-        }
-    </main>
+                    @if (assistants.length) {
+                        <div class="nac-assistant-picker">
+                            <button
+                                type="button"
+                                class="nac-tool-btn nac-assistant-trigger"
+                                [class.is-open]="assistantMenuOpen"
+                                [attr.aria-expanded]="assistantMenuOpen"
+                                aria-haspopup="menu"
+                                (click)="toggleAssistantMenu()"
+                                title="Asistan seç">
+                                <i class="fa-solid fa-robot" aria-hidden="true"></i>
+                                <span class="nac-assistant-label">{{ selectedAssistantLabel }}</span>
+                                <i class="fa-solid fa-angle-down nac-caret" aria-hidden="true"></i>
+                            </button>
 
-    <footer class="nac-composer-wrap">
-        <div class="nac-composer nac-auto-field" [class.nac-auto-field-active]="input.trim().length > 0">
-            <div class="nac-extension-picker" title="Eklenti etiketi ekle">
-                <button
-                    type="button"
-                    class="nac-extension-trigger"
-                    [disabled]="!hasExtensionShortcuts() || isLoadingExtensions"
-                    [attr.aria-expanded]="extensionMenuOpen"
-                    (click)="onExtensionShortcutClick()"
-                    aria-label="Eklenti etiketi ekle">
-                    <i class="fa-solid fa-plus"></i>
-                </button>
-
-                @if (extensionMenuOpen) {
-                    <div class="nac-extension-menu" role="listbox" aria-label="Eklenti etiket listesi">
-                        <div class="nac-extension-filter-row">
-                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                            <input
-                                type="text"
-                                class="nac-extension-filter-input"
-                                placeholder="Eklenti ara..."
-                                [(ngModel)]="extensionMenuFilterText"
-                                (input)="onExtensionMenuFilterInput()" />
+                            @if (assistantMenuOpen) {
+                                <div class="nac-menu nac-assistant-menu" role="menu" aria-label="Asistan listesi">
+                                    @for (assistant of assistants; track assistant.id; let i = $index) {
+                                        <button
+                                            type="button"
+                                            role="menuitemradio"
+                                            class="nac-assistant-option"
+                                            [class.is-selected]="assistant.id === selectedAssistantId"
+                                            [attr.aria-checked]="assistant.id === selectedAssistantId"
+                                            [style.--i]="i"
+                                            (click)="selectAssistant(assistant.id)">
+                                            <span>{{ assistant.name }}</span>
+                                            @if (assistant.id === selectedAssistantId) {
+                                                <i class="fa-solid fa-check" aria-hidden="true"></i>
+                                            }
+                                        </button>
+                                    }
+                                </div>
+                            }
                         </div>
+                    }
 
-                        @for (ext of filteredExtensionShortcuts; track ext.id) {
-                            <button
-                                type="button"
-                                class="nac-extension-option"
-                                [class.is-passive]="!ext.isEnabled"
-                                [disabled]="!ext.isEnabled"
-                                (click)="selectExtensionShortcut(ext)">
-                                @if (ext.photoUrl) {
-                                    <img class="nac-extension-option-img" [src]="ext.photoUrl" [alt]="ext.name + ' gorseli'" />
-                                } @else {
-                                    <span class="nac-extension-option-fallback"><i class="fa-solid fa-puzzle-piece"></i></span>
-                                }
-                                <span class="nac-extension-option-text">
-                                    <strong>{{ ext.name }}</strong>
-                                    <small>{{ ext.mention }} · {{ ext.isEnabled ? 'Aktif' : 'Pasif' }}</small>
-                                </span>
-                            </button>
-                        } @empty {
-                            <div class="nac-extension-empty">Filtreye uygun eklenti bulunamadi.</div>
+                    <button
+                        type="button"
+                        class="nac-send"
+                        [class.is-busy]="isSending"
+                        [disabled]="!input.trim() || isSending"
+                        (click)="send()"
+                        title="Gönder"
+                        aria-label="Gönder">
+                        @if (isSending) {
+                            <span class="nac-send-spinner" aria-hidden="true"></span>
+                        } @else {
+                            <i class="fa-solid fa-arrow-up"></i>
                         }
-                    </div>
-                }
+                    </button>
+                </div>
             </div>
 
-            <div class="nac-textarea-stack">
-                @if (selectedMentionChips.length) {
-                    <div class="nac-mention-chips">
-                        @for (chip of selectedMentionChips; track chip.id) {
-                            <div class="nac-mention-chip">
-                                @if (chip.photoUrl) {
-                                    <img class="nac-mention-chip-img" [src]="chip.photoUrl" [alt]="chip.name + ' gorseli'" />
-                                } @else {
-                                    <span class="nac-mention-chip-fallback"><i class="fa-solid fa-puzzle-piece"></i></span>
-                                }
-                                <span class="nac-mention-chip-text">{{ chip.mention }}</span>
-                                <button type="button" class="nac-mention-chip-remove" (click)="removeMentionChip(chip)">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </button>
-                            </div>
-                        }
-                    </div>
+            @if (errorMessage) {
+                <div class="nac-error" role="alert">
+                    <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+                    <span class="nac-error-text">{{ errorMessage }}</span>
+                    <button type="button" class="nac-error-close" (click)="errorMessage = ''" aria-label="Uyarıyı kapat">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            }
+
+            <div class="nac-hint">
+                <span class="nac-hint-keys">Enter ile gönder · Shift + Enter yeni satır · ↑ son mesaj</span>
+                @if (quotaText) {
+                    <span>{{ quotaText }}</span>
                 }
-
-            <textarea
-                #textArea
-                class="nac-textarea"
-                rows="1"
-                placeholder="Nebim AI'a bir mesaj gönder..."
-                [(ngModel)]="input"
-                (keydown)="onComposerKeydown($event)"
-                (keydown.enter)="onEnter($event)"
-                (keydown.tab)="onComposerTab($event)"
-                (focus)="onComposerFocus()"
-                (input)="onComposerInput()"></textarea>
-            </div>
-
-            <div class="nac-assistant-picker" title="Asistan seç">
-                <button
-                    type="button"
-                    class="nac-assistant-trigger"
-                    (click)="toggleAssistantMenu()"
-                    [attr.aria-expanded]="assistantMenuOpen"
-                    aria-label="Asistan seç">
-                    <i class="fa-solid fa-robot nac-assistant-icon" aria-hidden="true"></i>
-                    <span class="nac-assistant-label">{{ selectedAssistantLabel }}</span>
-                    <i class="fa-solid fa-angle-down nac-assistant-caret" [class.is-open]="assistantMenuOpen" aria-hidden="true"></i>
-                </button>
-
-                @if (assistantMenuOpen) {
-                    <div class="nac-assistant-menu" role="listbox" aria-label="Asistan listesi">
-                        @for (assistant of assistants; track assistant.id) {
-                            <button
-                                type="button"
-                                class="nac-assistant-option"
-                                [class.is-selected]="isAssistantSelected(assistant.id)"
-                                (click)="selectAssistant(assistant.id)">
-                                {{ assistant.name }}
-                            </button>
-                        }
-                    </div>
+                @if (tokenUsageText) {
+                    <span>{{ tokenUsageText }}</span>
                 }
             </div>
-
-            <button
-                type="button"
-                class="nac-send"
-                [disabled]="!input.trim() || isSending"
-                (click)="send()"
-                title="Gönder">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M5 12h14"/>
-                    <path d="M13 5l7 7-7 7"/>
-                </svg>
-            </button>
-        </div>
-        @if (errorMessage) {
-            <div class="nac-error">{{ errorMessage }}</div>
-        }
-        <div class="nac-hint">Enter ile gönder · Shift + Enter ile yeni satır</div>
-    </footer>
+        </footer>
     </div>
 </div>
+
+@if (showReactionModal) {
+    <div
+        class="modal show d-block nac-modal"
+        tabindex="-1"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="nacReactionTitle"
+        (click)="closeReactionModal()">
+        <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="nacReactionTitle"><i class="fa-regular fa-thumbs-down me-2"></i>Yanıtta ne eksikti?</h5>
+                    <button type="button" class="btn-close" (click)="closeReactionModal()" aria-label="Kapat"></button>
+                </div>
+                <div class="modal-body nac-reaction-body">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        @for (reason of dislikeReasons; track reason) {
+                            <button
+                                type="button"
+                                class="btn btn-sm"
+                                [class.btn-primary]="reactionForm.reason === reason"
+                                [class.btn-outline-secondary]="reactionForm.reason !== reason"
+                                [attr.aria-pressed]="reactionForm.reason === reason"
+                                (click)="selectDislikeReason(reason)">
+                                {{ reason }}
+                            </button>
+                        }
+                    </div>
+                    <label class="form-label" for="reactionDescription">Açıklama (isteğe bağlı)</label>
+                    <textarea
+                        id="reactionDescription"
+                        class="form-control"
+                        rows="3"
+                        maxlength="1000"
+                        placeholder="Neyin daha iyi olabileceğini yazın..."
+                        [(ngModel)]="reactionForm.description"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeReactionModal()">Vazgeç</button>
+                    <button type="button" class="btn btn-soft-danger" (click)="submitReactionModal()">
+                        <i class="fa-solid fa-paper-plane me-1"></i>Gönder
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show nac-modal-backdrop"></div>
+}
+
+<ng-template #extIcon let-item>
+    @if (item.photoUrl) {
+        <img class="nac-ext-icon" [src]="item.photoUrl" alt="" loading="lazy" />
+    } @else {
+        <span class="nac-ext-icon is-fallback" aria-hidden="true"><i class="fa-solid fa-puzzle-piece"></i></span>
+    }
+</ng-template>

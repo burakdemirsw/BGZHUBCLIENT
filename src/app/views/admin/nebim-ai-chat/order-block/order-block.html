@@ -1,0 +1,147 @@
+<article class="ob-card">
+    <header class="ob-head">
+        <div class="ob-head-main">
+            <span class="ob-icon"><i class="fa-solid fa-bag-shopping"></i></span>
+            <div>
+                <div class="ob-number">#{{ order.orderNumber || '-' }}</div>
+                <div class="ob-meta">
+                    @if (order.provider) {
+                        <span class="ob-provider">{{ order.provider }}</span>
+                    }
+                    @if (order.orderDate) {
+                        <span>{{ formatDate(order.orderDate) }}</span>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="ob-total">{{ formatPrice(order.totalPrice) }}</div>
+    </header>
+
+    <div class="ob-badges">
+        @if (getOrderStatus(); as status) {
+            <span class="badge" [class]="'bg-' + status.tone + '-subtle text-' + status.tone">
+                <i class="fa-solid fa-box"></i> {{ status.label }}
+            </span>
+        }
+        @if (getPaymentStatus(); as payment) {
+            <span class="badge" [class]="'bg-' + payment.tone + '-subtle text-' + payment.tone">
+                <i class="fa-solid fa-credit-card"></i> {{ payment.label }}
+            </span>
+        }
+    </div>
+
+    <div class="ob-grid">
+        @if (order.customerName || order.customerEmail || order.customerPhone) {
+            <section class="ob-section">
+                <div class="ob-label"><i class="fa-regular fa-user"></i> Müşteri</div>
+                @if (order.customerName) {
+                    <div class="ob-strong">{{ order.customerName }}</div>
+                }
+                @if (order.customerEmail) {
+                    <a class="ob-link" [href]="'mailto:' + order.customerEmail">{{ order.customerEmail }}</a>
+                }
+                @if (order.customerPhone) {
+                    <a class="ob-link" [href]="'tel:' + order.customerPhone">{{ order.customerPhone }}</a>
+                }
+            </section>
+        }
+
+        @if (order.shippingAddress) {
+            <section class="ob-section">
+                <div class="ob-label"><i class="fa-solid fa-location-dot"></i> Teslimat Adresi</div>
+                @if (order.shippingAddress.fullName) {
+                    <div class="ob-strong">{{ order.shippingAddress.fullName }}</div>
+                }
+                <div>{{ formatAddress(order.shippingAddress) }}</div>
+            </section>
+        }
+
+        @if (hasInvoiceInfo()) {
+            <section class="ob-section">
+                <div class="ob-label"><i class="fa-solid fa-file-invoice"></i> Fatura</div>
+                @if (order.invoice?.invoiceNumber) {
+                    <div class="ob-strong">No: {{ order.invoice!.invoiceNumber }}</div>
+                }
+                @if (order.invoice?.invoiceDate) {
+                    <div class="ob-muted">{{ formatDate(order.invoice!.invoiceDate) }}</div>
+                }
+                @if (order.invoice?.isCorporate) {
+                    <span class="badge bg-info-subtle text-info ob-corporate">Kurumsal</span>
+                    @if (order.invoice!.companyName) {
+                        <div class="ob-strong">{{ order.invoice!.companyName }}</div>
+                    }
+                    @if (order.invoice!.taxOffice || order.invoice!.taxNumber) {
+                        <div>{{ order.invoice!.taxOffice || '-' }} / {{ order.invoice!.taxNumber || '-' }}</div>
+                    }
+                } @else if (order.invoice?.identityNumber) {
+                    <div class="ob-muted">TCKN: {{ maskIdentity(order.invoice!.identityNumber) }}</div>
+                }
+                @if (order.billingAddress && !isSameAddress()) {
+                    @if (order.billingAddress.fullName) {
+                        <div class="ob-strong">{{ order.billingAddress.fullName }}</div>
+                    }
+                    <div>{{ formatAddress(order.billingAddress) }}</div>
+                }
+            </section>
+        }
+
+        @if (hasCargoInfo()) {
+            <section class="ob-section">
+                <div class="ob-label"><i class="fa-solid fa-truck-fast"></i> Kargo</div>
+                @if (order.cargoCompany) {
+                    <div class="ob-strong">{{ order.cargoCompany }}</div>
+                }
+                @if (order.cargoTrackingUrl) {
+                    <a class="ob-link" [href]="order.cargoTrackingUrl" target="_blank" rel="noopener noreferrer">
+                        {{ order.cargoTrackingNumber || 'Kargoyu takip et' }}
+                    </a>
+                } @else if (order.cargoTrackingNumber) {
+                    <div>{{ order.cargoTrackingNumber }}</div>
+                }
+            </section>
+        }
+    </div>
+
+    @if (order.items?.length) {
+        <div class="ob-items">
+            @for (item of order.items!; track $index) {
+                <div class="ob-item">
+                    @if (item.imageUrl) {
+                        <img class="ob-item-img" [src]="item.imageUrl" [alt]="item.name || 'Ürün görseli'" loading="lazy" />
+                    } @else {
+                        <span class="ob-item-img ob-item-fallback"><i class="fa-solid fa-shirt"></i></span>
+                    }
+                    <div class="ob-item-body">
+                        <div class="ob-strong">{{ item.name || 'Ürün' }}</div>
+                        @if (item.sku || item.barcode) {
+                            <div class="ob-muted">
+                                @if (item.sku) { SKU: {{ item.sku }} }
+                                @if (item.sku && item.barcode) { · }
+                                @if (item.barcode) { Barkod: {{ item.barcode }} }
+                            </div>
+                        }
+                    </div>
+                    <div class="ob-item-price">
+                        <div class="ob-strong">{{ formatPrice(item.totalPrice) }}</div>
+                        <div class="ob-muted">
+                            {{ item.quantity }} adet
+                            @if (item.unitPrice !== null && item.unitPrice !== item.totalPrice) {
+                                × {{ formatPrice(item.unitPrice) }}
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (order.note) {
+        <div class="ob-note"><i class="fa-regular fa-note-sticky"></i> {{ order.note }}</div>
+    }
+
+    @if (order.invoice?.invoiceUrl) {
+        <a class="btn btn-sm btn-soft-primary ob-invoice" [href]="order.invoice!.invoiceUrl" target="_blank" rel="noopener noreferrer">
+            <i class="fa-solid fa-file-invoice"></i> Faturayı Görüntüle
+        </a>
+    }
+</article>

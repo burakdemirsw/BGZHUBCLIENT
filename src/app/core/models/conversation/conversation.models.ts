@@ -101,8 +101,8 @@ export interface ConversationMessagesResponse {
     totalCount: number;
 }
 
-export type AiChatResponseType = 'text' | 'table' | 'image' | 'imageGallery' | 'mixed';
-export type AiChatBlockType = 'text' | 'table' | 'image' | 'imageGallery';
+export type AiChatResponseType = 'text' | 'table' | 'image' | 'imageGallery' | 'order' | 'mixed';
+export type AiChatBlockType = 'text' | 'table' | 'image' | 'imageGallery' | 'order';
 
 export interface AiChatTableData {
     columns: string[];
@@ -124,6 +124,60 @@ export interface AiChatContentBlock {
     text: string | null;
     table: AiChatTableData | null;
     images: AiChatImageData[] | null;
+    orders?: AiChatOrderData[] | null;
+}
+
+export interface AiChatOrderAddress {
+    fullName: string | null;
+    addressLine: string | null;
+    district: string | null;
+    city: string | null;
+    postalCode: string | null;
+    countryCode: string | null;
+    phone: string | null;
+}
+
+export interface AiChatOrderItem {
+    name: string | null;
+    sku: string | null;
+    barcode: string | null;
+    quantity: number;
+    unitPrice: number | null;
+    totalPrice: number | null;
+    imageUrl: string | null;
+}
+
+export interface AiChatOrderData {
+    provider: string | null;
+    orderNumber: string | null;
+    orderId: string | null;
+    orderDate: string | null;
+    status: string | null;
+    paymentStatus: string | null;
+    totalPrice: number | null;
+    currency: string | null;
+    customerName: string | null;
+    customerEmail: string | null;
+    customerPhone: string | null;
+    cargoCompany: string | null;
+    cargoTrackingNumber: string | null;
+    cargoTrackingUrl: string | null;
+    shippingAddress: AiChatOrderAddress | null;
+    billingAddress: AiChatOrderAddress | null;
+    items: AiChatOrderItem[] | null;
+    invoice: AiChatOrderInvoice | null;
+    note: string | null;
+}
+
+export interface AiChatOrderInvoice {
+    invoiceNumber: string | null;
+    invoiceDate: string | null;
+    invoiceUrl: string | null;
+    isCorporate: boolean;
+    companyName: string | null;
+    taxOffice: string | null;
+    taxNumber: string | null;
+    identityNumber: string | null;
 }
 
 export interface AiChatToolPayload {
@@ -141,6 +195,18 @@ export interface AiChatResponse {
     success: boolean;
     response: string | null;
     error: string | null;
+    model: string | null;
+    inputTokens: number | null;
+    outputTokens: number | null;
+    totalTokens: number | null;
+    costUsd: number | null;
+    userMessageId?: string | null;
+    assistantMessageId?: string | null;
+    aiMessageId?: string | null;
+    hasImage?: boolean;
+    imageUrl?: string | null;
+    hasExcel?: boolean;
+    excelUrl?: string | null;
     responseType: AiChatResponseType;
     blocks: AiChatContentBlock[] | null;
     toolPayloads: AiChatToolPayload[] | null;
@@ -149,6 +215,35 @@ export interface AiChatResponse {
 export interface ConversationReplyResponse {
     conversation: ConversationMessagesResponse;
     aiResponse: AiChatResponse;
+    stats: ConversationStatsResponse;
+}
+
+export interface ConversationQuotaInfo {
+    planName: string | null;
+    maxMessageCount: number | null;
+    usedMessageCount: number | null;
+    remainingMessageCount: number | null;
+    isUnlimited: boolean;
+    subscriptionEndDate: string;
+}
+
+export interface ConversationStatsResponse {
+    conversationId: string;
+    totalMessageCount: number;
+    userMessageCount: number;
+    assistantMessageCount: number;
+    toolCallCount: number;
+    totalInputTokens: number;
+    totalOutputTokens: number;
+    totalTokens: number;
+    totalCostUsd: number;
+    aiRequestCount: number;
+    failedAiRequestCount: number;
+    averageAiRequestDurationMs: number;
+    lastModel: string | null;
+    firstMessageDate: string | null;
+    lastMessageDate: string | null;
+    quota: ConversationQuotaInfo | null;
 }
 
 export interface ConversationReplyRequest {
@@ -160,7 +255,19 @@ export interface ConversationReplyRequest {
 }
 
 export interface ConversationMessageReactionRequest {
+    isLiked: boolean | null;
+    reason?: string | null;
+    description?: string | null;
+}
+
+export interface MessageReactionReasonResponse {
+    id: string;
+    messageId: string;
+    userId: string;
     isLiked: boolean;
+    reason: string | null;
+    description: string | null;
+    createdDate: string;
 }
 
 // ========================

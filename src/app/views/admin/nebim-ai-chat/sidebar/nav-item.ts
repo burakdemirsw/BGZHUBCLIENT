@@ -1,21 +1,19 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
     selector: 'nac-nav-item',
     standalone: true,
-    imports: [CommonModule],
     template: `
         <button
             type="button"
             class="nav-item"
-            [class.active]="active"
             [class.collapsed]="collapsed"
-            [attr.title]="collapsed ? label : null">
-            <span class="icon" [innerHTML]="safeIcon"></span>
-            <span class="label" *ngIf="!collapsed">{{ label }}</span>
-            <span class="badge" *ngIf="!collapsed && badge">{{ badge }}</span>
+            [attr.title]="collapsed ? label : null"
+            [attr.aria-label]="collapsed ? label : null">
+            <i class="icon" [class]="icon" aria-hidden="true"></i>
+            @if (!collapsed) {
+                <span class="label">{{ label }}</span>
+            }
         </button>
     `,
     styles: [`
@@ -30,53 +28,40 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
             border: none;
             color: #ececec;
             border-radius: 8px;
+            font: inherit;
             font-size: 13.5px;
-            font-weight: 400;
             cursor: pointer;
             text-align: left;
-            transition: background 0.12s ease, color 0.12s ease;
-            font-family: inherit;
+            transition: background 0.15s ease, transform 0.15s ease;
         }
-        .nav-item.collapsed {
-            justify-content: center;
-            padding: 10px 0;
-            gap: 0;
-        }
-        .nav-item:hover { background: rgba(255,255,255,0.06); }
-        .nav-item.active { background: rgba(255,255,255,0.09); color: #fff; font-weight: 500; }
+        .nav-item.collapsed { justify-content: center; padding: 10px 0; }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.07); }
+        .nav-item:active { transform: scale(0.97); }
+        .nav-item:focus-visible { outline: 2px solid #818cf8; outline-offset: -2px; }
         .icon {
-            width: 18px; height: 18px; flex-shrink: 0;
-            display: inline-flex; align-items: center; justify-content: center;
+            width: 18px;
+            flex-shrink: 0;
+            text-align: center;
+            font-size: 15px;
             color: #d1d5db;
+            transition: transform 0.2s ease;
         }
-        .nav-item.active .icon { color: #fff; }
+        .nav-item:hover .icon { transform: scale(1.1); color: #fff; }
         .label {
             flex: 1;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            animation: navLabelIn 0.24s ease both;
         }
-        .badge {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: rgba(255,255,255,0.12);
-            color: #e5e7eb;
-            font-weight: 500;
-            letter-spacing: 0.02em;
+        @keyframes navLabelIn { from { opacity: 0; transform: translateX(-4px); } }
+        @media (prefers-reduced-motion: reduce) {
+            .label { animation: none; }
         }
     `]
 })
 export class NavItemComponent {
     @Input() label = '';
-    @Input() iconSvg: string = '';
-    @Input() active = false;
-    @Input() badge?: string;
+    @Input() icon = '';
     @Input() collapsed = false;
-
-    constructor(private sanitizer: DomSanitizer) {}
-
-    get safeIcon(): SafeHtml {
-        return this.sanitizer.bypassSecurityTrustHtml(this.iconSvg || '');
-    }
 }

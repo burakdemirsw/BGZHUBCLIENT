@@ -8,6 +8,7 @@ import {
     ConversationMessagesResponse,
     ConversationReplyRequest,
     ConversationMessageReactionRequest,
+    MessageReactionReasonResponse,
     ConversationResponse,
     ConversationSidebarResponse,
     CreateConversationRequest,
@@ -74,8 +75,19 @@ export class ConversationsService {
     ): Promise<ApiResponse<object>> {
         return this.http.post<object>(
             { controller: 'Conversations', action: `${conversationId}/messages/${messageId}/reaction` },
-            request,
+            {
+                isLiked: request.isLiked,
+                reason: request.reason ?? null,
+                description: request.description ?? null,
+            },
         );
+    }
+
+    getMessageReactionReasons(conversationId: string, messageId: string): Promise<ApiResponse<MessageReactionReasonResponse[]>> {
+        return this.http.get<MessageReactionReasonResponse[]>({
+            controller: 'Conversations',
+            action: `${conversationId}/messages/${messageId}/reaction-reasons`,
+        });
     }
 
     // ── Action endpoints ──
@@ -83,9 +95,9 @@ export class ConversationsService {
         return this.http.post<object>({ controller: 'Conversations', action: `${id}/${action}` }, {});
     }
 
-    /** Test sohbeti oluşturur — POST create-conversation */
-    createTestConversation(request: CreateTestConversationRequest): Promise<ApiResponse<string>> {
-        return this.http.post<string>(
+    /** Test sohbeti oluşturur — POST create-conversation (v1.yaml: ApiResponseOfConversationMessagesResponse) */
+    createTestConversation(request: CreateTestConversationRequest): Promise<ApiResponse<ConversationMessagesResponse>> {
+        return this.http.post<ConversationMessagesResponse>(
             { controller: 'Conversations', action: 'create-conversation' },
             request,
         );

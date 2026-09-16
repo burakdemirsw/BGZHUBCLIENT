@@ -1,6 +1,20 @@
-import {Routes} from '@angular/router';
+import {Routes, UrlMatchResult, UrlSegment} from '@angular/router';
 import {MainLayout} from '@layouts/main-layout/main-layout';
 import {Landing} from './views/landing/landing';
+
+/**
+ * '/nebim-ai-chat' ve '/c/:conversationId' tek route kaydina eslenir; ayri kayitlar olsaydi
+ * aralarindaki her geciste sohbet sayfasi yok edilip yeniden olusturulurdu.
+ */
+export function nebimAiChatMatcher(segments: UrlSegment[]): UrlMatchResult | null {
+    if (segments.length === 1 && segments[0].path === 'nebim-ai-chat') {
+        return {consumed: segments};
+    }
+    if (segments.length === 2 && segments[0].path === 'c') {
+        return {consumed: segments, posParams: {conversationId: segments[1]}};
+    }
+    return null;
+}
 
 export const routes: Routes = [
     {
@@ -14,13 +28,7 @@ export const routes: Routes = [
         data: {title: 'Nebim AI — AI Destekli Müşteri İletişim Platformu'}
     },
     {
-        path: 'nebim-ai-chat',
-        loadComponent: () =>
-            import('./views/admin/nebim-ai-chat/nebim-ai-chat/nebim-ai-chat').then(m => m.NebimAiChatPage),
-        data: {title: 'Nebim AI Chat'}
-    },
-    {
-        path: 'c/:conversationId',
+        matcher: nebimAiChatMatcher,
         loadComponent: () =>
             import('./views/admin/nebim-ai-chat/nebim-ai-chat/nebim-ai-chat').then(m => m.NebimAiChatPage),
         data: {title: 'Nebim AI Chat'}

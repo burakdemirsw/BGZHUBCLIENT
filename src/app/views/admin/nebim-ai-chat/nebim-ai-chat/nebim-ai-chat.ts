@@ -1,9 +1,10 @@
-import { AfterViewChecked, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ChatHistoryEntry, SidebarComponent } from '../sidebar/sidebar';
+import { OrderBlockComponent } from '../order-block/order-block';
 import { ConversationsService } from '@/app/core/services/conversations.service';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
@@ -12,214 +13,203 @@ import { AiAssistant } from '@/app/core/models/ai-assistant/ai-assistant.models'
 import { CompanyExtension } from '@/app/core/models/extension/company-extension.models';
 import { ExtensionDefinition } from '@/app/core/models/extension/extension-definition.models';
 import {
+    AiChatBlockType,
     AiChatContentBlock,
     AiChatImageData,
-    AiChatResponse,
-    AiChatResponseType,
+    AiChatOrderData,
     AiChatTableData,
-    AiChatToolPayload,
-    ConversationReplyResponse,
-    ConversationMessageReactionRequest,
+    ChatMessage,
     ConversationHeader,
+    ConversationListResponse,
+    ConversationMessageReactionRequest,
     ConversationMessagesResponse,
     ConversationReplyRequest,
+    ConversationReplyResponse,
+    ConversationStatsResponse,
     CreateTestConversationRequest,
 } from '@/app/core/models/conversation/conversation.models';
 
-interface UiChatMessage {
+interface MentionChip {
     id: string;
+    name: string;
+    mention: string;
+    photoUrl?: string;
+}
+
+interface ExtensionShortcut extends MentionChip {
+    category: string;
+    subtitle: string;
+    order: number;
+    isEnabled: boolean;
+}
+
+interface ExtensionShortcutGroup {
+    category: string;
+    items: ExtensionShortcut[];
+    /** Kart giris animasyonu gruplar arasinda kesintisiz sirayla oynasin diye. */
+    startIndex: number;
+}
+
+interface ExtensionContent {
+    category: string;
+    title: string;
+    subtitle: string;
+    order: number;
+}
+
+interface UiTableCell {
+    value: string;
+    link: string | null;
+    linkLabel: string;
+    isImage: boolean;
+}
+
+interface UiTable {
+    columns: string[];
+    rows: UiTableCell[][];
+    isTruncated: boolean;
+}
+
+interface UiChatBlock {
+    type: AiChatBlockType;
+    title: string | null;
+    text: string | null;
+    table: UiTable | null;
+    images: AiChatImageData[];
+    orders: AiChatOrderData[];
+}
+
+interface UiChatMessage {
+    /** Sunucu kimligi; optimistic mesajlarda gecicidir. */
+    id: string;
+    /** @for track anahtari; optimistic mesaj sunucu kaydina donustugunde DOM yeniden olusmaz. */
+    key: string;
     role: 'user' | 'assistant';
     content: string;
-    createdAt: Date;
-    mentions?: MentionChipItem[];
-    blocks?: AiChatContentBlock[];
-    isError?: boolean;
-    hasImage?: boolean;
-    aiImageUrl?: string | null;
-    hasExcel?: boolean;
-    excelUrl?: string | null;
-    isLiked?: boolean | null;
-    isReactionSaving?: boolean;
+    createdDate: string | null;
+    timeText: string;
+    mentions: MentionChip[];
+    blocks: UiChatBlock[];
+    aiImageUrl: string | null;
+    excelUrl: string | null;
+    shareUrl: string | null;
+    isLiked: boolean | null;
+    isReactionSaving: boolean;
+    isPending: boolean;
+    animate: boolean;
 }
 
-interface ConversationApiMessage {
-    id?: string;
-    conversationId?: string | null;
-    source?: string | null;
-    text?: string | null;
-    imageUrl?: string | null;
-    messageText?: string | null;
-    messageContent?: string | null;
-    createdDate?: string | null;
-    responseType?: AiChatResponseType | string | null;
-    blocks?: AiChatContentBlock[] | null;
-    toolPayloads?: AiChatToolPayload[] | null;
-    hasImage?: boolean | null;
-    aiImageUrl?: string | null;
-    hasExcel?: boolean | null;
-    excelUrl?: string | null;
-    isLiked?: boolean | null;
-}
-
-interface ConversationReplyResponseShape {
-    conversation?: ConversationMessagesResponse | null;
-    Conversation?: ConversationMessagesResponse | null;
-    aiResponse?: AiChatResponse | null;
-    AiResponse?: AiChatResponse | null;
-}
-
-interface CreateTestConversationResponse {
-    conversationId?: string;
+interface ReactionReasonForm {
+    reason: string;
+    description: string;
 }
 
 interface StoredUserProfile {
-    userId?: string;
     companyId?: string;
     name?: string;
-    lastName?: string;
+    surname?: string;
 }
 
-interface ConversationPageResult {
-    conversations: ConversationHeader[];
-    totalCount: number;
-}
+const EXTENSION_CONTENT: Record<string, ExtensionContent> = {
+    siparis: { category: 'Operasyon', title: 'Sipariş', subtitle: 'Sipariş durumu, hazırlık adımları ve iptal sürecini hızlıca sorgula.', order: 1 },
+    fatura: { category: 'Finans', title: 'Fatura', subtitle: 'Faturalandırma, iade faturaları ve tahsilat kalemlerini incele.', order: 2 },
+    sevkiyat: { category: 'Lojistik', title: 'Sevkiyat', subtitle: 'Kargo hazırlığı, teslimat ve gecikme nedenlerini tek noktadan gör.', order: 3 },
+    transfer: { category: 'Depo', title: 'Transfer', subtitle: 'Depolar arası transfer taleplerini ve onay bekleyen hareketleri yönet.', order: 4 },
+    musteri: { category: 'CRM', title: 'Müşteri', subtitle: 'Müşteri geçmişi, iletişim kayıtları ve son alışveriş trendini analiz et.', order: 5 },
+    urun: { category: 'Katalog', title: 'Ürün', subtitle: 'Ürün kartı detayları, varyant bilgileri ve katalog metinlerini sorgula.', order: 6 },
+    stok: { category: 'Envanter', title: 'Stok', subtitle: 'Anlık stok, kritik seviye uyarıları ve devir hızını karşılaştır.', order: 7 },
+    wms: { category: 'Warehouse', title: 'WMS', subtitle: 'Toplama, yerleştirme, sayım ve lokasyon verimliliğini takip et.', order: 8 },
+};
 
-interface ActiveExtensionShortcut {
-    id: string;
-    name: string;
-    mention: string;
-    category: string;
-    subtitle: string;
-    prompt: string;
-    isEnabled: boolean;
-    photoUrl?: string;
-}
-
-interface ExtensionShortcutCategoryGroup {
-    category: string;
-    items: ActiveExtensionShortcut[];
-}
-
-interface MentionChipItem {
-    id: string;
-    name: string;
-    mention: string;
-    photoUrl?: string;
-}
+const SUPPORTED_BLOCK_TYPES = new Set<string>(['text', 'table', 'image', 'imageGallery', 'order']);
+const IMAGE_COLUMN_HINTS = ['image', 'foto', 'gorsel', 'photo', 'picture'];
+const MENTION_TOKEN_PATTERN = /(^|\s)(@[^\s@]+)/g;
+// Backend .NET Guid parse ile uyumlu: canonical 8-4-4-4-12 hex format.
+const GUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
+const MOBILE_QUERY = '(max-width: 768px)';
+const TOUCH_QUERY = '(pointer: coarse)';
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+const SOUND_PREFERENCE_KEY = 'nebim-ai-chat-sound-enabled';
+const SIDEBAR_PAGE_SIZE = 20;
+const REPLY_POLL_ATTEMPTS = 12;
+const REPLY_POLL_DELAY_MS = 800;
+const SCROLL_DOWN_THRESHOLD = 240;
+/** Sayfa yenilendiginde yalnizca bu sure icinde gonderilmis mesajin yaniti beklenir. */
+const REPLY_WAIT_WINDOW_MS = 3 * 60_000;
 
 @Component({
     selector: 'app-nebim-ai-chat',
     standalone: true,
-    imports: [CommonModule, FormsModule, SidebarComponent],
+    imports: [NgTemplateOutlet, FormsModule, SidebarComponent, OrderBlockComponent],
     templateUrl: './nebim-ai-chat.html',
     styleUrl: './nebim-ai-chat.scss'
 })
 export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
-    @ViewChild('scrollAnchor') scrollAnchor?: ElementRef<HTMLDivElement>;
-    @ViewChild('textArea') textArea?: ElementRef<HTMLTextAreaElement>;
+    @ViewChild('scroller', { static: true }) scroller?: ElementRef<HTMLElement>;
+    @ViewChild('textArea', { static: true }) textArea?: ElementRef<HTMLTextAreaElement>;
 
     messages: UiChatMessage[] = [];
+    activeConversationId: string | null = null;
+    conversationStats: ConversationStatsResponse | null = null;
+    isSending = false;
+    isLoadingThread = false;
+    errorMessage = '';
+    soundEnabled = true;
+    showScrollDown = false;
+    composerFlash = false;
+
     sidebarChats: ChatHistoryEntry[] = [];
     hasMoreSidebarChats = false;
     isLoadingMoreChats = false;
+    sidebarCollapsed = false;
+    sidebarMobileOpen = false;
 
     input = '';
     assistants: AiAssistant[] = [];
     selectedAssistantId = '';
     assistantMenuOpen = false;
-    extensionMenuOpen = false;
-    mentionAutocompleteQuery: string | null = null;
-    extensionMenuFilterText = '';
+
+    /** Pasifler dahil tum eklentiler; gecmis mesajlardaki etiketlerin gorselini cozmek icin. */
+    extensionShortcuts: ExtensionShortcut[] = [];
+    enabledExtensionShortcuts: ExtensionShortcut[] = [];
+    extensionGroups: ExtensionShortcutGroup[] = [];
     isLoadingExtensions = false;
-    activeExtensionShortcuts: ActiveExtensionShortcut[] = [];
-    selectedMentionChips: MentionChipItem[] = [];
-    defaultMentionChip: MentionChipItem | null = null;
-    isSending = false;
-    isLoadingThread = false;
-    soundEnabled = true;
-    sidebarCollapsed = false;
-    sidebarMobileOpen = false;
+    extensionMenuOpen = false;
+    extensionMenuFilterText = '';
+    /** Ayni anda tek etiket secilebilir; gonderimden sonra da secili kalir. */
+    selectedMention: MentionChip | null = null;
 
-    activeConversationId: string | null = null;
-    errorMessage = '';
+    readonly dislikeReasons: string[] = [
+        'Yanlış bilgi',
+        'Eksik yanıt',
+        'Soruyu anlamadı',
+        'Yavaş yanıt',
+        'Diğer',
+    ];
+    showReactionModal = false;
+    reactionForm: ReactionReasonForm = { reason: '', description: '' };
+    private reactionTarget: UiChatMessage | null = null;
 
-    private shouldScroll = false;
-    /**
-     * Bu sayfadan yeni baslatilan sohbetin id'si. Route degisimi tetiklendiginde
-     * backend henuz ilk mesaji kaydetmedigi icin getMessages bos donuyor ve
-     * optimistic mesajlar siliniyordu. Bu id icin route kaynakli yukleme atlanir.
-     */
-    private locallyStartedConversationId: string | null = null;
-    private assistantWaitConversationId: string | null = null;
+    private mentionQuery: string | null = null;
     private extensionMenuOpenedByMention = false;
-    private hasHydratedThread = false;
     private sidebarOpenedManually = false;
     private sidebarCurrentPage = 1;
-    private readonly sidebarPageSize = 20;
-    private routeConversationSub: Subscription | null = null;
-    private viewportSyncCleanup: (() => void) | null = null;
-    private readonly soundPreferenceKey = 'nebim-ai-chat-sound-enabled';
-    private keyboardSound = new Audio('assets/sounds/keyboard.mp3');
+    /** Liste yeniden yuklendiginde geciken "daha fazla" yanitlari yok sayilir. */
+    private sidebarListVersion = 0;
+    private hasHydratedThread = false;
+    private pendingConversation: Promise<string | null> | null = null;
+    /** Sohbet her degistiginde artar; geciken async islemlerin yanlis sohbete yazmasini engeller. */
+    private conversationToken = 0;
+    private sendingConversationId: string | null = null;
+    private replyWaitConversationId: string | null = null;
+    private pendingScroll: ScrollBehavior | null = null;
+    private destroyed = false;
+    private routeSub: Subscription | null = null;
+    private readonly cleanups: (() => void)[] = [];
+    private readonly keyboardSound = new Audio('assets/sounds/keyboard.mp3');
     private lastKeyboardSoundAt = 0;
-
-    private readonly extensionContentByKey: Record<string, { category: string; title: string; subtitle: string; prompt: string; order: number }> = {
-        siparis: {
-            category: 'Operasyon',
-            title: 'Siparis',
-            subtitle: 'Siparis durumu, hazirlik adimlari ve iptal surecini hizlica sorgula.',
-            prompt: 'Siparis durumunu ve son islem adimlarini getir.',
-            order: 1,
-        },
-        fatura: {
-            category: 'Finans',
-            title: 'Fatura',
-            subtitle: 'Faturalandirma, iade faturalari ve tahsilat kalemlerini incele.',
-            prompt: 'Fatura ozetini ve acik kalan kayitlari listeler misin?',
-            order: 2,
-        },
-        sevkiyat: {
-            category: 'Lojistik',
-            title: 'Sevkiyat',
-            subtitle: 'Kargo hazirlik, teslimat ve gecikme nedenlerini tek noktadan gor.',
-            prompt: 'Sevkiyat durumunu ve teslimat performansini ozetle.',
-            order: 3,
-        },
-        transfer: {
-            category: 'Depo',
-            title: 'Transfer',
-            subtitle: 'Depolar arasi transfer talepleri ve onay bekleyen hareketleri yonet.',
-            prompt: 'Transfer taleplerini ve bekleyen onaylari getir.',
-            order: 4,
-        },
-        musteri: {
-            category: 'CRM',
-            title: 'Musteri',
-            subtitle: 'Musteri gecmisi, iletisim kayitlari ve son alisveris trendini analiz et.',
-            prompt: 'Musteri gecmisini ve son etkilesim notlarini goster.',
-            order: 5,
-        },
-        urun: {
-            category: 'Katalog',
-            title: 'Urun',
-            subtitle: 'Urun karti detaylari, varyant bilgileri ve katalog metinlerini sorgula.',
-            prompt: 'Urun bilgilerini ve varyant detaylarini listeler misin?',
-            order: 6,
-        },
-        stok: {
-            category: 'Envanter',
-            title: 'Stok',
-            subtitle: 'Anlik stok, kritik seviye uyarilari ve devir hizini karsilastir.',
-            prompt: 'Stok seviyelerini ve kritik urunleri raporla.',
-            order: 7,
-        },
-        wms: {
-            category: 'Warehouse',
-            title: 'WMS',
-            subtitle: 'Toplama, yerlestirme, sayim ve lokasyon verimliligini takip et.',
-            prompt: 'WMS operasyon durumunu ve lokasyon verimliligini paylas.',
-            order: 8,
-        },
-    };
+    private flashTimer: ReturnType<typeof setTimeout> | undefined;
 
     constructor(
         private conversationsService: ConversationsService,
@@ -229,305 +219,197 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         private router: Router,
         private route: ActivatedRoute,
         private hostRef: ElementRef<HTMLElement>,
+        private zone: NgZone,
     ) {}
-   
-    async ngOnInit(): Promise<void> {
+
+    ngOnInit(): void {
         this.startViewportSync();
+        this.startScrollTracking();
         this.loadSoundPreference();
         this.keyboardSound.preload = 'auto';
         this.keyboardSound.volume = 0.5;
-
-        await Promise.all([
-            this.loadSidebar(),
-            this.loadConversationList(),
-            this.loadAssistants(),
-            this.loadActiveExtensionShortcuts(),
-        ]);
-
-        await this.syncConversationFromRoute(this.route.snapshot.paramMap.get('conversationId'));
-        this.routeConversationSub = this.route.paramMap.subscribe((paramMap) => {
-            void this.syncConversationFromRoute(paramMap.get('conversationId'));
-        });
-
-        // Ensure initial render lands at the latest message on page open.
-        this.shouldScroll = true;
-        setTimeout(() => {
-            this.scrollAnchor?.nativeElement.scrollIntoView({ behavior: 'auto', block: 'end' });
-        }, 0);
-    }   
+        void this.initialize();
+    }
 
     ngAfterViewChecked(): void {
-        if (this.shouldScroll) {
-            this.shouldScroll = false;
-            this.scrollAnchor?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        }
+        if (!this.pendingScroll) return;
+        const behavior = this.pendingScroll;
+        this.pendingScroll = null;
+        this.scrollToBottom(behavior);
     }
 
     ngOnDestroy(): void {
-        this.routeConversationSub?.unsubscribe();
-        this.routeConversationSub = null;
-        this.viewportSyncCleanup?.();
-        this.viewportSyncCleanup = null;
+        this.destroyed = true;
+        this.routeSub?.unsubscribe();
+        this.cleanups.forEach((cleanup) => cleanup());
+        clearTimeout(this.flashTimer);
         this.keyboardSound.pause();
+    }
+
+    private async initialize(): Promise<void> {
+        // Gecmis mesajlardaki etiket gorselleri eklenti listesine bagli oldugu icin
+        // route senkronizasyonu veriler yuklendikten sonra baslar.
+        await Promise.all([
+            this.loadConversationList(),
+            this.loadAssistants(),
+            this.loadExtensionShortcuts(),
+        ]);
+        if (this.destroyed) return;
+
+        // paramMap abone olundugu anda mevcut degeri yayar; ayrica snapshot okumaya gerek yok.
+        this.routeSub = this.route.paramMap.subscribe((params) => {
+            void this.syncConversationFromRoute(params.get('conversationId'));
+        });
+    }
+
+    // ── Görünüm / layout ─────────────────────────────────────────────
+
+    get selectedAssistantLabel(): string {
+        const assistant = this.assistants.find((item) => item.id === this.selectedAssistantId) ?? this.assistants[0];
+        return assistant?.name?.trim() || 'Asistan seç';
+    }
+
+    get composerPlaceholder(): string {
+        return this.selectedMention ? 'Nebim AI\'a bir mesaj gönder...' : 'Önce + ile bir eklenti seç ya da @ yaz...';
+    }
+
+    /** Menu @ yazilarak acildiysa ilk oneri Enter/Tab ile secilir. */
+    get isMentionAutocomplete(): boolean {
+        return this.extensionMenuOpen && this.extensionMenuOpenedByMention;
+    }
+
+    get isAssistantTyping(): boolean {
+        const id = this.activeConversationId;
+        return !!id && (this.sendingConversationId === id || this.replyWaitConversationId === id);
+    }
+
+    get quotaText(): string {
+        const quota = this.conversationStats?.quota;
+        if (!quota) return '';
+        if (quota.isUnlimited) return 'Sınırsız mesaj hakkı';
+        if (quota.remainingMessageCount === null) return '';
+        const max = quota.maxMessageCount !== null ? ` / ${quota.maxMessageCount}` : '';
+        return `Kalan mesaj hakkı: ${quota.remainingMessageCount}${max}`;
+    }
+
+    get tokenUsageText(): string {
+        const totalTokens = this.conversationStats?.totalTokens;
+        return totalTokens ? `Bu sohbet: ${Number(totalTokens).toLocaleString('tr-TR')} token` : '';
+    }
+
+    /**
+     * Mobil tarayicilarda yazilim klavyesi acildiginda layout viewport degismedigi icin
+     * sabit konumlu chat kabugu klavyenin altinda kaliyor. Gercek gorunur viewport
+     * olculeri CSS degiskenlerine yazilarak composer her zaman gorunur tutulur.
+     */
+    private startViewportSync(): void {
+        const viewport = window.visualViewport;
+        const target: EventTarget = viewport ?? window;
+        const events = viewport ? ['resize', 'scroll'] : ['resize', 'orientationchange'];
+        const apply = () => {
+            const host = this.hostRef.nativeElement;
+            const height = Math.round(viewport?.height ?? window.innerHeight);
+            host.style.setProperty('--nac-viewport-height', `${height}px`);
+            host.style.setProperty('--nac-viewport-offset', `${Math.round(viewport?.offsetTop ?? 0)}px`);
+
+            // Klavye acikken ipucu satiri, cok alcak ekranlarda (yatay telefon) header da gizlenir.
+            const keyboardOpen = window.innerHeight - height > 150;
+            host.classList.toggle('nac-keyboard-open', keyboardOpen);
+            host.classList.toggle('nac-compact', keyboardOpen && height < 480);
+        };
+
+        apply();
+        this.zone.runOutsideAngular(() => events.forEach((name) => target.addEventListener(name, apply)));
+        this.cleanups.push(() => events.forEach((name) => target.removeEventListener(name, apply)));
+    }
+
+    /** "En alta git" butonu icin; scroll olaylari change detection tetiklemesin diye zone disinda dinlenir. */
+    private startScrollTracking(): void {
+        const el = this.scroller?.nativeElement;
+        if (!el) return;
+
+        const onScroll = () => {
+            const show = el.scrollHeight - el.scrollTop - el.clientHeight > SCROLL_DOWN_THRESHOLD;
+            if (show !== this.showScrollDown) {
+                this.zone.run(() => (this.showScrollDown = show));
+            }
+        };
+
+        this.zone.runOutsideAngular(() => el.addEventListener('scroll', onScroll, { passive: true }));
+        this.cleanups.push(() => el.removeEventListener('scroll', onScroll));
+    }
+
+    scrollToBottom(behavior: ScrollBehavior = 'smooth'): void {
+        const el = this.scroller?.nativeElement;
+        if (!el) return;
+        const reducedMotion = window.matchMedia(REDUCED_MOTION_QUERY).matches;
+        el.scrollTo({ top: el.scrollHeight, behavior: reducedMotion ? 'instant' : behavior });
+    }
+
+    private requestScroll(behavior: ScrollBehavior = 'smooth'): void {
+        this.pendingScroll = behavior;
+    }
+
+    private isMobileViewport(): boolean {
+        return window.matchMedia(MOBILE_QUERY).matches;
+    }
+
+    private isTouchDevice(): boolean {
+        return window.matchMedia(TOUCH_QUERY).matches;
+    }
+
+    /** Dokunmatik cihazda klavyeyi acmadan, composer'a eklenen degeri kisa bir vurguyla gosterir. */
+    private flashComposer(): void {
+        clearTimeout(this.flashTimer);
+        this.composerFlash = false;
+        this.flashTimer = setTimeout(() => {
+            this.composerFlash = true;
+            this.flashTimer = setTimeout(() => (this.composerFlash = false), 700);
+        });
+    }
+
+    /** Header hamburger ve sidebar icindeki toggle: mobilde drawer'i, masaustunde daraltmayi yonetir. */
+    toggleSidebar(): void {
+        if (this.isMobileViewport()) {
+            this.sidebarMobileOpen = !this.sidebarMobileOpen;
+            // Mobil drawer her zaman tam genislikte acilmali
+            if (this.sidebarMobileOpen) this.sidebarCollapsed = false;
+            return;
+        }
+
+        this.sidebarCollapsed = !this.sidebarCollapsed;
+        this.sidebarOpenedManually = !this.sidebarCollapsed;
+    }
+
+    closeMobileSidebar(): void {
+        this.sidebarMobileOpen = false;
     }
 
     toggleSound(): void {
         this.soundEnabled = !this.soundEnabled;
-        this.persistSoundPreference();
-    }
-
-    /**
-     * Mobil tarayicılarda yazılım klavyesi acıldıgında layout viewport degismedigi icin
-     * sabit konumlu chat kabugu klavyenin altında kalıyor. Gercek gorunur viewport
-     * olculeri CSS degiskenlerine yazılarak composer her zaman gorunur tutulur.
-     */
-    private startViewportSync(): void {
-        if (typeof window === 'undefined') return;
-
-        const visualViewport = window.visualViewport ?? null;
-        const applyViewportMetrics = () => {
-            const height = Math.round(visualViewport?.height ?? window.innerHeight);
-            const offsetTop = Math.round(visualViewport?.offsetTop ?? 0);
-            const hostStyle = this.hostRef.nativeElement.style;
-            hostStyle.setProperty('--nac-viewport-height', `${height}px`);
-            hostStyle.setProperty('--nac-viewport-offset', `${offsetTop}px`);
-        };
-
-        applyViewportMetrics();
-
-        if (visualViewport) {
-            visualViewport.addEventListener('resize', applyViewportMetrics);
-            visualViewport.addEventListener('scroll', applyViewportMetrics);
-            this.viewportSyncCleanup = () => {
-                visualViewport.removeEventListener('resize', applyViewportMetrics);
-                visualViewport.removeEventListener('scroll', applyViewportMetrics);
-            };
-            return;
-        }
-
-        window.addEventListener('resize', applyViewportMetrics);
-        window.addEventListener('orientationchange', applyViewportMetrics);
-        this.viewportSyncCleanup = () => {
-            window.removeEventListener('resize', applyViewportMetrics);
-            window.removeEventListener('orientationchange', applyViewportMetrics);
-        };
-    }
-  
-    private isMobileViewport(): boolean {
-        return typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
-    }
-
-    onComposerFocus(): void {
-        // Klavye acilma animasyonu bittikten sonra son mesaja kaydir.
-        setTimeout(() => {
-            this.scrollAnchor?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        }, 300);
-    }
-
-    get selectedAssistantLabel(): string {
-        const selectedAssistant = this.assistants.find((assistant) => assistant.id === this.selectedAssistantId);
-        if (selectedAssistant?.name?.trim()) {
-            return selectedAssistant.name.trim();
-        }
-
-        if (this.assistants.length > 0) {
-            return this.assistants[0].name?.trim() || 'Asistan sec';
-        }
-
-        return 'Asistan sec';
-    }
-
-    toggleAssistantMenu(): void {
-        this.assistantMenuOpen = !this.assistantMenuOpen;
-    }
-
-    selectAssistant(assistantId: string): void {  
-        this.selectedAssistantId = assistantId;
-        this.assistantMenuOpen = false;
-    }
-
-    onExtensionShortcutClick(): void {
-        if (this.isLoadingExtensions) return;
-
-        const enabledShortcuts = this.getEnabledExtensionShortcuts();
-        if (!enabledShortcuts.length) {
-            this.errorMessage = 'Aktif eklenti bulunamadi.';
-            return;
-        }
-
-        if (enabledShortcuts.length === 1) {
-            this.insertMentionToInput(enabledShortcuts[0].mention, enabledShortcuts[0]);
-            return;
-        }
-
-        this.extensionMenuOpen = !this.extensionMenuOpen;
-        if (this.extensionMenuOpen) {
-            this.mentionAutocompleteQuery = null;
-            this.extensionMenuFilterText = '';
-            this.extensionMenuOpenedByMention = false;
-            this.assistantMenuOpen = false;
+        try {
+            localStorage.setItem(SOUND_PREFERENCE_KEY, this.soundEnabled ? '1' : '0');
+        } catch {
+            // Storage kullanilamiyor; tercih yalnizca bu oturumda gecerli.
         }
     }
 
-    selectExtensionShortcut(shortcut: ActiveExtensionShortcut): void {
-        if (!shortcut.isEnabled) {
-            this.errorMessage = 'Bu eklenti pasif durumda oldugu icin secilemez.';
-            return;
+    private loadSoundPreference(): void {
+        // Dokunmatik cihazlarda HTMLAudio arka plandaki muzigi kestigi icin tus sesi varsayilan olarak kapali.
+        this.soundEnabled = !this.isTouchDevice();
+        try {
+            const raw = localStorage.getItem(SOUND_PREFERENCE_KEY);
+            if (raw === '0' || raw === '1') {
+                this.soundEnabled = raw === '1';
+            }
+        } catch {
+            // Storage kullanilamiyor; varsayilan tercih korunur.
         }
-        this.insertMentionToInput(shortcut.mention, shortcut);
-        this.extensionMenuOpen = false;
-        this.extensionMenuOpenedByMention = false;
     }
 
-    useExtensionShortcutCard(shortcut: ActiveExtensionShortcut): void {
-        if (!shortcut.isEnabled) {
-            this.errorMessage = `${shortcut.name} su anda pasif durumda.`;
-            return;
-        }
-
-        this.insertMentionToInput(shortcut.mention, shortcut);
-
-        setTimeout(() => {
-            this.textArea?.nativeElement.focus();
-            this.autoResize();
-        }, 0);
-    }
-
-    hasExtensionShortcuts(): boolean {
-        return this.getEnabledExtensionShortcuts().length > 0;
-    }
-
-    isSingleExtensionShortcut(): boolean {
-        return this.getEnabledExtensionShortcuts().length === 1;
-    }
-
-    private getEnabledExtensionShortcuts(): ActiveExtensionShortcut[] {
-        return this.activeExtensionShortcuts.filter(item => item.isEnabled);
-    }
-
-    get filteredExtensionShortcuts(): ActiveExtensionShortcut[] {
-        const enabledShortcuts = this.getEnabledExtensionShortcuts();
-        const autocompleteQuery = this.mentionAutocompleteQuery;
-        const manualFilterQuery = this.toLookupKey(this.extensionMenuFilterText);
-        const query = autocompleteQuery !== null ? autocompleteQuery : manualFilterQuery;
-
-        if (query === null) {
-            return enabledShortcuts;
-        }
-
-        if (!query) {
-            return enabledShortcuts;
-        }
-
-        return enabledShortcuts.filter(item => {
-            const mentionKey = this.toLookupKey((item.mention || '').replace('@', ''));
-            const nameKey = this.toLookupKey(item.name || '');
-            return mentionKey.includes(query) || nameKey.includes(query);
-        });
-    }
-
-    get enabledExtensionShortcuts(): ActiveExtensionShortcut[] {
-        return this.activeExtensionShortcuts.filter(item => item.isEnabled);
-    }
-
-    get groupedActiveExtensionShortcuts(): ExtensionShortcutCategoryGroup[] {
-        const groups = new Map<string, ActiveExtensionShortcut[]>();
-
-        for (const item of this.enabledExtensionShortcuts) {
-            const category = (item.category || '').trim() || 'Genel';
-            const list = groups.get(category) || [];
-            list.push(item);
-            groups.set(category, list);
-        }
-
-        return Array.from(groups.entries())
-            .map(([category, items]) => ({ category, items }))
-            .sort((a, b) => a.category.localeCompare(b.category, 'tr-TR'));
-    }
-
-    onExtensionMenuFilterInput(): void {
-        if (!this.extensionMenuOpen) {
-            return;
-        }
-
-        this.mentionAutocompleteQuery = null;
-    }
-
-    private insertMentionToInput(mention: string, shortcut?: ActiveExtensionShortcut): void {
-        const token = this.normalizeMention(mention);
-        if (!token) {
-            this.errorMessage = 'Bu eklenti icin etiket tanimi bulunamadi.';
-            return;
-        }
-
-        if (!shortcut) {
-            this.errorMessage = 'Etiket secimi icin eklenti bulunamadi.';
-            return;
-        }
-
-        if (this.selectedMentionChips.some(item => item.id === shortcut.id || item.mention === token)) {
-            this.errorMessage = `${token} zaten secili.`;
-            return;
-        }
-
-        this.selectedMentionChips = [
-            ...this.selectedMentionChips,
-            {
-                id: shortcut.id,
-                name: shortcut.name,
-                mention: token,
-                photoUrl: shortcut.photoUrl,
-            },
-        ];
-        if (!this.defaultMentionChip) {
-            this.defaultMentionChip = {
-                id: shortcut.id,
-                name: shortcut.name,
-                mention: token,
-                photoUrl: shortcut.photoUrl,
-            };
-        }
-        this.errorMessage = '';
-
-        setTimeout(() => {
-            this.textArea?.nativeElement.focus();
-            this.autoResize();
-        }, 0);
-    }
-
-    private normalizeMention(mention: string | null | undefined): string {
-        const raw = (mention || '').trim();
-        if (!raw) return '';
-        return raw.startsWith('@') ? raw : `@${raw}`;
-    }
-
-    removeMentionChip(chip: MentionChipItem): void {
-        this.selectedMentionChips = this.selectedMentionChips.filter(item => item.id !== chip.id);
-        if (
-            this.defaultMentionChip
-            && this.defaultMentionChip.id === chip.id
-            && this.normalizeMention(this.defaultMentionChip.mention) === this.normalizeMention(chip.mention)
-        ) {
-            this.defaultMentionChip = null;
-        }
-        this.autoResize();
-    }
-
-    private getSelectedMentionTokens(): string[] {
-        const chips = [...this.selectedMentionChips];
-        if (chips.length === 0 && this.defaultMentionChip) {
-            chips.push(this.defaultMentionChip);
-        }
-
-        return Array.from(new Set(chips.map(item => this.normalizeMention(item.mention)).filter(Boolean)));
-    }
-
-    isAssistantSelected(assistantId: string): boolean {
-        return this.selectedAssistantId === assistantId;
-    }
-
-    @HostListener('document:click', ['$event'])
-    onDocumentClick(event: MouseEvent): void {
+    // iOS Safari tiklanamayan alanlara dokunuldugunda click uretmedigi icin pointerdown dinlenir.
+    @HostListener('document:pointerdown', ['$event'])
+    onDocumentPointerDown(event: PointerEvent): void {
         const target = event.target as HTMLElement | null;
         if (!target) return;
 
@@ -536,360 +418,409 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         }
 
         if (this.extensionMenuOpen && !target.closest('.nac-extension-picker')) {
-            this.extensionMenuOpen = false;
-            this.extensionMenuOpenedByMention = false;
-            this.mentionAutocompleteQuery = null;
+            this.closeExtensionMenu();
         }
     }
 
-    private async loadActiveExtensionShortcuts(): Promise<void> {
-        const companyId = this.getCompanyId();
-        if (!companyId) {
-            this.activeExtensionShortcuts = [];
+    @HostListener('document:keydown.escape')
+    onEscape(): void {
+        if (this.showReactionModal) {
+            this.closeReactionModal();
+        } else if (this.extensionMenuOpen || this.assistantMenuOpen) {
+            this.closeExtensionMenu();
+            this.assistantMenuOpen = false;
+        } else if (this.sidebarMobileOpen) {
+            this.sidebarMobileOpen = false;
+        }
+    }
+
+    // ── Asistan & eklenti seçimi ─────────────────────────────────────
+
+    toggleAssistantMenu(): void {
+        this.assistantMenuOpen = !this.assistantMenuOpen;
+        if (this.assistantMenuOpen) this.closeExtensionMenu();
+    }
+
+    selectAssistant(assistantId: string): void {
+        this.selectedAssistantId = assistantId;
+        this.assistantMenuOpen = false;
+    }
+
+    get filteredExtensionShortcuts(): ExtensionShortcut[] {
+        const query = this.mentionQuery ?? this.toLookupKey(this.extensionMenuFilterText);
+        if (!query) return this.enabledExtensionShortcuts;
+
+        const exactKey = this.toLookupKey(this.normalizeMention(query));
+        return this.enabledExtensionShortcuts
+            .filter((item) => this.toLookupKey(item.mention).includes(query) || this.toLookupKey(item.name).includes(query))
+            // Tam eslesen etiket (@stok) basa alinir; Enter/Tab onu secer (@stokrapor degil).
+            .sort((a, b) => Number(this.toLookupKey(b.mention) === exactKey) - Number(this.toLookupKey(a.mention) === exactKey));
+    }
+
+    onExtensionTriggerClick(): void {
+        const shortcuts = this.enabledExtensionShortcuts;
+        if (!shortcuts.length) return;
+
+        if (shortcuts.length === 1) {
+            this.selectExtensionShortcut(shortcuts[0]);
             return;
         }
 
-        this.isLoadingExtensions = true;
-        try {
-            const [companyExtensionsResponse, definitionsResponse] = await Promise.all([
-                this.extensionManagementService.getCompanyExtensions(companyId),
-                this.extensionManagementService.getExtensionDefinitions(),
-            ]);
+        const open = !this.extensionMenuOpen;
+        this.closeExtensionMenu();
+        this.extensionMenuFilterText = '';
+        this.extensionMenuOpen = open;
+        this.assistantMenuOpen = false;
+    }
 
-            const companyExtensions = this.extractArray<CompanyExtension>(companyExtensionsResponse?.data)
-                .filter(item => !item.isBlocked);
-            const definitions = this.extractArray<ExtensionDefinition>(definitionsResponse?.data)
-                .filter(item => item.isActive && !item.isBlocked);
+    /** Menuden, bos ekran kartlarindan veya @ otomatik tamamlamasindan etiket secer. */
+    selectExtensionShortcut(shortcut: ExtensionShortcut): void {
+        const openedByMention = this.isMentionAutocomplete;
+        this.closeExtensionMenu();
+        this.selectedMention = this.toChip(shortcut);
+        this.errorMessage = '';
 
-            this.activeExtensionShortcuts = companyExtensions
-                .map(item => {
-                    const definition = definitions.find(def => def.id === item.extensionId);
-                    if (!definition?.mention) return null;
-
-                    const content = this.getExtensionContent(definition.name, definition.mention);
-
-                    return {
-                        id: item.extensionId,
-                        name: content.title || definition.name || item.extensionName || 'Extension',
-                        mention: definition.mention,
-                        category: content.category,
-                        subtitle: content.subtitle,
-                        prompt: content.prompt,
-                        isEnabled: item.isEnabled,
-                        photoUrl: definition.photoUrl || item.photoUrl,
-                    } as ActiveExtensionShortcut;
-                })
-                .filter((item): item is ActiveExtensionShortcut => item !== null)
-                .sort((a, b) => {
-                    if (a.isEnabled !== b.isEnabled) {
-                        return a.isEnabled ? -1 : 1;
-                    }
-                    return this.getContentOrder(a) - this.getContentOrder(b);
-                });
-        } catch (err) {
-            console.error('[NebimAiChat] Extension kisayollari yuklenemedi:', err);
-            this.activeExtensionShortcuts = [];
-        } finally {
-            this.isLoadingExtensions = false;
+        if (openedByMention) {
+            this.removeMentionTokenAtCaret();
+        } else {
+            this.focusComposer();
         }
     }
 
-    private getExtensionContent(name: string | null | undefined, mention: string | null | undefined): { category: string; title: string; subtitle: string; prompt: string; order: number } {
-        const mentionKey = this.toLookupKey((mention || '').replace('@', ''));
-        const nameKey = this.toLookupKey(name || '');
-        return this.extensionContentByKey[mentionKey] || this.extensionContentByKey[nameKey] || {
-            category: 'Genel',
-            title: name || 'Eklenti',
-            subtitle: 'Bu eklenti ile ilgili sorularinizi etiket ekleyerek sorabilirsiniz.',
-            prompt: 'Bu eklenti ile ilgili guncel bilgileri paylas.',
-            order: 99,
-        };
+    onExtensionMenuFilterInput(): void {
+        // Elle yazilan filtre, @ otomatik tamamlama sorgusunun onune gecer.
+        this.mentionQuery = null;
     }
 
-    private getContentOrder(item: ActiveExtensionShortcut): number {
-        const key = this.toLookupKey((item.mention || '').replace('@', ''));
-        return this.extensionContentByKey[key]?.order ?? 99;
+    removeSelectedMention(): void {
+        this.selectedMention = null;
     }
 
-    private toLookupKey(value: string): string {
+    private closeExtensionMenu(): void {
+        this.extensionMenuOpen = false;
+        this.extensionMenuOpenedByMention = false;
+        this.mentionQuery = null;
+    }
+
+    private toChip(shortcut: MentionChip): MentionChip {
+        return { id: shortcut.id, name: shortcut.name, mention: shortcut.mention, photoUrl: shortcut.photoUrl };
+    }
+
+    private findShortcut(mention: string, source = this.extensionShortcuts): ExtensionShortcut | undefined {
+        const key = this.toLookupKey(this.normalizeMention(mention));
+        return source.find((item) => this.toLookupKey(item.mention) === key);
+    }
+
+    private normalizeMention(mention: string | null | undefined): string {
+        const raw = (mention || '').trim();
+        if (!raw) return '';
+        return raw.startsWith('@') ? raw : `@${raw}`;
+    }
+
+    private toLookupKey(value: string | null | undefined): string {
         return (value || '')
-            .toLowerCase()
+            .toLocaleLowerCase('tr-TR')
             .trim()
             .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
+            .replace(/[̀-ͯ]/g, '')
+            .replace(/ı/g, 'i');
     }
 
-    useSuggestion(text: string): void {
-        this.input = text;
+    // ── Composer ─────────────────────────────────────────────────────
+
+    onComposerKeydown(event: KeyboardEvent): void {
+        if (event.isComposing) return;
+
+        if (event.key === 'Enter' && !event.shiftKey) {
+            if (this.acceptMentionSuggestion()) {
+                event.preventDefault();
+                return;
+            }
+            // Dokunmatik klavyede Shift+Enter olmadigi icin Enter yeni satir ekler; gonderim butonla yapilir.
+            if (!this.isTouchDevice()) {
+                event.preventDefault();
+                void this.send();
+                return;
+            }
+        }
+
+        if (event.key === 'Tab') {
+            if (this.acceptMentionSuggestion()) event.preventDefault();
+            return;
+        }
+
+        if (event.key === 'ArrowUp' && this.recallLastUserMessage()) {
+            event.preventDefault();
+            return;
+        }
+
+        this.playTypingSound(event);
+    }
+
+    // Yapistirilan metnin sonundaki bosluk/satir sonlarini kirp
+    onComposerPaste(event: ClipboardEvent): void {
+        const pasted = event.clipboardData?.getData('text/plain');
+        const trimmed = pasted?.trimEnd();
+        if (!pasted || trimmed === pasted) return;
+
+        event.preventDefault();
+        const el = event.target as HTMLTextAreaElement;
+        const start = el.selectionStart ?? this.input.length;
+        const end = el.selectionEnd ?? this.input.length;
+        this.input = `${this.input.slice(0, start)}${trimmed}${this.input.slice(end)}`;
+
         setTimeout(() => {
-            this.textArea?.nativeElement.focus();
-            this.autoResize();
-        }, 0);
+            const caret = start + (trimmed?.length ?? 0);
+            el.setSelectionRange(caret, caret);
+            this.onComposerInput();
+        });
     }
 
-    onEnter(event: Event): void {
-        const keyboardEvent = event as KeyboardEvent;
-        if (keyboardEvent.shiftKey) return;
-        keyboardEvent.preventDefault();
-        this.send();
+    onComposerInput(): void {
+        this.autoResize();
+        this.captureTypedMention();
+        this.updateMentionAutocomplete();
+
+        if (this.input && !this.sidebarOpenedManually && !this.isMobileViewport()) {
+            this.sidebarCollapsed = true;
+        }
     }
 
-    onComposerKeydown(event: Event): void {
-        const keyboardEvent = event as KeyboardEvent;
-        if (!this.soundEnabled) {
-            return;
+    onComposerFocus(): void {
+        // Mobil klavyenin acilma animasyonu bittikten sonra son mesaja kaydir.
+        if (this.isMobileViewport()) {
+            setTimeout(() => this.scrollToBottom(), 300);
         }
-
-        if (keyboardEvent.ctrlKey || keyboardEvent.metaKey || keyboardEvent.altKey) {
-            return;
-        }
-
-        const key = keyboardEvent.key;
-        const isTypingLikeKey = key.length === 1 || key === 'Backspace' || key === 'Delete' || key === 'Enter';
-        if (!isTypingLikeKey) {
-            return;
-        }
-
-        const now = Date.now();
-        if (now - this.lastKeyboardSoundAt < 45) {
-            return;
-        }
-
-        this.lastKeyboardSoundAt = now;
-        this.playKeyboardSound();
-    }
-
-    onComposerTab(event: Event): void {
-        const keyboardEvent = event as KeyboardEvent;
-        if (!this.extensionMenuOpen || !this.extensionMenuOpenedByMention) {
-            return;
-        }
-
-        const suggestion = this.filteredExtensionShortcuts[0];
-        if (!suggestion) {
-            return;
-        }
-
-        keyboardEvent.preventDefault();
-        this.selectExtensionShortcut(suggestion);
-        this.removeCurrentMentionTokenFromInput();
-        this.onComposerInput();
     }
 
     autoResize(): void {
         const el = this.textArea?.nativeElement;
         if (!el) return;
         el.style.height = 'auto';
-        el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+        const maxHeight = parseFloat(getComputedStyle(el).maxHeight) || 200;
+        el.style.height = `${Math.min(el.scrollHeight, maxHeight)}px`;
+        // Sinir asildiginda icerik kaydirilabilir olmali; aksi halde fazlasi gorunmez kalir.
+        el.classList.toggle('is-scrollable', el.scrollHeight > maxHeight);
     }
 
-    onComposerInput(): void {
-        this.autoResize();
-        this.captureTypedTagsFromInput();
-        this.updateMentionAutocompleteMenu();
+    insertTableCellValue(value: string, event?: Event): void {
+        event?.preventDefault();
 
-        if (this.input.length > 0 && !this.sidebarOpenedManually && !this.isMobileViewport()) {
-            this.sidebarCollapsed = true;
-            this.sidebarMobileOpen = false;
+        const text = value.trim();
+        if (!text || text === '-') return;
+
+        const current = this.input.trimEnd();
+        this.input = current ? `${current} ${text}` : text;
+        this.onComposerInput();
+
+        if (this.isTouchDevice()) {
+            // Klavyeyi acip okunan tablodan son mesaja kaydirmak yerine composer'i vurgula.
+            this.flashComposer();
+            setTimeout(() => this.autoResize());
+        } else {
+            this.focusComposer(this.input.length);
         }
     }
 
-    private captureTypedTagsFromInput(): void {
-        if (!this.input.includes('@')) {
-            return;
-        }
+    private acceptMentionSuggestion(): boolean {
+        if (!this.isMentionAutocomplete) return false;
 
-        const enabledByMention = new Map(
-            this.getEnabledExtensionShortcuts().map((item) => [
-                this.normalizeMention(item.mention).toLowerCase(),
-                item,
-            ]),
-        );
+        const suggestion = this.filteredExtensionShortcuts[0];
+        if (!suggestion) return false;
 
-        let hasMutation = false;
-        const nextChips = [...this.selectedMentionChips];
-
-        const nextInput = this.input.replace(/(^|\s)(@[^\s@]+)/g, (full, leading: string, rawTag: string) => {
-            const normalizedTag = this.normalizeMention(rawTag).toLowerCase();
-            const matchedShortcut = enabledByMention.get(normalizedTag);
-            if (!matchedShortcut) {
-                return full;
-            }
-
-            const alreadySelected = nextChips.some(
-                (chip) => chip.id === matchedShortcut.id || this.normalizeMention(chip.mention).toLowerCase() === normalizedTag,
-            );
-
-            if (!alreadySelected) {
-                nextChips.push({
-                    id: matchedShortcut.id,
-                    name: matchedShortcut.name,
-                    mention: this.normalizeMention(matchedShortcut.mention),
-                    photoUrl: matchedShortcut.photoUrl,
-                });
-            }
-
-            hasMutation = true;
-            return leading;
-        });
-
-        if (!hasMutation) {
-            return;
-        }
-
-        this.selectedMentionChips = nextChips;
-        this.input = nextInput.replace(/\s{2,}/g, ' ').trimStart();
+        this.selectExtensionShortcut(suggestion);
+        return true;
     }
 
-    private updateMentionAutocompleteMenu(): void {
-        const query = this.extractMentionQueryAtCaret();
-        this.mentionAutocompleteQuery = query;
+    // Input bosken yukari ok: son gonderilen mesaji (ve etiketini) input'a geri getirir
+    private recallLastUserMessage(): boolean {
+        if (this.input.trim()) return false;
 
-        if (query === null) {
-            if (this.extensionMenuOpenedByMention) {
-                this.extensionMenuOpen = false;
-                this.extensionMenuOpenedByMention = false;
-            }
-            return;
+        const last = [...this.messages].reverse().find((message) => message.role === 'user' && message.content);
+        if (!last) return false;
+
+        this.input = last.content;
+        const mention = last.mentions[0] && this.findShortcut(last.mentions[0].mention, this.enabledExtensionShortcuts);
+        if (mention) {
+            this.selectedMention = this.toChip(mention);
         }
-
-        const suggestions = this.filteredExtensionShortcuts;
-        if (!suggestions.length) {
-            if (this.extensionMenuOpenedByMention) {
-                this.extensionMenuOpen = false;
-                this.extensionMenuOpenedByMention = false;
-            }
-            return;
-        }
-
-        this.extensionMenuOpen = true;
-        this.extensionMenuOpenedByMention = true;
-        this.assistantMenuOpen = false;
+        this.focusComposer(last.content.length);
+        return true;
     }
 
-    private extractMentionQueryAtCaret(): string | null {
-        const el = this.textArea?.nativeElement;
-        const cursor = el?.selectionStart ?? this.input.length;
-        const inputBeforeCursor = this.input.slice(0, cursor);
-        const match = inputBeforeCursor.match(/(^|\s)@([^\s@]*)$/);
+    /**
+     * Yazilan etiket (@siparis) aktif bir eklentiyle eslesirse metinden cikarilip chip'e donusturulur.
+     * Imlecin hemen onundeki etiket hala yaziliyor olabilecegi icin (@stok → @stokrapor) gonderime kadar beklenir.
+     */
+    private captureTypedMention(includeTokenAtCaret = false): void {
+        if (!this.input.includes('@')) return;
 
-        if (!match) {
-            return null;
-        }
+        const caret = this.textArea?.nativeElement.selectionStart ?? this.input.length;
+        const result = this.removeMentionTokens(this.input, caret, (token, tokenEnd) =>
+            (includeTokenAtCaret || tokenEnd !== caret) && !!this.findShortcut(token, this.enabledExtensionShortcuts));
 
-        return this.toLookupKey(match[2] || '');
+        // Birden fazla etiket yazilirsa sonuncusu gecerli olur
+        const matched = result.tokens.length && this.findShortcut(result.tokens[result.tokens.length - 1], this.enabledExtensionShortcuts);
+        if (!matched) return;
+
+        this.selectedMention = this.toChip(matched);
+        this.input = result.text;
+        this.restoreCaret(result.caret);
     }
 
-    private removeCurrentMentionTokenFromInput(): void {
-        const el = this.textArea?.nativeElement;
-        const cursor = el?.selectionStart ?? this.input.length;
-        const before = this.input.slice(0, cursor);
-        const after = this.input.slice(cursor);
-        const nextBefore = before.replace(/(^|\s)@[^\s@]*$/, '$1');
-        this.input = `${nextBefore}${after}`;
+    /** Eslesen etiketleri ve hemen ardindaki tek boslugu metinden cikarir; imlecin yeni konumunu da hesaplar. */
+    private removeMentionTokens(
+        text: string,
+        caret: number,
+        shouldRemove: (token: string, tokenEnd: number) => boolean,
+    ): { text: string; caret: number; tokens: string[] } {
+        const tokens: string[] = [];
+        let result = '';
+        let cursor = 0;
+        let nextCaret = caret;
 
+        for (const match of text.matchAll(MENTION_TOKEN_PATTERN)) {
+            const start = (match.index ?? 0) + match[1].length;
+            const tokenEnd = start + match[2].length;
+            if (!shouldRemove(match[2], tokenEnd)) continue;
+
+            const end = /[ \t]/.test(text.charAt(tokenEnd)) ? tokenEnd + 1 : tokenEnd;
+            tokens.push(match[2]);
+            result += text.slice(cursor, start);
+            cursor = end;
+            if (start < caret) nextCaret -= Math.min(caret, end) - start;
+        }
+
+        return { text: result + text.slice(cursor), caret: nextCaret, tokens };
+    }
+
+    private updateMentionAutocomplete(): void {
+        const caret = this.textArea?.nativeElement.selectionStart ?? this.input.length;
+        const match = this.input.slice(0, caret).match(/(^|\s)@([^\s@]*)$/);
+        this.mentionQuery = match ? this.toLookupKey(match[2]) : null;
+
+        if (this.mentionQuery !== null && this.filteredExtensionShortcuts.length) {
+            this.extensionMenuOpen = true;
+            this.extensionMenuOpenedByMention = true;
+            this.assistantMenuOpen = false;
+        } else if (this.extensionMenuOpenedByMention) {
+            this.closeExtensionMenu();
+        }
+    }
+
+    private removeMentionTokenAtCaret(): void {
+        const caret = this.textArea?.nativeElement.selectionStart ?? this.input.length;
+        const before = this.input.slice(0, caret).replace(/(^|\s)@[^\s@]*$/, '$1');
+        this.input = `${before}${this.input.slice(caret)}`;
+        this.focusComposer(before.length);
+    }
+
+    /** ngModel degeri DOM'a yazdiginda imlec sona atlar; kullanici yaziyorsa eski konumuna geri al. */
+    private restoreCaret(caret: number): void {
         setTimeout(() => {
-            const textArea = this.textArea?.nativeElement;
-            if (!textArea) return;
-            const nextCursor = nextBefore.length;
-            textArea.focus();
-            textArea.setSelectionRange(nextCursor, nextCursor);
+            const el = this.textArea?.nativeElement;
+            if (el && document.activeElement === el) {
+                el.setSelectionRange(caret, caret);
+            }
             this.autoResize();
-        }, 0);
+        });
     }
 
-    send(): void {
-        void this.sendAsync();
+    private focusComposer(caret?: number): void {
+        setTimeout(() => {
+            const el = this.textArea?.nativeElement;
+            if (!el) return;
+            el.focus();
+            if (caret !== undefined) el.setSelectionRange(caret, caret);
+            this.autoResize();
+        });
     }
 
-    private async sendAsync(): Promise<void> {
+    // ── Mesaj gönderimi ──────────────────────────────────────────────
+
+    async send(): Promise<void> {
+        if (this.isSending) return;
+
+        // Sonuna bosluk birakilmadan yazilmis etiket de gonderimde chip'e donusturulur.
+        this.captureTypedMention(true);
         const content = this.input.trim();
-        if (!content || this.isSending) return;
+        if (!content) return;
 
-        const mentionTokens = this.getSelectedMentionTokens();
-        if (!mentionTokens.length) {
-            this.errorMessage = 'Mesaj gonderebilmek icin en az bir etiket eklemelisiniz (orn: @nebim).';
+        const mention = this.selectedMention;
+        if (!mention) {
+            this.errorMessage = 'Mesaj gönderebilmek için bir eklenti etiketi seçmelisin (örn: @siparis).';
             return;
         }
 
-        const outgoingContent = `${mentionTokens.join(' ')} ${content}`.trim();
-
-        // 1) Aktif sohbet yoksa yeni sohbet oluştur
-        if (!this.activeConversationId) {
-            const created = await this.ensureConversation();
-            if (!created) return;
-            this.activeConversationId = created;
-            this.locallyStartedConversationId = created;
-            await this.navigateToConversation(created);
+        const companyId = this.getCompanyId();
+        if (!companyId) {
+            this.errorMessage = 'Şirket bilgisi bulunamadı. Lütfen yeniden giriş yapın.';
+            return;
         }
 
-        const conversationId = this.activeConversationId!;
-        const optimisticMentions = (this.selectedMentionChips.length
-            ? this.selectedMentionChips
-            : this.defaultMentionChip
-                ? [this.defaultMentionChip]
-                : []).map((chip) => ({ ...chip }));
-        if (!this.defaultMentionChip && optimisticMentions.length > 0) {
-            this.defaultMentionChip = { ...optimisticMentions[0] };
-        }
-        this.hasHydratedThread = true;
-
-        // 2) UI'a kullanıcı mesajını optimistic ekle
-        this.messages = [
-            ...this.messages,
-            {
-                id: this.uid(),
-                role: 'user',
-                content,
-                createdAt: new Date(),
-                mentions: optimisticMentions,
-            }
-        ];
-        this.playKeyboardSound();
-        this.selectedMentionChips = this.defaultMentionChip ? [{ ...this.defaultMentionChip }] : [];
-        this.input = '';
         this.isSending = true;
         this.errorMessage = '';
-        this.shouldScroll = true;
-        setTimeout(() => this.autoResize(), 0);
 
         try {
-            const companyId = this.getCompanyId();
-            if (!companyId || !this.isGuid(companyId) || this.isEmptyGuid(companyId)) {
-                this.errorMessage = 'Şirket bilgisi bulunamadı. Lütfen yeniden giriş yapın.';
-                return;
-            }
+            const conversationId = this.activeConversationId ?? await this.startNewConversation(false);
+            if (!conversationId) return;
 
-            if (!this.isGuid(conversationId) || this.isEmptyGuid(conversationId)) {
+            if (!GUID_PATTERN.test(conversationId) || conversationId === EMPTY_GUID) {
                 this.errorMessage = 'Geçersiz konuşma kimliği.';
                 return;
             }
 
-            // 3) Conversations/{conversationId}/reply ile kullanıcı + AI akışını tek istekte çalıştır
-            const replyRequest: ConversationReplyRequest = {
+            const optimisticId = this.uid();
+            this.messages = [
+                ...this.messages,
+                {
+                    id: optimisticId,
+                    key: optimisticId,
+                    role: 'user',
+                    content,
+                    createdDate: new Date().toISOString(),
+                    timeText: this.formatMessageTime(new Date()),
+                    mentions: [{ ...mention }],
+                    blocks: [],
+                    aiImageUrl: null,
+                    excelUrl: null,
+                    shareUrl: null,
+                    isLiked: null,
+                    isReactionSaving: false,
+                    isPending: true,
+                    animate: true,
+                },
+            ];
+            this.hasHydratedThread = true;
+            this.sendingConversationId = conversationId;
+            this.input = '';
+            this.playKeyboardSound();
+            this.requestScroll();
+            setTimeout(() => this.autoResize());
+
+            // Conversations/{conversationId}/reply kullanici + AI akisini tek istekte calistirir
+            const request: ConversationReplyRequest = {
                 companyId,
-                message: outgoingContent,
+                message: `${mention.mention} ${content}`,
                 assistantId: this.selectedAssistantId || null,
                 file: null,
                 fileType: null,
             };
-            const replyRes = await this.conversationsService.reply(conversationId, replyRequest);
+            const response = await this.conversationsService.reply(conversationId, request);
+            void this.loadConversationList();
 
-            // 4) Sohbet listesini yenile
-            await this.loadConversationList();
+            if (this.activeConversationId !== conversationId) return;
 
-            if (!replyRes.isSuccess) {
+            if (!response.isSuccess) {
                 this.errorMessage = 'AI yanıtı alınamadı. Lütfen tekrar deneyin.';
                 return;
             }
 
-            if (replyRes.data) {
-                this.applyConversationReplyResponse(replyRes.data);
-            }
+            const aiFailed = response.data ? this.applyReplyResponse(response.data) : false;
 
             // Backend ilk yaniti asenkron uretebiliyor; F5 gerektirmemesi icin
-            // kisa sureli messages polling fallback'i uygula.
-            if (this.isAwaitingAssistantReply(this.messages)) {
+            // kisa sureli messages polling fallback'i uygulanir. AI hata dondurduyse beklenecek yanit yoktur.
+            if (!aiFailed && this.isAwaitingAssistantReply()) {
                 await this.waitForAssistantMessage(conversationId);
             }
         } catch (err) {
@@ -897,166 +828,261 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
             this.errorMessage = 'Mesaj gönderilemedi. Lütfen tekrar deneyin.';
         } finally {
             this.isSending = false;
-            this.shouldScroll = true;
+            this.sendingConversationId = null;
+            this.requestScroll();
         }
     }
 
-    private async ensureConversation(): Promise<string | null> {
+    /** Reply yanitini uygular; AI basarisiz olduysa true doner. */
+    private applyReplyResponse(response: ConversationReplyResponse): boolean {
+        if (response.conversation) {
+            this.applyServerMessages(this.mapConversationMessages(response.conversation));
+        }
+
+        if (response.stats) {
+            this.conversationStats = response.stats;
+        }
+
+        const aiResponse = response.aiResponse;
+        if (aiResponse && !aiResponse.success) {
+            this.errorMessage = aiResponse.error || aiResponse.response || 'AI yanıtı alınamadı. Lütfen tekrar deneyin.';
+            return true;
+        }
+        return false;
+    }
+
+    private isAwaitingAssistantReply(): boolean {
+        return this.messages.at(-1)?.role === 'user';
+    }
+
+    private async waitForAssistantMessage(conversationId: string): Promise<void> {
+        if (this.replyWaitConversationId === conversationId) return;
+
+        this.replyWaitConversationId = conversationId;
+        const isStale = () => this.destroyed || this.activeConversationId !== conversationId;
+
+        try {
+            for (let attempt = 0; attempt < REPLY_POLL_ATTEMPTS; attempt++) {
+                await this.sleep(REPLY_POLL_DELAY_MS);
+                if (isStale()) return;
+
+                const response = await this.conversationsService.getMessages(conversationId);
+                if (isStale()) return;
+                if (!response.isSuccess || !response.data) continue;
+
+                this.applyServerMessages(this.mapConversationMessages(response.data));
+                if (!this.isAwaitingAssistantReply()) {
+                    this.errorMessage = '';
+                    return;
+                }
+            }
+        } catch (err) {
+            console.warn('[NebimAiChat] AI yanıtı takip edilirken hata oluştu:', err);
+        } finally {
+            if (this.replyWaitConversationId === conversationId) {
+                this.replyWaitConversationId = null;
+            }
+        }
+    }
+
+    /**
+     * Sunucudan gelen listeyi ekrandakiyle birlestirir: bilinen mesajlarin track anahtari korunur,
+     * optimistic kullanici mesaji sunucu kaydiyla eslesir, yalnizca gercekten yeni olanlar animasyon alir.
+     */
+    private applyServerMessages(next: UiChatMessage[]): void {
+        // Bos yanit ekrandaki (optimistic) mesajlari silmemeli.
+        if (!next.length && this.messages.length) return;
+
+        if (!this.hasHydratedThread) {
+            this.messages = next;
+            this.hasHydratedThread = true;
+            this.requestScroll('instant');
+            return;
+        }
+
+        const previousById = new Map(this.messages.map((message) => [message.id, message]));
+        const pending = this.messages.filter((message) => message.isPending);
+        let hasNewMessage = false;
+
+        for (const message of next) {
+            const previous = previousById.get(message.id) ?? this.takePendingMatch(pending, message);
+            if (previous) {
+                message.key = previous.key;
+            } else {
+                message.animate = true;
+                hasNewMessage = true;
+            }
+        }
+
+        this.messages = next;
+        if (hasNewMessage) {
+            this.playKeyboardSound();
+            this.requestScroll();
+        }
+    }
+
+    private takePendingMatch(pending: UiChatMessage[], message: UiChatMessage): UiChatMessage | undefined {
+        const text = this.collapseWhitespace(message.content);
+        const index = pending.findIndex((item) => item.role === message.role && this.collapseWhitespace(item.content) === text);
+        return index >= 0 ? pending.splice(index, 1)[0] : undefined;
+    }
+
+    // ── Sohbet yaşam döngüsü ─────────────────────────────────────────
+
+    newChat(): void {
+        this.resetConversationState();
+        this.sidebarMobileOpen = false;
+        void this.startNewConversation(false);
+        // Mobilde klavye acilip bos ekrandaki eklenti kartlarini kapatmasin.
+        if (!this.isMobileViewport()) this.focusComposer();
+    }
+
+    async onSelectChat(conversationId: string): Promise<void> {
+        this.sidebarMobileOpen = false;
+        await this.router.navigate(['/c', conversationId]);
+    }
+
+    private async syncConversationFromRoute(conversationId: string | null): Promise<void> {
+        if (!conversationId) {
+            this.resetConversationState();
+            await this.startNewConversation(true);
+            return;
+        }
+
+        // Bu sayfadan yeni baslatilan sohbet navigasyondan once aktif yapilir; backend ilk mesaji
+        // henuz kaydetmedigi icin sunucudan yuklenmez, guncel icerik reply yanitindan gelir.
+        if (conversationId === this.activeConversationId) return;
+
+        this.clearThread();
+        this.activeConversationId = conversationId;
+        await this.loadThread(conversationId);
+    }
+
+    /** Ayni anda yalnizca bir sohbet olusturulur; route ve gonderim ayni istegi paylasir. */
+    private startNewConversation(replaceUrl: boolean): Promise<string | null> {
+        this.pendingConversation ??= this.createAndOpenConversation(replaceUrl)
+            .finally(() => (this.pendingConversation = null));
+        return this.pendingConversation;
+    }
+
+    private async createAndOpenConversation(replaceUrl: boolean): Promise<string | null> {
+        const token = this.conversationToken;
+        const conversationId = await this.createConversation();
+        // Bu arada kullanici baska bir sohbete gectiyse yeni sohbeti acma.
+        if (!conversationId || this.destroyed || token !== this.conversationToken) return null;
+
+        this.activeConversationId = conversationId;
+        this.hasHydratedThread = true;
+        void this.loadConversationList();
+        await this.router.navigate(['/c', conversationId], { replaceUrl });
+        return conversationId;
+    }
+
+    private async createConversation(): Promise<string | null> {
         const companyId = this.getCompanyId();
         if (!companyId) {
             this.errorMessage = 'Şirket bilgisi bulunamadı. Lütfen yeniden giriş yapın.';
             return null;
         }
+
+        const profile = this.authState.profile;
+        const storedProfile = this.readStoredProfile();
+        const request: CreateTestConversationRequest = {
+            companyId,
+            firstName: profile?.name || storedProfile?.name || 'Test',
+            lastName: profile?.lastName || profile?.surname || storedProfile?.surname || 'User',
+            userIntSmaId: null,
+        };
+
         try {
-            const payload: CreateTestConversationRequest = {
-                companyId,
-                firstName:
-                    this.authState.profile?.name ||
-                    this.getStoredProfile()?.name ||
-                    'Test',
-                lastName:
-                    this.authState.profile?.surname ||
-                    this.getStoredProfile()?.lastName ||
-                    'User',
-                userIntSmaId: null,
-            };
-            const res = await this.conversationsService.createTestConversation(payload);
-            const id = this.extractConversationId(res.data);
-            if (id) await this.loadConversationList();
-            return id;
+            const response = await this.conversationsService.createTestConversation(request);
+            const conversationId = response.data?.conversationId?.trim();
+            if (conversationId) return conversationId;
         } catch (err) {
             console.error('[NebimAiChat] Sohbet oluşturulamadı:', err);
-            this.errorMessage = 'Yeni sohbet oluşturulamadı.';
-            return null;
-        }
-    }
-
-    private extractConversationId(data: string | CreateTestConversationResponse | null): string | null {
-        if (typeof data === 'string' && data.trim().length > 0) {
-            return data;
         }
 
-        if (data && typeof data === 'object' && typeof data.conversationId === 'string' && data.conversationId.trim().length > 0) {
-            return data.conversationId;
-        }
-
+        this.errorMessage = 'Yeni sohbet oluşturulamadı.';
         return null;
     }
 
-    private isGuid(value: string): boolean {
-        // Backend .NET Guid parse ile uyumlu: canonical 8-4-4-4-12 hex format.
-        return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
-    }
-
-    private isEmptyGuid(value: string): boolean {
-        return value.toLowerCase() === '00000000-0000-0000-0000-000000000000';
-    }
-
-    private getCompanyId(): string | null {
-        const fromAuth = this.authState.profile?.companyId;
-        if (fromAuth && this.isGuid(fromAuth) && !this.isEmptyGuid(fromAuth)) {
-            return fromAuth;
-        }
-
-        const fromProfile = this.getStoredProfile()?.companyId;
-        if (fromProfile && this.isGuid(fromProfile) && !this.isEmptyGuid(fromProfile)) {
-            return fromProfile;
-        }
-
-        return null;
-    }
-
-    private getStoredProfile(): StoredUserProfile | null {
+    private async loadThread(conversationId: string): Promise<void> {
+        this.isLoadingThread = true;
         try {
-            const raw = localStorage.getItem('userProfile');
-            if (!raw) return null;
-            const parsed = JSON.parse(raw) as StoredUserProfile;
-            return parsed && typeof parsed === 'object' ? parsed : null;
-        } catch {
-            return null;
-        }
-    }
+            const response = await this.conversationsService.getMessages(conversationId);
+            // Yanit geldiginde kullanici baska bir sohbete gecmis olabilir.
+            if (this.activeConversationId !== conversationId) return;
 
-    private async loadSidebar(): Promise<void> {
-        try {
-            await this.conversationsService.getSidebar();
-        } catch (err) {
-            console.warn('[NebimAiChat] Sidebar yüklenemedi:', err);
-        }  
-    }
+            this.applyServerMessages(response.data ? this.mapConversationMessages(response.data) : []);
 
-    private async loadAssistants(): Promise<void> {
-        try {
-            const companyId = this.authState.profile?.companyId || '';
-            const response = await this.aiProvidersService.getAssistantsPaged({
-                pageNumber: 1,
-                pageSize: 1000,
-                companyId,
-            });
-
-            const list = this.extractArray<AiAssistant>(response?.data)
-                .filter((assistant) => !assistant.isBlocked)
-                .sort((left, right) => (left.order ?? 0) - (right.order ?? 0));
-
-            this.assistants = list;
-            if (!this.selectedAssistantId && this.assistants.length > 0) {
-                this.selectedAssistantId = this.assistants[0].id;
+            // Sayfa yenileme gibi durumlarda thread ilk etapta sadece kullanici mesaji
+            // donebilir; AI mesaji gelene kadar kisa sureli takip et. Eski ve yanitsiz
+            // kalmis sohbetlerde bos yere polling yapilmaz.
+            if (this.isAwaitingAssistantReply() && this.isRecent(this.messages.at(-1)?.createdDate)) {
+                void this.waitForAssistantMessage(conversationId);
             }
         } catch (err) {
-            console.warn('[NebimAiChat] Asistan listesi yüklenemedi:', err);
-            this.assistants = [];
-            this.selectedAssistantId = '';
+            console.error('[NebimAiChat] Thread yüklenemedi:', err);
+            if (this.activeConversationId === conversationId) {
+                this.errorMessage = 'Sohbet mesajları yüklenemedi.';
+            }
+        } finally {
+            if (this.activeConversationId === conversationId) {
+                this.isLoadingThread = false;
+            }
         }
     }
 
-    private async loadConversationList(): Promise<void> {
+    /** Ekrandaki sohbeti bosaltir; taslak mesaj ve secili etiket korunur. */
+    private clearThread(): void {
+        this.conversationToken++;
+        this.messages = [];
+        this.conversationStats = null;
+        this.errorMessage = '';
+        this.hasHydratedThread = false;
+        this.isLoadingThread = false;
+        this.showScrollDown = false;
+        this.closeReactionModal();
+    }
+
+    private resetConversationState(): void {
+        this.clearThread();
+        this.activeConversationId = null;
+        this.input = '';
+        setTimeout(() => this.autoResize());
+    }
+
+    // ── Veri yükleme ─────────────────────────────────────────────────
+
+    async loadConversationList(): Promise<void> {
+        const version = ++this.sidebarListVersion;
         try {
+            const page = await this.fetchConversationPage(1);
+            if (version !== this.sidebarListVersion) return;
+
+            page.conversations.sort((a, b) => this.toEpoch(b.lastMessageDate) - this.toEpoch(a.lastMessageDate));
+
+            this.sidebarChats = page.conversations.map((conversation, index) => this.toSidebarEntry(conversation, index));
             this.sidebarCurrentPage = 1;
-
-            const page = await this.fetchConversationHeadersByType('messages', this.sidebarCurrentPage, this.sidebarPageSize);
-            const conversations = page.conversations
-                .sort((a, b) => this.toEpoch(b.lastMessageDate) - this.toEpoch(a.lastMessageDate));
-
-            this.sidebarChats = conversations.map((conversation, index) => ({
-                id: conversation.id,
-                label: this.toConversationLabel(conversation, index),
-                preview: this.toConversationPreview(conversation),
-                dateText: this.toConversationDateText(conversation),
-            }));
-
             this.hasMoreSidebarChats = this.sidebarChats.length < page.totalCount;
         } catch (err) {
             console.warn('[NebimAiChat] Sohbet listesi yüklenemedi:', err);
+            if (version !== this.sidebarListVersion) return;
             this.sidebarChats = [];
             this.hasMoreSidebarChats = false;
         }
     }
 
-    async reloadConversationList(): Promise<void> {
-        await this.loadConversationList();
-    }
-
-    private async fetchConversationHeadersByType(type: string, page: number, pageSize: number): Promise<ConversationPageResult> {
-        const res = await this.conversationsService.getList(type, page, pageSize);
-        const conversations = this.extractConversationHeaders(res.data);
-        const totalFromPayload = this.extractConversationTotalCount(res.data);
-        const totalCount = this.toFiniteNumber(res.dataCount) || totalFromPayload || conversations.length;
-
-        return {
-            conversations,
-            totalCount,
-        };
-    }
-
     async onLoadMoreChats(): Promise<void> {
-        if (!this.hasMoreSidebarChats || this.isLoadingMoreChats) {
-            return;
-        }
+        if (!this.hasMoreSidebarChats || this.isLoadingMoreChats) return;
 
+        const version = this.sidebarListVersion;
         this.isLoadingMoreChats = true;
         try {
             const nextPage = this.sidebarCurrentPage + 1;
-            const page = await this.fetchConversationHeadersByType('messages', nextPage, this.sidebarPageSize);
+            const page = await this.fetchConversationPage(nextPage);
+            if (version !== this.sidebarListVersion) return;
+
             if (!page.conversations.length) {
                 this.hasMoreSidebarChats = false;
                 return;
@@ -1065,12 +1091,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
             const existingIds = new Set(this.sidebarChats.map((chat) => chat.id));
             const appended = page.conversations
                 .filter((conversation) => !existingIds.has(conversation.id))
-                .map((conversation, index) => ({
-                    id: conversation.id,
-                    label: this.toConversationLabel(conversation, this.sidebarChats.length + index),
-                    preview: this.toConversationPreview(conversation),
-                    dateText: this.toConversationDateText(conversation),
-                }));
+                .map((conversation, index) => this.toSidebarEntry(conversation, this.sidebarChats.length + index));
 
             this.sidebarChats = [...this.sidebarChats, ...appended];
             this.sidebarCurrentPage = nextPage;
@@ -1082,40 +1103,122 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         }
     }
 
-    private async loadThread(conversationId: string): Promise<void> {
-        this.isLoadingThread = true;
-        this.errorMessage = '';
+    private async fetchConversationPage(page: number): Promise<ConversationListResponse> {
+        const response = await this.conversationsService.getList('messages', page, SIDEBAR_PAGE_SIZE);
+        const conversations = this.extractArray<ConversationHeader>(this.readField(response.data, 'conversations'));
+        const totalCount = this.toFiniteNumber(response.dataCount)
+            || this.toFiniteNumber(this.readField(response.data, 'totalCount'))
+            || conversations.length;
+
+        return { conversations, totalCount };
+    }
+
+    private async loadAssistants(): Promise<void> {
         try {
-            const res = await this.conversationsService.getMessages(conversationId);
+            const response = await this.aiProvidersService.getAssistantsPaged({
+                pageNumber: 1,
+                pageSize: 1000,
+                companyId: this.getCompanyId() ?? '',
+            });
 
-            // Yanit geldiginde kullanici baska bir sohbete gecmis olabilir.
-            if (this.activeConversationId !== conversationId) {
-                return;
-            }
+            this.assistants = this.extractArray<AiAssistant>(response.data)
+                .filter((assistant) => !assistant.isBlocked)
+                .sort((left, right) => (left.order ?? 0) - (right.order ?? 0));
 
-            const loaded = res.data ? this.mapConversationMessages(res.data) : [];
-
-            // Bos yanit gelirse ekrandaki optimistic mesajlari silme.
-            if (loaded.length === 0 && this.messages.length > 0) {
-                return;
-            }
-
-            this.setMessagesFromServer(loaded);
-            this.shouldScroll = true;
-
-            // Sayfa yenileme gibi durumlarda thread ilk etapta sadece kullanici mesaji
-            // donebilir; AI mesaji gelene kadar kisa sureli takip et.
-            if (this.isAwaitingAssistantReply(this.messages)) {
-                void this.waitForAssistantMessage(conversationId);
+            if (!this.selectedAssistantId && this.assistants.length) {
+                this.selectedAssistantId = this.assistants[0].id;
             }
         } catch (err) {
-            console.error('[NebimAiChat] Thread yüklenemedi:', err);
-            this.errorMessage = 'Sohbet mesajları yüklenemedi.';
-        } finally {
-            this.isLoadingThread = false;
+            console.warn('[NebimAiChat] Asistan listesi yüklenemedi:', err);
+            this.assistants = [];
+            this.selectedAssistantId = '';
         }
     }
-  
+
+    private async loadExtensionShortcuts(): Promise<void> {
+        const companyId = this.getCompanyId();
+        if (!companyId) return;
+
+        this.isLoadingExtensions = true;
+        try {
+            const [companyExtensionsResponse, definitionsResponse] = await Promise.all([
+                this.extensionManagementService.getCompanyExtensions(companyId),
+                this.extensionManagementService.getExtensionDefinitions(),
+            ]);
+
+            const definitions = new Map(
+                this.extractArray<ExtensionDefinition>(definitionsResponse.data)
+                    .filter((definition) => definition.isActive && !definition.isBlocked && definition.mention?.trim())
+                    .map((definition) => [definition.id, definition]),
+            );
+
+            this.extensionShortcuts = this.extractArray<CompanyExtension>(companyExtensionsResponse.data)
+                .filter((item) => !item.isBlocked)
+                .flatMap((item) => {
+                    const definition = definitions.get(item.extensionId);
+                    return definition ? [this.toExtensionShortcut(item, definition)] : [];
+                })
+                .sort((a, b) => a.order - b.order);
+        } catch (err) {
+            console.error('[NebimAiChat] Eklenti kısayolları yüklenemedi:', err);
+            this.extensionShortcuts = [];
+        } finally {
+            this.isLoadingExtensions = false;
+        }
+
+        this.enabledExtensionShortcuts = this.extensionShortcuts.filter((item) => item.isEnabled);
+        this.extensionGroups = this.groupByCategory(this.enabledExtensionShortcuts);
+    }
+
+    private toExtensionShortcut(item: CompanyExtension, definition: ExtensionDefinition): ExtensionShortcut {
+        const mention = this.normalizeMention(definition.mention);
+        const content = EXTENSION_CONTENT[this.toLookupKey(mention.slice(1))]
+            ?? EXTENSION_CONTENT[this.toLookupKey(definition.name)];
+
+        return {
+            id: item.extensionId,
+            name: content?.title || definition.name || item.extensionName || 'Eklenti',
+            mention,
+            photoUrl: definition.photoUrl || item.photoUrl,
+            category: content?.category || definition.category?.trim() || 'Genel',
+            subtitle: content?.subtitle || 'Bu eklentiyle ilgili sorularını etiket ekleyerek sorabilirsin.',
+            order: content?.order ?? 99,
+            isEnabled: item.isEnabled,
+        };
+    }
+
+    private groupByCategory(items: ExtensionShortcut[]): ExtensionShortcutGroup[] {
+        const groups = new Map<string, ExtensionShortcut[]>();
+        for (const item of items) {
+            groups.set(item.category, [...(groups.get(item.category) ?? []), item]);
+        }
+
+        let startIndex = 0;
+        return [...groups.entries()]
+            .sort(([left], [right]) => left.localeCompare(right, 'tr-TR'))
+            .map(([category, groupItems]) => {
+                const group = { category, items: groupItems, startIndex };
+                startIndex += groupItems.length;
+                return group;
+            });
+    }
+
+    private getCompanyId(): string | null {
+        const candidates = [this.authState.profile?.companyId, this.readStoredProfile()?.companyId];
+        return candidates.find((id): id is string => !!id && GUID_PATTERN.test(id) && id !== EMPTY_GUID) ?? null;
+    }
+
+    private readStoredProfile(): StoredUserProfile | null {
+        try {
+            const parsed: unknown = JSON.parse(localStorage.getItem('userProfile') || 'null');
+            return parsed && typeof parsed === 'object' ? parsed as StoredUserProfile : null;
+        } catch {
+            return null;
+        }
+    }
+
+    // ── API yanıtı → UI modeli ───────────────────────────────────────
+
     private extractArray<T>(response: unknown): T[] {
         if (Array.isArray(response)) return response as T[];
         if (!response || typeof response !== 'object') return [];
@@ -1124,782 +1227,379 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         if (Array.isArray(record['$values'])) return record['$values'] as T[];
         if (Array.isArray(record['items'])) return record['items'] as T[];
 
-        const data = record['data'];
-        if (Array.isArray(data)) return data as T[];
-        if (data && typeof data === 'object') return [data as T];
-
-        const result = record['result'];
-        if (Array.isArray(result)) return result as T[];
-        if (result && typeof result === 'object') return [result as T];
+        for (const key of ['data', 'result']) {
+            const value = record[key];
+            if (Array.isArray(value)) return value as T[];
+            if (value && typeof value === 'object') return [value as T];
+        }
 
         return [];
     }
 
-    private extractConversationHeaders(response: unknown): ConversationHeader[] {
-        if (!response || typeof response !== 'object') return [];
-        const record = response as Record<string, unknown>;
-        const rawConversations = record['conversations'] ?? record['Conversations'];
-        return this.extractArray<ConversationHeader>(rawConversations);
+    /** Sohbet listesi v1.yaml'da tanimli degil; alanlar camelCase veya PascalCase gelebilir. */
+    private readField(source: unknown, key: string): unknown {
+        if (!source || typeof source !== 'object') return undefined;
+        const record = source as Record<string, unknown>;
+        return record[key] ?? record[key.charAt(0).toUpperCase() + key.slice(1)];
     }
 
-    private extractConversationTotalCount(response: unknown): number {
-        if (!response || typeof response !== 'object') return 0;
-        const record = response as Record<string, unknown>;
-        const totalRaw = record['totalCount'] ?? record['TotalCount'];
-        return this.toFiniteNumber(totalRaw);
+    private readText(source: unknown, ...keys: string[]): string {
+        for (const key of keys) {
+            const value = this.readField(source, key);
+            if (typeof value === 'string' && value.trim()) return value.trim();
+        }
+        return '';
     }
 
     private toFiniteNumber(value: unknown): number {
-        if (typeof value === 'number' && Number.isFinite(value)) {
-            return value;
+        const parsed = typeof value === 'string' && value.trim() ? Number(value) : value;
+        return typeof parsed === 'number' && Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    private toSidebarEntry(conversation: ConversationHeader, index: number): ChatHistoryEntry {
+        const preview = this.readText(conversation, 'lastMessage', 'lastMessages');
+        const rawDate = this.readText(conversation, 'lastMessageDate', 'updatedDate', 'createdDate');
+        const date = new Date(rawDate);
+
+        return {
+            id: conversation.id,
+            label: this.readText(conversation, 'customerName') || preview || `Sohbet ${index + 1}`,
+            preview,
+            dateText: rawDate && !Number.isNaN(date.getTime())
+                ? (this.isToday(date)
+                    ? date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+                    : date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }))
+                : '',
+        };
+    }
+
+    private mapConversationMessages(response: ConversationMessagesResponse): UiChatMessage[] {
+        return this.extractArray<ChatMessage>(response.messages)
+            .map((message) => this.toUiChatMessage(message))
+            .filter((message) => message.content || message.mentions.length || message.blocks.length);
+    }
+
+    private toUiChatMessage(message: ChatMessage): UiChatMessage {
+        const role = this.resolveRole(message.source);
+        const text = (message.text ?? '').trim();
+        // Kullanici mesajindaki etiket chip olarak gosterilir; metinde tekrar edilmez.
+        const mentions = role === 'user' ? this.extractMentions(text) : [];
+        const id = message.id || this.uid();
+
+        const uiMessage: UiChatMessage = {
+            id,
+            key: id,
+            role,
+            content: mentions.length ? this.stripMentions(text) : text,
+            createdDate: message.createdDate ?? null,
+            timeText: this.formatMessageTime(message.createdDate),
+            mentions,
+            blocks: this.normalizeBlocks(message.blocks, message.imageUrl),
+            aiImageUrl: message.hasImage && message.aiImageUrl ? message.aiImageUrl : null,
+            excelUrl: message.hasExcel && message.excelUrl ? message.excelUrl : null,
+            shareUrl: null,
+            isLiked: typeof message.isLiked === 'boolean' ? message.isLiked : null,
+            isReactionSaving: false,
+            isPending: false,
+            animate: false,
+        };
+
+        if (role === 'assistant') {
+            uiMessage.shareUrl = this.buildWhatsAppShareUrl(uiMessage);
         }
 
-        if (typeof value === 'string' && value.trim()) {
-            const parsed = Number(value);
-            return Number.isFinite(parsed) ? parsed : 0;
-        }
-
-        return 0;
+        return uiMessage;
     }
 
-    private extractConversationMessages(response: ConversationMessagesResponse | null): ConversationApiMessage[] {
-        if (!response || typeof response !== 'object') return [];
-        const record = response as unknown as Record<string, unknown>;
-        const rawMessages = record['messages'] ?? record['Messages'];
-        return this.extractArray<ConversationApiMessage>(rawMessages);
+    private resolveRole(source: string | null | undefined): 'user' | 'assistant' {
+        const normalized = (source ?? '').toLowerCase();
+        return normalized.includes('assistant') || normalized.includes('ai') ? 'assistant' : 'user';
     }
 
-    private extractConversationFromReply(response: ConversationReplyResponse | null): ConversationMessagesResponse | null {
-        if (!response || typeof response !== 'object') {
-            return null;
-        }
+    private extractMentions(text: string): MentionChip[] {
+        const tokens = new Set([...text.matchAll(MENTION_TOKEN_PATTERN)].map((match) => this.normalizeMention(match[2])));
 
-        const record = response as unknown as ConversationReplyResponseShape;
-        return record.conversation ?? record.Conversation ?? null;
+        return [...tokens].map((mention) => {
+            const shortcut = this.findShortcut(mention);
+            return shortcut ? this.toChip(shortcut) : { id: mention, name: mention.slice(1), mention };
+        });
     }
 
-    private extractAiResponse(response: ConversationReplyResponse | null): AiChatResponse | null {
-        if (!response || typeof response !== 'object') {
-            return null;
-        }
-
-        const record = response as unknown as ConversationReplyResponseShape;
-        return record.aiResponse ?? record.AiResponse ?? null;
+    private stripMentions(text: string): string {
+        return this.removeMentionTokens(text, 0, () => true).text.trim();
     }
 
-    private resolveRole(message: ConversationApiMessage): 'user' | 'assistant' {
-        const source = (message.source ?? '').toLowerCase();
-        return source.includes('assistant') || source.includes('ai') ? 'assistant' : 'user';
-    }
-
-    private resolveMessageText(message: ConversationApiMessage): string {
-        return message.text ?? message.messageText ?? message.messageContent ?? '';
-    }
-
-    private normalizeBlocks(blocks: AiChatContentBlock[] | null | undefined): AiChatContentBlock[] {
-        if (!Array.isArray(blocks)) {
-            return [];
-        }
-
-        return blocks
-            .filter((block) => this.isSupportedBlockType(block?.type))
-            .map((block, index) => ({
-                type: block.type,
-                title: this.normalizeBlockTitle(block.title),
-                order: Number.isFinite(block.order) ? block.order : index,
-                text: block.text ?? null,
-                table: this.normalizeTable(block.table),
-                images: this.normalizeImages(block.images),
-            }))
+    private normalizeBlocks(blocks: AiChatContentBlock[] | null | undefined, fallbackImageUrl?: string | null): UiChatBlock[] {
+        const normalized = (Array.isArray(blocks) ? blocks : [])
+            .filter((block) => SUPPORTED_BLOCK_TYPES.has(block?.type))
+            .map((block, index) => ({ block, order: Number.isFinite(block.order) ? block.order : index }))
             .sort((left, right) => left.order - right.order)
-            .filter((block) => this.hasRenderableBlockContent(block));
+            .map(({ block }) => this.toUiBlock(block))
+            .filter((block) => this.hasBlockContent(block));
+
+        if (!normalized.length && fallbackImageUrl?.trim()) {
+            return [{
+                type: 'image',
+                title: null,
+                text: null,
+                table: null,
+                images: [{ url: fallbackImageUrl, caption: null, alt: null }],
+                orders: [],
+            }];
+        }
+
+        return normalized;
+    }
+
+    private toUiBlock(block: AiChatContentBlock): UiChatBlock {
+        return {
+            type: block.type,
+            title: this.normalizeBlockTitle(block.title),
+            text: block.text?.trim() ? block.text : null,
+            table: this.toUiTable(block.table),
+            images: (block.images ?? []).filter((image) => typeof image?.url === 'string' && image.url.trim()),
+            orders: (block.orders ?? [])
+                .filter((order) => !!order && typeof order === 'object')
+                .map((order) => ({ ...order, items: (order.items ?? []).filter(Boolean) })),
+        };
+    }
+
+    private hasBlockContent(block: UiChatBlock): boolean {
+        switch (block.type) {
+            case 'text': return !!block.text;
+            case 'table': return !!block.table;
+            case 'order': return block.orders.length > 0;
+            default: return block.images.length > 0;
+        }
     }
 
     private normalizeBlockTitle(title: string | null | undefined): string | null {
-        const normalizedTitle = (title || '').trim();
-        if (!normalizedTitle) {
-            return null;
-        }
+        const normalized = (title || '').trim();
+        if (!normalized) return null;
 
-        const hiddenToolTitles = new Set([
-            'get_invoice_by_customercode',
-            'get_inner_list_by_innerprocesscode_startdate_enddate',
-        ]);
-        const loweredTitle = normalizedTitle.toLocaleLowerCase('tr-TR');
+        // Tool adlari Ingilizce; tr-TR kucuk harf 'I' → 'ı' yapip eslesmeyi bozar.
+        const lowered = normalized.toLowerCase();
         const isTechnicalToolTitle =
-            hiddenToolTitles.has(loweredTitle)
-            || loweredTitle.startsWith('func.tool')
-            || loweredTitle.startsWith('tool.')
-            || loweredTitle.startsWith('function.')
-            || /^get_[a-z0-9_]+$/i.test(normalizedTitle);
+            lowered.startsWith('func.tool')
+            || lowered.startsWith('tool.')
+            || lowered.startsWith('function.')
+            || /^([a-z0-9]+_)?get_[a-z0-9_]+$/i.test(normalized);
 
-        if (isTechnicalToolTitle) {
-            return null;
-        }
-
-        return normalizedTitle;
+        return isTechnicalToolTitle ? null : normalized;
     }
 
-    private normalizeMessageBlocks(message: ConversationApiMessage): AiChatContentBlock[] {
-        const normalizedBlocks = this.normalizeBlocks(message.blocks);
-        if (normalizedBlocks.length > 0) {
-            return normalizedBlocks;
-        }
+    private toUiTable(table: AiChatTableData | null | undefined): UiTable | null {
+        if (!table || !Array.isArray(table.columns) || !Array.isArray(table.rows)) return null;
 
-        if (typeof message.imageUrl === 'string' && message.imageUrl.trim().length > 0) {
-            return [
-                {
-                    type: 'image',
-                    title: null,
-                    order: 0,
-                    text: null,
-                    table: null,
-                    images: [
-                        {
-                            url: message.imageUrl,
-                            caption: null,
-                            alt: null,
-                        },
-                    ],
-                },
-            ];
-        }
-
-        return [];
-    }
-
-    private isSupportedBlockType(type: string | null | undefined): type is AiChatContentBlock['type'] {
-        return type === 'text' || type === 'table' || type === 'image' || type === 'imageGallery';
-    }
-
-    private normalizeTable(table: AiChatTableData | null | undefined): AiChatTableData | null {
-        if (!table || !Array.isArray(table.columns) || !Array.isArray(table.rows)) {
-            return null;
-        }
+        const columns = table.columns.filter((column) => typeof column === 'string' && column.trim());
+        const rows = table.rows.filter((row) => !!row && typeof row === 'object');
+        if (!columns.length || !rows.length) return null;
 
         return {
-            columns: table.columns.filter((column) => typeof column === 'string' && column.trim().length > 0),
-            rows: table.rows.filter((row) => !!row && typeof row === 'object'),
-            totalRowCount: typeof table.totalRowCount === 'number' ? table.totalRowCount : null,
+            columns,
+            rows: rows.map((row) => columns.map((column) => this.toUiTableCell(row[column], column))),
             isTruncated: Boolean(table.isTruncated),
         };
     }
 
-    private normalizeImages(images: AiChatImageData[] | null | undefined): AiChatImageData[] {
-        if (!Array.isArray(images)) {
-            return [];
-        }
+    private toUiTableCell(raw: unknown, column: string): UiTableCell {
+        const value = raw === null || raw === undefined ? '-' : String(raw);
+        const link = this.toLink(value);
+        const columnKey = this.toLookupKey(column);
 
-        return images.filter((image) => typeof image?.url === 'string' && image.url.trim().length > 0);
+        return {
+            value,
+            link,
+            isImage: !!link && (this.isImageUrl(link) || IMAGE_COLUMN_HINTS.some((hint) => columnKey.includes(hint))),
+            linkLabel: columnKey.includes('invoice') || columnKey.includes('pdf')
+                ? 'PDF Aç'
+                : columnKey.includes('excel') ? 'Excel Aç' : 'Linki Aç',
+        };
     }
 
-    private hasRenderableBlockContent(block: AiChatContentBlock): boolean {
-        if (block.type === 'text') {
-            return !!(block.text || '').trim();
-        }
-
-        if (block.type === 'table') {
-            return this.hasRenderableTable(block.table);
-        }
-
-        return this.hasRenderableImages(block.images);
-    }
-
-    hasRenderableTable(table: AiChatTableData | null | undefined): boolean {
-        return !!table && Array.isArray(table.columns) && table.columns.length > 0 && Array.isArray(table.rows) && table.rows.length > 0;
-    }
-
-    hasRenderableImages(images: AiChatImageData[] | null | undefined): boolean {
-        return Array.isArray(images) && images.length > 0;
-    }
-
-    hasExternalAiImage(message: UiChatMessage): boolean {
-        return !!message.hasImage && !!message.aiImageUrl;
-    }
-
-    isMessageArriving(messageId: string): boolean {
-        const message = this.messages.find((item) => item.id === messageId);
-        if (!message || message.role !== 'assistant') {
-            return false;
-        }
-
-        const lastAssistantMessage = [...this.messages].reverse().find((item) => item.role === 'assistant');
-        if (!lastAssistantMessage || lastAssistantMessage.id !== messageId) {
-            return false;
-        }
-
-        const ageInMs = Date.now() - message.createdAt.getTime();
-        return ageInMs >= 0 && ageInMs < 1800;
-    }
-
-    hasExcelExport(message: UiChatMessage): boolean {
-        return !!message.hasExcel && !!message.excelUrl;
-    }
-
-    canReactToMessage(message: UiChatMessage): boolean {
-        return message.role === 'assistant' && !message.isError;
-    }
-
-    isReactionActive(message: UiChatMessage, reaction: 'like' | 'dislike'): boolean {
-        if (reaction === 'like') {
-            return message.isLiked === true;
-        }
-
-        return message.isLiked === false;
-    }
-
-    async setMessageReaction(message: UiChatMessage, isLiked: boolean): Promise<void> {
-        if (!this.activeConversationId || !this.canReactToMessage(message) || message.isReactionSaving) {
-            return;
-        }
-
-        if (message.isLiked === isLiked) {
-            return;
-        }
-
-        const previousReaction = message.isLiked ?? null;
-        message.isLiked = isLiked;
-        message.isReactionSaving = true;
-
-        const request: ConversationMessageReactionRequest = { isLiked };
-        try {
-            await this.conversationsService.setMessageReaction(this.activeConversationId, message.id, request);
-        } catch (err) {
-            message.isLiked = previousReaction;
-            console.error('[NebimAiChat] Mesaj reaction guncellenemedi:', err);
-            this.errorMessage = 'Mesaj reaction guncellenemedi. Lutfen tekrar deneyin.';
-        } finally {
-            message.isReactionSaving = false;
-        }
-    }
-
-    canShareOnWhatsApp(message: UiChatMessage): boolean {
-        return this.buildWhatsAppShareText(message).trim().length > 0;
-    }
-
-    getWhatsAppShareUrl(message: UiChatMessage): string {
-        const text = this.buildWhatsAppShareText(message).trim();
-        return `https://wa.me/?text=${encodeURIComponent(text)}`;
-    }
-
-    getCellValue(row: Record<string, string | null>, column: string): string {
-        return row[column] ?? '-';
-    }
-
-    insertTableCellValue(value: string, event?: Event): void {
-        event?.preventDefault();
-
-        const normalizedValue = value.trim();
-        if (!normalizedValue || normalizedValue === '-') {
-            return;
-        }
-
-        const currentInput = this.input.trimEnd();
-        this.input = currentInput ? `${currentInput} ${normalizedValue}` : normalizedValue;
-        this.onComposerInput();
-        setTimeout(() => this.textArea?.nativeElement.focus(), 0);
-    }
-
-    isCellLink(row: Record<string, string | null>, column: string): boolean {
-        return this.getCellLink(row, column) !== null;
-    }
-
-    isCellImage(row: Record<string, string | null>, column: string): boolean {
-        const link = this.getCellLink(row, column);
-        if (!link) {
-            return false;
-        }
-
-        if (this.isImageUrl(link)) {
-            return true;
-        }
-
-        const normalizedColumn = column.toLocaleLowerCase('tr-TR');
-        return (
-            normalizedColumn.includes('image') ||
-            normalizedColumn.includes('foto') ||
-            normalizedColumn.includes('gorsel') ||
-            normalizedColumn.includes('photo') ||
-            normalizedColumn.includes('picture')
-        );
-    }
-
-    getCellLink(row: Record<string, string | null>, column: string): string | null {
-        const rawValue = row[column];
-        if (typeof rawValue !== 'string') {
-            return null;
-        }
-
+    private toLink(rawValue: string): string | null {
         const value = rawValue.trim();
-        if (!value) {
-            return null;
-        }
-
-        if (/^https?:\/\//i.test(value)) {
-            return value;
-        }
-
-        if (/^www\./i.test(value)) {
-            return `https://${value}`;
-        }
-
-        if (/^(mailto:|tel:)/i.test(value)) {
-            return value;
-        }
-
+        if (/^(https?:\/\/|mailto:|tel:)/i.test(value)) return value;
+        if (/^www\./i.test(value)) return `https://${value}`;
         return null;
-    }
-
-    getCellLinkLabel(row: Record<string, string | null>, column: string): string {
-        const link = this.getCellLink(row, column);
-        if (!link) {
-            return this.getCellValue(row, column);
-        }
-
-        const normalizedColumn = column.toLocaleLowerCase('tr-TR');
-        if (normalizedColumn.includes('invoice') || normalizedColumn.includes('pdf')) {
-            return 'PDF Ac';
-        }
-
-        if (normalizedColumn.includes('excel')) {
-            return 'Excel Ac';
-        }
-
-        if (normalizedColumn.includes('image') || normalizedColumn.includes('foto') || normalizedColumn.includes('gorsel')) {
-            return 'Gorseli Ac';
-        }
-
-        return 'Linki Ac';
     }
 
     private isImageUrl(url: string): boolean {
         try {
-            const parsed = new URL(url);
-            const normalizedPath = parsed.pathname.toLocaleLowerCase('tr-TR');
-            return /\.(png|jpe?g|gif|webp|bmp|svg|avif)$/i.test(normalizedPath);
+            return /\.(png|jpe?g|gif|webp|bmp|svg|avif)$/i.test(new URL(url).pathname);
         } catch {
             return false;
         }
     }
 
-    private toUiChatMessage(message: ConversationApiMessage): UiChatMessage {
-        const blocks = this.normalizeMessageBlocks(message);
-        const content = this.resolveMessageText(message);
-        const mentions = this.extractMessageMentions(content);
+    private buildWhatsAppShareUrl(message: UiChatMessage): string | null {
+        const parts = new Set<string>();
+        if (message.content) parts.add(message.content);
 
-        return {
-            id: message.id ?? this.uid(),
-            role: this.resolveRole(message),
-            content,
-            createdAt: message.createdDate ? new Date(message.createdDate) : new Date(),
-            mentions,
-            blocks,
-            isError: false,
-            hasImage: Boolean(message.hasImage),
-            aiImageUrl: message.aiImageUrl ?? null,
-            hasExcel: Boolean(message.hasExcel),
-            excelUrl: message.excelUrl ?? null,
-            isLiked: this.resolveReactionValue(message),
-            isReactionSaving: false,
-        };
-    }
-
-    private extractMessageMentions(content: string | null | undefined): MentionChipItem[] {
-        const text = (content || '').trim();
-        if (!text) {
-            return [];
-        }
-
-        const tokens: string[] = [];
-        const tokenRegex = /(^|\s)@([^\s@]+)/g;
-        let match: RegExpExecArray | null = null;
-
-        while ((match = tokenRegex.exec(text)) !== null) {
-            const token = this.normalizeMention(match[2]);
-            if (!token || tokens.includes(token)) {
-                continue;
-            }
-
-            tokens.push(token);
-        }
-
-        return tokens.map((token) => {
-            const relatedExtension = this.activeExtensionShortcuts.find(
-                (item) => this.normalizeMention(item.mention) === token,
-            );
-
-            return {
-                id: relatedExtension?.id || token,
-                name: relatedExtension?.name || token.replace('@', ''),
-                mention: token,
-                photoUrl: relatedExtension?.photoUrl,
-            };
-        });
-    }
-
-    private resolveReactionValue(message: ConversationApiMessage): boolean | null {
-        if (typeof message.isLiked === 'boolean') {
-            return message.isLiked;
-        }
-
-        const record = message as unknown as Record<string, unknown>;
-        const rawValue = record['IsLiked'] ?? record['isLiked'];
-        if (typeof rawValue === 'boolean') {
-            return rawValue;
-        }
-
-        return null;
-    }
-
-    private buildWhatsAppShareText(message: UiChatMessage): string {
-        const parts: string[] = [];
-
-        if (message.content.trim()) {
-            parts.push(message.content.trim());
-        }
-
-        for (const block of message.blocks || []) {
-            if (block.type === 'text' && block.text?.trim()) {
-                if (!parts.includes(block.text.trim())) {
-                    parts.push(block.text.trim());
-                }
-                continue;
-            }
-
-            if (block.type === 'table' && this.hasRenderableTable(block.table)) {
-                parts.push(this.serializeTableForShare(block.title, block.table!));
-                continue;
-            }
-
-            if ((block.type === 'image' || block.type === 'imageGallery') && this.hasRenderableImages(block.images)) {
-                const imageLines = block.images!
-                    .map((image, index) => `${block.title || 'Gorsel'} ${index + 1}: ${image.url}`);
-                parts.push(imageLines.join('\n'));
+        for (const block of message.blocks) {
+            if (block.type === 'text') {
+                parts.add((block.text ?? '').trim());
+            } else if (block.type === 'table' && block.table) {
+                parts.add(this.serializeTableForShare(block.title, block.table));
+            } else if (block.type === 'order') {
+                parts.add(block.orders.map((order) => this.describeOrder(order)).join('\n'));
+            } else {
+                parts.add(block.images.map((image, index) => `${block.title || 'Görsel'} ${index + 1}: ${image.url}`).join('\n'));
             }
         }
 
-        if (message.hasExcel && message.excelUrl) {
-            parts.push(`Excel: ${message.excelUrl}`);
-        }
+        if (message.excelUrl) parts.add(`Excel: ${message.excelUrl}`);
+        if (message.aiImageUrl) parts.add(`Görsel: ${message.aiImageUrl}`);
 
-        if (message.hasImage && message.aiImageUrl) {
-            parts.push(`Gorsel: ${message.aiImageUrl}`);
-        }
-
-        return parts.filter((part) => part.trim().length > 0).join('\n\n');
+        const text = [...parts].filter(Boolean).join('\n\n');
+        return text ? `https://wa.me/?text=${encodeURIComponent(text)}` : null;
     }
 
-    private serializeTableForShare(title: string | null | undefined, table: AiChatTableData): string {
-        const header = table.columns.join(' | ');
-        const rows = table.rows.map((row) => table.columns.map((column) => this.getCellValue(row as Record<string, string | null>, column)).join(' | '));
-        const lines = title ? [title, header, ...rows] : [header, ...rows];
+    private serializeTableForShare(title: string | null, table: UiTable): string {
+        const lines = [
+            ...(title ? [title] : []),
+            table.columns.join(' | '),
+            ...table.rows.map((row) => row.map((cell) => cell.value).join(' | ')),
+        ];
 
         if (table.isTruncated) {
-            lines.push('Not: Tablo kisaltilmis veridir.');
+            lines.push('Not: Tablo kısaltılmış veridir.');
         }
 
         return lines.join('\n');
     }
 
-    private applyConversationMessagesResponse(response: ConversationMessagesResponse): void {
-        const mapped = this.mapConversationMessages(response);
-
-        // Bos yanit ekrandaki mevcut mesajlari silmemeli.
-        if (mapped.length === 0 && this.messages.length > 0) {
-            return;
-        }
-
-        this.setMessagesFromServer(mapped);
+    private describeOrder(order: AiChatOrderData): string {
+        const total = order.totalPrice !== null ? `${order.totalPrice} ${order.currency || ''}`.trim() : null;
+        return [`Sipariş #${order.orderNumber || '-'}`, order.status, total].filter(Boolean).join(' · ');
     }
 
-    private isAwaitingAssistantReply(messages: UiChatMessage[]): boolean {
-        if (messages.length === 0) {
-            return false;
-        }
+    // ── Reaksiyonlar ─────────────────────────────────────────────────
 
-        const lastMessage = messages[messages.length - 1];
-        return lastMessage.role === 'user';
+    async toggleReaction(message: UiChatMessage, isLiked: boolean): Promise<void> {
+        if (message.isReactionSaving) return;
+
+        // Ayni reaksiyona tekrar basilirsa reaksiyon kaldirilir
+        if (message.isLiked === isLiked) {
+            await this.saveReaction(message, { isLiked: null });
+        } else if (isLiked) {
+            await this.saveReaction(message, { isLiked: true });
+        } else {
+            this.openReactionModal(message);
+        }
     }
 
-    private async waitForAssistantMessage(conversationId: string): Promise<void> {
-        if (this.assistantWaitConversationId === conversationId) {
-            return;
-        }
+    selectDislikeReason(reason: string): void {
+        // Secili nedene tekrar basilirsa secim kaldirilir
+        this.reactionForm.reason = this.reactionForm.reason === reason ? '' : reason;
+    }
 
-        this.assistantWaitConversationId = conversationId;
-        const maxAttempts = 12;
-        const attemptDelayMs = 800;
+    closeReactionModal(): void {
+        this.showReactionModal = false;
+        this.reactionTarget = null;
+    }
+
+    async submitReactionModal(): Promise<void> {
+        const message = this.reactionTarget;
+        if (!message) return;
+
+        const request: ConversationMessageReactionRequest = {
+            isLiked: false,
+            reason: this.reactionForm.reason || null,
+            description: this.reactionForm.description.trim() || null,
+        };
+        this.closeReactionModal();
+        await this.saveReaction(message, request);
+    }
+
+    private openReactionModal(message: UiChatMessage): void {
+        // Mobilde acik klavye diyalogun altini kapatmasin; odak diyaloga tasinir.
+        (document.activeElement as HTMLElement | null)?.blur();
+        this.reactionTarget = message;
+        this.reactionForm = { reason: '', description: '' };
+        this.showReactionModal = true;
+        setTimeout(() => this.hostRef.nativeElement.querySelector<HTMLElement>('.nac-modal .btn')?.focus());
+    }
+
+    private async saveReaction(message: UiChatMessage, request: ConversationMessageReactionRequest): Promise<void> {
+        const conversationId = this.activeConversationId;
+        // Polling mesaj listesini yenilemis ya da sohbet degismis olabilir; ekrandaki guncel nesne uzerinde calis.
+        const target = this.messages.find((item) => item.id === message.id);
+        if (!conversationId || !target) return;
+
+        const previous = target.isLiked;
+        target.isLiked = request.isLiked;
+        target.isReactionSaving = true;
 
         try {
-            for (let attempt = 0; attempt < maxAttempts; attempt++) {
-                if (this.activeConversationId !== conversationId) {
-                    return;
-                }
-
-                const res = await this.conversationsService.getMessages(conversationId);
-                if (!res.isSuccess || !res.data) {
-                    await this.sleep(attemptDelayMs);
-                    continue;
-                }
-
-                const loadedMessages = this.mapConversationMessages(res.data);
-                if (loadedMessages.length > 0) {
-                    this.setMessagesFromServer(loadedMessages);
-                    this.shouldScroll = true;
-                }
-
-                if (!this.isAwaitingAssistantReply(loadedMessages)) {
-                    this.errorMessage = '';
-                    return;
-                }
-
-                await this.sleep(attemptDelayMs);
-            }
+            await this.conversationsService.setMessageReaction(conversationId, target.id, request);
         } catch (err) {
-            console.warn('[NebimAiChat] AI yaniti takip edilirken hata olustu:', err);
+            target.isLiked = previous;
+            console.error('[NebimAiChat] Mesaj reaksiyonu güncellenemedi:', err);
+            this.errorMessage = 'Geri bildirimin kaydedilemedi. Lütfen tekrar deneyin.';
         } finally {
-            if (this.assistantWaitConversationId === conversationId) {
-                this.assistantWaitConversationId = null;
-            }
+            target.isReactionSaving = false;
         }
+    }
+
+    // ── Yardımcılar ──────────────────────────────────────────────────
+
+    private formatMessageTime(value: string | Date | null | undefined): string {
+        const date = value instanceof Date ? value : new Date(value ?? '');
+        if (Number.isNaN(date.getTime())) return '';
+
+        const time = date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        return this.isToday(date)
+            ? time
+            : `${date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' })} ${time}`;
+    }
+
+    private isToday(date: Date): boolean {
+        return date.toDateString() === new Date().toDateString();
+    }
+
+    /** Saat dilimi bilgisi olmayan tarih UTC de olabilecegi icin iki yorumdan biri yeterlidir. */
+    private isRecent(value: string | null | undefined): boolean {
+        if (!value) return false;
+        const hasZone = /(z|[+-]\d{2}:?\d{2})$/i.test(value);
+        const candidates = [new Date(value).getTime(), hasZone ? NaN : new Date(`${value}Z`).getTime()];
+        return candidates.some((time) => Number.isFinite(time) && Math.abs(Date.now() - time) < REPLY_WAIT_WINDOW_MS);
+    }
+
+    private toEpoch(dateValue?: string): number {
+        const time = dateValue ? new Date(dateValue).getTime() : 0;
+        return Number.isFinite(time) ? time : 0;
+    }
+
+    private collapseWhitespace(value: string): string {
+        return value.replace(/\s+/g, ' ').trim();
+    }
+
+    private playTypingSound(event: KeyboardEvent): void {
+        if (!this.soundEnabled || event.ctrlKey || event.metaKey || event.altKey) return;
+
+        const key = event.key;
+        const isTypingKey = key.length === 1 || key === 'Backspace' || key === 'Delete' || key === 'Enter';
+        const now = Date.now();
+        if (!isTypingKey || now - this.lastKeyboardSoundAt < 45) return;
+
+        this.lastKeyboardSoundAt = now;
+        this.playKeyboardSound();
+    }
+
+    private playKeyboardSound(): void {
+        if (!this.soundEnabled) return;
+
+        this.keyboardSound.currentTime = 0;
+        // Tarayici otomatik oynatmayi engelleyebilir; sessizce yoksay.
+        this.keyboardSound.play()?.catch(() => undefined);
     }
 
     private sleep(ms: number): Promise<void> {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
-    private mapConversationMessages(response: ConversationMessagesResponse): UiChatMessage[] {
-        return this.extractConversationMessages(response)
-            .filter((message) => {
-                const content = this.resolveMessageText(message);
-                const blocks = this.normalizeMessageBlocks(message);
-                return !!content || blocks.length > 0;
-            })
-            .map<UiChatMessage>((message) => this.toUiChatMessage(message));
-    }
-
-    private applyConversationReplyResponse(response: ConversationReplyResponse): void {
-        const conversation = this.extractConversationFromReply(response);
-        if (conversation) {
-            this.applyConversationMessagesResponse(conversation);
-        }
-
-        const aiResponse = this.extractAiResponse(response);
-        if (aiResponse && !aiResponse.success) {
-            this.errorMessage = aiResponse.error || aiResponse.response || 'AI yanıtı alınamadı. Lütfen tekrar deneyin.';
-        }
-    }
-
-    private toConversationLabel(conversation: ConversationHeader, index: number): string {
-        const record = conversation as unknown as Record<string, unknown>;
-        const customerName = this.readString(record['customerName'] ?? record['CustomerName']);
-        const lastMessage = this.readString(record['lastMessage'] ?? record['LastMessage']);
-        const lastMessages = this.readString(record['lastMessages'] ?? record['LastMessages']);
-        if (customerName) return customerName;
-        if (lastMessage) return lastMessage;
-        if (lastMessages) return lastMessages;
-        return `Sohbet ${index + 1}`;
-    }
-
-    private toConversationPreview(conversation: ConversationHeader): string {
-        const record = conversation as unknown as Record<string, unknown>;
-        return this.readString(
-            record['lastMessage']
-            ?? record['LastMessage']
-            ?? record['lastMessages']
-            ?? record['LastMessages']
-        );
-    }
-
-    private toConversationDateText(conversation: ConversationHeader): string {
-        const record = conversation as unknown as Record<string, unknown>;
-        const rawDate = this.readString(
-            record['lastMessageDate']
-            ?? record['LastMessageDate']
-            ?? record['updatedDate']
-            ?? record['UpdatedDate']
-            ?? record['createdDate']
-            ?? record['CreatedDate']
-        );
-
-        if (!rawDate) return '';
-
-        const date = new Date(rawDate);
-        if (Number.isNaN(date.getTime())) return '';
-
-        const now = new Date();
-        const sameDay =
-            date.getFullYear() === now.getFullYear()
-            && date.getMonth() === now.getMonth()
-            && date.getDate() === now.getDate();
-
-        if (sameDay) {
-            return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-        }
-  
-        return date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' });
-    }
-
-    private readString(value: unknown): string {
-        return typeof value === 'string' ? value.trim() : '';
-    }
-
-    private toEpoch(dateValue?: string): number {
-        if (!dateValue) return 0;
-        const ts = new Date(dateValue).getTime();
-        return Number.isFinite(ts) ? ts : 0;
-    }
-
-    newChat(): void {
-        this.resetConversationState();
-        this.sidebarMobileOpen = false;
-        void this.router.navigate(['/nebim-ai-chat']);
-        setTimeout(() => this.textArea?.nativeElement.focus(), 0);
-    }
-
-    toggleSidebar(): void {
-        if (this.isMobileViewport()) {
-            // Mobilde sidebar icindeki toggle drawer'i kapatir
-            this.sidebarMobileOpen = false;
-            return;
-        }
-
-        this.sidebarCollapsed = !this.sidebarCollapsed;
-        this.sidebarOpenedManually = !this.sidebarCollapsed;
-    }
-
-    /** Header hamburger: mobil'de drawer, desktop'ta collapse toggle */
-    onHamburgerClick(): void {
-        if (this.isMobileViewport()) {
-            this.sidebarMobileOpen = !this.sidebarMobileOpen;
-            if (this.sidebarMobileOpen) {
-                // Mobil drawer her zaman tam genislikte acilmali
-                this.sidebarCollapsed = false;
-                this.sidebarOpenedManually = true;
-            }
-        } else {
-            this.sidebarCollapsed = !this.sidebarCollapsed;
-            this.sidebarOpenedManually = !this.sidebarCollapsed;
-        }
-    }
-
-    openMobileSidebar(): void {
-        this.sidebarMobileOpen = true;
-        this.sidebarCollapsed = false;
-        this.sidebarOpenedManually = true;
-    }
-
-    closeMobileSidebar(): void {
-        this.sidebarMobileOpen = false;
-    }  
-
-    async onSelectChat(conversationId: string): Promise<void> {
-        this.sidebarMobileOpen = false;
-        await this.navigateToConversation(conversationId);
-    }
-
-    private async navigateToConversation(conversationId: string): Promise<void> {
-        await this.router.navigate(['/c', conversationId]);
-    }
-
-    private async syncConversationFromRoute(routeConversationId: string | null): Promise<void> {
-        if (!routeConversationId) {
-            this.resetConversationState();
-            const newConversationId = await this.ensureConversation();
-            if (newConversationId) {
-                await this.navigateToConversation(newConversationId);
-            }
-            return;
-        }
-
-        if (this.activeConversationId === routeConversationId && this.messages.length > 0) {
-            return;
-        }
-
-        // Sohbet bu sayfadan yeni baslatildiysa sunucudan yuklemeye gerek yok;
-        // guncel icerik reply yanitindan gelecek.
-        if (this.locallyStartedConversationId === routeConversationId) {
-            this.activeConversationId = routeConversationId;
-            return;
-        }
-
-        // Baska bir sohbete gecildiginde "yeni baslatildi" isareti gecerliligini yitirir.
-        this.locallyStartedConversationId = null;
-
-        this.activeConversationId = routeConversationId;
-        this.hasHydratedThread = false;
-        await this.loadThread(routeConversationId);
-    }
-
-    private resetConversationState(): void {
-        this.messages = [];
-        this.input = '';
-        this.activeConversationId = null;
-        this.locallyStartedConversationId = null;
-        this.errorMessage = '';
-        this.hasHydratedThread = false;
-        this.selectedMentionChips = this.defaultMentionChip ? [{ ...this.defaultMentionChip }] : [];
-    }
-
-    private persistSoundPreference(): void {
-        try {
-            localStorage.setItem(this.soundPreferenceKey, this.soundEnabled ? '1' : '0');
-        } catch {
-            // Storage not available; ignore.
-        }
-    }
-
-    private loadSoundPreference(): void {
-        try {
-            const raw = localStorage.getItem(this.soundPreferenceKey);
-            if (raw === '0') {
-                this.soundEnabled = false;
-            }
-            if (raw === '1') {
-                this.soundEnabled = true;
-            }
-        } catch {
-            // Storage not available; keep default.
-        }
-    }
-
-    private setMessagesFromServer(nextMessages: UiChatMessage[]): void {
-        if (!this.hasHydratedThread) {
-            this.messages = nextMessages;
-            this.hasHydratedThread = true;
-            return;
-        }
-
-        const previousIds = new Set(this.messages.map((item) => item.id));
-        const hasNewMessage = nextMessages.some((item) => !previousIds.has(item.id));
-        this.messages = nextMessages;
-
-        if (hasNewMessage) {
-            this.playKeyboardSound();
-        }
-    }
-
-    private playKeyboardSound(): void {
-        if (!this.soundEnabled) {
-            return;
-        }
-
-        try {
-            this.keyboardSound.currentTime = 0;
-            this.keyboardSound.volume = 0.5;
-            const playPromise = this.keyboardSound.play();
-            if (playPromise && typeof playPromise.catch === 'function') {
-                playPromise.catch(() => {
-                    // Audio playback may be blocked; ignore.
-                });
-            }
-        } catch {
-            // Audio playback may be blocked; ignore.
-        }
-    }
-
     private uid(): string {
         return Math.random().toString(36).slice(2) + Date.now().toString(36);
     }
-
 }
