@@ -460,10 +460,14 @@
                                 <li class="page-item" [class.disabled]="currentPage === 1">
                                     <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
                                 </li>
-                                @for (page of totalPagesArray; track $index) {
-                                    <li class="page-item" [class.active]="page === currentPage">
-                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
-                                    </li>
+                                @for (page of visiblePages; track $index) {
+                                    @if (page === -1) {
+                                        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+                                    } @else {
+                                        <li class="page-item" [class.active]="page === currentPage">
+                                            <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                        </li>
+                                    }
                                 }
                                 <li class="page-item" [class.disabled]="currentPage === totalPages">
                                     <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
@@ -480,14 +484,18 @@
 
 <!-- Detay Modal -->
 @if (showDetailModal) {
-    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
-        <div class="modal-dialog modal-xl">
+    <div class="modal fade show d-block log-modal-backdrop" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable log-detail-dialog" [class.modal-fullscreen]="detailFullscreen">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="fa-solid fa-file-lines me-2"></i>AI İstek Log Detayı
                     </h5>
-                    <button type="button" class="btn-close" (click)="closeDetailModal()"></button>
+                    <button type="button" class="btn btn-sm btn-light ms-auto me-2" (click)="toggleDetailFullscreen()"
+                        [title]="detailFullscreen ? 'Küçült' : 'Tam Ekran'">
+                        <i class="fa-solid" [class.fa-compress]="detailFullscreen" [class.fa-expand]="!detailFullscreen"></i>
+                    </button>
+                    <button type="button" class="btn-close ms-0" (click)="closeDetailModal()"></button>
                 </div>
                 <div class="modal-body">
                     @if (detailLoading) {
@@ -590,8 +598,8 @@
                             </table>
                         </div>
 
-                        <!-- Request / Response Tabs -->
-                        <ul class="nav nav-tabs">
+                        <!-- Request / Response: geniş ekranda yan yana, dar ekranda sekmeli -->
+                        <ul class="nav nav-tabs d-xl-none">
                             <li class="nav-item">
                                 <button class="nav-link" [class.active]="activeTab === 'request'" (click)="activeTab = 'request'">
                                     <i class="fa-solid fa-arrow-up me-1"></i>Request Body
@@ -603,17 +611,35 @@
                                 </button>
                             </li>
                         </ul>
-                        <div class="tab-content border border-top-0 rounded-bottom">
-                            @if (activeTab === 'request') {
-                                <div class="p-3">
-                                    <pre class="log-json-block mb-0">{{ formatJson(selectedItem.requestBody) }}</pre>
+                        <div class="row g-3 log-body-panes">
+                            <div class="col-12 col-xl-6 d-xl-block" [class.d-none]="activeTab !== 'request'">
+                                <div class="log-pane-title">
+                                    <span class="d-none d-xl-inline"><i class="fa-solid fa-arrow-up me-1"></i>Request Body</span>
+                                    <button type="button" class="btn btn-sm btn-soft-primary ms-auto" (click)="copyBody('request')"
+                                        [disabled]="!selectedItem.requestBody">
+                                        @if (copiedBody === 'request') {
+                                            <i class="fa-solid fa-check me-1"></i>Kopyalandı
+                                        } @else {
+                                            <i class="fa-regular fa-copy me-1"></i>Kopyala
+                                        }
+                                    </button>
                                 </div>
-                            }
-                            @if (activeTab === 'response') {
-                                <div class="p-3">
-                                    <pre class="log-json-block mb-0">{{ formatJson(selectedItem.responseBody) }}</pre>
+                                <pre class="log-json-block mb-0">{{ formatJson(selectedItem.requestBody) }}</pre>
+                            </div>
+                            <div class="col-12 col-xl-6 d-xl-block" [class.d-none]="activeTab !== 'response'">
+                                <div class="log-pane-title">
+                                    <span class="d-none d-xl-inline"><i class="fa-solid fa-arrow-down me-1"></i>Response Body</span>
+                                    <button type="button" class="btn btn-sm btn-soft-primary ms-auto" (click)="copyBody('response')"
+                                        [disabled]="!selectedItem.responseBody">
+                                        @if (copiedBody === 'response') {
+                                            <i class="fa-solid fa-check me-1"></i>Kopyalandı
+                                        } @else {
+                                            <i class="fa-regular fa-copy me-1"></i>Kopyala
+                                        }
+                                    </button>
                                 </div>
-                            }
+                                <pre class="log-json-block mb-0">{{ formatJson(selectedItem.responseBody) }}</pre>
+                            </div>
                         </div>
                     }
                 </div>

@@ -1,0 +1,215 @@
+<section class="cl-root">
+    <header class="cl-header">
+        <div class="cl-header-title">
+            <span class="cl-header-icon"><i class="fa-solid fa-wave-square"></i></span>
+            <div>
+                <h5 class="mb-0">Sohbet Logları</h5>
+                <small class="text-muted">AI ve extension istekleri, zaman sırasına göre</small>
+            </div>
+        </div>
+        <div class="cl-header-actions">
+            <button type="button" class="btn btn-sm btn-light" (click)="load()" [disabled]="loading || !conversationId" title="Yenile">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-light" (click)="toggleFullscreen()"
+                [title]="fullscreen ? 'Tam ekrandan çık' : 'Tam ekran'" [attr.aria-pressed]="fullscreen">
+                <i class="fa-solid" [class.fa-expand]="!fullscreen" [class.fa-compress]="fullscreen"></i>
+            </button>
+            @if (showClose) {
+                <button type="button" class="btn btn-sm btn-light" (click)="close()" title="Kapat" aria-label="Kapat">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            }
+        </div>
+    </header>
+
+    @if (!conversationId) {
+        <div class="cl-empty">
+            <i class="fa-regular fa-comments"></i>
+            <p>Logları görmek için bir sohbet seçin.</p>
+        </div>
+    } @else {
+        <!-- Özet -->
+        <div class="cl-stats">
+            <div class="cl-stat">
+                <span class="cl-stat-value">{{ entries.length }}</span>
+                <span class="cl-stat-label">Toplam</span>
+            </div>
+            <div class="cl-stat is-ai">
+                <span class="cl-stat-value">{{ aiCount }}</span>
+                <span class="cl-stat-label">AI</span>
+            </div>
+            <div class="cl-stat is-ext">
+                <span class="cl-stat-value">{{ extensionCount }}</span>
+                <span class="cl-stat-label">Extension</span>
+            </div>
+            <div class="cl-stat" [class.is-fail]="failedCount > 0">
+                <span class="cl-stat-value">{{ failedCount }}</span>
+                <span class="cl-stat-label">Hatalı</span>
+            </div>
+            <div class="cl-stat">
+                <span class="cl-stat-value">{{ formatTokens(totalTokens) }}</span>
+                <span class="cl-stat-label">Token</span>
+            </div>
+            <div class="cl-stat">
+                <span class="cl-stat-value">{{ formatCost(totalCost) }}</span>
+                <span class="cl-stat-label">Maliyet</span>
+            </div>
+            <div class="cl-stat">
+                <span class="cl-stat-value">{{ formatDuration(totalDurationMs) }}</span>
+                <span class="cl-stat-label">Süre</span>
+            </div>
+        </div>
+
+        <!-- Arama -->
+        <div class="cl-search">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" class="form-control" placeholder="Model, tool, sağlayıcı, hata{{ searchInContent ? ', request/response içeriği' : '' }} ara..."
+                    [(ngModel)]="searchText" name="logSearch">
+                @if (searchText) {
+                    <button type="button" class="btn btn-light" (click)="searchText = ''" title="Temizle">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                }
+            </div>
+            <div class="cl-search-row">
+                <select class="form-select form-select-sm" [(ngModel)]="sourceFilter" name="logSource">
+                    <option value="">Tüm kaynaklar</option>
+                    @for (option of sourceOptions; track option.key) {
+                        <option [value]="option.key">{{ option.label }}</option>
+                    }
+                </select>
+                <div class="form-check form-switch mb-0 text-nowrap">
+                    <input class="form-check-input" type="checkbox" id="clSearchContent"
+                        [(ngModel)]="searchInContent" (ngModelChange)="onSearchInContentChange()" name="logSearchContent">
+                    <label class="form-check-label small" for="clSearchContent">İçerikte ara</label>
+                </div>
+            </div>
+            @if (searchInContent && contentLoading) {
+                <div class="small text-muted mt-1">
+                    <span class="spinner-border spinner-border-sm me-1"></span>İçerikler yükleniyor ({{ contentLoadedCount }}/{{ entries.length }})
+                </div>
+            }
+        </div>
+
+        <!-- Filtre -->
+        <div class="cl-filters">
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn" [class.btn-primary]="kindFilter === 'all'" [class.btn-light]="kindFilter !== 'all'" (click)="setKindFilter('all')">Tümü</button>
+                <button type="button" class="btn" [class.btn-primary]="kindFilter === 'ai'" [class.btn-light]="kindFilter !== 'ai'" (click)="setKindFilter('ai')">
+                    <i class="fa-solid fa-robot me-1"></i>AI
+                </button>
+                <button type="button" class="btn" [class.btn-primary]="kindFilter === 'extension'" [class.btn-light]="kindFilter !== 'extension'" (click)="setKindFilter('extension')">
+                    <i class="fa-solid fa-puzzle-piece me-1"></i>Extension
+                </button>
+            </div>
+            <button type="button" class="btn btn-sm" [class.btn-danger]="onlyFailed" [class.btn-light]="!onlyFailed" (click)="toggleOnlyFailed()">
+                <i class="fa-solid fa-triangle-exclamation me-1"></i>Sadece hatalı
+            </button>
+            @if (hasActiveFilter) {
+                <div class="cl-result-count">
+                    <span>{{ visibleEntries.length }} / {{ entries.length }} kayıt</span>
+                    <button type="button" class="btn btn-sm btn-link p-0" (click)="clearFilters()">Filtreleri temizle</button>
+                </div>
+            }
+        </div>
+
+        @if (loadError) {
+            <div class="alert alert-warning py-2 small mb-2">{{ loadError }}</div>
+        }
+
+        @if (loading && !entries.length) {
+            <div class="cl-empty">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p>Loglar yükleniyor...</p>
+            </div>
+        } @else {
+            <ol class="cl-timeline">
+                @for (entry of visibleEntries; track entry.key) {
+                    @if (entry.deltaMs !== null && !hasActiveFilter) {
+                        <li class="cl-gap">{{ formatDelta(entry.deltaMs) }}</li>
+                    }
+                    <li class="cl-item" [class.is-ai]="entry.kind === 'ai'" [class.is-ext]="entry.kind === 'extension'" [class.is-fail]="!entry.isSuccess">
+                        <span class="cl-dot">
+                            <i class="fa-solid" [class.fa-robot]="entry.kind === 'ai'" [class.fa-puzzle-piece]="entry.kind === 'extension'"></i>
+                        </span>
+
+                        <div class="cl-card" [class.is-open]="expandedKey === entry.key">
+                            <button type="button" class="cl-card-head" (click)="toggleEntry(entry)" [attr.aria-expanded]="expandedKey === entry.key">
+                                <div class="cl-card-main">
+                                    <div class="cl-card-top">
+                                        <span class="cl-kind">{{ entry.kind === 'ai' ? 'AI' : entry.subtitle }}</span>
+                                        <span class="cl-time">{{ entry.createdDate | date:'HH:mm:ss' }}</span>
+                                        <span class="cl-date">{{ entry.createdDate | date:'dd.MM.yyyy' }}</span>
+                                    </div>
+                                    <div class="cl-title">{{ entry.title }}</div>
+                                    <div class="cl-chips">
+                                        @if (entry.isSuccess) {
+                                            <span class="badge bg-success-subtle text-success"><i class="fa-solid fa-check me-1"></i>Başarılı</span>
+                                        } @else {
+                                            <span class="badge bg-danger-subtle text-danger"><i class="fa-solid fa-xmark me-1"></i>Hatalı</span>
+                                        }
+                                        @if (entry.kind === 'ai') {
+                                            @if (entry.statusCode) {
+                                                <span class="cl-chip">HTTP {{ entry.statusCode }}</span>
+                                            }
+                                            <span class="cl-chip"><i class="fa-solid fa-coins me-1"></i>{{ formatTokens(entry.totalTokens) }}</span>
+                                            <span class="cl-chip">{{ formatCost(entry.costUsd) }}</span>
+                                        } @else if (entry.rowCount !== null && entry.rowCount !== undefined) {
+                                            <span class="cl-chip"><i class="fa-solid fa-list me-1"></i>{{ entry.rowCount }} kayıt</span>
+                                        }
+                                        <span class="cl-chip"><i class="fa-regular fa-clock me-1"></i>{{ formatDuration(entry.durationMs) }}</span>
+                                        @if (contentMatches(entry)) {
+                                            <span class="cl-chip is-match"><i class="fa-solid fa-magnifying-glass me-1"></i>İçerikte eşleşme</span>
+                                        }
+                                    </div>
+                                    @if (entry.errorMessage) {
+                                        <div class="cl-error">{{ entry.errorMessage }}</div>
+                                    }
+                                </div>
+                                <i class="fa-solid fa-chevron-down cl-caret"></i>
+                            </button>
+
+                            @if (expandedKey === entry.key) {
+                                <div class="cl-detail">
+                                    @if (detailLoadingKey === entry.key) {
+                                        <div class="text-center py-3">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                        </div>
+                                    } @else {
+                                        @if (details[entry.key]; as detail) {
+                                            <div class="cl-pane">
+                                                <div class="cl-pane-head">
+                                                    <span><i class="fa-solid fa-upload me-1"></i>{{ detail.requestLabel }}</span>
+                                                    <button type="button" class="btn btn-sm btn-link p-0" (click)="copy(detail.request)" [disabled]="!detail.request">
+                                                        <i class="fa-regular fa-copy me-1"></i>Kopyala
+                                                    </button>
+                                                </div>
+                                                <pre class="cl-json" [innerHTML]="highlight(detail.request, entry.key + ':req')"></pre>
+                                            </div>
+                                            <div class="cl-pane">
+                                                <div class="cl-pane-head">
+                                                    <span><i class="fa-solid fa-download me-1"></i>{{ detail.responseLabel }}</span>
+                                                    <button type="button" class="btn btn-sm btn-link p-0" (click)="copy(detail.response)" [disabled]="!detail.response">
+                                                        <i class="fa-regular fa-copy me-1"></i>Kopyala
+                                                    </button>
+                                                </div>
+                                                <pre class="cl-json" [innerHTML]="highlight(detail.response, entry.key + ':res')"></pre>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </li>
+                } @empty {
+                    <li class="cl-empty">
+                        <i class="fa-solid fa-inbox"></i>
+                        <p>{{ entries.length ? 'Filtreye uyan log yok.' : 'Bu sohbete ait log kaydı yok.' }}</p>
+                    </li>
+                }
+            </ol>
+        }
+    }
+</section>

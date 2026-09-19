@@ -5,8 +5,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ChatHistoryEntry, SidebarComponent } from '../sidebar/sidebar';
 import { OrderBlockComponent } from '../order-block/order-block';
+import { ConversationLogsPage } from '../../conversation-logs/conversation-logs';
 import { ConversationsService } from '@/app/core/services/conversations.service';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
+import { AiRequestLogsService } from '@/app/core/services/ai-request-logs.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { ExtensionManagementService } from '@/app/core/services/extension-management.service';
 import { AiAssistant } from '@/app/core/models/ai-assistant/ai-assistant.models';
@@ -124,6 +126,13 @@ const EXTENSION_CONTENT: Record<string, ExtensionContent> = {
 const SUPPORTED_BLOCK_TYPES = new Set<string>(['text', 'table', 'image', 'imageGallery', 'order']);
 const IMAGE_COLUMN_HINTS = ['image', 'foto', 'gorsel', 'photo', 'picture'];
 const MENTION_TOKEN_PATTERN = /(^|\s)(@[^\s@]+)/g;
+const CONVERSATION_SELECTION_KEY = 'nac.conversationSelections';
+const CONVERSATION_SELECTION_LIMIT = 200;
+
+interface StoredConversationSelection {
+    assistantId: string;
+    mention: MentionChip | null;
+}
 // Backend .NET Guid parse ile uyumlu: canonical 8-4-4-4-12 hex format.
 const GUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
@@ -141,7 +150,7 @@ const REPLY_WAIT_WINDOW_MS = 3 * 60_000;
 @Component({
     selector: 'app-nebim-ai-chat',
     standalone: true,
-    imports: [NgTemplateOutlet, FormsModule, SidebarComponent, OrderBlockComponent],
+    imports: [NgTemplateOutlet, FormsModule, SidebarComponent, OrderBlockComponent, ConversationLogsPage],
     templateUrl: './nebim-ai-chat.html',
     styleUrl: './nebim-ai-chat.scss'
 })
@@ -156,6 +165,11 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     isLoadingThread = false;
     errorMessage = '';
     soundEnabled = true;
+    /** Sağdan açılan sohbet logları paneli */
+    showLogsPanel = false;
+    /** Log paneli tüm ekranı kaplıyor mu */
+    logsFullscreen = false;
+    @ViewChild(ConversationLogsPage) logsPanel?: ConversationLogsPage;
     showScrollDown = false;
     composerFlash = false;
 
@@ -214,6 +228,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     constructor(
         private conversationsService: ConversationsService,
         private aiProvidersService: AiProvidersService,
+        private aiRequestLogsService: AiRequestLogsService,
         private authState: AuthStateService,
         private extensionManagementService: ExtensionManagementService,
         private router: Router,
@@ -267,6 +282,19 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     get selectedAssistantLabel(): string {
         const assistant = this.assistants.find((item) => item.id === this.selectedAssistantId) ?? this.assistants[0];
         return assistant?.name?.trim() || 'Asistan seç';
+    }
+
+    /**
+     * Sohbet ilk kullanici mesajiyla basladiktan sonra asistan ve eklenti degistirilemez;
+     * sohbet bitene kadar baslangicta secilenlerle devam edilir.
+     */
+    get isSelectionLocked(): boolean {
+        return this.messages.some((message) => message.role === 'user');
+    }
+
+    /** Etiket yalnizca sohbetin ilk mesajindan belirlenebildiyse kilitlenir. */
+    get isMentionLocked(): boolean {
+        return this.isSelectionLocked && !!this.selectedMention;
     }
 
     get composerPlaceholder(): string {
@@ -424,7 +452,11 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
 
     @HostListener('document:keydown.escape')
     onEscape(): void {
-        if (this.showReactionModal) {
+        if (this.showLogsPanel) {
+            // Tam ekrandaysa önce tam ekrandan çık, sonra paneli kapat
+            if (this.logsPanel?.fullscreen) this.logsPanel.exitFullscreen();
+            else this.closeLogsPanel();
+        } else if (this.showReactionModal) {
             this.closeReactionModal();
         } else if (this.extensionMenuOpen || this.assistantMenuOpen) {
             this.closeExtensionMenu();
@@ -434,14 +466,29 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         }
     }
 
+    // ── Sohbet logları paneli ────────────────────────────────────────
+
+    toggleLogsPanel(): void {
+        if (!this.activeConversationId) return;
+        this.showLogsPanel = !this.showLogsPanel;
+        if (!this.showLogsPanel) this.logsFullscreen = false;
+    }
+
+    closeLogsPanel(): void {
+        this.showLogsPanel = false;
+        this.logsFullscreen = false;
+    }
+
     // ── Asistan & eklenti seçimi ─────────────────────────────────────
 
     toggleAssistantMenu(): void {
+        if (this.isSelectionLocked) return;
         this.assistantMenuOpen = !this.assistantMenuOpen;
         if (this.assistantMenuOpen) this.closeExtensionMenu();
     }
 
     selectAssistant(assistantId: string): void {
+        if (this.isSelectionLocked) return;
         this.selectedAssistantId = assistantId;
         this.assistantMenuOpen = false;
     }
@@ -458,6 +505,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     }
 
     onExtensionTriggerClick(): void {
+        if (this.isMentionLocked) return;
         const shortcuts = this.enabledExtensionShortcuts;
         if (!shortcuts.length) return;
 
@@ -475,6 +523,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
 
     /** Menuden, bos ekran kartlarindan veya @ otomatik tamamlamasindan etiket secer. */
     selectExtensionShortcut(shortcut: ExtensionShortcut): void {
+        if (this.isMentionLocked) return;
         const openedByMention = this.isMentionAutocomplete;
         this.closeExtensionMenu();
         this.selectedMention = this.toChip(shortcut);
@@ -493,6 +542,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     }
 
     removeSelectedMention(): void {
+        if (this.isMentionLocked) return;
         this.selectedMention = null;
     }
 
@@ -653,7 +703,8 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
      * Imlecin hemen onundeki etiket hala yaziliyor olabilecegi icin (@stok → @stokrapor) gonderime kadar beklenir.
      */
     private captureTypedMention(includeTokenAtCaret = false): void {
-        if (!this.input.includes('@')) return;
+        // Kilitli sohbette yazilan @etiket metnin parcasi olarak kalir, eklentiyi degistirmez.
+        if (this.isMentionLocked || !this.input.includes('@')) return;
 
         const caret = this.textArea?.nativeElement.selectionStart ?? this.input.length;
         const result = this.removeMentionTokens(this.input, caret, (token, tokenEnd) =>
@@ -695,6 +746,10 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     }
 
     private updateMentionAutocomplete(): void {
+        if (this.isMentionLocked) {
+            if (this.extensionMenuOpenedByMention) this.closeExtensionMenu();
+            return;
+        }
         const caret = this.textArea?.nativeElement.selectionStart ?? this.input.length;
         const match = this.input.slice(0, caret).match(/(^|\s)@([^\s@]*)$/);
         this.mentionQuery = match ? this.toLookupKey(match[2]) : null;
@@ -768,6 +823,11 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
             if (!GUID_PATTERN.test(conversationId) || conversationId === EMPTY_GUID) {
                 this.errorMessage = 'Geçersiz konuşma kimliği.';
                 return;
+            }
+
+            // Ilk mesajda secilen asistan + eklenti bu sohbet icin sabitlenir.
+            if (!this.isSelectionLocked) {
+                this.rememberConversationSelection(conversationId, this.selectedAssistantId, mention);
             }
 
             const optimisticId = this.uid();
@@ -1014,6 +1074,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
             if (this.activeConversationId !== conversationId) return;
 
             this.applyServerMessages(response.data ? this.mapConversationMessages(response.data) : []);
+            void this.restoreConversationSelection(conversationId);
 
             // Sayfa yenileme gibi durumlarda thread ilk etapta sadece kullanici mesaji
             // donebilir; AI mesaji gelene kadar kisa sureli takip et. Eski ve yanitsiz
@@ -1050,6 +1111,74 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
         this.activeConversationId = null;
         this.input = '';
         setTimeout(() => this.autoResize());
+    }
+
+    // ── Sohbet başına sabit asistan / eklenti ────────────────────────
+
+    /**
+     * Mevcut bir sohbet acildiginda baslangicta secilen eklenti ve asistani geri yukler.
+     * Eklenti ilk kullanici mesajindaki etiketten, asistan once yerel kayittan,
+     * yoksa sohbetin AI istek loglarindaki assistantId'den bulunur.
+     */
+    private async restoreConversationSelection(conversationId: string): Promise<void> {
+        if (!this.isSelectionLocked) return;
+
+        const firstMention = this.messages.find((message) => message.role === 'user' && message.mentions.length)?.mentions[0];
+        const stored = this.readConversationSelection(conversationId);
+        const mention = firstMention ?? stored?.mention ?? null;
+        if (mention) {
+            const shortcut = this.findShortcut(mention.mention);
+            this.selectedMention = shortcut ? this.toChip(shortcut) : { ...mention };
+        }
+        this.closeExtensionMenu();
+        this.assistantMenuOpen = false;
+
+        if (stored?.assistantId && this.assistants.some((item) => item.id === stored.assistantId)) {
+            this.selectedAssistantId = stored.assistantId;
+            return;
+        }
+
+        try {
+            const response = await this.aiRequestLogsService.getByConversation(conversationId);
+            if (this.activeConversationId !== conversationId) return;
+            const firstWithAssistant = this.extractArray<{ assistantId?: string; createdDate: string }>(response.data)
+                .filter((log) => !!log.assistantId)
+                .sort((a, b) => this.toEpoch(a.createdDate) - this.toEpoch(b.createdDate))[0];
+            if (firstWithAssistant?.assistantId && this.assistants.some((item) => item.id === firstWithAssistant.assistantId)) {
+                this.selectedAssistantId = firstWithAssistant.assistantId;
+                this.rememberConversationSelection(conversationId, firstWithAssistant.assistantId, this.selectedMention);
+            }
+        } catch (err) {
+            console.warn('[NebimAiChat] Sohbetin asistanı bulunamadı:', err);
+        }
+    }
+
+    private rememberConversationSelection(conversationId: string, assistantId: string, mention: MentionChip | null): void {
+        try {
+            const all = this.readAllConversationSelections();
+            delete all[conversationId];
+            all[conversationId] = { assistantId, mention: mention ? { ...mention } : null };
+            // En eski kayitlar atilarak depolama sinirli tutulur
+            const keys = Object.keys(all);
+            for (const key of keys.slice(0, Math.max(0, keys.length - CONVERSATION_SELECTION_LIMIT))) delete all[key];
+            localStorage.setItem(CONVERSATION_SELECTION_KEY, JSON.stringify(all));
+        } catch {
+            // localStorage kullanilamiyorsa AI loglarindan geri yuklenir
+        }
+    }
+
+    private readConversationSelection(conversationId: string): StoredConversationSelection | null {
+        return this.readAllConversationSelections()[conversationId] ?? null;
+    }
+
+    private readAllConversationSelections(): Record<string, StoredConversationSelection> {
+        try {
+            const raw = localStorage.getItem(CONVERSATION_SELECTION_KEY);
+            const parsed = raw ? JSON.parse(raw) : {};
+            return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch {
+            return {};
+        }
     }
 
     // ── Veri yükleme ─────────────────────────────────────────────────

@@ -1661,3 +1661,67 @@ a:focus-visible,
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ── Sohbet logları paneli ─────────────────────────────── */
+.nac-icon-btn.is-active {
+    color: var(--nac-accent-strong);
+    border-color: var(--nac-accent);
+    background: var(--nac-accent-soft);
+}
+
+.nac-icon-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.nac-logs-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    z-index: 1060;
+    animation: nacLogsFade 0.2s ease both;
+}
+
+.nac-logs-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(620px, 100vw);
+    background: #f7f7f9;
+    box-shadow: -12px 0 32px rgba(15, 23, 42, 0.18);
+    z-index: 1061;
+    overflow-y: auto;
+    transition: width 0.3s var(--nac-ease), box-shadow 0.3s ease;
+    animation: nacLogsSlide 0.28s var(--nac-ease) both;
+}
+
+.nac-logs-drawer.is-fullscreen {
+    width: 100vw;
+    box-shadow: none;
+}
+
+@keyframes nacLogsFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes nacLogsSlide {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+/* ── Sohbet başladıktan sonra sabit asistan / eklenti ─── */
+.nac-assistant-trigger.is-locked,
+.nac-mention-chip.is-locked {
+    cursor: default;
+}
+
+.nac-assistant-trigger.is-locked {
+    opacity: 0.85;
+}
+
+.nac-lock-icon {
+    font-size: 10px;
+    color: var(--nac-muted);
+}

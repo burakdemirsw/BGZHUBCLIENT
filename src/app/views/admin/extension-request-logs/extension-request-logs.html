@@ -1,0 +1,219 @@
+<div class="row">
+    <div class="col-12">
+        <!-- Kullanım özeti -->
+        @if (usage) {
+            <div class="row g-3 mb-3">
+                <div class="col-6 col-lg-3">
+                    <div class="card mb-0 h-100"><div class="card-body py-3">
+                        <div class="text-muted small">Toplam İstek</div>
+                        <div class="fw-bold fs-5">{{ usage.totalRequests | number }}</div>
+                    </div></div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="card mb-0 h-100"><div class="card-body py-3">
+                        <div class="text-muted small">Başarı Oranı</div>
+                        <div class="fw-bold fs-5 text-success">{{ formatPercent(usage.successRate) }}</div>
+                    </div></div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="card mb-0 h-100"><div class="card-body py-3">
+                        <div class="text-muted small">Hatalı İstek</div>
+                        <div class="fw-bold fs-5 text-danger">{{ usage.failedRequests | number }}</div>
+                    </div></div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="card mb-0 h-100"><div class="card-body py-3">
+                        <div class="text-muted small">Ortalama Süre</div>
+                        <div class="fw-bold fs-5">{{ formatDuration(usage.averageDurationMs) }}</div>
+                    </div></div>
+                </div>
+            </div>
+        }
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-puzzle-piece me-2"></i>Extension İstek Logları</h4>
+                <button class="btn btn-light btn-sm" (click)="loadUsage(); loadLogs()" [disabled]="loading" title="Yenile">
+                    <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+                </button>
+            </div>
+            <div class="card-body page-surface">
+                <div class="row g-2 mb-3">
+                    <div class="col-md-5">
+                        <input type="text" class="form-control form-control-sm" placeholder="Tool, sağlayıcı veya hata ara..."
+                            [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select form-select-sm" [(ngModel)]="providerFilter" (ngModelChange)="onSelectFilterChange()">
+                            <option value="">Tüm Sağlayıcılar</option>
+                            @for (code of providerOptions; track code) {
+                                <option [value]="code">{{ code }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select form-select-sm" [(ngModel)]="successFilter" (ngModelChange)="onSelectFilterChange()">
+                            <option value="all">Tüm Durumlar</option>
+                            <option value="success">Başarılı</option>
+                            <option value="failed">Hatalı</option>
+                        </select>
+                    </div>
+                </div>
+
+                @if (loading) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>İşlemler</th>
+                                    <th>Tarih</th>
+                                    <th>Sağlayıcı</th>
+                                    <th>Tool</th>
+                                    <th class="text-center">Durum</th>
+                                    <th class="text-end">Kayıt</th>
+                                    <th class="text-end">Süre</th>
+                                    <th>Hata</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of pagedItems; track item.id) {
+                                    <tr>
+                                        <td class="text-nowrap">
+                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openDetail(item)" title="Detay">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            @if (item.conversationId) {
+                                                <button class="btn btn-soft-info btn-sm me-1" (click)="openConversationLogs(item)" title="Sohbet logları">
+                                                    <i class="fa-solid fa-wave-square"></i>
+                                                </button>
+                                            }
+                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteLog(item)" title="Sil">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                        <td class="small text-nowrap">{{ item.createdDate | date:'dd.MM.yyyy HH:mm:ss' }}</td>
+                                        <td><span class="badge bg-info-subtle text-info">{{ item.providerCode || '—' }}</span></td>
+                                        <td><code>{{ item.toolName || '—' }}</code></td>
+                                        <td class="text-center">
+                                            @if (item.isSuccess) {
+                                                <span class="badge bg-success-subtle text-success"><i class="fa-solid fa-check me-1"></i>Başarılı</span>
+                                            } @else {
+                                                <span class="badge bg-danger-subtle text-danger"><i class="fa-solid fa-xmark me-1"></i>Hatalı</span>
+                                            }
+                                        </td>
+                                        <td class="text-end">{{ item.rowCount ?? '—' }}</td>
+                                        <td class="text-end">{{ formatDuration(item.durationMs) }}</td>
+                                        <td>
+                                            @if (item.errorMessage) {
+                                                <span class="text-danger error-cell" [title]="item.errorMessage">{{ item.errorMessage }}</span>
+                                            } @else {
+                                                <span class="text-muted">—</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">
+                                            <i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>
+                                            Log kaydı bulunamadı.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="small text-muted">Toplam: {{ totalCount | number }} kayıt</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of visiblePages; track $index) {
+                                    @if (page === -1) {
+                                        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+                                    } @else {
+                                        <li class="page-item" [class.active]="page === currentPage">
+                                            <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                        </li>
+                                    }
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (showModal && selectedLog) {
+    <div class="modal fade show d-block log-modal-backdrop" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-puzzle-piece me-2"></i>{{ selectedLog.providerCode || 'Extension' }}
+                        <code class="ms-1">{{ selectedLog.toolName }}</code>
+                    </h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex flex-wrap gap-2 mb-3 small">
+                        @if (selectedLog.isSuccess) {
+                            <span class="badge bg-success-subtle text-success">Başarılı</span>
+                        } @else {
+                            <span class="badge bg-danger-subtle text-danger">Hatalı</span>
+                        }
+                        <span class="badge bg-light text-dark"><i class="fa-regular fa-calendar me-1"></i>{{ selectedLog.createdDate | date:'dd.MM.yyyy HH:mm:ss' }}</span>
+                        <span class="badge bg-light text-dark"><i class="fa-regular fa-clock me-1"></i>{{ formatDuration(selectedLog.durationMs) }}</span>
+                        <span class="badge bg-light text-dark"><i class="fa-solid fa-list me-1"></i>{{ selectedLog.rowCount ?? '—' }} kayıt</span>
+                    </div>
+
+                    @if (selectedLog.errorMessage) {
+                        <div class="alert alert-danger py-2 small">{{ selectedLog.errorMessage }}</div>
+                    }
+
+                    @if (detailLoading) {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                        </div>
+                    } @else {
+                        <div class="row g-3">
+                            <div class="col-lg-6">
+                                <div class="log-pane-title">
+                                    <span><i class="fa-solid fa-upload me-1"></i>Tool Argümanları</span>
+                                    <button type="button" class="btn btn-sm btn-link p-0" (click)="copy(selectedLog.requestJson)" [disabled]="!selectedLog.requestJson">
+                                        <i class="fa-regular fa-copy me-1"></i>Kopyala
+                                    </button>
+                                </div>
+                                <pre class="log-json-block">{{ formatJson(selectedLog.requestJson) || '—' }}</pre>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="log-pane-title">
+                                    <span><i class="fa-solid fa-download me-1"></i>Extension Yanıtı</span>
+                                    <button type="button" class="btn btn-sm btn-link p-0" (click)="copy(selectedLog.responseJson)" [disabled]="!selectedLog.responseJson">
+                                        <i class="fa-regular fa-copy me-1"></i>Kopyala
+                                    </button>
+                                </div>
+                                <pre class="log-json-block">{{ formatJson(selectedLog.responseJson) || '—' }}</pre>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -13,6 +13,8 @@ import { AiSettingsPage } from './ai-assistants/ai-settings/ai-settings';
 import { AiKnowledgePage } from './ai-knowledge/ai-knowledge';
 import { AiKnowledgeTypesPage } from './ai-knowledge-types/ai-knowledge-types';
 import { AiRequestLogsPage } from './ai-request-logs/ai-request-logs';
+import { ExtensionRequestLogsPage } from './extension-request-logs/extension-request-logs';
+import { ConversationLogsPage } from './conversation-logs/conversation-logs';
 import { AiToolGapsPage } from './ai-tool-gaps/ai-tool-gaps';
 import { AwsS3SettingsPage } from './aws-s3-settings/aws-s3-settings';
 import { CloudinarySettingsPage } from './cloudinary-settings/cloudinary-settings';
@@ -328,6 +330,18 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/ai-request-logs',
         component: AiRequestLogsPage,
         data: { title: 'AI İstek Logları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/extension-request-logs',
+        component: ExtensionRequestLogsPage,
+        data: { title: 'Extension İstek Logları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/conversation-logs',
+        component: ConversationLogsPage,
+        data: { title: 'Sohbet Logları' },
         canActivate: [AuthGuard],
     },
     {

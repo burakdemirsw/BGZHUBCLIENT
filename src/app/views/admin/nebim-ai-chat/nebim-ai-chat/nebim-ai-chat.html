@@ -32,6 +32,18 @@
             <div class="nac-header-side">
                 <button
                     type="button"
+                    class="nac-icon-btn"
+                    [class.is-active]="showLogsPanel"
+                    (click)="toggleLogsPanel()"
+                    [disabled]="!activeConversationId"
+                    [title]="activeConversationId ? 'Bu sohbetin loglarını göster' : 'Loglar için bir sohbet seçin'"
+                    aria-label="Sohbet logları"
+                    [attr.aria-expanded]="showLogsPanel">
+                    <i class="fa-solid fa-wave-square"></i>
+                    <span class="nac-icon-btn-label">Loglar</span>
+                </button>
+                <button
+                    type="button"
                     class="nac-icon-btn nac-mobile-only"
                     (click)="newChat()"
                     title="Yeni sohbet"
@@ -359,6 +371,7 @@
                     (input)="onComposerInput()"></textarea>
 
                 <div class="nac-composer-toolbar">
+                    @if (!isMentionLocked) {
                     <div class="nac-extension-picker">
                         <button
                             type="button"
@@ -412,18 +425,30 @@
                             </div>
                         }
                     </div>
+                    }
 
                     @if (selectedMention; as chip) {
-                        <span class="nac-mention-chip is-removable" [title]="chip.name">
+                        <span class="nac-mention-chip" [class.is-removable]="!isMentionLocked" [class.is-locked]="isMentionLocked"
+                            [title]="isMentionLocked ? chip.name + ' — bu sohbetin eklentisi değiştirilemez' : chip.name">
                             <ng-container [ngTemplateOutlet]="extIcon" [ngTemplateOutletContext]="{ $implicit: chip }" />
                             <span class="nac-mention-chip-text">{{ chip.mention }}</span>
-                            <button type="button" class="nac-mention-chip-remove" (click)="removeSelectedMention()" [attr.aria-label]="chip.mention + ' etiketini kaldır'">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
+                            @if (isMentionLocked) {
+                                <i class="fa-solid fa-lock nac-lock-icon" aria-hidden="true"></i>
+                            } @else {
+                                <button type="button" class="nac-mention-chip-remove" (click)="removeSelectedMention()" [attr.aria-label]="chip.mention + ' etiketini kaldır'">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            }
                         </span>
                     }
 
-                    @if (assistants.length) {
+                    @if (assistants.length && isSelectionLocked) {
+                        <span class="nac-tool-btn nac-assistant-trigger is-locked" title="Bu sohbetin asistanı değiştirilemez">
+                            <i class="fa-solid fa-robot" aria-hidden="true"></i>
+                            <span class="nac-assistant-label">{{ selectedAssistantLabel }}</span>
+                            <i class="fa-solid fa-lock nac-lock-icon" aria-hidden="true"></i>
+                        </span>
+                    } @else if (assistants.length) {
                         <div class="nac-assistant-picker">
                             <button
                                 type="button"
@@ -499,6 +524,17 @@
         </footer>
     </div>
 </div>
+
+@if (showLogsPanel && activeConversationId) {
+    <div class="nac-logs-backdrop" (click)="closeLogsPanel()" aria-hidden="true"></div>
+    <aside class="nac-logs-drawer" [class.is-fullscreen]="logsFullscreen" role="dialog" aria-label="Sohbet logları">
+        <app-conversation-logs
+            [conversationId]="activeConversationId"
+            [showClose]="true"
+            (fullscreenChange)="logsFullscreen = $event"
+            (closed)="closeLogsPanel()" />
+    </aside>
+}
 
 @if (showReactionModal) {
     <div

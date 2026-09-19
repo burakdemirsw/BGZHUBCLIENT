@@ -10,3 +10,27 @@
     word-break: break-all;
     font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 }
+
+.log-modal-backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.log-detail-dialog:not(.modal-fullscreen) {
+    max-width: min(1600px, 95vw);
+}
+
+.log-body-panes .log-json-block {
+    max-height: 60vh;
+}
+
+.modal-fullscreen .log-body-panes .log-json-block {
+    max-height: calc(100vh - 220px);
+}
+
+.log-pane-title {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}

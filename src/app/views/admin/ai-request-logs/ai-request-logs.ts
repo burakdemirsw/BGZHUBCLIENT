@@ -12,6 +12,7 @@ import {
     AiCostReportResponse,
 } from '@/app/core/models/ai-request-log/ai-request-log.models';
 import { PagedResult } from '@/app/core/models/pagination.model';
+import { ClipboardService } from '@/app/core/services/clipboard.service';
 
 @Component({
     selector: 'app-ai-request-logs-page',
@@ -31,6 +32,8 @@ export class AiRequestLogsPage implements OnInit {
     pageSize = 10;
     totalPages = 1;
     totalPagesArray: number[] = [];
+    /** Gösterilecek sayfa numaraları; -1 = '…' ayracı */
+    visiblePages: number[] = [];
 
     // Server-side paging
     serverTotalCount = 0;
@@ -47,6 +50,9 @@ export class AiRequestLogsPage implements OnInit {
 
     // Aktif tab (request/response)
     activeTab: 'request' | 'response' = 'request';
+    detailFullscreen = false;
+    copiedBody: 'request' | 'response' | null = null;
+    private copiedTimer: ReturnType<typeof setTimeout> | null = null;
 
     // ── Aktif sayfa sekmesi ──
     activeView: 'logs' | 'reports' = 'logs';
@@ -63,6 +69,7 @@ export class AiRequestLogsPage implements OnInit {
     constructor(
         private aiRequestLogsService: AiRequestLogsService,
         private authState: AuthStateService,
+        private clipboardService: ClipboardService,
     ) {}
 
     ngOnInit(): void {
@@ -149,6 +156,24 @@ export class AiRequestLogsPage implements OnInit {
         this.selectedItem = null;
     }
 
+    toggleDetailFullscreen(): void {
+        this.detailFullscreen = !this.detailFullscreen;
+    }
+
+    async copyBody(type: 'request' | 'response'): Promise<void> {
+        if (!this.selectedItem) return;
+        const raw = type === 'request' ? this.selectedItem.requestBody : this.selectedItem.responseBody;
+        if (!raw) return;
+        try {
+            await this.clipboardService.copyText(this.formatJson(raw));
+            this.copiedBody = type;
+            if (this.copiedTimer) clearTimeout(this.copiedTimer);
+            this.copiedTimer = setTimeout(() => (this.copiedBody = null), 1500);
+        } catch (err) {
+            console.error('Kopyalama hatası:', err);
+        }
+    }
+
     async deleteLog(item: AiRequestLogSummaryResponse): Promise<void> {
         if (confirm('Bu log kaydını silmek istediğinize emin misiniz?')) {
             try {
@@ -191,6 +216,22 @@ export class AiRequestLogsPage implements OnInit {
         }
 
         this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        this.visiblePages = this.buildVisiblePages(this.currentPage, this.totalPages);
+    }
+
+    /** 1 … 4 5 [6] 7 8 … 120 şeklinde kısa sayfa listesi üretir. */
+    private buildVisiblePages(current: number, total: number, radius = 2): number[] {
+        if (total <= radius * 2 + 5) {
+            return Array.from({ length: total }, (_, i) => i + 1);
+        }
+        const start = Math.max(2, current - radius);
+        const end = Math.min(total - 1, current + radius);
+        const pages: number[] = [1];
+        if (start > 2) pages.push(-1);
+        for (let p = start; p <= end; p++) pages.push(p);
+        if (end < total - 1) pages.push(-1);
+        pages.push(total);
+        return pages;
     }
 
     toggleFailedFilter(): void {
