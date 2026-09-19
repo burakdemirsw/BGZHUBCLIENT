@@ -36,6 +36,7 @@ export class AiAssistantsPage implements OnInit {
     editMode = false;
     selectedAssistant: AiAssistant | null = null;
     copyingId: string | null = null;
+    togglingId: string | null = null;
 
     // Server-side pagination
     filterText = '';
@@ -423,6 +424,35 @@ export class AiAssistantsPage implements OnInit {
             await fn();
         } catch (err: any) {
             if (!this.isNoRouteError(err)) throw err;
+        }
+    }
+
+    async toggleActive(assistant: AiAssistant): Promise<void> {
+        if (this.togglingId) return;
+        const userId = this.userMenuService.getUserIdFromToken();
+        if (!userId) {
+            alert('Kullanıcı bilgisi alınamadı. Lütfen tekrar giriş yapın.');
+            return;
+        }
+        const newBlocked = !assistant.isBlocked;
+        this.togglingId = assistant.id;
+        try {
+            const req: UpdateAiAssistantRequest = {
+                userId,
+                companyId: this.authStateService.profile?.companyId || '',
+                name: assistant.name,
+                aiProviderId: assistant.aiProviderId,
+                aiModelId: assistant.aiModelId,
+                order: Number(assistant.order ?? 0),
+                isBlocked: newBlocked,
+            };
+            await this.aiService.updateAssistant(assistant.id, req);
+            assistant.isBlocked = newBlocked;
+        } catch (err: any) {
+            console.error('Toggle error:', err);
+            alert('Durum güncellenemedi: ' + (err?.error?.message || err?.error?.title || err?.message || 'Bilinmeyen hata'));
+        } finally {
+            this.togglingId = null;
         }
     }
 

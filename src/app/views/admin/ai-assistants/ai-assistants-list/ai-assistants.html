@@ -57,11 +57,17 @@
                                         <td>{{ item.modelName || getModelName(item.aiModelId) }}</td>
                                         <td>{{ item.order }}</td>
                                         <td class="text-center">
-                                            @if (item.isBlocked) {
-                                                <span class="badge bg-danger-subtle text-danger">Pasif</span>
-                                            } @else {
-                                                <span class="badge bg-success-subtle text-success">Aktif</span>
-                                            }
+                                            <div class="form-check form-switch mb-0 d-inline-flex align-items-center gap-2">
+                                                <input class="form-check-input" type="checkbox" role="switch"
+                                                    [checked]="!item.isBlocked"
+                                                    [disabled]="togglingId === item.id"
+                                                    (click)="$event.preventDefault(); $event.stopPropagation(); toggleActive(item)">
+                                                @if (!item.isBlocked) {
+                                                    <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                } @else {
+                                                    <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                }
+                                            </div>
                                         </td>
                                     </tr>
                                 } @empty {

@@ -34,6 +34,7 @@ export class AiModelsPage implements OnInit {
     showModal = false;
     editMode = false;
     selectedModel: AiModel | null = null;
+    togglingId: string | null = null;
 
     filterText = '';
     filteredModels: AiModel[] = [];
@@ -208,6 +209,32 @@ export class AiModelsPage implements OnInit {
     onDeleteClick(event: Event, model: AiModel): void {
         event.stopPropagation();
         this.deleteModel(model);
+    }
+
+    async toggleActive(model: AiModel): Promise<void> {
+        if (this.togglingId) return;
+        const newBlocked = !model.isBlocked;
+        this.togglingId = model.id;
+        try {
+            const req: UpdateAiModelRequest = {
+                aiProviderId: model.aiProviderId,
+                name: model.name,
+                modelCode: model.modelCode,
+                priorityOrder: Number(model.priorityOrder ?? 0),
+                inputTokenLimit: model.inputTokenLimit ?? 0,
+                outputTokenLimit: model.outputTokenLimit ?? 0,
+                inputPrice: model.inputPrice ?? 0,
+                outputPrice: model.outputPrice ?? 0,
+                isBlocked: newBlocked,
+            };
+            await this.aiService.updateModel(model.id, req);
+            model.isBlocked = newBlocked;
+        } catch (err: any) {
+            console.error('Toggle error:', err);
+            alert('Durum güncellenemedi: ' + (err?.error?.message || err?.error?.title || err?.message || 'Bilinmeyen hata'));
+        } finally {
+            this.togglingId = null;
+        }
     }
 
     closeModal(): void {

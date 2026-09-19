@@ -160,8 +160,22 @@ export class MenusPage implements OnInit {
             this.showModal = false;
             await this.loadMenus();
             await this.userMenuService.loadUserMenus();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Save error:', err);
+            // Backend CreatedAtAction route hatası — kayıt oluşmuş olabilir
+            if (err?.status === 400 && JSON.stringify(err.error)?.includes('No route matches')) {
+                this.showModal = false;
+                await this.loadMenus();
+                await this.userMenuService.loadUserMenus();
+                return;
+            }
+            const validationErrors = err?.error?.errors
+                ? Object.values(err.error.errors as Record<string, string[]>).flat().join('\n')
+                : '';
+            const msg = err?.status === 0
+                ? `Sunucuya bağlanılamadı.\nURL: ${err.url}`
+                : `Hata ${err?.status}: ${validationErrors || err?.error?.message || err?.error?.title || JSON.stringify(err?.error)}`;
+            alert('Menü kaydedilemedi:\n' + msg);
         }
     }
 

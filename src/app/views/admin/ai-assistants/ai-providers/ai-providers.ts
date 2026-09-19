@@ -17,6 +17,7 @@ export class AiProvidersPage implements OnInit {
     showModal = false;
     editMode = false;
     selectedProvider: AiProvider | null = null;
+    togglingId: string | null = null;
 
     // Datatable
     filterText = '';
@@ -147,6 +148,26 @@ export class AiProvidersPage implements OnInit {
             } catch (err) {
                 console.error('Delete error:', err);
             }
+        }
+    }
+
+    async toggleActive(provider: AiProvider): Promise<void> {
+        if (this.togglingId) return;
+        const newBlocked = !provider.isBlocked;
+        this.togglingId = provider.id;
+        try {
+            const req: UpdateAiProviderRequest = {
+                firmDescription: provider.firmDescription,
+                photoUrl: provider.photoUrl,
+                isBlocked: newBlocked,
+            };
+            await this.aiService.updateProvider(provider.id, req);
+            provider.isBlocked = newBlocked;
+        } catch (err: any) {
+            console.error('Toggle error:', err);
+            alert('Durum güncellenemedi:\n' + (err?.error?.message || err?.error?.title || err?.message || 'Bilinmeyen hata'));
+        } finally {
+            this.togglingId = null;
         }
     }
 

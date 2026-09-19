@@ -59,6 +59,7 @@ export class AiToolGapsPage implements OnInit {
     showReasonModal = false;
     reasonSaving = false;
     editingReason: AiToolGapReasonResponse | null = null;
+    togglingReasonId: string | null = null;
     reasonForm: UpdateAiToolGapReasonRequest = { name: '', description: '', isActive: true, sortOrder: 0 };
 
     private searchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -274,6 +275,26 @@ export class AiToolGapsPage implements OnInit {
             alert('Neden güncellenemedi.');
         } finally {
             this.reasonSaving = false;
+        }
+    }
+
+    async toggleReasonActive(reason: AiToolGapReasonResponse): Promise<void> {
+        if (this.togglingReasonId) return;
+        const newActive = !reason.isActive;
+        this.togglingReasonId = reason.id;
+        try {
+            await this.aiToolGapsService.updateReason(reason.id, {
+                name: reason.name ?? '',
+                description: reason.description ?? null,
+                isActive: newActive,
+                sortOrder: Number(reason.sortOrder) || 0,
+            });
+            reason.isActive = newActive;
+        } catch (err: any) {
+            console.error('Tool gap nedeni durum hatası:', err);
+            alert('Durum güncellenemedi: ' + (err?.error?.message || err?.error?.title || err?.message || 'Bilinmeyen hata'));
+        } finally {
+            this.togglingReasonId = null;
         }
     }
 

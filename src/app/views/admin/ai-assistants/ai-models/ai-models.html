@@ -45,11 +45,17 @@
                                                     <div class="small text-muted mb-1">{{ model.modelCode }}</div>
                                                     <div class="d-flex gap-2 flex-wrap">
                                                         <span class="badge bg-primary-subtle text-primary">Öncelik: {{ model.priorityOrder }}</span>
-                                                        @if (model.isBlocked) {
-                                                            <span class="badge bg-danger-subtle text-danger">Pasif</span>
-                                                        } @else {
-                                                            <span class="badge bg-success-subtle text-success">Aktif</span>
-                                                        }
+                                                        <div class="form-check form-switch mb-0 d-inline-flex align-items-center gap-2">
+                                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                                [checked]="!model.isBlocked"
+                                                                [disabled]="togglingId === model.id"
+                                                                (click)="$event.preventDefault(); $event.stopPropagation(); toggleActive(model)">
+                                                            @if (!model.isBlocked) {
+                                                                <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                            } @else {
+                                                                <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                            }
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <button type="button" class="btn btn-soft-danger btn-sm align-self-start" (click)="onDeleteClick($event, model)" title="Sil">

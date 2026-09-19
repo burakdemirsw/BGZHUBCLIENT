@@ -36,6 +36,7 @@ export class AiProviderSettingDefinitionsPage implements OnInit {
     showModal = false;
     editMode = false;
     selectedItem: AiProviderSettingDefinition | null = null;
+    togglingId: string | null = null;
 
     selectedProviderId = '';
 
@@ -232,6 +233,31 @@ export class AiProviderSettingDefinitionsPage implements OnInit {
             await this.loadItems();
         } catch (err) {
             console.error('AiProviderSettingDefinitions delete error:', err);
+        }
+    }
+
+    async toggleActive(item: AiProviderSettingDefinition): Promise<void> {
+        if (this.togglingId) return;
+        const newActive = !item.isActive;
+        this.togglingId = item.id;
+        try {
+            const request: UpdateAiProviderSettingDefinitionRequest = {
+                key: item.key,
+                displayName: item.displayName,
+                inputType: item.inputType,
+                isRequired: item.isRequired,
+                placeholder: item.placeholder ?? '',
+                defaultValue: item.defaultValue ?? '',
+                sortOrder: Number(item.sortOrder ?? 0),
+                isActive: newActive,
+            };
+            await this.aiService.updateProviderSettingDefinition(item.id, request);
+            item.isActive = newActive;
+        } catch (err: any) {
+            console.error('Toggle error:', err);
+            alert('Durum güncellenemedi: ' + (err?.error?.message || err?.error?.title || err?.message || 'Bilinmeyen hata'));
+        } finally {
+            this.togglingId = null;
         }
     }
 

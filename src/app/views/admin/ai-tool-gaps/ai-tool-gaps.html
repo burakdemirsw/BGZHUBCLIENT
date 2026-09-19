@@ -55,18 +55,26 @@
                             <table class="table table-centered table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
+                                        <th>İşlemler</th>
                                         <th>Tarih</th>
                                         <th>Neden</th>
                                         <th>Eklenti</th>
                                         <th>Tool</th>
                                         <th>İstek</th>
                                         <th>Durum</th>
-                                        <th class="text-end">İşlemler</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @for (item of pagedItems; track item.id) {
                                         <tr>
+                                            <td class="text-nowrap">
+                                                <button class="btn btn-sm btn-soft-primary me-1" title="Detay" (click)="openDetail(item)">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-soft-danger" title="Sil" (click)="deleteGap(item)">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </td>
                                             <td class="text-nowrap small">{{ item.createdDate | date:'dd.MM.yyyy HH:mm' }}</td>
                                             <td><span class="badge bg-warning-subtle text-warning">{{ item.reasonName || item.reasonCode || '-' }}</span></td>
                                             <td>{{ item.extensionCode || '-' }}</td>
@@ -78,14 +86,6 @@
                                                 } @else {
                                                     <span class="badge bg-danger-subtle text-danger">Açık</span>
                                                 }
-                                            </td>
-                                            <td class="text-end text-nowrap">
-                                                <button class="btn btn-sm btn-soft-primary me-1" title="Detay" (click)="openDetail(item)">
-                                                    <i class="fa-solid fa-eye"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-soft-danger" title="Sil" (click)="deleteGap(item)">
-                                                    <i class="fa-solid fa-trash"></i>
-                                                </button>
                                             </td>
                                         </tr>
                                     } @empty {
@@ -144,32 +144,38 @@
                             <table class="table table-centered table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
+                                        <th>İşlemler</th>
                                         <th>Sıra</th>
                                         <th>Kod</th>
                                         <th>Ad</th>
                                         <th>Açıklama</th>
                                         <th>Durum</th>
-                                        <th class="text-end">İşlemler</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @for (reason of pagedReasons; track reason.id) {
                                         <tr>
+                                            <td class="text-nowrap">
+                                                <button class="btn btn-sm btn-soft-primary" title="Düzenle" (click)="openReasonModal(reason)">
+                                                    <i class="fa-solid fa-pen"></i>
+                                                </button>
+                                            </td>
                                             <td>{{ reason.sortOrder }}</td>
                                             <td><code>{{ reason.code }}</code></td>
                                             <td class="fw-semibold">{{ reason.name }}</td>
                                             <td class="text-muted small">{{ reason.description || '-' }}</td>
                                             <td>
-                                                @if (reason.isActive) {
-                                                    <span class="badge bg-success-subtle text-success">Aktif</span>
-                                                } @else {
-                                                    <span class="badge bg-danger-subtle text-danger">Pasif</span>
-                                                }
-                                            </td>
-                                            <td class="text-end">
-                                                <button class="btn btn-sm btn-soft-primary" title="Düzenle" (click)="openReasonModal(reason)">
-                                                    <i class="fa-solid fa-pen"></i>
-                                                </button>
+                                                <div class="form-check form-switch mb-0 d-inline-flex align-items-center gap-2">
+                                                    <input class="form-check-input" type="checkbox" role="switch"
+                                                        [checked]="reason.isActive"
+                                                        [disabled]="togglingReasonId === reason.id"
+                                                        (click)="$event.preventDefault(); toggleReasonActive(reason)">
+                                                    @if (reason.isActive) {
+                                                        <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                    } @else {
+                                                        <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                    }
+                                                </div>
                                             </td>
                                         </tr>
                                     } @empty {

@@ -20,6 +20,7 @@ export class AiKnowledgeTypesPage implements OnInit {
     showModal = false;
     editMode = false;
     selectedItem: AiKnowledgeTypeResponse | null = null;
+    togglingId: string | null = null;
 
     // Datatable filter & pagination
     filterText = '';
@@ -130,6 +131,25 @@ export class AiKnowledgeTypesPage implements OnInit {
             } catch (err) {
                 console.error('Delete error:', err);
             }
+        }
+    }
+
+    async toggleActive(item: AiKnowledgeTypeResponse): Promise<void> {
+        if (this.togglingId) return;
+        const newBlocked = !item.isBlocked;
+        this.togglingId = item.id;
+        try {
+            const req: UpdateAiKnowledgeTypeRequest = {
+                type: item.type || '',
+                isBlocked: newBlocked,
+            };
+            await this.aiKnowledgeTypesService.update(item.id, req);
+            item.isBlocked = newBlocked;
+        } catch (err: any) {
+            console.error('Toggle error:', err);
+            alert('Durum güncellenemedi: ' + (err?.error?.message || err?.error?.title || err?.message || 'Bilinmeyen hata'));
+        } finally {
+            this.togglingId = null;
         }
     }
 

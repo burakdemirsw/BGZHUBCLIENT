@@ -36,6 +36,7 @@ export class AiModelSettingDefinitionsPage implements OnInit {
     showModal = false;
     editMode = false;
     selectedItem: AiModelSettingDefinition | null = null;
+    togglingId: string | null = null;
 
     selectedModelId = '';
 
@@ -232,6 +233,31 @@ export class AiModelSettingDefinitionsPage implements OnInit {
             await this.loadItems();
         } catch (err) {
             console.error('AiModelSettingDefinitions delete error:', err);
+        }
+    }
+
+    async toggleActive(item: AiModelSettingDefinition): Promise<void> {
+        if (this.togglingId) return;
+        const newActive = !item.isActive;
+        this.togglingId = item.id;
+        try {
+            const request: UpdateAiModelSettingDefinitionRequest = {
+                key: item.key,
+                displayName: item.displayName,
+                inputType: item.inputType,
+                isRequired: item.isRequired,
+                placeholder: item.placeholder ?? '',
+                defaultValue: item.defaultValue ?? '',
+                sortOrder: Number(item.sortOrder ?? 0),
+                isActive: newActive,
+            };
+            await this.aiService.updateModelSettingDefinition(item.id, request);
+            item.isActive = newActive;
+        } catch (err: any) {
+            console.error('Toggle error:', err);
+            alert('Durum güncellenemedi: ' + (err?.error?.message || err?.error?.title || err?.message || 'Bilinmeyen hata'));
+        } finally {
+            this.togglingId = null;
         }
     }
 

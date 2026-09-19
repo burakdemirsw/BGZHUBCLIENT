@@ -36,6 +36,14 @@
 5. Veri yüklendikten sonra mutlaka `this.applyFilterAndPaging()` çağır
 6. HTML'de `@for` döngüsü `pagedItems` üzerinde döner, `filteredItems.length` toplam kayıt gösterir
 
+7. **İşlemler kolonu en solda** — Tabloda `İşlemler` (Düzenle/Sil vb.) ilk kolon olur (`<th>İşlemler</th>` ilk `th`, butonlar `text-nowrap` td içinde). Sağa (`text-end`) koyma.
+8. **Listede Aktif/Pasif switch** — `isBlocked` veya `isActive` alanı olan kayıtlarda Durum kolonu salt badge değil, satırdan doğrudan değiştirilebilen `form-switch` olur:
+   - `togglingId: string | null` ile istek sürerken switch `disabled`
+   - `toggleActive(item)` metodu mevcut kaydın tüm alanlarını koruyarak sadece `isBlocked`/`isActive` değerini tersine çevirip `update` endpoint'ine gönderir, başarılıysa listedeki item'ı yerinde günceller (tüm listeyi yeniden yüklemeye gerek yok)
+   - Hata olursa `alert` ile gösterilir, switch eski durumunda kalır (`(click)="$event.preventDefault(); ..."`)
+   - Switch'in yanında `Aktif` (`bg-success-subtle text-success`) / `Pasif` (`bg-danger-subtle text-danger`) badge'i gösterilir
+   - Kart (grid) tasarımlı sayfalarda switch kartın içine konur ve `$event.stopPropagation()` ile kartın tıklama olayı engellenir
+
 **Eğer datatable yapısı yoksa uyar ve ekle.**
 
 ## Servis Kuralları
