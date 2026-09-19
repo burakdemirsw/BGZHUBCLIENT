@@ -49,7 +49,6 @@
                             <th>AI Asistan</th>
                             <th>Extension</th>
                             <th>Bilgi Tipi</th>
-                            <th>Entegrasyon</th>
                             <th>Özellik</th>
                             <th>Değer</th>
                             <th class="text-center">Tarih</th>
@@ -82,12 +81,6 @@
                                     <div class="entity-chip chip-type">
                                         <i class="fa-solid fa-tag"></i>
                                         <span>{{ getKnowledgeTypeName(item.aiKnowledgeTypeId) }}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="entity-chip chip-integration">
-                                        <i class="fa-solid fa-plug"></i>
-                                        <span>{{ item.integrationDescription || '—' }}</span>
                                     </div>
                                 </td>
                                 <td>
@@ -127,7 +120,7 @@
                             </tr>
                         } @empty {
                             <tr>
-                                <td colspan="9">
+                                <td colspan="8">
                                     <div class="empty-state">
                                         <i class="fa-solid fa-inbox"></i>
                                         <p>Bilgi kaydı bulunamadı</p>
@@ -226,19 +219,6 @@
                                 }
                             </select>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label-modern">
-                            <i class="fa-solid fa-plug me-1 text-warning"></i>Entegrasyon Kullanıcısı
-                        </label>
-                        <select class="form-select"
-                                [(ngModel)]="form.integrationUserId"
-                                name="integrationUserId">
-                            <option value="">Entegrasyon kullanıcısı seçiniz (opsiyonel)...</option>
-                            @for (iu of integrationUsers; track iu.id) {
-                                <option [value]="iu.id">{{ iu.integrationDescription || iu.userEmail || iu.id }}</option>
-                            }
-                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label-modern">

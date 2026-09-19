@@ -1,0 +1,199 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-sliders me-2"></i>AI Model Ayar Tanımları</h4>
+                <button class="btn btn-primary btn-sm" (click)="openCreate()" [disabled]="!selectedModelId">
+                    <i class="fa-solid fa-plus me-1"></i>Yeni Ayar Tanımı
+                </button>
+            </div>
+            <div class="card-body">
+                @if (loading && !models.length) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">AI Model</label>
+                            <select class="form-select" [(ngModel)]="selectedModelId" (ngModelChange)="onModelChange()">
+                                <option value="">Seçiniz...</option>
+                                @for (model of models; track model.id) {
+                                    <option [value]="model.id">{{ model.name }} ({{ model.modelCode }})</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Ara</label>
+                            <input type="text" class="form-control" placeholder="Key, görünen ad veya input tipi ara..." [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+                        </div>
+                    </div>
+
+                    @if (loading) {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2 text-muted">Yükleniyor...</p>
+                        </div>
+                    } @else {
+                        <div class="table-responsive">
+                            <table class="table table-centered table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Key</th>
+                                        <th>Görünen Ad</th>
+                                        <th>Input Tipi</th>
+                                        <th class="text-center">Zorunlu</th>
+                                        <th>Placeholder</th>
+                                        <th>Default</th>
+                                        <th>Sıra</th>
+                                        <th class="text-center">Durum</th>
+                                        <th class="text-end">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (item of pagedItems; track item.id; let idx = $index) {
+                                        <tr>
+                                            <td><span class="badge bg-primary-subtle text-primary">{{ (currentPage - 1) * pageSize + idx + 1 }}</span></td>
+                                            <td><code>{{ item.key }}</code></td>
+                                            <td><strong>{{ item.displayName }}</strong></td>
+                                            <td>{{ item.inputType }}</td>
+                                            <td class="text-center">
+                                                @if (item.isRequired) {
+                                                    <span class="badge bg-danger-subtle text-danger">Evet</span>
+                                                } @else {
+                                                    <span class="badge bg-secondary-subtle text-secondary">Hayır</span>
+                                                }
+                                            </td>
+                                            <td class="small text-muted">{{ item.placeholder || '-' }}</td>
+                                            <td class="small text-muted">{{ item.defaultValue || '-' }}</td>
+                                            <td>{{ item.sortOrder }}</td>
+                                            <td class="text-center">
+                                                @if (item.isActive) {
+                                                    <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                } @else {
+                                                    <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                }
+                                            </td>
+                                            <td class="text-end">
+                                                <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(item)">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </button>
+                                                <button class="btn btn-soft-danger btn-sm" (click)="deleteItem(item)">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    } @empty {
+                                        <tr><td colspan="10" class="text-center text-muted">Ayar tanımı bulunamadı.</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div class="small text-muted">Toplam: {{ filteredItems.length }} kayıt</div>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item" [class.disabled]="currentPage === 1">
+                                        <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                    </li>
+                                    @for (page of totalPagesArray; track $index) {
+                                        <li class="page-item" [class.active]="page === currentPage">
+                                            <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                        </li>
+                                    }
+                                    <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                        <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+@if (showModal) {
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ editMode ? 'Ayar Tanımı Düzenle' : 'Yeni Ayar Tanımı' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">AI Model</label>
+                                <select class="form-select" [(ngModel)]="form.aiModelId" name="aiModelId" [disabled]="editMode" required>
+                                    <option value="">Seçiniz...</option>
+                                    @for (model of models; track model.id) {
+                                        <option [value]="model.id">{{ model.name }} ({{ model.modelCode }})</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Input Tipi</label>
+                                <select class="form-select" [(ngModel)]="form.inputType" name="inputType" required>
+                                    @for (inputType of inputTypeOptions; track inputType) {
+                                        <option [value]="inputType">{{ inputType }}</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Key</label>
+                                <input type="text" class="form-control" [(ngModel)]="form.key" name="key" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Görünen Ad</label>
+                                <input type="text" class="form-control" [(ngModel)]="form.displayName" name="displayName" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Placeholder</label>
+                                <input type="text" class="form-control" [(ngModel)]="form.placeholder" name="placeholder">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Default Değer</label>
+                                <input type="text" class="form-control" [(ngModel)]="form.defaultValue" name="defaultValue">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Sıra</label>
+                                <input type="number" class="form-control" [(ngModel)]="form.sortOrder" name="sortOrder" required>
+                            </div>
+                            <div class="col-md-4 mb-3 d-flex align-items-end">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="form.isRequired" name="isRequired" id="modelDefIsRequiredSwitch">
+                                    <label class="form-check-label" for="modelDefIsRequiredSwitch">Zorunlu</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3 d-flex align-items-end">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="form.isActive" name="isActive" id="modelDefIsActiveSwitch">
+                                    <label class="form-check-label" for="modelDefIsActiveSwitch">Aktif</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" (click)="save()">{{ editMode ? 'Güncelle' : 'Kaydet' }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,156 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-sliders me-2"></i>AI Model Ayarları</h4>
+            </div>
+            <div class="card-body page-surface">
+                <div class="d-flex mb-3">
+                    <input
+                        type="text"
+                        class="form-control form-control-sm w-auto"
+                        placeholder="Model, kod veya sağlayıcı ara..."
+                        [(ngModel)]="filterText"
+                        (ngModelChange)="onFilterChange()">
+                </div>
+
+                @if (loading) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    @for (group of groupedPagedModels; track group.category) {
+                        <div class="category-section">
+                            <div class="category-title">{{ group.category }}</div>
+                            <div class="row g-3">
+                                @for (model of group.items; track model.id) {
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <button class="extension-box text-start" (click)="openModelForm(model)">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="thumb-wrap">
+                                                    @if (getProviderPhotoUrl(model.aiProviderId)) {
+                                                        <img [src]="getProviderPhotoUrl(model.aiProviderId)" alt="{{ getProviderName(model.aiProviderId) }}" class="extension-thumb" />
+                                                    } @else {
+                                                        <div class="extension-thumb extension-thumb-fallback">
+                                                            <i class="fa-solid fa-microchip"></i>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h5 class="mb-1 extension-title">{{ model.name }}</h5>
+                                                    <div class="small text-muted mb-1">{{ model.modelCode }}</div>
+                                                    <div class="d-flex gap-2 flex-wrap">
+                                                        <span class="badge bg-primary-subtle text-primary">Alan: {{ getSettingCount(model.id) }}</span>
+                                                        <span class="badge bg-success-subtle text-success">Kayıtlı: {{ getConfiguredCount(model.id) }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    } @empty {
+                        <div class="col-12 text-center text-muted py-4">Model bulunamadı.</div>
+                    }
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="small text-muted">Toplam: {{ filteredModels.length }} model</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track $index) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (showModal) {
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ selectedModel?.name }} Ayarları</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        @for (field of selectedModelSettings; track field.id) {
+                            <div class="setting-row">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label mb-0">{{ field.displayName }}</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-info-subtle text-info text-lowercase">{{ field.inputType }}</span>
+                                        @if (field.isRequired) {
+                                            <span class="badge bg-danger-subtle text-danger">Zorunlu</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="small text-muted mb-2">{{ field.key }}</div>
+
+                                @if (isTextAreaType(field.inputType)) {
+                                    <textarea
+                                        class="form-control"
+                                        rows="3"
+                                        [(ngModel)]="formValues[field.key]"
+                                        [name]="'value_' + field.key"
+                                        [placeholder]="field.placeholder || ''"
+                                        [required]="field.isRequired"></textarea>
+                                } @else if (isCheckboxType(field.inputType)) {
+                                    <div class="form-check form-switch">
+                                        <input
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            [ngModel]="getCheckboxValue(field.key)"
+                                            (ngModelChange)="onCheckboxValueChange(field.key, $event)"
+                                            [name]="'value_' + field.key">
+                                        <label class="form-check-label">{{ getCheckboxValue(field.key) ? 'Aktif' : 'Pasif' }}</label>
+                                    </div>
+                                } @else {
+                                    <input
+                                        class="form-control"
+                                        [type]="getInputTypeForValue(field.inputType)"
+                                        [(ngModel)]="formValues[field.key]"
+                                        [name]="'value_' + field.key"
+                                        [placeholder]="field.placeholder || ''"
+                                        [required]="field.isRequired">
+                                }
+
+                                @if (field.defaultValue) {
+                                    <div class="small text-muted mt-1">Varsayılan: {{ field.defaultValue }}</div>
+                                }
+                            </div>
+                        } @empty {
+                            <div class="text-center text-muted py-3">Bu model için ayar alanı tanımlanmamış.</div>
+                        }
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" (click)="saveModelSettings()" [disabled]="saving || !selectedModelSettings.length">
+                        @if (saving) {
+                            Kaydediliyor...
+                        } @else {
+                            Kaydet
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

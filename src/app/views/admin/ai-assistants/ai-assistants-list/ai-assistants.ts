@@ -8,6 +8,10 @@ import { AiModel } from '@/app/core/models/ai-assistant/ai-model.models';
 import { UserMenuService } from '@/app/core/services/user-menu.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { PagedResult } from '@/app/core/models/pagination.model';
+import { AiKnowledgeService } from '@/app/core/services/ai-knowledge.service';
+import { AiKnowledgeResponse, CreateAiKnowledgeRequest as CreateKnowledgeCopyRequest } from '@/app/core/models/ai-assistant/ai-knowledge.models';
+import { PromptAiAssistantsService } from '@/app/core/services/prompt-ai-assistants.service';
+import { PromptAiAssistant, CreatePromptAiAssistantRequest } from '@/app/core/models/ai-assistant/prompt.models';
 
 interface AiAssistantForm {
     name: string;
@@ -31,6 +35,7 @@ export class AiAssistantsPage implements OnInit {
     showModal = false;
     editMode = false;
     selectedAssistant: AiAssistant | null = null;
+    copyingId: string | null = null;
 
     // Server-side pagination
     filterText = '';
@@ -57,6 +62,8 @@ export class AiAssistantsPage implements OnInit {
         private aiService: AiProvidersService,
         private userMenuService: UserMenuService,
         private authStateService: AuthStateService,
+        private aiKnowledgeService: AiKnowledgeService,
+        private promptAiAssistantsService: PromptAiAssistantsService,
     ) {}
 
     ngOnInit(): void {
@@ -314,6 +321,108 @@ export class AiAssistantsPage implements OnInit {
             } catch (err) {
                 console.error('Delete error:', err);
             }
+        }
+    }
+
+    // ── Kopyalama: asistan + bilgi tabanı + prompt atamaları ──
+    async copyAssistant(assistant: AiAssistant): Promise<void> {
+        if (this.copyingId) return;
+        if (!confirm(`"${assistant.name}" asistanı tüm özellikleriyle (bilgi tabanı ve promptlar) kopyalansın mı?`)) return;
+
+        const userId = this.userMenuService.getUserIdFromToken();
+        const companyId = this.authStateService.profile?.companyId || '';
+        if (!userId) {
+            alert('Kullanıcı bilgisi alınamadı. Lütfen tekrar giriş yapın.');
+            return;
+        }
+
+        this.copyingId = assistant.id;
+        try {
+            const newName = `${assistant.name} (Kopya)`;
+            const req: CreateAiAssistantRequest = {
+                userId,
+                companyId,
+                name: newName,
+                aiProviderId: assistant.aiProviderId,
+                aiModelId: assistant.aiModelId,
+                order: Number(assistant.order ?? 0),
+            };
+
+            let newId: string | null = null;
+            try {
+                const res = await this.aiService.createAssistant(req);
+                newId = res?.data?.id ?? null;
+            } catch (err: any) {
+                if (!this.isNoRouteError(err)) throw err;
+            }
+            if (!newId) {
+                // Backend CreatedAtAction route hatası — kaydı isimden bul
+                const response = await this.aiService.getAssistantsPaged({ pageNumber: 1, pageSize: 50, searchTerm: newName, companyId });
+                const found = PagedResult.from<AiAssistant>(response).items
+                    .filter(a => a.name === newName && a.id !== assistant.id)
+                    .sort((a, b) => (b.createdDate ?? '').localeCompare(a.createdDate ?? ''))[0];
+                newId = found?.id ?? null;
+            }
+            if (!newId) throw new Error('Kopyalanan asistan bulunamadı.');
+
+            // Pasif durumu kopyala
+            if (assistant.isBlocked) {
+                const upd: UpdateAiAssistantRequest = { ...req, isBlocked: true };
+                await this.aiService.updateAssistant(newId, upd);
+            }
+
+            // Bilgi tabanı (knowledge)
+            const kRes = await this.aiKnowledgeService.getByAssistant(assistant.id);
+            const knowledge = this.extractArray(kRes?.data) as AiKnowledgeResponse[];
+            for (const k of knowledge) {
+                const kReq: CreateKnowledgeCopyRequest = {
+                    companyId,
+                    userId,
+                    aiAssistantId: newId,
+                    extensionId: k.extensionId,
+                    aiKnowledgeTypeId: k.aiKnowledgeTypeId ?? null,
+                    prop: k.prop ?? '',
+                    value: k.value ?? '',
+                    shortDescription: k.shortDescription ?? null,
+                };
+                await this.createIgnoringNoRoute(() => this.aiKnowledgeService.create(kReq));
+            }
+
+            // Prompt atamaları
+            const pRes = await this.promptAiAssistantsService.getByAssistant(assistant.id);
+            const prompts = this.extractArray(pRes?.data) as PromptAiAssistant[];
+            for (const p of prompts) {
+                const pReq: CreatePromptAiAssistantRequest = {
+                    promptId: p.promptId,
+                    aiAssistantId: newId,
+                    order: p.order,
+                    isFirst: p.isFirst,
+                    userId,
+                    companyId,
+                };
+                await this.createIgnoringNoRoute(() => this.promptAiAssistantsService.create(pReq));
+            }
+
+            await this.loadAssistants();
+            alert(`"${newName}" oluşturuldu.\nBilgi: ${knowledge.length}, Prompt: ${prompts.length} kayıt kopyalandı.`);
+        } catch (err: any) {
+            console.error('Copy error:', err);
+            alert('Kopyalama hatası: ' + (err?.error?.message || err?.message || 'Bilinmeyen hata'));
+            await this.loadAssistants();
+        } finally {
+            this.copyingId = null;
+        }
+    }
+
+    private isNoRouteError(err: any): boolean {
+        return err?.status === 400 && !!JSON.stringify(err.error)?.includes('No route matches');
+    }
+
+    private async createIgnoringNoRoute(fn: () => Promise<unknown>): Promise<void> {
+        try {
+            await fn();
+        } catch (err: any) {
+            if (!this.isNoRouteError(err)) throw err;
         }
     }
 

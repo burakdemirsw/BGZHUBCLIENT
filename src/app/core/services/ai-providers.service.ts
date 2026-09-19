@@ -7,6 +7,10 @@ import { CreateAiSettingRequest, UpdateAiSettingRequest } from '../models/ai-ass
 import { CreateAiProviderSettingRequest, UpdateAiProviderSettingRequest } from '../models/ai-assistant/ai-provider-setting.models';
 import { CreateAiModelRequest, UpdateAiModelRequest } from '../models/ai-assistant/ai-model.models';
 import { AiAssistant, CreateAiAssistantRequest, UpdateAiAssistantRequest } from '../models/ai-assistant/ai-assistant.models';
+import { AiModelSettingDefinition, CreateAiModelSettingDefinitionRequest, UpdateAiModelSettingDefinitionRequest } from '../models/ai-assistant/ai-model-setting-definition.models';
+import { AiProviderSettingDefinition, CreateAiProviderSettingDefinitionRequest, UpdateAiProviderSettingDefinitionRequest } from '../models/ai-assistant/ai-provider-setting-definition.models';
+import { AiModelSetting, CreateAiModelSettingRequest as CreateAiModelSettingValueRequest, UpdateAiModelSettingRequest as UpdateAiModelSettingValueRequest } from '../models/ai-assistant/ai-model-setting.models';
+import { AiProviderSettingValue, CreateAiProviderSettingValueRequest, UpdateAiProviderSettingValueRequest } from '../models/ai-assistant/ai-provider-setting-value.models';
 
 @Injectable({
   providedIn: 'root',
@@ -94,6 +98,40 @@ export class AiProvidersService {
     return this.http.post<any>({ controller: 'AiProviderSettings', action: `delete/${id}` }, {});
   }
 
+  // ── AiProviderSettings/definitions ──
+  getProviderSettingDefinitionsByProvider(aiProviderId: string): Promise<ApiResponse<AiProviderSettingDefinition[]>> {
+    return this.http.get<AiProviderSettingDefinition[]>({ controller: 'AiProviderSettings', action: `definitions/by-provider/${aiProviderId}` });
+  }
+
+  createProviderSettingDefinition(request: CreateAiProviderSettingDefinitionRequest): Promise<ApiResponse<AiProviderSettingDefinition>> {
+    return this.http.post<AiProviderSettingDefinition>({ controller: 'AiProviderSettings', action: 'definitions' }, request);
+  }
+
+  updateProviderSettingDefinition(id: string, request: UpdateAiProviderSettingDefinitionRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiProviderSettings', action: `definitions/update/${id}` }, request);
+  }
+
+  deleteProviderSettingDefinition(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiProviderSettings', action: `definitions/delete/${id}` }, {});
+  }
+
+  // ── AiProviderSettings (değerler) ──
+  getProviderSettingValuesByProvider(aiProviderId: string): Promise<ApiResponse<AiProviderSettingValue[]>> {
+    return this.http.get<AiProviderSettingValue[]>({ controller: 'AiProviderSettings', action: `by-provider/${aiProviderId}` });
+  }
+
+  createProviderSettingValue(request: CreateAiProviderSettingValueRequest): Promise<ApiResponse<AiProviderSettingValue>> {
+    return this.http.post<AiProviderSettingValue>({ controller: 'AiProviderSettings' }, request);
+  }
+
+  updateProviderSettingValue(id: string, request: UpdateAiProviderSettingValueRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiProviderSettings', action: `update/${id}` }, request);
+  }
+
+  deleteProviderSettingValue(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiProviderSettings', action: `delete/${id}` }, {});
+  }
+
   // ── AiModels ──
   getModelsPaged(req?: PaginationRequest): Promise<ApiResponse<PagedResult<any>>> {
     return this.http.post<PagedResult<any>>(
@@ -124,6 +162,40 @@ export class AiProvidersService {
 
   deleteModel(id: string): Promise<ApiResponse<any>> {
     return this.http.post<any>({ controller: 'AiModels', action: `delete/${id}` }, {});
+  }
+
+  // ── AiModelSettings/definitions ──
+  getModelSettingDefinitionsByModel(aiModelId: string): Promise<ApiResponse<AiModelSettingDefinition[]>> {
+    return this.http.get<AiModelSettingDefinition[]>({ controller: 'AiModelSettings', action: `definitions/by-model/${aiModelId}` });
+  }
+
+  createModelSettingDefinition(request: CreateAiModelSettingDefinitionRequest): Promise<ApiResponse<AiModelSettingDefinition>> {
+    return this.http.post<AiModelSettingDefinition>({ controller: 'AiModelSettings', action: 'definitions' }, request);
+  }
+
+  updateModelSettingDefinition(id: string, request: UpdateAiModelSettingDefinitionRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiModelSettings', action: `definitions/update/${id}` }, request);
+  }
+
+  deleteModelSettingDefinition(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiModelSettings', action: `definitions/delete/${id}` }, {});
+  }
+
+  // ── AiModelSettings (değerler) ──
+  getModelSettingsByModel(aiModelId: string): Promise<ApiResponse<AiModelSetting[]>> {
+    return this.http.get<AiModelSetting[]>({ controller: 'AiModelSettings', action: `by-model/${aiModelId}` });
+  }
+
+  createModelSetting(request: CreateAiModelSettingValueRequest): Promise<ApiResponse<AiModelSetting>> {
+    return this.http.post<AiModelSetting>({ controller: 'AiModelSettings' }, request);
+  }
+
+  updateModelSetting(id: string, request: UpdateAiModelSettingValueRequest): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiModelSettings', action: `update/${id}` }, request);
+  }
+
+  deleteModelSetting(id: string): Promise<ApiResponse<any>> {
+    return this.http.post<any>({ controller: 'AiModelSettings', action: `delete/${id}` }, {});
   }
 
   // ── AiAssistants ──

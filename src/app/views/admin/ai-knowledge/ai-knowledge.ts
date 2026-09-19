@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { AiKnowledgeService } from '@/app/core/services/ai-knowledge.service';
 import { AiKnowledgeTypesService } from '@/app/core/services/ai-knowledge-types.service';
 import { AiProvidersService } from '@/app/core/services/ai-providers.service';
-import { IntegrationsService } from '@/app/core/services/integrations.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { ExtensionManagementService } from '@/app/core/services/extension-management.service';
 import {
@@ -14,7 +13,6 @@ import {
 } from '@/app/core/models/ai-assistant/ai-knowledge.models';
 import { AiKnowledgeTypeResponse } from '@/app/core/models/ai-assistant/ai-knowledge-type.models';
 import { AiAssistant, UpdateAiAssistantRequest } from '@/app/core/models/ai-assistant/ai-assistant.models';
-import { IntegrationUser } from '@/app/core/models/integration/integration-user.models';
 import { ExtensionDefinition } from '@/app/core/models/extension/extension-definition.models';
 import { PagedResult } from '@/app/core/models/pagination.model';
 
@@ -28,7 +26,6 @@ export class AiKnowledgePage implements OnInit {
     // Veri
     items: AiKnowledgeResponse[] = [];
     assistants: AiAssistant[] = [];
-    integrationUsers: IntegrationUser[] = [];
     knowledgeTypes: AiKnowledgeTypeResponse[] = [];
     extensionDefinitions: ExtensionDefinition[] = [];
     loading = false;
@@ -50,7 +47,6 @@ export class AiKnowledgePage implements OnInit {
         aiAssistantId: string;
         extensionId: string;
         aiKnowledgeTypeId: string;
-        integrationUserId: string;
         prop: string;
         value: string;
         shortDescription: string;
@@ -58,7 +54,6 @@ export class AiKnowledgePage implements OnInit {
         aiAssistantId: '',
         extensionId: '',
         aiKnowledgeTypeId: '',
-        integrationUserId: '',
         prop: '',
         value: '',
         shortDescription: '',
@@ -74,7 +69,6 @@ export class AiKnowledgePage implements OnInit {
         private knowledgeService: AiKnowledgeService,
         private knowledgeTypesService: AiKnowledgeTypesService,
         private aiProvidersService: AiProvidersService,
-        private integrationsService: IntegrationsService,
         private extensionManagementService: ExtensionManagementService,
         private authState: AuthStateService,
     ) {}
@@ -82,7 +76,6 @@ export class AiKnowledgePage implements OnInit {
     ngOnInit(): void {
         this.loadKnowledge();
         this.loadAssistants();
-        this.loadIntegrationUsers();
         this.loadKnowledgeTypes();
         this.loadExtensionDefinitions();
     }
@@ -120,17 +113,6 @@ export class AiKnowledgePage implements OnInit {
         }
     }
 
-    async loadIntegrationUsers(): Promise<void> {
-        try {
-            const companyId = this.authState.profile?.companyId || '';
-            const response = await this.integrationsService.getIntegrationUsersPaged({ companyId, pageNumber: 1, pageSize: 1000 });
-            const paged = response?.data;
-            this.integrationUsers = paged?.items ?? [];
-        } catch (err) {
-            console.error('IntegrationUsers yükleme hatası:', err);
-        }
-    }
-
     async loadKnowledgeTypes(): Promise<void> {
         try {
             const resp = await this.knowledgeTypesService.getAll();
@@ -159,7 +141,7 @@ export class AiKnowledgePage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedItem = null;
-        this.form = { aiAssistantId: '', extensionId: '', aiKnowledgeTypeId: '', integrationUserId: '', prop: '', value: '', shortDescription: '' };
+        this.form = { aiAssistantId: '', extensionId: '', aiKnowledgeTypeId: '', prop: '', value: '', shortDescription: '' };
         this.showModal = true;
     }
 
@@ -170,7 +152,6 @@ export class AiKnowledgePage implements OnInit {
             aiAssistantId: item.aiAssistantId || '',
             extensionId: item.extensionId || '',
             aiKnowledgeTypeId: item.aiKnowledgeTypeId || '',
-            integrationUserId: item.integrationUserId || '',
             prop: item.prop || '',
             value: item.value || '',
             shortDescription: item.shortDescription || '',
@@ -190,7 +171,6 @@ export class AiKnowledgePage implements OnInit {
                     aiAssistantId: this.form.aiAssistantId,
                     extensionId: this.form.extensionId,
                     aiKnowledgeTypeId: this.form.aiKnowledgeTypeId || null,
-                    integrationUserId: this.form.integrationUserId || null,
                     prop: this.form.prop,
                     value: this.form.value,
                     shortDescription: this.form.shortDescription || null,
@@ -203,7 +183,6 @@ export class AiKnowledgePage implements OnInit {
                     aiAssistantId: this.form.aiAssistantId,
                     extensionId: this.form.extensionId,
                     aiKnowledgeTypeId: this.form.aiKnowledgeTypeId || null,
-                    integrationUserId: this.form.integrationUserId || null,
                     prop: this.form.prop,
                     value: this.form.value,
                     shortDescription: this.form.shortDescription || null,
@@ -243,7 +222,6 @@ export class AiKnowledgePage implements OnInit {
                 aiAssistantId: item.aiAssistantId,
                 extensionId: item.extensionId,
                 aiKnowledgeTypeId: item.aiKnowledgeTypeId || null,
-                integrationUserId: item.integrationUserId || null,
                 prop: item.prop || '',
                 value: item.value || '',
                 shortDescription: item.shortDescription || null,
@@ -281,12 +259,6 @@ export class AiKnowledgePage implements OnInit {
         if (!assistantId) return '—';
         const a = this.assistants.find(x => x.id === assistantId);
         return a?.name || '—';
-    }
-
-    getIntegrationUserName(integrationUserId: string): string {
-        if (!integrationUserId) return '—';
-        const iu = this.integrationUsers.find(x => x.id === integrationUserId);
-        return iu?.integrationDescription || '—';
     }
 
     getKnowledgeTypeName(typeId: string | null): string {

@@ -1,0 +1,308 @@
+<div class="row mb-3">
+    <div class="col-12">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <button class="nav-link" [class.active]="activeView === 'gaps'" (click)="switchView('gaps')">
+                    <i class="fa-solid fa-screwdriver-wrench me-1"></i>Tool Eksikleri
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" [class.active]="activeView === 'reasons'" (click)="switchView('reasons')">
+                    <i class="fa-solid fa-tags me-1"></i>Nedenler
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+@if (activeView === 'gaps') {
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0"><i class="fa-solid fa-screwdriver-wrench me-2"></i>AI Tool Eksikleri</h4>
+                </div>
+                <div class="card-body page-surface">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-5">
+                            <input type="text" class="form-control form-control-sm" placeholder="İstek, tool veya hata ara..."
+                                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select form-select-sm" [(ngModel)]="reasonFilter" (ngModelChange)="onSelectFilterChange()">
+                                <option value="">Tüm Nedenler</option>
+                                @for (reason of reasons; track reason.id) {
+                                    <option [value]="reason.id">{{ reason.name || reason.code }}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select form-select-sm" [(ngModel)]="resolvedFilter" (ngModelChange)="onSelectFilterChange()">
+                                <option value="all">Tüm Durumlar</option>
+                                <option value="open">Açık</option>
+                                <option value="resolved">Çözüldü</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    @if (loading) {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2 text-muted">Yükleniyor...</p>
+                        </div>
+                    } @else {
+                        <div class="table-responsive">
+                            <table class="table table-centered table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tarih</th>
+                                        <th>Neden</th>
+                                        <th>Eklenti</th>
+                                        <th>Tool</th>
+                                        <th>İstek</th>
+                                        <th>Durum</th>
+                                        <th class="text-end">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (item of pagedItems; track item.id) {
+                                        <tr>
+                                            <td class="text-nowrap small">{{ item.createdDate | date:'dd.MM.yyyy HH:mm' }}</td>
+                                            <td><span class="badge bg-warning-subtle text-warning">{{ item.reasonName || item.reasonCode || '-' }}</span></td>
+                                            <td>{{ item.extensionCode || '-' }}</td>
+                                            <td><code>{{ item.toolName || '-' }}</code></td>
+                                            <td class="text-truncate-cell" [title]="item.requestText || ''">{{ item.requestText || '-' }}</td>
+                                            <td>
+                                                @if (item.isResolved) {
+                                                    <span class="badge bg-success-subtle text-success">Çözüldü</span>
+                                                } @else {
+                                                    <span class="badge bg-danger-subtle text-danger">Açık</span>
+                                                }
+                                            </td>
+                                            <td class="text-end text-nowrap">
+                                                <button class="btn btn-sm btn-soft-primary me-1" title="Detay" (click)="openDetail(item)">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-soft-danger" title="Sil" (click)="deleteGap(item)">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    } @empty {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">Kayıt bulunamadı.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="small text-muted">Toplam: {{ totalCount }} kayıt</div>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item" [class.disabled]="currentPage === 1">
+                                        <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                    </li>
+                                    @for (page of totalPagesArray; track page) {
+                                        <li class="page-item" [class.active]="page === currentPage">
+                                            <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                        </li>
+                                    }
+                                    <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                        <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (activeView === 'reasons') {
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0"><i class="fa-solid fa-tags me-2"></i>Tool Eksikliği Nedenleri</h4>
+                </div>
+                <div class="card-body page-surface">
+                    <div class="d-flex mb-3">
+                        <input type="text" class="form-control form-control-sm w-auto" placeholder="Kod, ad veya açıklama ara..."
+                            [(ngModel)]="reasonFilterText" (ngModelChange)="onReasonFilterChange()">
+                    </div>
+
+                    @if (reasonsLoading) {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                        </div>
+                    } @else {
+                        <div class="table-responsive">
+                            <table class="table table-centered table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Sıra</th>
+                                        <th>Kod</th>
+                                        <th>Ad</th>
+                                        <th>Açıklama</th>
+                                        <th>Durum</th>
+                                        <th class="text-end">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (reason of pagedReasons; track reason.id) {
+                                        <tr>
+                                            <td>{{ reason.sortOrder }}</td>
+                                            <td><code>{{ reason.code }}</code></td>
+                                            <td class="fw-semibold">{{ reason.name }}</td>
+                                            <td class="text-muted small">{{ reason.description || '-' }}</td>
+                                            <td>
+                                                @if (reason.isActive) {
+                                                    <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                } @else {
+                                                    <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                }
+                                            </td>
+                                            <td class="text-end">
+                                                <button class="btn btn-sm btn-soft-primary" title="Düzenle" (click)="openReasonModal(reason)">
+                                                    <i class="fa-solid fa-pen"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    } @empty {
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted py-4">Kayıt bulunamadı.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="small text-muted">Toplam: {{ filteredReasons.length }} kayıt</div>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item" [class.disabled]="reasonCurrentPage === 1">
+                                        <button class="page-link" (click)="setReasonPage(reasonCurrentPage - 1)">&laquo;</button>
+                                    </li>
+                                    @for (page of reasonTotalPagesArray; track page) {
+                                        <li class="page-item" [class.active]="page === reasonCurrentPage">
+                                            <button class="page-link" (click)="setReasonPage(page)">{{ page }}</button>
+                                        </li>
+                                    }
+                                    <li class="page-item" [class.disabled]="reasonCurrentPage === reasonTotalPages">
+                                        <button class="page-link" (click)="setReasonPage(reasonCurrentPage + 1)">&raquo;</button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showModal && selectedItem) {
+    <div class="modal fade show d-block modal-backdrop-custom" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-screwdriver-wrench me-2"></i>Tool Eksikliği Detayı</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    @if (detailLoading) {
+                        <div class="text-center py-2">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        </div>
+                    }
+
+                    <div class="row g-2 mb-3 small">
+                        <div class="col-md-4"><span class="text-muted">Neden:</span> {{ selectedItem.reasonName || selectedItem.reasonCode || '-' }}</div>
+                        <div class="col-md-4"><span class="text-muted">Eklenti:</span> {{ selectedItem.extensionCode || '-' }}</div>
+                        <div class="col-md-4"><span class="text-muted">Tool:</span> <code>{{ selectedItem.toolName || '-' }}</code></div>
+                        <div class="col-md-4"><span class="text-muted">Oluşturulma:</span> {{ selectedItem.createdDate | date:'dd.MM.yyyy HH:mm' }}</div>
+                        @if (selectedItem.resolvedDate) {
+                            <div class="col-md-4"><span class="text-muted">Çözülme:</span> {{ selectedItem.resolvedDate | date:'dd.MM.yyyy HH:mm' }}</div>
+                        }
+                    </div>
+
+                    <label class="form-label fw-semibold">Kullanıcı İsteği</label>
+                    <div class="detail-block mb-3">{{ selectedItem.requestText || '-' }}</div>
+
+                    @if (selectedItem.errorMessage) {
+                        <label class="form-label fw-semibold text-danger">Hata Mesajı</label>
+                        <div class="detail-block text-danger mb-3">{{ selectedItem.errorMessage }}</div>
+                    }
+
+                    @if (selectedItem.toolArgumentsJson) {
+                        <label class="form-label fw-semibold">Tool Argümanları</label>
+                        <pre class="detail-block json-block mb-3">{{ formatJson(selectedItem.toolArgumentsJson) }}</pre>
+                    }
+
+                    @if (selectedItem.contextJson) {
+                        <label class="form-label fw-semibold">Bağlam</label>
+                        <pre class="detail-block json-block mb-3">{{ formatJson(selectedItem.contextJson) }}</pre>
+                    }
+
+                    <hr>
+
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="gapResolved" [(ngModel)]="resolveForm.isResolved" name="isResolved">
+                        <label class="form-check-label" for="gapResolved">Çözüldü olarak işaretle</label>
+                    </div>
+                    <label class="form-label">Çözüm Notu</label>
+                    <textarea class="form-control" rows="3" [(ngModel)]="resolveForm.resolutionNote" name="resolutionNote"
+                        placeholder="Yapılan düzenlemeyi not edin..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Kapat</button>
+                    <button type="button" class="btn btn-primary" (click)="saveResolution()" [disabled]="saving">
+                        {{ saving ? 'Kaydediliyor...' : 'Kaydet' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showReasonModal) {
+    <div class="modal fade show d-block modal-backdrop-custom" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Neden Düzenle <code class="ms-1">{{ editingReason?.code }}</code></h5>
+                    <button type="button" class="btn-close" (click)="closeReasonModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Ad <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" [(ngModel)]="reasonForm.name" name="reasonName">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Açıklama</label>
+                        <textarea class="form-control" rows="3" [(ngModel)]="reasonForm.description" name="reasonDescription"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sıra</label>
+                        <input type="number" class="form-control" [(ngModel)]="reasonForm.sortOrder" name="reasonSortOrder">
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="reasonActive" [(ngModel)]="reasonForm.isActive" name="reasonActive">
+                        <label class="form-check-label" for="reasonActive">Aktif</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeReasonModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" (click)="saveReason()" [disabled]="reasonSaving">
+                        {{ reasonSaving ? 'Kaydediliyor...' : 'Kaydet' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

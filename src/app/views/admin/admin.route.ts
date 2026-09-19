@@ -3,12 +3,17 @@ import { AuthGuard } from '@/app/core/guards/auth.guard';
 import { Profile } from '@/app/views/apps/users/profile/profile';
 import { AiAssistantsPage } from './ai-assistants/ai-assistants-list/ai-assistants';
 import { AiModelsPage } from './ai-assistants/ai-models/ai-models';
+import { AiModelSettingDefinitionsPage } from './ai-assistants/ai-model-setting-definitions/ai-model-setting-definitions';
+import { AiModelSettingsPage } from './ai-assistants/ai-model-settings/ai-model-settings';
 import { AiProviderSettingsPage } from './ai-assistants/ai-provider-settings/ai-provider-settings';
+import { AiProviderSettingDefinitionsPage } from './ai-assistants/ai-provider-setting-definitions/ai-provider-setting-definitions';
+import { AiProviderSettingsValuesPage } from './ai-assistants/ai-provider-settings-values/ai-provider-settings-values';
 import { AiProvidersPage } from './ai-assistants/ai-providers/ai-providers';
 import { AiSettingsPage } from './ai-assistants/ai-settings/ai-settings';
 import { AiKnowledgePage } from './ai-knowledge/ai-knowledge';
 import { AiKnowledgeTypesPage } from './ai-knowledge-types/ai-knowledge-types';
 import { AiRequestLogsPage } from './ai-request-logs/ai-request-logs';
+import { AiToolGapsPage } from './ai-tool-gaps/ai-tool-gaps';
 import { AwsS3SettingsPage } from './aws-s3-settings/aws-s3-settings';
 import { CloudinarySettingsPage } from './cloudinary-settings/cloudinary-settings';
 import { CompanyExtensionsPage } from './company-extensions/company-extensions';
@@ -132,6 +137,30 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/ai-models',
         component: AiModelsPage,
         data: { title: 'AI Modelleri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/ai-model-setting-definitions',
+        component: AiModelSettingDefinitionsPage,
+        data: { title: 'AI Model Ayar Tanımları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/ai-model-settings',
+        component: AiModelSettingsPage,
+        data: { title: 'AI Model Ayarları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/ai-provider-setting-definitions',
+        component: AiProviderSettingDefinitionsPage,
+        data: { title: 'AI Sağlayıcı Ayar Tanımları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/ai-provider-settings-values',
+        component: AiProviderSettingsValuesPage,
+        data: { title: 'AI Sağlayıcı Ayarları' },
         canActivate: [AuthGuard],
     },
     {
@@ -299,6 +328,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/ai-request-logs',
         component: AiRequestLogsPage,
         data: { title: 'AI İstek Logları' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/ai-tool-gaps',
+        component: AiToolGapsPage,
+        data: { title: 'AI Tool Eksikleri' },
         canActivate: [AuthGuard],
     },
     {

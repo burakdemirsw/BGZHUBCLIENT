@@ -5,39 +5,42 @@ import { AiProvidersService } from '@/app/core/services/ai-providers.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { AiModel, CreateAiModelRequest, UpdateAiModelRequest } from '@/app/core/models/ai-assistant/ai-model.models';
 import { AiProvider } from '@/app/core/models/ai-assistant/ai-provider.models';
-import { PagedResult } from '@/app/core/models/pagination.model';
 
 interface AiModelForm {
     aiProviderId: string;
     name: string;
     modelCode: string;
     priorityOrder: number;
-    inputTokenLimit: number;
-    outputTokenLimit: number;
-    inputPrice: number;
-    outputPrice: number;
     isBlocked: boolean;
+}
+
+interface AiModelProviderGroup {
+    category: string;
+    items: AiModel[];
 }
 
 @Component({
     selector: 'app-ai-models-page',
     imports: [CommonModule, FormsModule],
     templateUrl: './ai-models.html',
+    styleUrls: ['./ai-models.scss'],
 })
 export class AiModelsPage implements OnInit {
     models: AiModel[] = [];
     providers: AiProvider[] = [];
+    providersById: Record<string, AiProvider> = {};
+
     loading = false;
     showModal = false;
     editMode = false;
     selectedModel: AiModel | null = null;
 
-    // Datatable filter & pagination
     filterText = '';
-    filteredItems: AiModel[] = [];
-    pagedItems: AiModel[] = [];
+    filteredModels: AiModel[] = [];
+    pagedModels: AiModel[] = [];
+    groupedPagedModels: AiModelProviderGroup[] = [];
     currentPage = 1;
-    pageSize = 10;
+    pageSize = 12;
     totalPages = 1;
     totalPagesArray: number[] = [];
 
@@ -46,10 +49,6 @@ export class AiModelsPage implements OnInit {
         name: '',
         modelCode: '',
         priorityOrder: 0,
-        inputTokenLimit: 0,
-        outputTokenLimit: 0,
-        inputPrice: 0,
-        outputPrice: 0,
         isBlocked: false,
     };
 
@@ -59,8 +58,32 @@ export class AiModelsPage implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.loadModels();
-        this.loadProviders();
+        this.loadPageData();
+    }
+
+    async loadPageData(): Promise<void> {
+        this.loading = true;
+        try {
+            const companyId = this.authStateService.profile?.companyId || '';
+            const [modelsResponse, providersResponse] = await Promise.all([
+                this.aiService.getModelsPaged({ pageNumber: 1, pageSize: 1000, companyId }),
+                this.aiService.getProvidersPaged({ pageNumber: 1, pageSize: 1000, companyId }),
+            ]);
+            this.models = this.extractArray<AiModel>(modelsResponse?.data);
+            this.providers = this.extractArray<AiProvider>(providersResponse?.data);
+            this.providersById = {};
+            this.providers.forEach(provider => {
+                this.providersById[provider.id] = provider;
+            });
+
+            this.applyFilterAndPaging();
+        } catch (err) {
+            console.error('AiModels load error:', err);
+            this.models = [];
+            this.applyFilterAndPaging();
+        } finally {
+            this.loading = false;
+        }
     }
 
     onFilterChange(): void {
@@ -76,57 +99,27 @@ export class AiModelsPage implements OnInit {
 
     applyFilterAndPaging(): void {
         const filter = (this.filterText || '').toLowerCase();
-        this.filteredItems = this.models.filter(item =>
+        this.filteredModels = this.models.filter(item =>
             (item.name || '').toLowerCase().includes(filter) ||
             (item.modelCode || '').toLowerCase().includes(filter) ||
-            String(item.priorityOrder ?? '').includes(filter) ||
-            (item.aiProvider?.firmDescription || '').toLowerCase().includes(filter)
+            this.getProviderName(item.aiProviderId).toLowerCase().includes(filter)
         );
-        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
+
+        this.totalPages = Math.max(1, Math.ceil(this.filteredModels.length / this.pageSize));
         this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
+
         const start = (this.currentPage - 1) * this.pageSize;
-        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
-    }
-
-    async loadModels(): Promise<void> {
-        this.loading = true;
-        try {
-            const companyId = this.authStateService.profile?.companyId || '';
-            const response = await this.aiService.getModelsPaged({ pageNumber: 1, pageSize: 1000, companyId });
-            const paged = PagedResult.from<AiModel>(response);
-            this.models = paged.items;
-            this.applyFilterAndPaging();
-        } catch (err) {
-            console.error('AiModels load error:', err);
-        } finally {
-            this.loading = false;
-        }
-    }
-
-    async loadProviders(): Promise<void> {
-        try {
-            const companyId = this.authStateService.profile?.companyId || '';
-            const response = await this.aiService.getProvidersPaged({ pageNumber: 1, pageSize: 1000, companyId });
-            const paged = PagedResult.from<AiProvider>(response);
-            this.providers = paged.items;
-        } catch (err) {
-            console.error('Providers load error:', err);
-        }
-    }
-
-    private extractArray(response: any): any[] {
-        if (Array.isArray(response)) return response;
-        if (response?.$values) return response.$values;
-        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
-        if (response?.items) return response.items;
-        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
-        return [];
+        this.pagedModels = this.filteredModels.slice(start, start + this.pageSize);
+        this.groupedPagedModels = this.buildProviderGroups(this.pagedModels);
     }
 
     getProviderName(providerId: string): string {
-        const provider = this.providers.find(p => p.id === providerId);
-        return provider?.firmDescription ?? providerId;
+        return this.providersById[providerId]?.firmDescription ?? providerId;
+    }
+
+    getProviderPhotoUrl(providerId: string): string {
+        return this.providersById[providerId]?.photoUrl || '';
     }
 
     openCreate(): void {
@@ -137,10 +130,6 @@ export class AiModelsPage implements OnInit {
             name: '',
             modelCode: '',
             priorityOrder: 0,
-            inputTokenLimit: 0,
-            outputTokenLimit: 0,
-            inputPrice: 0,
-            outputPrice: 0,
             isBlocked: false,
         };
         this.showModal = true;
@@ -154,10 +143,6 @@ export class AiModelsPage implements OnInit {
             name: model.name,
             modelCode: model.modelCode,
             priorityOrder: model.priorityOrder,
-            inputTokenLimit: model.inputTokenLimit,
-            outputTokenLimit: model.outputTokenLimit,
-            inputPrice: model.inputPrice,
-            outputPrice: model.outputPrice,
             isBlocked: model.isBlocked ?? false,
         };
         this.showModal = true;
@@ -166,15 +151,17 @@ export class AiModelsPage implements OnInit {
     async save(): Promise<void> {
         try {
             if (this.editMode && this.selectedModel) {
+                // inputTokenLimit/outputTokenLimit/inputPrice/outputPrice bu sayfada gösterilmiyor;
+                // backend zorunlu tuttuğu için mevcut değerler değiştirilmeden gönderilir.
                 const req: UpdateAiModelRequest = {
                     aiProviderId: this.form.aiProviderId,
                     name: this.form.name,
                     modelCode: this.form.modelCode,
                     priorityOrder: Number(this.form.priorityOrder),
-                    inputTokenLimit: Number(this.form.inputTokenLimit),
-                    outputTokenLimit: Number(this.form.outputTokenLimit),
-                    inputPrice: Number(this.form.inputPrice),
-                    outputPrice: Number(this.form.outputPrice),
+                    inputTokenLimit: this.selectedModel.inputTokenLimit ?? 0,
+                    outputTokenLimit: this.selectedModel.outputTokenLimit ?? 0,
+                    inputPrice: this.selectedModel.inputPrice ?? 0,
+                    outputPrice: this.selectedModel.outputPrice ?? 0,
                     isBlocked: this.form.isBlocked,
                 };
                 await this.aiService.updateModel(this.selectedModel.id, req);
@@ -184,20 +171,20 @@ export class AiModelsPage implements OnInit {
                     name: this.form.name,
                     modelCode: this.form.modelCode,
                     priorityOrder: Number(this.form.priorityOrder),
-                    inputTokenLimit: Number(this.form.inputTokenLimit),
-                    outputTokenLimit: Number(this.form.outputTokenLimit),
-                    inputPrice: Number(this.form.inputPrice),
-                    outputPrice: Number(this.form.outputPrice),
+                    inputTokenLimit: 0,
+                    outputTokenLimit: 0,
+                    inputPrice: 0,
+                    outputPrice: 0,
                 };
                 await this.aiService.createModel(req);
             }
             this.showModal = false;
-            await this.loadModels();
+            await this.loadPageData();
         } catch (err: any) {
             console.error('Save error:', err);
             if (err.status === 400 && JSON.stringify(err.error)?.includes('No route matches')) {
                 this.showModal = false;
-                await this.loadModels();
+                await this.loadPageData();
                 return;
             }
             const msg = err.status === 0
@@ -211,14 +198,52 @@ export class AiModelsPage implements OnInit {
         if (confirm(`"${model.name}" modelini silmek istediğinize emin misiniz?`)) {
             try {
                 await this.aiService.deleteModel(model.id);
-                await this.loadModels();
+                await this.loadPageData();
             } catch (err) {
                 console.error('Delete error:', err);
             }
         }
     }
 
+    onDeleteClick(event: Event, model: AiModel): void {
+        event.stopPropagation();
+        this.deleteModel(model);
+    }
+
     closeModal(): void {
         this.showModal = false;
+    }
+
+    private extractArray<T>(response: unknown): T[] {
+        if (Array.isArray(response)) return response;
+        if (!response || typeof response !== 'object') return [];
+
+        const source = response as { data?: unknown; items?: unknown; result?: unknown; $values?: unknown };
+
+        if (Array.isArray(source.$values)) return source.$values as T[];
+        if (Array.isArray(source.items)) return source.items as T[];
+        if (Array.isArray(source.result)) return source.result as T[];
+        if (Array.isArray(source.data)) return source.data as T[];
+
+        return [];
+    }
+
+    private buildProviderGroups(items: AiModel[]): AiModelProviderGroup[] {
+        const groups: Record<string, AiModel[]> = {};
+
+        items.forEach(item => {
+            const category = (this.getProviderName(item.aiProviderId) || '').trim() || 'Diğer';
+            if (!groups[category]) {
+                groups[category] = [];
+            }
+            groups[category].push(item);
+        });
+
+        return Object.keys(groups)
+            .sort((a, b) => a.localeCompare(b, 'tr'))
+            .map(category => ({
+                category,
+                items: groups[category],
+            }));
     }
 }
