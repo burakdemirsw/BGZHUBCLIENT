@@ -1,0 +1,251 @@
+<div class="page-surface p-3">
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small mb-1">Sayfada Ara</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Sipariş no, müşteri, ürün, barkod..."
+                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Sipariş No</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="orderNumberFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Başlangıç</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="startDate" (ngModelChange)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Bitiş</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="endDate" (ngModelChange)="onServerFilterChange()">
+        </div>
+        <div class="col-md-1 d-flex gap-1">
+            <button class="btn btn-light btn-sm flex-fill" (click)="clearFilters()" title="Filtreleri temizle">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+            <button class="btn btn-light btn-sm flex-fill" (click)="load()" [disabled]="loading" title="Yenile">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+        <div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Siparişler yükleniyor...</p>
+        </div>
+    } @else {
+        <div class="table-responsive">
+            <table class="table table-centered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>İşlemler</th>
+                        <th>Sipariş No</th>
+                        <th>Tarih</th>
+                        <th>Müşteri</th>
+                        <th>Ürün</th>
+                        <th>Tutar</th>
+                        <th>Kargo</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (order of pagedItems; track $index) {
+                        <tr>
+                            <td class="text-nowrap">
+                                <button class="btn btn-soft-primary btn-sm" (click)="openDetail(order)" title="Detay">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </td>
+                            <td class="fw-semibold">{{ order.siparisNo || '-' }}</td>
+                            <td class="text-nowrap">{{ order.siparisTarihi ? (order.siparisTarihi | date:'dd.MM.yyyy HH:mm') : '-' }}</td>
+                            <td>{{ customerName(order) }}</td>
+                            <td class="product-cell">
+                                @if (order.urunler?.length) {
+                                    <div class="text-truncate">{{ firstProductName(order) }}</div>
+                                    <small class="text-muted">
+                                        {{ stockCount(order) }} adet
+                                        @if (order.urunler!.length > 1) {
+                                            · +{{ order.urunler!.length - 1 }} ürün
+                                        }
+                                    </small>
+                                } @else {
+                                    -
+                                }
+                            </td>
+                            <td class="text-nowrap">{{ order.toplamTutar | number:'1.2-2' }} {{ order.paraBirimi }}</td>
+                            <td>
+                                <div>{{ order.kargoFirmaTanim || '-' }}</div>
+                                @if (order.kargoTakipNo) {
+                                    @if (order.kargoTakipLink) {
+                                        <a [href]="order.kargoTakipLink" target="_blank" rel="noopener" class="small">
+                                            {{ order.kargoTakipNo }} <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                        </a>
+                                    } @else {
+                                        <small class="text-muted">{{ order.kargoTakipNo }}</small>
+                                    }
+                                }
+                            </td>
+                            <td>
+                                <span class="badge" [ngClass]="statusClass(order.siparisDurumu)">{{ order.siparisDurumu || '-' }}</span>
+                                @if (order.paketlemeDurumu) {
+                                    <div><small class="text-muted">{{ order.paketlemeDurumu }}</small></div>
+                                }
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">Sipariş bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <app-table-pager [currentPage]="currentPage" [totalPages]="totalPages" [totalCount]="totalCount"
+            [shownCount]="filteredItems.length" [knownTotal]="knownTotal" (pageChange)="setPage($event)" />
+    }
+</div>
+
+@if (showModal && selectedOrder) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-box me-2"></i>Sipariş {{ selectedOrder.siparisNo }}
+                        <span class="badge ms-2" [ngClass]="statusClass(selectedOrder.siparisDurumu)">{{ selectedOrder.siparisDurumu || '-' }}</span>
+                    </h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <div class="detail-box">
+                                <div class="fw-semibold mb-2"><i class="fa-solid fa-user me-1"></i>Müşteri</div>
+                                <div>{{ customerName(selectedOrder) }}</div>
+                                <div class="small text-muted">{{ selectedOrder.mail || '-' }}</div>
+                                <div class="small text-muted">{{ selectedOrder.teslimatAdresi?.aliciTelefon }}</div>
+                                @if (selectedOrder.siparisKaynagi) {
+                                    <div class="small text-muted">Kaynak: {{ selectedOrder.siparisKaynagi }}</div>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-box">
+                                <div class="fw-semibold mb-2"><i class="fa-solid fa-location-dot me-1"></i>Teslimat Adresi</div>
+                                <div class="small">{{ selectedOrder.teslimatAdresi?.aliciAdi }}</div>
+                                <div class="small">{{ selectedOrder.teslimatAdresi?.adres || '-' }}</div>
+                                <div class="small text-muted">
+                                    {{ selectedOrder.teslimatAdresi?.ilce }} / {{ selectedOrder.teslimatAdresi?.il }}
+                                </div>
+                                <div class="small text-muted">{{ selectedOrder.teslimatAdresi?.aliciTelefon }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-box small">
+                                <div class="fw-semibold mb-2"><i class="fa-solid fa-file-invoice me-1"></i>Fatura &amp; Kargo</div>
+                                <div>{{ selectedOrder.faturaAdresi?.isKurumsal ? 'Kurumsal' : 'Bireysel' }}</div>
+                                @if (selectedOrder.faturaAdresi?.firmaAdi) {
+                                    <div>{{ selectedOrder.faturaAdresi?.firmaAdi }}</div>
+                                }
+                                @if (selectedOrder.faturaAdresi?.vergiNo) {
+                                    <div class="text-muted">{{ selectedOrder.faturaAdresi?.vergiDairesi }} / {{ selectedOrder.faturaAdresi?.vergiNo }}</div>
+                                }
+                                <div class="text-muted">
+                                    {{ selectedOrder.faturaAdresi?.ilce }} / {{ selectedOrder.faturaAdresi?.il }}
+                                </div>
+                                <div>Fatura No: {{ selectedOrder.faturaNo || '-' }}</div>
+                                <div>Kargo: {{ selectedOrder.kargoFirmaTanim || '-' }}</div>
+                                <div>Takip No: {{ selectedOrder.kargoTakipNo || '-' }}</div>
+                                @if (selectedOrder.faturaUrl) {
+                                    <a [href]="selectedOrder.faturaUrl" target="_blank" rel="noopener">Faturayı Görüntüle</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="mb-2">Ürünler</h6>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-centered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Ürün</th>
+                                    <th>Stok Kodu</th>
+                                    <th>Barkod</th>
+                                    <th class="text-end">Adet</th>
+                                    <th class="text-end">Birim Fiyat</th>
+                                    <th class="text-end">KDV %</th>
+                                    <th class="text-end">Tutar</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (line of selectedOrder.urunler ?? []; track $index) {
+                                    <tr>
+                                        <td>{{ line.urunAdi || '-' }}</td>
+                                        <td>{{ line.stokKodu || '-' }}</td>
+                                        <td>{{ line.barkod || '-' }}</td>
+                                        <td class="text-end">{{ line.adet }}</td>
+                                        <td class="text-end text-nowrap">{{ line.satisAniIndirimliFiyat | number:'1.2-2' }}</td>
+                                        <td class="text-end">{{ line.kdvOrani | number:'1.0-2' }}</td>
+                                        <td class="text-end text-nowrap">{{ lineTotal(line) | number:'1.2-2' }}</td>
+                                        <td>{{ line.durumAd || '-' }}</td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="8" class="text-center text-muted">Ürün yok.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if (selectedOrder.odemeler?.length) {
+                        <h6 class="mb-2">Ödemeler</h6>
+                        <div class="table-responsive mb-3">
+                            <table class="table table-sm table-centered mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tarih</th>
+                                        <th class="text-end">Tutar</th>
+                                        <th class="text-end">Taksit</th>
+                                        <th>Para Birimi</th>
+                                        <th>Not</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (odeme of selectedOrder.odemeler ?? []; track $index) {
+                                        <tr>
+                                            <td class="text-nowrap">{{ odeme.tarih ? (odeme.tarih | date:'dd.MM.yyyy HH:mm') : '-' }}</td>
+                                            <td class="text-end text-nowrap">{{ odeme.tutar | number:'1.2-2' }}</td>
+                                            <td class="text-end">{{ odeme.taksitSayisi || '-' }}</td>
+                                            <td>{{ odeme.paraBirimi || '-' }}</td>
+                                            <td>{{ odeme.odemeNotu || '-' }}</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-end flex-wrap gap-4 small mb-3">
+                        <span>Ara Toplam: <strong>{{ selectedOrder.tutar | number:'1.2-2' }}</strong></span>
+                        <span>İndirim: <strong>{{ selectedOrder.indirimTutari | number:'1.2-2' }}</strong></span>
+                        <span>Kargo: <strong>{{ selectedOrder.kargoTutari | number:'1.2-2' }}</strong></span>
+                        <span>KDV: <strong>{{ selectedOrder.toplamKdv | number:'1.2-2' }}</strong></span>
+                        <span>Toplam: <strong>{{ selectedOrder.toplamTutar | number:'1.2-2' }} {{ selectedOrder.paraBirimi }}</strong></span>
+                    </div>
+
+                    @if (selectedOrder.siparisNotu) {
+                        <h6 class="mb-2">Sipariş Notu</h6>
+                        <p class="small mb-0">{{ selectedOrder.siparisNotu }}</p>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

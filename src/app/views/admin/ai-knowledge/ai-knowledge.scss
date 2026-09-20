@@ -937,3 +937,56 @@
     color: #374151;
     margin-bottom: 6px;
 }
+
+// ── Diğer asistanlara uygula ──
+.modal-card-lg { max-width: 720px; }
+
+.btn-action-propagate {
+    background: #ecfdf5;
+    color: #059669;
+
+    &:hover { background: #d1fae5; color: #047857; }
+}
+
+.propagate-source {
+    background: #f7f7f9;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+}
+
+.propagate-value {
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 120px;
+    overflow: auto;
+}
+
+.propagate-list {
+    display: grid;
+    gap: 0.5rem;
+    max-height: 45vh;
+    overflow-y: auto;
+}
+
+.propagate-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    margin: 0;
+
+    &.is-selected { border-color: #86b7fe; background: #f5f9ff; }
+    &.is-disabled { opacity: 0.6; cursor: default; }
+}
+
+.propagate-diff {
+    font-size: 0.78rem;
+    margin-top: 0.25rem;
+    word-break: break-word;
+}

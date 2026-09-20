@@ -7,6 +7,7 @@ import { ExtensionRequestLogsService } from '@/app/core/services/extension-reque
 import { ClipboardService } from '@/app/core/services/clipboard.service';
 import { AiRequestLogSummaryResponse } from '@/app/core/models/ai-request-log/ai-request-log.models';
 import { ExtensionRequestLogSummaryResponse } from '@/app/core/models/extension-request-log/extension-request-log.models';
+import { parseLogDate } from '@/app/core/utils/log-date.util';
 
 type LogKind = 'ai' | 'extension';
 type KindFilter = 'all' | LogKind;
@@ -54,6 +55,8 @@ interface ConversationLogDetail {
 export class ConversationLogsPage implements OnInit, OnChanges {
     @Input() conversationId: string | null = null;
     @Input() showClose = false;
+    /** true ise bileşen tam ekran açılır (ör. sohbetteki log paneli) */
+    @Input() startFullscreen = false;
     @Output() closed = new EventEmitter<void>();
 
     /** Tam ekran durumu değiştiğinde host'a (ör. yan panel) bildirilir */
@@ -99,6 +102,9 @@ export class ConversationLogsPage implements OnInit, OnChanges {
     ) {}
 
     ngOnInit(): void {
+        // Host zaten tam ekran açtığı için olay yayınlanmaz, sadece durum eşitlenir
+        if (this.startFullscreen) this.fullscreen = true;
+
         // Sayfa olarak açıldıysa conversationId query param'dan gelir
         if (!this.conversationId) {
             this.conversationId = this.route.snapshot.queryParamMap.get('conversationId');
@@ -162,7 +168,7 @@ export class ConversationLogsPage implements OnInit, OnChanges {
                 kind: 'ai' as const,
                 id: log.id,
                 createdDate: log.createdDate,
-                time: this.toEpoch(log.createdDate),
+                time: parseLogDate(log.createdDate, 'local'),
                 isSuccess: log.isSuccess,
                 title: log.model || 'AI isteği',
                 subtitle: 'AI Request',
@@ -179,7 +185,7 @@ export class ConversationLogsPage implements OnInit, OnChanges {
                 kind: 'extension' as const,
                 id: log.id,
                 createdDate: log.createdDate,
-                time: this.toEpoch(log.createdDate),
+                time: parseLogDate(log.createdDate, 'utc'),
                 isSuccess: log.isSuccess,
                 title: log.toolName || 'Tool çağrısı',
                 subtitle: log.providerCode || 'Extension',
@@ -191,9 +197,10 @@ export class ConversationLogsPage implements OnInit, OnChanges {
             })),
         ];
 
-        merged.sort((a, b) => a.time - b.time);
+        // En yeni kayıt en üstte
+        merged.sort((a, b) => b.time - a.time);
         for (let i = 1; i < merged.length; i++) {
-            merged[i].deltaMs = merged[i].time - merged[i - 1].time;
+            merged[i].deltaMs = merged[i - 1].time - merged[i].time;
         }
         return merged;
     }
@@ -399,7 +406,7 @@ export class ConversationLogsPage implements OnInit, OnChanges {
 
     formatDelta(ms: number | null): string {
         if (ms === null || ms < 0) return '';
-        return '+' + this.formatDuration(ms);
+        return this.formatDuration(ms) + ' önce';
     }
 
     formatTokens(value?: number | null): string {
@@ -429,13 +436,6 @@ export class ConversationLogsPage implements OnInit, OnChanges {
 
     private escapeRegExp(value: string): string {
         return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
-    private toEpoch(value?: string): number {
-        if (!value) return 0;
-        // Diğer log sayfalarıyla aynı yorumlama (date pipe ile tutarlı)
-        const time = new Date(value).getTime();
-        return Number.isFinite(time) ? time : 0;
     }
 
     private extractArray<T>(response: unknown): T[] {

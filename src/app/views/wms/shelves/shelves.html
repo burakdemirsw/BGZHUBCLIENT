@@ -1,0 +1,251 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-pallet me-2"></i>Raflar</h4>
+                <button class="btn btn-primary btn-sm" (click)="openCreate()">
+                    <i class="fa-solid fa-plus me-1"></i>Yeni Raf
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="d-flex mb-3 gap-2">
+                    <input type="text" class="form-control form-control-sm w-auto"
+                           placeholder="Raf kodu, barkod veya depo ara..."
+                           [(ngModel)]="filterText"
+                           (ngModelChange)="onFilterChange()">
+                </div>
+
+                @if (loading) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>İşlemler</th>
+                                    <th>#</th>
+                                    <th>Raf Kodu</th>
+                                    <th>Raf Adı</th>
+                                    <th>Depo</th>
+                                    <th>Bölge</th>
+                                    <th>Koridor</th>
+                                    <th>Seviye</th>
+                                    <th class="text-center">Durum</th>
+                                    <th>Oluşturulma</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of pagedItems; track item.id; let idx = $index) {
+                                    <tr>
+                                        <td class="text-nowrap">
+                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(item)" title="Düzenle">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </button>
+                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteItem(item)" title="Sil">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">{{ rowNumber(idx) }}</span>
+                                        </td>
+                                        <td><span class="fw-semibold">{{ item.shelfCode || '—' }}</span></td>
+                                        <td>{{ item.shelfDescription || '—' }}</td>
+                                        <td>{{ item.warehouseCode || '—' }}</td>
+                                        <td>{{ item.zone || '—' }}</td>
+                                        <td>{{ item.aisle || '—' }}</td>
+                                        <td>{{ item.shelfLevel || '—' }}</td>
+                                        <td class="text-center">
+                                            <div class="form-check form-switch mb-0 d-inline-flex align-items-center gap-2">
+                                                <input class="form-check-input" type="checkbox" role="switch"
+                                                       [checked]="item.isActive"
+                                                       [disabled]="togglingId === item.id"
+                                                       (click)="$event.preventDefault(); toggleActive(item)">
+                                                @if (item.isActive) {
+                                                    <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                } @else {
+                                                    <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                }
+                                            </div>
+                                        </td>
+                                        <td class="small text-muted">{{ item.createdDate | date:'dd.MM.yyyy HH:mm' }}</td>
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td colspan="10" class="text-center text-muted">Kayıt bulunamadı.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Sayfalama -->
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="small text-muted">
+                            Toplam: {{ filteredItems.length }} kayıt
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track $index) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+@if (showModal) {
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ editMode ? 'Raf Düzenle' : 'Yeni Raf' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body wms-form-body">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Ofis <span class="text-danger">*</span></label>
+                                    <select class="form-select" [(ngModel)]="form.officeCode" name="officeCode" required>
+                                        <option value="">Seçiniz...</option>
+                                        @for (option of offices; track option.id) {
+                                            <option [value]="option.officeCode">
+                                                {{ option.officeDescription || option.officeCode }}
+                                            </option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Depo <span class="text-danger">*</span></label>
+                                    <select class="form-select" [(ngModel)]="form.warehouseCode" name="warehouseCode" required>
+                                        <option value="">Seçiniz...</option>
+                                        @for (option of warehouses; track option.id) {
+                                            <option [value]="option.warehouseCode">
+                                                {{ option.warehouseDescription || option.warehouseCode }}
+                                            </option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Raf Kodu <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" [(ngModel)]="form.shelfCode"
+                                           name="shelfCode" required placeholder="Raf Kodu giriniz...">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Raf Adı <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" [(ngModel)]="form.shelfDescription"
+                                           name="shelfDescription" required placeholder="Raf Adı giriniz...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Raf Barkodu</label>
+                                    <input type="text" class="form-control" [(ngModel)]="form.shelfBarcode"
+                                           name="shelfBarcode" placeholder="Raf Barkodu giriniz...">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Üst Raf Kodu</label>
+                                    <input type="text" class="form-control" [(ngModel)]="form.parentShelfCode"
+                                           name="parentShelfCode" placeholder="Üst Raf Kodu giriniz...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Bölge</label>
+                                    <input type="text" class="form-control" [(ngModel)]="form.zone"
+                                           name="zone" placeholder="Bölge giriniz...">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Koridor</label>
+                                    <input type="text" class="form-control" [(ngModel)]="form.aisle"
+                                           name="aisle" placeholder="Koridor giriniz...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Göz</label>
+                                    <input type="text" class="form-control" [(ngModel)]="form.bay"
+                                           name="bay" placeholder="Göz giriniz...">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Seviye</label>
+                                    <input type="text" class="form-control" [(ngModel)]="form.shelfLevel"
+                                           name="shelfLevel" placeholder="Seviye giriniz...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Toplama Sırası</label>
+                                    <input type="number" class="form-control" [(ngModel)]="form.pickSequence"
+                                           name="pickSequence" placeholder="Toplama Sırası giriniz...">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Kapasite</label>
+                                    <input type="number" class="form-control" [(ngModel)]="form.capacity"
+                                           name="capacity" placeholder="Kapasite giriniz...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Maks. Ağırlık</label>
+                            <input type="number" class="form-control" [(ngModel)]="form.maxWeight"
+                                   name="maxWeight" placeholder="Maks. Ağırlık giriniz...">
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" [(ngModel)]="form.isActive"
+                                   name="isActive" id="shelvesIsActive">
+                            <label class="form-check-label" for="shelvesIsActive">Aktif</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" [disabled]="!isFormValid || saving" (click)="save()">
+                        {{ editMode ? 'Güncelle' : 'Kaydet' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -471,7 +471,8 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     toggleLogsPanel(): void {
         if (!this.activeConversationId) return;
         this.showLogsPanel = !this.showLogsPanel;
-        if (!this.showLogsPanel) this.logsFullscreen = false;
+        // Panel doğrudan tam ekran açılır; tam ekrandan çıkınca yan panel olarak kalır
+        this.logsFullscreen = this.showLogsPanel;
     }
 
     closeLogsPanel(): void {

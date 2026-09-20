@@ -6,6 +6,8 @@ import { Menu, CreateMenuRequest, UpdateMenuRequest } from '@/app/core/models/me
 import { FA_ICONS } from '@/app/constants/fa-icons';
 import { UserMenuService } from '@/app/core/services/user-menu.service';
 
+const LAST_PARENT_KEY = 'admin.menus.lastParentId';
+
 @Component({
     selector: 'app-menus-page',
     imports: [CommonModule, FormsModule],
@@ -17,6 +19,8 @@ export class MenusPage implements OnInit {
     showModal = false;
     editMode = false;
     selectedMenu: Menu | null = null;
+    /** Son eklenen menünün üst menüsü; yeni kayıtta varsayılan olarak seçilir */
+    private lastParentId: string | null = this.readLastParentId();
 
     // Datatable filter & pagination
     filterText: string = '';
@@ -108,7 +112,9 @@ export class MenusPage implements OnInit {
     openCreate(): void {
         this.editMode = false;
         this.selectedMenu = null;
-        this.form = { parentId: null, name: '', description: '', url: '', icon: '', colorCode: '', orderIndex: 0, isBlocked: false, isInvisible: false };
+        // Son kullanılan üst menü hâlâ mevcutsa hatırlanır
+        const parentId = this.lastParentId && this.menus.some((m) => m.id === this.lastParentId) ? this.lastParentId : null;
+        this.form = { parentId, name: '', description: '', url: '', icon: '', colorCode: '', orderIndex: 0, isBlocked: false, isInvisible: false };
         this.showModal = true;
     }
 
@@ -156,6 +162,7 @@ export class MenusPage implements OnInit {
                     isInvisible: this.form.isInvisible,
                 };
                 await this.menusService.create(req);
+                this.rememberLastParentId(req.parentId);
             }
             this.showModal = false;
             await this.loadMenus();
@@ -164,6 +171,7 @@ export class MenusPage implements OnInit {
             console.error('Save error:', err);
             // Backend CreatedAtAction route hatası — kayıt oluşmuş olabilir
             if (err?.status === 400 && JSON.stringify(err.error)?.includes('No route matches')) {
+                if (!this.editMode) this.rememberLastParentId(this.form.parentId);
                 this.showModal = false;
                 await this.loadMenus();
                 await this.userMenuService.loadUserMenus();
@@ -188,6 +196,24 @@ export class MenusPage implements OnInit {
             } catch (err) {
                 console.error('Delete error:', err);
             }
+        }
+    }
+
+    private rememberLastParentId(parentId: string | null): void {
+        this.lastParentId = parentId;
+        try {
+            if (parentId) localStorage.setItem(LAST_PARENT_KEY, parentId);
+            else localStorage.removeItem(LAST_PARENT_KEY);
+        } catch {
+            // localStorage kullanılamıyorsa yalnızca bu oturumda hatırlanır
+        }
+    }
+
+    private readLastParentId(): string | null {
+        try {
+            return localStorage.getItem(LAST_PARENT_KEY);
+        } catch {
+            return null;
         }
     }
 

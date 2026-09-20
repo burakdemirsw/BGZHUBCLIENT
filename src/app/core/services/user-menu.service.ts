@@ -3,6 +3,7 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 import { MenusService } from './menus.service';
 import { MenuItemType } from '@/app/types/layout';
 import { Menu, RoleMenu } from '@/app/core/models/menu/menu.models';
+import { WMS_MENU_ITEMS } from '@/app/views/wms/wms-menu';
 
 @Injectable({
   providedIn: 'root',
@@ -42,7 +43,7 @@ export class UserMenuService {
   async loadUserMenus(): Promise<void> {
     const userId = this.getUserIdFromToken();
     if (!userId) {
-      this.userMenuItems = [];
+      this.userMenuItems = this.withStaticMenus([]);
       this.loaded = true;
       return;
     }
@@ -82,11 +83,11 @@ export class UserMenuService {
         .sort((a, b) => a.orderIndex - b.orderIndex);
 
       // 6) Ağaç yapısına dönüştür
-      this.userMenuItems = this.buildMenuTree(finalMenus);
+      this.userMenuItems = this.withStaticMenus(this.buildMenuTree(finalMenus));
       this.loaded = true;
     } catch (err) {
       console.error('UserMenuService loadUserMenus error:', err);
-      this.userMenuItems = [];
+      this.userMenuItems = this.withStaticMenus([]);
       this.loaded = true;
     }
   }
@@ -140,6 +141,14 @@ export class UserMenuService {
     }
 
     return result;
+  }
+
+  /**
+   * Veritabanından gelen menülere kod tarafında tanımlı statik bölümleri ekler.
+   * WMS menüsü veritabanına kaydedilmediği için buradan eklenir.
+   */
+  private withStaticMenus(items: MenuItemType[]): MenuItemType[] {
+    return [...items, ...WMS_MENU_ITEMS];
   }
 
   /** Menüleri temizle */

@@ -1,0 +1,232 @@
+<div class="page-surface p-3">
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Sayfada Ara</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Sipariş no, müşteri, ürün, SKU..."
+                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Shopify Araması</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="searchFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Ödeme Durumu</label>
+            <select class="form-select form-select-sm" [(ngModel)]="financialFilter" (ngModelChange)="onServerFilterChange()">
+                <option value="">Tümü</option>
+                @for (option of financialOptions; track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Gönderim Durumu</label>
+            <select class="form-select form-select-sm" [(ngModel)]="fulfillmentFilter" (ngModelChange)="onServerFilterChange()">
+                <option value="">Tümü</option>
+                @for (option of fulfillmentOptions; track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-1">
+            <label class="form-label small mb-1">Başlangıç</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="startDate" (ngModelChange)="onServerFilterChange()">
+        </div>
+        <div class="col-md-1">
+            <label class="form-label small mb-1">Bitiş</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="endDate" (ngModelChange)="onServerFilterChange()">
+        </div>
+        <div class="col-md-1 d-flex gap-1">
+            <button class="btn btn-light btn-sm flex-fill" (click)="clearFilters()" title="Filtreleri temizle">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+            <button class="btn btn-light btn-sm flex-fill" (click)="load()" [disabled]="loading" title="Yenile">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+        <div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Siparişler yükleniyor...</p>
+        </div>
+    } @else {
+        <div class="table-responsive">
+            <table class="table table-centered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>İşlemler</th>
+                        <th>Sipariş</th>
+                        <th>Tarih</th>
+                        <th>Müşteri</th>
+                        <th>Ürün</th>
+                        <th>Tutar</th>
+                        <th>Ödeme</th>
+                        <th>Gönderim</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (order of pagedItems; track $index) {
+                        <tr>
+                            <td class="text-nowrap">
+                                <button class="btn btn-soft-primary btn-sm" (click)="openDetail(order)" title="Detay">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </td>
+                            <td class="fw-semibold">{{ order.name || '-' }}</td>
+                            <td class="text-nowrap">{{ order.processedAt || order.createdAt | date:'dd.MM.yyyy HH:mm' }}</td>
+                            <td>
+                                <div>{{ order.customer?.displayName || '-' }}</div>
+                                <small class="text-muted">{{ order.email }}</small>
+                            </td>
+                            <td class="product-cell">
+                                @if (lines(order).length) {
+                                    <div class="text-truncate">{{ lines(order)[0].title }}</div>
+                                    <small class="text-muted">
+                                        {{ totalQuantity(order) }} adet
+                                        @if (lines(order).length > 1) {
+                                            · +{{ lines(order).length - 1 }} ürün
+                                        }
+                                    </small>
+                                } @else {
+                                    -
+                                }
+                            </td>
+                            <td class="text-nowrap">{{ amount(order.totalPriceSet) | number:'1.2-2' }} {{ currency(order) }}</td>
+                            <td>
+                                <span class="badge" [ngClass]="financialClass(order.displayFinancialStatus)">
+                                    {{ financialLabel(order.displayFinancialStatus) }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge" [ngClass]="fulfillmentClass(order.displayFulfillmentStatus)">
+                                    {{ fulfillmentLabel(order.displayFulfillmentStatus) }}
+                                </span>
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">Sipariş bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <app-table-pager [currentPage]="currentPage" [totalPages]="totalPages" [totalCount]="totalCount"
+            [shownCount]="filteredItems.length" [knownTotal]="knownTotal" (pageChange)="setPage($event)" />
+    }
+</div>
+
+@if (showModal && selectedOrder) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-bag-shopping me-2"></i>Sipariş {{ selectedOrder.name }}
+                        <span class="badge ms-2" [ngClass]="financialClass(selectedOrder.displayFinancialStatus)">
+                            {{ financialLabel(selectedOrder.displayFinancialStatus) }}
+                        </span>
+                        <span class="badge ms-1" [ngClass]="fulfillmentClass(selectedOrder.displayFulfillmentStatus)">
+                            {{ fulfillmentLabel(selectedOrder.displayFulfillmentStatus) }}
+                        </span>
+                    </h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <div class="detail-box">
+                                <div class="fw-semibold mb-2"><i class="fa-solid fa-user me-1"></i>Müşteri</div>
+                                <div>{{ selectedOrder.customer?.displayName || '-' }}</div>
+                                <div class="small text-muted">{{ selectedOrder.email || selectedOrder.customer?.defaultEmailAddress?.emailAddress }}</div>
+                                <div class="small text-muted">{{ selectedOrder.phone || selectedOrder.customer?.phone }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-box">
+                                <div class="fw-semibold mb-2"><i class="fa-solid fa-location-dot me-1"></i>Teslimat Adresi</div>
+                                <div class="small">{{ selectedOrder.shippingAddress?.address1 || '-' }}</div>
+                                <div class="small">{{ selectedOrder.shippingAddress?.address2 }}</div>
+                                <div class="small text-muted">
+                                    {{ selectedOrder.shippingAddress?.city }} / {{ selectedOrder.shippingAddress?.province }}
+                                    {{ selectedOrder.shippingAddress?.country }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-box small">
+                                <div class="fw-semibold mb-2"><i class="fa-solid fa-truck me-1"></i>Kargo &amp; Not</div>
+                                @if (tracking(selectedOrder); as info) {
+                                    <div>Kargo: {{ info.company || '-' }}</div>
+                                    <div>Takip No: {{ info.number || '-' }}</div>
+                                    @if (info.url) {
+                                        <a [href]="info.url" target="_blank" rel="noopener">Takip Et</a>
+                                    }
+                                } @else {
+                                    <div class="text-muted">Gönderim kaydı yok.</div>
+                                }
+                                @if (selectedOrder.note) {
+                                    <div class="mt-2">Not: {{ selectedOrder.note }}</div>
+                                }
+                                @if (selectedOrder.tags?.length) {
+                                    <div class="mt-2 d-flex flex-wrap gap-1">
+                                        @for (tag of selectedOrder.tags ?? []; track $index) {
+                                            <span class="badge bg-primary-subtle text-primary">{{ tag }}</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="mb-2">Ürünler</h6>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-centered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Ürün</th>
+                                    <th>Varyant</th>
+                                    <th>SKU</th>
+                                    <th>Barkod</th>
+                                    <th class="text-end">Adet</th>
+                                    <th class="text-end">Birim Fiyat</th>
+                                    <th class="text-end">İndirimli</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (line of lines(selectedOrder); track $index) {
+                                    <tr>
+                                        <td>{{ line.title }}</td>
+                                        <td>{{ line.variantTitle || '-' }}</td>
+                                        <td>{{ line.sku || '-' }}</td>
+                                        <td>{{ line.variant?.barcode || '-' }}</td>
+                                        <td class="text-end">{{ line.quantity }}</td>
+                                        <td class="text-end text-nowrap">{{ amount(line.originalUnitPriceSet) | number:'1.2-2' }}</td>
+                                        <td class="text-end text-nowrap">{{ amount(line.discountedUnitPriceSet) | number:'1.2-2' }}</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-end flex-wrap gap-4 small">
+                        <span>Ara Toplam: <strong>{{ amount(selectedOrder.subtotalPriceSet) | number:'1.2-2' }}</strong></span>
+                        <span>Kargo: <strong>{{ amount(selectedOrder.totalShippingPriceSet) | number:'1.2-2' }}</strong></span>
+                        <span>İndirim: <strong>{{ amount(selectedOrder.totalDiscountsSet) | number:'1.2-2' }}</strong></span>
+                        <span>Vergi: <strong>{{ amount(selectedOrder.totalTaxSet) | number:'1.2-2' }}</strong></span>
+                        <span>Toplam: <strong>{{ amount(selectedOrder.totalPriceSet) | number:'1.2-2' }} {{ currency(selectedOrder) }}</strong></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

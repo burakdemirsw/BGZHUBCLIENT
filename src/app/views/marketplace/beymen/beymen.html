@@ -1,0 +1,38 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex align-items-center gap-2">
+                <span class="brand-mark">B</span>
+                <h4 class="card-title mb-0">Beymen Mağazam</h4>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs mb-3">
+                    @for (tab of tabs; track tab.key) {
+                        <li class="nav-item">
+                            <button class="nav-link" [class.active]="activeTab === tab.key" (click)="selectTab(tab.key)">
+                                <i [class]="tab.icon + ' me-1'"></i>{{ tab.label }}
+                            </button>
+                        </li>
+                    }
+                </ul>
+
+                @if (activeTab !== 'customers') {
+                    <div class="alert alert-light py-2 small">
+                        <i class="fa-solid fa-circle-info me-1"></i>
+                        Beymen uç noktaları şemasız JSON döndürür; kolonlar gelen veriye göre oluşturulur.
+                    </div>
+                }
+
+                @if (visited.has('orders')) {
+                    <app-beymen-orders [hidden]="activeTab !== 'orders'" />
+                }
+                @if (visited.has('questions')) {
+                    <app-beymen-questions [hidden]="activeTab !== 'questions'" />
+                }
+                @if (visited.has('customers')) {
+                    <app-marketplace-customers [hidden]="activeTab !== 'customers'" [fetch]="loadCustomers" />
+                }
+            </div>
+        </div>
+    </div>
+</div>

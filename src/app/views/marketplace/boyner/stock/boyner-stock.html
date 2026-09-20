@@ -1,0 +1,135 @@
+<div class="page-surface p-3">
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Barkod</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Barkod girin"
+                [(ngModel)]="barcodeInput" (keyup.enter)="search()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Ürün Kodu</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Ürün / model kodu girin"
+                [(ngModel)]="productCodeInput" (keyup.enter)="search()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Sonuçta Ara</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Barkod, stok kodu, ürün, renk..."
+                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-md-3 d-flex gap-1">
+            <button class="btn btn-primary btn-sm flex-fill" (click)="search()" [disabled]="loading">
+                <i class="fa-solid fa-magnifying-glass me-1"></i>Sorgula
+            </button>
+            <button class="btn btn-light btn-sm" (click)="clearFilters()" title="Temizle">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+        <div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Stok bilgisi sorgulanıyor...</p>
+        </div>
+    } @else if (!searched) {
+        <div class="text-center text-muted py-5">
+            <i class="fa-solid fa-boxes-stacked fa-2x mb-2 d-block"></i>
+            Barkod veya ürün kodu girip <strong>Sorgula</strong> butonuna basın.
+        </div>
+    } @else {
+        @if (result) {
+            <div class="summary-box d-flex flex-wrap gap-4 align-items-center mb-3">
+                <span class="small">Barkod: <strong>{{ result.barcode || '-' }}</strong></span>
+                <span class="small">Ürün Kodu: <strong>{{ result.productCode || '-' }}</strong></span>
+                <span class="small">
+                    Toplam Stok:
+                    <span class="badge" [ngClass]="stockClass(result.totalQuantity)">{{ result.totalQuantity ?? 0 }}</span>
+                </span>
+            </div>
+        }
+
+        <div class="table-responsive">
+            <table class="table table-centered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>İşlemler</th>
+                        <th>Barkod</th>
+                        <th>Stok Kodu</th>
+                        <th>Model Kodu</th>
+                        <th>Ürün</th>
+                        <th>Renk / Beden</th>
+                        <th>Stok</th>
+                        <th>Satış / Liste Fiyatı</th>
+                        <th>Satışta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (item of pagedItems; track $index) {
+                        <tr>
+                            <td class="text-nowrap">
+                                <button class="btn btn-soft-primary btn-sm" (click)="openDetail(item)" title="Detay">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </td>
+                            <td class="text-nowrap fw-semibold">{{ item.barcode || '-' }}</td>
+                            <td class="text-nowrap">{{ item.stockCode || '-' }}</td>
+                            <td class="text-nowrap">{{ item.productMainId || '-' }}</td>
+                            <td class="product-cell"><span class="text-truncate d-block">{{ item.title || '-' }}</span></td>
+                            <td class="text-nowrap">{{ item.color || '-' }} / {{ item.size || '-' }}</td>
+                            <td><span class="badge" [ngClass]="stockClass(item.quantity)">{{ item.quantity ?? 0 }}</span></td>
+                            <td class="text-nowrap">
+                                {{ item.salePrice | number:'1.2-2' }} / {{ item.listPrice | number:'1.2-2' }}
+                            </td>
+                            <td>
+                                @if (item.isOnSale) {
+                                    <span class="badge bg-success-subtle text-success">Evet</span>
+                                } @else {
+                                    <span class="badge bg-danger-subtle text-danger">Hayır</span>
+                                }
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-4">Stok kaydı bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <app-table-pager [currentPage]="currentPage" [totalPages]="totalPages" [totalCount]="filteredItems.length"
+            [shownCount]="pagedItems.length" (pageChange)="setPage($event)" />
+    }
+</div>
+
+@if (showModal && selectedItem) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-boxes-stacked me-2"></i>{{ selectedItem.title || 'Stok Detayı' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body small">
+                    <div class="detail-box">
+                        <div>Barkod: <strong>{{ selectedItem.barcode || '-' }}</strong></div>
+                        <div>Stok Kodu: <strong>{{ selectedItem.stockCode || '-' }}</strong></div>
+                        <div>Model Kodu: <strong>{{ selectedItem.productMainId || '-' }}</strong></div>
+                        <div>Renk / Beden: <strong>{{ selectedItem.color || '-' }} / {{ selectedItem.size || '-' }}</strong></div>
+                        <div>Stok:
+                            <span class="badge" [ngClass]="stockClass(selectedItem.quantity)">{{ selectedItem.quantity ?? 0 }}</span>
+                        </div>
+                        <div>Satış Fiyatı: <strong>{{ selectedItem.salePrice | number:'1.2-2' }}</strong></div>
+                        <div>Liste Fiyatı: <strong>{{ selectedItem.listPrice | number:'1.2-2' }}</strong></div>
+                        <div>Satışta: <strong>{{ selectedItem.isOnSale ? 'Evet' : 'Hayır' }}</strong></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

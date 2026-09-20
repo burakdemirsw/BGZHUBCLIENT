@@ -1,0 +1,182 @@
+<div class="page-surface p-3">
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small mb-1">Sayfada Ara</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Ad soyad, e-posta, telefon, şehir..."
+                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small mb-1">E-posta</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="emailFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Telefon</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="phoneFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Müşteri Kodu</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="customerCodeFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-1 d-flex gap-1">
+            <button class="btn btn-light btn-sm flex-fill" (click)="clearFilters()" title="Filtreleri temizle">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+            <button class="btn btn-light btn-sm flex-fill" (click)="load()" [disabled]="loading" title="Yenile">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+        <div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Müşteriler yükleniyor...</p>
+        </div>
+    } @else {
+        <div class="table-responsive">
+            <table class="table table-centered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>İşlemler</th>
+                        <th>Ad Soyad</th>
+                        <th>İletişim</th>
+                        <th>Şehir / İlçe</th>
+                        <th>Üyelik</th>
+                        <th>Kayıt</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (customer of pagedItems; track $index) {
+                        <tr>
+                            <td class="text-nowrap">
+                                <button class="btn btn-soft-primary btn-sm" (click)="openDetail(customer)" title="Detay">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </td>
+                            <td class="fw-semibold">{{ fullName(customer) }}</td>
+                            <td>
+                                <div class="small">{{ customer.email || '-' }}</div>
+                                <small class="text-muted">{{ contactPhone(customer) }}</small>
+                            </td>
+                            <td>{{ customer.city || '-' }} / {{ customer.district || '-' }}</td>
+                            <td>{{ membership(customer) }}</td>
+                            <td class="text-nowrap">{{ customer.registrationDate ? (customer.registrationDate | date:'dd.MM.yyyy') : '-' }}</td>
+                            <td>
+                                <span class="badge" [ngClass]="customer.isActive ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
+                                    {{ customer.isActive ? 'Aktif' : 'Pasif' }}
+                                </span>
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">Müşteri bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <app-table-pager [currentPage]="currentPage" [totalPages]="totalPages" [totalCount]="totalCount"
+            [shownCount]="filteredItems.length" [knownTotal]="knownTotal" (pageChange)="setPage($event)" />
+    }
+</div>
+
+@if (showModal && selectedCustomer) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-user me-2"></i>{{ fullName(selectedCustomer) }}
+                        <span class="badge ms-2" [ngClass]="selectedCustomer.isActive ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
+                            {{ selectedCustomer.isActive ? 'Aktif' : 'Pasif' }}
+                        </span>
+                    </h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <div class="detail-box small">
+                                <div class="fw-semibold mb-2"><i class="fa-solid fa-address-card me-1"></i>İletişim</div>
+                                <div>{{ selectedCustomer.email || '-' }}</div>
+                                <div class="text-muted">Telefon: {{ selectedCustomer.phone || '-' }}</div>
+                                <div class="text-muted">Cep: {{ selectedCustomer.mobilePhone || '-' }}</div>
+                                <div class="text-muted">{{ selectedCustomer.city || '-' }} / {{ selectedCustomer.district || '-' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-box small">
+                                <div class="fw-semibold mb-2"><i class="fa-solid fa-id-badge me-1"></i>Üyelik</div>
+                                <div>Tip: {{ membership(selectedCustomer) }}</div>
+                                <div class="text-muted">
+                                    Kayıt: {{ selectedCustomer.registrationDate ? (selectedCustomer.registrationDate | date:'dd.MM.yyyy HH:mm') : '-' }}
+                                </div>
+                                <div class="text-muted">
+                                    Son Giriş: {{ selectedCustomer.lastLoginDate ? (selectedCustomer.lastLoginDate | date:'dd.MM.yyyy HH:mm') : '-' }}
+                                </div>
+                                <div class="text-muted">Onaylı: {{ selectedCustomer.isApproved ? 'Evet' : 'Hayır' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-box small">
+                                <div class="fw-semibold mb-2"><i class="fa-solid fa-bell me-1"></i>İzinler &amp; Puan</div>
+                                <div>E-posta İzni: {{ selectedCustomer.hasEmailPermission ? 'Evet' : 'Hayır' }}</div>
+                                <div>SMS İzni: {{ selectedCustomer.hasSmsPermission ? 'Evet' : 'Hayır' }}</div>
+                                <div>Puan: <strong>{{ selectedCustomer.loyaltyPoints ?? 0 }}</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="mb-2">Adresler</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-centered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Başlık</th>
+                                    <th>Alıcı</th>
+                                    <th>Adres</th>
+                                    <th>İlçe / Şehir</th>
+                                    <th>Telefon</th>
+                                    <th>Tip</th>
+                                    <th>Vergi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (address of selectedCustomer.addresses ?? []; track $index) {
+                                    <tr>
+                                        <td>{{ address.title || '-' }}</td>
+                                        <td>{{ address.recipientName || '-' }}</td>
+                                        <td class="address-cell">{{ address.address || '-' }}</td>
+                                        <td>{{ address.district || '-' }} / {{ address.city || '-' }}</td>
+                                        <td class="text-nowrap">{{ address.recipientPhone || '-' }}</td>
+                                        <td>{{ address.isCorporate ? 'Kurumsal' : 'Bireysel' }}</td>
+                                        <td class="small text-muted">
+                                            @if (address.isCorporate) {
+                                                {{ address.taxOffice || '-' }} / {{ address.taxNumber || '-' }}
+                                            } @else {
+                                                -
+                                            }
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="7" class="text-center text-muted">Adres bulunamadı.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

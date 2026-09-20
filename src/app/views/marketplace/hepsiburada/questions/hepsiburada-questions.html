@@ -1,0 +1,170 @@
+<div class="page-surface p-3">
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Sayfada Ara</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Soru, konu, durum..."
+                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Arama</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="searchFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Konu</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="subjectFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Durum</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="statusFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-1">
+            <label class="form-label small mb-1">Başlangıç</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="startDate" (ngModelChange)="onServerFilterChange()">
+        </div>
+        <div class="col-md-1">
+            <label class="form-label small mb-1">Bitiş</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="endDate" (ngModelChange)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2 d-flex gap-1">
+            <button class="btn btn-light btn-sm flex-fill" (click)="clearFilters()" title="Filtreleri temizle">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+            <button class="btn btn-light btn-sm flex-fill" (click)="load()" [disabled]="loading" title="Yenile">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (pendingCount !== null) {
+        <div class="mb-2">
+            <span class="badge bg-warning-subtle text-warning">
+                <i class="fa-regular fa-clock me-1"></i>Bekleyen soru: {{ pendingCount }}
+            </span>
+        </div>
+    }
+
+    @if (errorMessage) {
+        <div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Sorular yükleniyor...</p>
+        </div>
+    } @else {
+        @if (hasIssueNumber) {
+            <div class="table-responsive">
+                <table class="table table-centered table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>İşlemler</th>
+                            <th>Konu</th>
+                            <th>Soru</th>
+                            <th>Durum</th>
+                            <th>Tarih</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (question of pagedItems; track $index) {
+                            <tr>
+                                <td class="text-nowrap">
+                                    @if (issueNumberOf(question) !== null) {
+                                        <button class="btn btn-soft-primary btn-sm" (click)="openAnswer(question)" title="Cevapla">
+                                            <i class="fa-solid fa-reply"></i>
+                                        </button>
+                                    }
+                                    <button class="btn btn-light btn-sm ms-1" (click)="openDetail(question)" title="Detay">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </td>
+                                <td>{{ text(question, 'subject', 'title') || '-' }}</td>
+                                <td class="question-cell">
+                                    {{ text(question, 'question', 'message', 'text', 'description', 'content') || '-' }}
+                                </td>
+                                <td>
+                                    @if (text(question, 'status', 'statusName'); as status) {
+                                        <span class="badge" [ngClass]="statusClass(status)">{{ status }}</span>
+                                    } @else {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-nowrap">
+                                    @if (dateOf(question, 'createdAt', 'createdDate', 'creationDate'); as created) {
+                                        {{ created | date:'dd.MM.yyyy HH:mm' }}
+                                    } @else {
+                                        -
+                                    }
+                                </td>
+                            </tr>
+                        } @empty {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">Soru bulunamadı.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        } @else {
+            <app-dynamic-table [rows]="pagedItems" emptyText="Soru bulunamadı." />
+        }
+        <app-table-pager [currentPage]="currentPage" [totalPages]="totalPages" [totalCount]="totalCount"
+            [shownCount]="filteredItems.length" [knownTotal]="knownTotal" (pageChange)="setPage($event)" />
+    }
+</div>
+
+@if (showModal && selectedRow) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        @if (detailOnly) {
+                            <i class="fa-solid fa-file-lines me-2"></i>Soru Detayı
+                        } @else {
+                            <i class="fa-solid fa-reply me-2"></i>Soruyu Cevapla
+                        }
+                    </h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    @if (detailOnly) {
+                        <pre class="json-block mb-0">{{ selectedJson }}</pre>
+                    } @else {
+                        <div class="small text-muted mb-1">{{ text(selectedRow, 'subject', 'title') }}</div>
+                        <div class="question-box mb-3">
+                            <i class="fa-regular fa-comment me-1"></i>
+                            {{ text(selectedRow, 'question', 'message', 'text', 'description', 'content') || '-' }}
+                        </div>
+                        <label class="form-label">Cevabınız</label>
+                        <textarea class="form-control" rows="5" [(ngModel)]="answerText" [maxlength]="maxAnswerLength"
+                            placeholder="En az {{ minAnswerLength }} karakter"></textarea>
+                        <div class="d-flex justify-content-between small mt-1">
+                            <span class="text-muted">Cevap Hepsiburada tarafına iletilir.</span>
+                            <span [class.text-danger]="!answerValid">{{ answerText.trim().length }} / {{ maxAnswerLength }}</span>
+                        </div>
+                        @if (answerError) {
+                            <div class="alert alert-danger py-2 small mt-2 mb-0">{{ answerError }}</div>
+                        }
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()" [disabled]="answering">
+                        {{ detailOnly ? 'Kapat' : 'Vazgeç' }}
+                    </button>
+                    @if (!detailOnly) {
+                        <button type="button" class="btn btn-primary" (click)="submitAnswer()" [disabled]="!answerValid || answering">
+                            @if (answering) {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            Gönder
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}

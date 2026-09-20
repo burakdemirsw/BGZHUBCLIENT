@@ -1,0 +1,135 @@
+<div class="page-surface p-3">
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small mb-1">Sayfada Ara</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Ürün adı, marka, stok kodu, barkod..."
+                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Ürün Kodu</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="productCodeFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Barkod</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="barcodeFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-1">
+            <label class="form-label small mb-1">Durum</label>
+            <select class="form-select form-select-sm" [(ngModel)]="activeFilter" (ngModelChange)="onServerFilterChange()">
+                <option value="">Hepsi</option>
+                <option value="true">Aktif</option>
+                <option value="false">Pasif</option>
+            </select>
+        </div>
+        <div class="col-md-1 d-flex gap-1">
+            <button class="btn btn-light btn-sm flex-fill" (click)="clearFilters()" title="Filtreleri temizle">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+            <button class="btn btn-light btn-sm flex-fill" (click)="load()" [disabled]="loading" title="Yenile">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+        <div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Ürünler yükleniyor...</p>
+        </div>
+    } @else {
+        <div class="table-responsive">
+            <table class="table table-centered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>İşlemler</th>
+                        <th>Ürün Adı</th>
+                        <th>Marka</th>
+                        <th>Kategori</th>
+                        <th>Varyant</th>
+                        <th>Toplam Stok</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (product of pagedItems; track $index) {
+                        <tr>
+                            <td class="text-nowrap">
+                                <button class="btn btn-soft-primary btn-sm" (click)="toggle(product)" title="Varyantlar">
+                                    <i class="fa-solid" [ngClass]="expanded.has(product) ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                                </button>
+                            </td>
+                            <td class="product-cell">
+                                <span class="fw-semibold">{{ product.name || '-' }}</span>
+                                @if (product.url) {
+                                    <a [href]="product.url" target="_blank" rel="noopener" class="ms-1" title="Ürün sayfası">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                    </a>
+                                }
+                            </td>
+                            <td>{{ product.brand || '-' }}</td>
+                            <td>{{ product.mainCategory || '-' }}</td>
+                            <td>{{ variantCount(product) }}</td>
+                            <td><span class="badge" [ngClass]="stockClass(product.totalStock)">{{ product.totalStock ?? 0 }}</span></td>
+                            <td>
+                                <span class="badge" [ngClass]="product.isActive ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
+                                    {{ product.isActive ? 'Aktif' : 'Pasif' }}
+                                </span>
+                            </td>
+                        </tr>
+                        @if (expanded.has(product)) {
+                            <tr class="variant-row">
+                                <td></td>
+                                <td colspan="6">
+                                    <table class="table table-sm mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Stok Kodu</th>
+                                                <th>Barkod</th>
+                                                <th>Özellikler</th>
+                                                <th class="text-end">Stok</th>
+                                                <th class="text-end">Satış Fiyatı</th>
+                                                <th class="text-end">İndirimli</th>
+                                                <th>Durum</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (v of product.variants ?? []; track $index) {
+                                                <tr>
+                                                    <td>{{ v.stockCode || '-' }}</td>
+                                                    <td>{{ v.barcode || '-' }}</td>
+                                                    <td class="small">{{ attributeText(v.attributes) }}</td>
+                                                    <td class="text-end"><span class="badge" [ngClass]="stockClass(v.stockQuantity)">{{ v.stockQuantity ?? 0 }}</span></td>
+                                                    <td class="text-end text-nowrap">{{ v.salePrice | number:'1.2-2' }} {{ v.currency }}</td>
+                                                    <td class="text-end text-nowrap">{{ v.discountedPrice | number:'1.2-2' }} {{ v.currency }}</td>
+                                                    <td>
+                                                        <span class="badge" [ngClass]="v.isActive ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
+                                                            {{ v.isActive ? 'Aktif' : 'Pasif' }}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            } @empty {
+                                                <tr><td colspan="7" class="text-muted text-center">Varyant yok.</td></tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        }
+                    } @empty {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">Ürün bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <app-table-pager [currentPage]="currentPage" [totalPages]="totalPages" [totalCount]="totalCount"
+            [shownCount]="filteredItems.length" [knownTotal]="knownTotal" (pageChange)="setPage($event)" />
+    }
+</div>

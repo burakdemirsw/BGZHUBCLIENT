@@ -14,6 +14,13 @@ import { AiKnowledgePage } from './ai-knowledge/ai-knowledge';
 import { AiKnowledgeTypesPage } from './ai-knowledge-types/ai-knowledge-types';
 import { AiRequestLogsPage } from './ai-request-logs/ai-request-logs';
 import { ExtensionRequestLogsPage } from './extension-request-logs/extension-request-logs';
+import { TrendyolPage } from '@/app/views/marketplace/trendyol/trendyol';
+import { IkasPage } from '@/app/views/marketplace/ikas/ikas';
+import { TicimaxPage } from '@/app/views/marketplace/ticimax/ticimax';
+import { HepsiburadaPage } from '@/app/views/marketplace/hepsiburada/hepsiburada';
+import { BoynerPage } from '@/app/views/marketplace/boyner/boyner';
+import { BeymenPage } from '@/app/views/marketplace/beymen/beymen';
+import { ShopifyPage } from '@/app/views/marketplace/shopify/shopify';
 import { ConversationLogsPage } from './conversation-logs/conversation-logs';
 import { AiToolGapsPage } from './ai-tool-gaps/ai-tool-gaps';
 import { AwsS3SettingsPage } from './aws-s3-settings/aws-s3-settings';
@@ -408,6 +415,48 @@ export const ADMIN_ROUTES: Routes = [
         path: 'users/profile',
         component: Profile,
         data: { title: 'Profil' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'marketplace/trendyol',
+        component: TrendyolPage,
+        data: { title: 'Trendyol' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'marketplace/ikas',
+        component: IkasPage,
+        data: { title: 'ikas' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'marketplace/ticimax',
+        component: TicimaxPage,
+        data: { title: 'Ticimax' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'marketplace/hepsiburada',
+        component: HepsiburadaPage,
+        data: { title: 'Hepsiburada' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'marketplace/boyner',
+        component: BoynerPage,
+        data: { title: 'Boyner' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'marketplace/beymen',
+        component: BeymenPage,
+        data: { title: 'Beymen' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'marketplace/shopify',
+        component: ShopifyPage,
+        data: { title: 'Shopify' },
         canActivate: [AuthGuard],
     },
 ];

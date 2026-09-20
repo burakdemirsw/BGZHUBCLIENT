@@ -1,0 +1,17 @@
+.brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 0.375rem;
+    background-color: #1b64d1;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+
+.nav-tabs .nav-link.active {
+    color: #1b64d1;
+    border-bottom-color: #f7f7f9;
+}

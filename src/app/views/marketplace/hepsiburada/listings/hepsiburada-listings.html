@@ -1,0 +1,129 @@
+<div class="page-surface p-3">
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small mb-1">Sayfada Ara</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Satıcı stok kodu, fiyat, stok..."
+                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label small mb-1">Satıcı Stok Kodu (virgülle ayırın)</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="merchantSkuFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2 d-flex gap-1">
+            <button class="btn btn-light btn-sm flex-fill" (click)="clearFilters()" title="Filtreleri temizle">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+            <button class="btn btn-light btn-sm flex-fill" (click)="load()" [disabled]="loading" title="Yenile">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+        <div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">İlanlar yükleniyor...</p>
+        </div>
+    } @else {
+        <div class="table-responsive">
+            <table class="table table-centered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>İşlemler</th>
+                        <th>Satıcı Stok Kodu</th>
+                        <th>Fiyat</th>
+                        <th>Stok</th>
+                        <th>Termin</th>
+                        <th>Satışta</th>
+                        <th>Kilitli / Askıda</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (listing of pagedItems; track $index) {
+                        <tr>
+                            <td class="text-nowrap">
+                                <button class="btn btn-soft-primary btn-sm" (click)="openDetail(listing)" title="Detay">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </td>
+                            <td class="fw-semibold">{{ listing.merchantSku || '-' }}</td>
+                            <td class="text-nowrap">{{ listing.price | number:'1.2-2' }}</td>
+                            <td>
+                                <span class="badge" [ngClass]="stockClass(listing.availableStock)">{{ listing.availableStock ?? 0 }}</span>
+                            </td>
+                            <td class="text-nowrap">{{ listing.dispatchTime ?? '-' }} gün</td>
+                            <td>
+                                <span class="badge" [ngClass]="listing.isSalable ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
+                                    {{ listing.isSalable ? 'Evet' : 'Hayır' }}
+                                </span>
+                            </td>
+                            <td class="text-nowrap">
+                                @if (listing.isLocked) {
+                                    <span class="badge bg-danger-subtle text-danger me-1">Kilitli</span>
+                                }
+                                @if (listing.isSuspended) {
+                                    <span class="badge bg-warning-subtle text-warning me-1">Askıda</span>
+                                }
+                                @if (listing.isFrozen) {
+                                    <span class="badge bg-info-subtle text-info">Donduruldu</span>
+                                }
+                                @if (!listing.isLocked && !listing.isSuspended && !listing.isFrozen) {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">İlan bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <app-table-pager [currentPage]="currentPage" [totalPages]="totalPages" [totalCount]="totalCount"
+            [shownCount]="filteredItems.length" [knownTotal]="knownTotal" (pageChange)="setPage($event)" />
+    }
+</div>
+
+@if (showModal && selectedListing) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-store me-2"></i>{{ selectedListing.merchantSku }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="detail-box small">
+                                <div class="fw-semibold mb-2">Satış Bilgileri</div>
+                                <div>Fiyat: <strong>{{ selectedListing.price | number:'1.2-2' }}</strong></div>
+                                <div>Stok: {{ selectedListing.availableStock ?? 0 }}</div>
+                                <div>Termin: {{ selectedListing.dispatchTime ?? '-' }} gün</div>
+                                <div>Maksimum Sipariş Adedi: {{ selectedListing.maximumPurchasableQuantity ?? '-' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-box small">
+                                <div class="fw-semibold mb-2">İlan Durumu</div>
+                                <div>Satışta: {{ selectedListing.isSalable ? 'Evet' : 'Hayır' }}</div>
+                                <div>Kilitli: {{ selectedListing.isLocked ? 'Evet' : 'Hayır' }}</div>
+                                <div>Askıda: {{ selectedListing.isSuspended ? 'Evet' : 'Hayır' }}</div>
+                                <div>Donduruldu: {{ selectedListing.isFrozen ? 'Evet' : 'Hayır' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

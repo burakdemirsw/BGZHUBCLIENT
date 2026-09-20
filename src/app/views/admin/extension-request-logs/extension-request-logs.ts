@@ -11,6 +11,7 @@ import {
     ExtensionUsageReportResponse,
 } from '@/app/core/models/extension-request-log/extension-request-log.models';
 import { PagedResult } from '@/app/core/models/pagination.model';
+import { parseLogDate } from '@/app/core/utils/log-date.util';
 
 type SuccessFilter = 'all' | 'success' | 'failed';
 
@@ -194,6 +195,11 @@ export class ExtensionRequestLogsPage implements OnInit {
     }
 
     // ────── Format ──────
+    /** Extension log tarihleri UTC tutulur; yerel saate çevrilmiş epoch döner */
+    logTime(value?: string | null): number {
+        return parseLogDate(value, 'utc');
+    }
+
     formatDuration(ms?: number | null): string {
         if (ms === null || ms === undefined || isNaN(Number(ms))) return '—';
         const value = Number(ms);

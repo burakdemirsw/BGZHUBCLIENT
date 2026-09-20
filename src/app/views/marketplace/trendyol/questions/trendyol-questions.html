@@ -1,0 +1,147 @@
+<div class="page-surface p-3">
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Sayfada Ara</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Soru, müşteri, ürün..."
+                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Barkod</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="barcodeFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Durum</label>
+            <select class="form-select form-select-sm" [(ngModel)]="statusFilter" (ngModelChange)="onServerFilterChange()">
+                <option value="">Tüm Durumlar</option>
+                @for (s of statusOptions; track s.value) {
+                    <option [value]="s.value">{{ s.label }}</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Başlangıç</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="startDate" (ngModelChange)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Bitiş</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="endDate" (ngModelChange)="onServerFilterChange()">
+        </div>
+        <div class="col-md-1 d-flex gap-1">
+            <button class="btn btn-light btn-sm flex-fill" (click)="clearFilters()" title="Filtreleri temizle">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+            <button class="btn btn-light btn-sm flex-fill" (click)="load()" [disabled]="loading" title="Yenile">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+        <div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Sorular yükleniyor...</p>
+        </div>
+    } @else {
+        <div class="table-responsive">
+            <table class="table table-centered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>İşlemler</th>
+                        <th>Ürün</th>
+                        <th>Soru</th>
+                        <th>Müşteri</th>
+                        <th>Tarih</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (q of pagedItems; track $index) {
+                        <tr>
+                            <td class="text-nowrap">
+                                @if (canAnswer(q)) {
+                                    <button class="btn btn-soft-primary btn-sm" (click)="openAnswer(q)" title="Cevapla">
+                                        <i class="fa-solid fa-reply"></i>
+                                    </button>
+                                }
+                                @if (q.webUrl) {
+                                    <a class="btn btn-light btn-sm ms-1" [href]="q.webUrl" target="_blank" rel="noopener" title="Ürünü Trendyol'da aç">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                    </a>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    @if (q.imageUrl) {
+                                        <img [src]="q.imageUrl" alt="" class="product-thumb">
+                                    }
+                                    <div>
+                                        <div class="small fw-semibold">{{ q.productName || '-' }}</div>
+                                        <small class="text-muted">{{ q.productMainId }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="question-cell">
+                                <div>{{ q.text }}</div>
+                                @if (q.answer?.text) {
+                                    <div class="small text-success mt-1"><i class="fa-solid fa-reply fa-flip-horizontal me-1"></i>{{ q.answer?.text }}</div>
+                                }
+                            </td>
+                            <td>{{ q.showUserName === false ? 'Gizli' : (q.userName || '-') }}</td>
+                            <td class="text-nowrap">{{ q.creationDate ? (q.creationDate | date:'dd.MM.yyyy HH:mm') : '-' }}</td>
+                            <td><span class="badge" [ngClass]="statusClass(q.status)">{{ statusLabel(q.status) }}</span></td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">Soru bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <app-table-pager [currentPage]="currentPage" [totalPages]="totalPages" [totalCount]="totalCount"
+            [shownCount]="filteredItems.length" [knownTotal]="knownTotal" (pageChange)="setPage($event)" />
+    }
+</div>
+
+@if (showModal && selectedQuestion) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-reply me-2"></i>Soruyu Cevapla</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="small text-muted mb-1">{{ selectedQuestion.productName }}</div>
+                    <div class="question-box mb-3">
+                        <i class="fa-regular fa-comment me-1"></i>{{ selectedQuestion.text }}
+                    </div>
+                    <label class="form-label">Cevabınız</label>
+                    <textarea class="form-control" rows="5" [(ngModel)]="answerText" [maxlength]="maxAnswerLength"
+                        placeholder="En az {{ minAnswerLength }} karakter"></textarea>
+                    <div class="d-flex justify-content-between small mt-1">
+                        <span class="text-muted">Cevap Trendyol onayından sonra yayınlanır.</span>
+                        <span [class.text-danger]="!answerValid">{{ answerText.trim().length }} / {{ maxAnswerLength }}</span>
+                    </div>
+                    @if (answerError) {
+                        <div class="alert alert-danger py-2 small mt-2 mb-0">{{ answerError }}</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()" [disabled]="answering">Vazgeç</button>
+                    <button type="button" class="btn btn-primary" (click)="submitAnswer()" [disabled]="!answerValid || answering">
+                        @if (answering) {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        Gönder
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

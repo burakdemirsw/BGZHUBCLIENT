@@ -1,0 +1,168 @@
+<div class="page-surface p-3">
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Sayfada Ara</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Sipariş no, müşteri, ürün, neden..."
+                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Sipariş No</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="orderNumberFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Durum</label>
+            <select class="form-select form-select-sm" [(ngModel)]="statusFilter" (ngModelChange)="onServerFilterChange()">
+                <option value="">Tüm Durumlar</option>
+                @for (s of statusOptions; track s.value) {
+                    <option [value]="s.value">{{ s.label }}</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Başlangıç</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="startDate" (ngModelChange)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Bitiş</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="endDate" (ngModelChange)="onServerFilterChange()">
+        </div>
+        <div class="col-md-1 d-flex gap-1">
+            <button class="btn btn-light btn-sm flex-fill" (click)="clearFilters()" title="Filtreleri temizle">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+            <button class="btn btn-light btn-sm flex-fill" (click)="load()" [disabled]="loading" title="Yenile">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+        <div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">İadeler yükleniyor...</p>
+        </div>
+    } @else {
+        <div class="table-responsive">
+            <table class="table table-centered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>İşlemler</th>
+                        <th>Sipariş No</th>
+                        <th>İade Tarihi</th>
+                        <th>Müşteri</th>
+                        <th>Kalem</th>
+                        <th>Neden</th>
+                        <th>Kargo</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (claim of pagedItems; track $index) {
+                        <tr>
+                            <td class="text-nowrap">
+                                <button class="btn btn-soft-primary btn-sm me-1" (click)="openDetail(claim)" title="Detay">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                @if (pendingItemIds(claim).length) {
+                                    <button class="btn btn-soft-success btn-sm" (click)="approve(claim)"
+                                        [disabled]="approvingId === (claim.id || claim.claimId)" title="İadeyi Onayla">
+                                        @if (approvingId === (claim.id || claim.claimId)) {
+                                            <span class="spinner-border spinner-border-sm"></span>
+                                        } @else {
+                                            <i class="fa-solid fa-check"></i>
+                                        }
+                                    </button>
+                                }
+                            </td>
+                            <td class="fw-semibold">{{ claim.orderNumber || '-' }}</td>
+                            <td class="text-nowrap">{{ claim.claimDate ? (claim.claimDate | date:'dd.MM.yyyy HH:mm') : '-' }}</td>
+                            <td>{{ claim.customerFirstName }} {{ claim.customerLastName }}</td>
+                            <td>{{ lines(claim).length }}</td>
+                            <td class="reason-cell"><div class="text-truncate">{{ firstReason(claim) }}</div></td>
+                            <td>
+                                <div>{{ claim.cargoProviderName || '-' }}</div>
+                                @if (claim.cargoTrackingLink) {
+                                    <a [href]="claim.cargoTrackingLink" target="_blank" rel="noopener" class="small">
+                                        {{ claim.cargoTrackingNumber }} <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                    </a>
+                                }
+                            </td>
+                            <td><span class="badge" [ngClass]="statusClass(claimStatus(claim))">{{ statusLabel(claimStatus(claim)) }}</span></td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">İade talebi bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <app-table-pager [currentPage]="currentPage" [totalPages]="totalPages" [totalCount]="totalCount"
+            [shownCount]="filteredItems.length" [knownTotal]="knownTotal" (pageChange)="setPage($event)" />
+    }
+</div>
+
+@if (showModal && selectedClaim) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-rotate-left me-2"></i>İade — Sipariş {{ selectedClaim.orderNumber }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row small mb-3">
+                        <div class="col-md-4">Müşteri: <strong>{{ selectedClaim.customerFirstName }} {{ selectedClaim.customerLastName }}</strong></div>
+                        <div class="col-md-4">Sipariş Tarihi: <strong>{{ selectedClaim.orderDate | date:'dd.MM.yyyy HH:mm' }}</strong></div>
+                        <div class="col-md-4">İade Tarihi: <strong>{{ selectedClaim.claimDate | date:'dd.MM.yyyy HH:mm' }}</strong></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-centered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Ürün</th>
+                                    <th>Barkod</th>
+                                    <th>Beden / Renk</th>
+                                    <th class="text-end">Fiyat</th>
+                                    <th>Müşteri Nedeni</th>
+                                    <th>Müşteri Notu</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (line of lines(selectedClaim); track $index) {
+                                    <tr>
+                                        <td>{{ line.orderLine?.productName || '-' }}</td>
+                                        <td>{{ line.orderLine?.barcode || '-' }}</td>
+                                        <td>{{ line.orderLine?.productSize || '-' }} / {{ line.orderLine?.productColor || '-' }}</td>
+                                        <td class="text-end text-nowrap">{{ line.orderLine?.price | number:'1.2-2' }}</td>
+                                        <td>{{ line.item.customerClaimItemReason?.name || '-' }}</td>
+                                        <td>{{ line.item.customerNote || '-' }}</td>
+                                        <td>
+                                            <span class="badge" [ngClass]="statusClass(line.item.claimItemStatus?.name)">
+                                                {{ statusLabel(line.item.claimItemStatus?.name) }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    @if (pendingItemIds(selectedClaim).length) {
+                        <button type="button" class="btn btn-success" (click)="approve(selectedClaim)" [disabled]="!!approvingId">
+                            <i class="fa-solid fa-check me-1"></i>Bekleyen Kalemleri Onayla
+                        </button>
+                    }
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

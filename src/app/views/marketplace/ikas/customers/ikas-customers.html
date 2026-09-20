@@ -1,0 +1,172 @@
+<div class="page-surface p-3">
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Sayfada Ara</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Ad soyad, e-posta, telefon..."
+                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Müşteri Arama</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="searchFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">E-posta</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="emailFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Telefon</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="phoneFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2 d-flex gap-1">
+            <button class="btn btn-light btn-sm flex-fill" (click)="clearFilters()" title="Filtreleri temizle">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+            <button class="btn btn-light btn-sm flex-fill" (click)="load()" [disabled]="loading" title="Yenile">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+        <div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Müşteriler yükleniyor...</p>
+        </div>
+    } @else {
+        <div class="table-responsive">
+            <table class="table table-centered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>İşlemler</th>
+                        <th>Ad Soyad</th>
+                        <th>İletişim</th>
+                        <th>Sipariş</th>
+                        <th>Toplam Tutar</th>
+                        <th>Kayıt</th>
+                        <th>Son Sipariş</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (customer of pagedItems; track $index) {
+                        <tr>
+                            <td class="text-nowrap">
+                                <button class="btn btn-soft-primary btn-sm" (click)="openDetail(customer)" title="Detay">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </td>
+                            <td class="fw-semibold">{{ fullName(customer) || '-' }}</td>
+                            <td>
+                                <div class="small">{{ customer.email || '-' }}</div>
+                                <div class="small text-muted">{{ customer.phone || '-' }}</div>
+                            </td>
+                            <td>{{ customer.orderCount ?? 0 }}</td>
+                            <td class="text-nowrap">{{ customer.totalOrderPrice | number:'1.2-2' }}</td>
+                            <td class="text-nowrap">
+                                {{ customer.createdAt ? (customer.createdAt | date:'dd.MM.yyyy') : '-' }}
+                            </td>
+                            <td class="text-nowrap">
+                                {{ customer.lastOrderDate ? (customer.lastOrderDate | date:'dd.MM.yyyy HH:mm') : '-' }}
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">Müşteri bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <app-table-pager [currentPage]="currentPage" [totalPages]="totalPages" [totalCount]="totalCount"
+            [shownCount]="filteredItems.length" [knownTotal]="knownTotal" (pageChange)="setPage($event)" />
+    }
+</div>
+
+@if (showModal && selectedCustomer) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-user me-2"></i>{{ fullName(selectedCustomer) || 'Müşteri Detayı' }}
+                    </h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="detail-box small">
+                                <div class="fw-semibold mb-2"><i class="fa-solid fa-address-card me-1"></i>İletişim</div>
+                                <div>E-posta: {{ selectedCustomer.email || '-' }}
+                                    @if (selectedCustomer.isEmailVerified) {
+                                        <i class="fa-solid fa-circle-check text-success ms-1" title="Doğrulanmış"></i>
+                                    }
+                                </div>
+                                <div>Telefon: {{ selectedCustomer.phone || '-' }}
+                                    @if (selectedCustomer.isPhoneVerified) {
+                                        <i class="fa-solid fa-circle-check text-success ms-1" title="Doğrulanmış"></i>
+                                    }
+                                </div>
+                                <div>Sipariş Sayısı: {{ selectedCustomer.orderCount ?? 0 }}</div>
+                                <div>Toplam Tutar: {{ selectedCustomer.totalOrderPrice | number:'1.2-2' }}</div>
+                                <div>İlk Sipariş:
+                                    {{ selectedCustomer.firstOrderDate ? (selectedCustomer.firstOrderDate | date:'dd.MM.yyyy HH:mm') : '-' }}
+                                </div>
+                                <div>Son Sipariş:
+                                    {{ selectedCustomer.lastOrderDate ? (selectedCustomer.lastOrderDate | date:'dd.MM.yyyy HH:mm') : '-' }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-box small">
+                                <div class="fw-semibold mb-2"><i class="fa-solid fa-circle-info me-1"></i>Hesap Durumu</div>
+                                <div>Hesap: {{ selectedCustomer.accountStatus || '-' }}</div>
+                                <div>Abonelik: {{ selectedCustomer.subscriptionStatus || '-' }}</div>
+                                <div>Kayıt:
+                                    {{ selectedCustomer.createdAt ? (selectedCustomer.createdAt | date:'dd.MM.yyyy HH:mm') : '-' }}
+                                </div>
+                                <div class="mt-2 fw-semibold">Notlar</div>
+                                <div>{{ selectedCustomer.note || 'Not bulunmuyor.' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="mb-2">Adresler</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-centered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Başlık</th>
+                                    <th>Adres</th>
+                                    <th>İlçe / Şehir</th>
+                                    <th>Telefon</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (address of selectedCustomer.addresses ?? []; track $index) {
+                                    <tr>
+                                        <td>{{ address.title || '-' }}</td>
+                                        <td>{{ address.addressLine1 || '-' }}</td>
+                                        <td>{{ addressLocation(address) || '-' }}</td>
+                                        <td>{{ address.phone || '-' }}</td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="4" class="text-center text-muted">Adres kaydı yok.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

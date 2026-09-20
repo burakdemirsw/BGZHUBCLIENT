@@ -1,0 +1,149 @@
+<div class="page-surface p-3">
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Sayfada Ara</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Ad, e-posta, telefon, etiket..."
+                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Shopify Araması</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="searchFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">E-posta</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="emailFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Telefon</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="phoneFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2 d-flex gap-1">
+            <button class="btn btn-light btn-sm flex-fill" (click)="clearFilters()" title="Filtreleri temizle">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+            <button class="btn btn-light btn-sm flex-fill" (click)="load()" [disabled]="loading" title="Yenile">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+        <div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Müşteriler yükleniyor...</p>
+        </div>
+    } @else {
+        <div class="table-responsive">
+            <table class="table table-centered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>İşlemler</th>
+                        <th>Müşteri</th>
+                        <th>İletişim</th>
+                        <th>Sipariş</th>
+                        <th>Toplam Harcama</th>
+                        <th>Son Sipariş</th>
+                        <th>Kayıt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (customer of pagedItems; track $index) {
+                        <tr>
+                            <td class="text-nowrap">
+                                <button class="btn btn-soft-primary btn-sm" (click)="openDetail(customer)" title="Detay">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </td>
+                            <td class="fw-semibold">{{ customer.displayName || '-' }}</td>
+                            <td>
+                                <div class="small">{{ email(customer) || '-' }}</div>
+                                <div class="small text-muted">{{ phone(customer) || '-' }}</div>
+                            </td>
+                            <td>{{ orderCount(customer) }}</td>
+                            <td class="text-nowrap">{{ spent(customer) | number:'1.2-2' }} {{ customer.amountSpent?.currencyCode }}</td>
+                            <td class="text-nowrap">
+                                @if (customer.lastOrder) {
+                                    <div>{{ customer.lastOrder.name }}</div>
+                                    <small class="text-muted">{{ customer.lastOrder.createdAt | date:'dd.MM.yyyy' }}</small>
+                                } @else {
+                                    -
+                                }
+                            </td>
+                            <td class="text-nowrap">{{ customer.createdAt | date:'dd.MM.yyyy' }}</td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">Müşteri bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <app-table-pager [currentPage]="currentPage" [totalPages]="totalPages" [totalCount]="totalCount"
+            [shownCount]="filteredItems.length" [knownTotal]="knownTotal" (pageChange)="setPage($event)" />
+    }
+</div>
+
+@if (showModal && selectedCustomer) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-user me-2"></i>{{ selectedCustomer.displayName }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="detail-box small">
+                                <div class="fw-semibold mb-2">İletişim</div>
+                                <div>{{ email(selectedCustomer) || '-' }}</div>
+                                <div>{{ phone(selectedCustomer) || '-' }}</div>
+                                <div class="text-muted mt-1">
+                                    E-posta doğrulandı: {{ selectedCustomer.verifiedEmail ? 'Evet' : 'Hayır' }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-box small">
+                                <div class="fw-semibold mb-2">Varsayılan Adres</div>
+                                <div>{{ selectedCustomer.defaultAddress?.address1 || '-' }}</div>
+                                <div>{{ selectedCustomer.defaultAddress?.address2 }}</div>
+                                <div class="text-muted">
+                                    {{ selectedCustomer.defaultAddress?.city }} / {{ selectedCustomer.defaultAddress?.province }}
+                                    {{ selectedCustomer.defaultAddress?.country }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-4 small mb-3">
+                        <span>Sipariş: <strong>{{ orderCount(selectedCustomer) }}</strong></span>
+                        <span>Harcama: <strong>{{ spent(selectedCustomer) | number:'1.2-2' }} {{ selectedCustomer.amountSpent?.currencyCode }}</strong></span>
+                        <span>Kayıt: <strong>{{ selectedCustomer.createdAt | date:'dd.MM.yyyy' }}</strong></span>
+                        <span>Durum: <strong>{{ selectedCustomer.state || '-' }}</strong></span>
+                    </div>
+                    @if (selectedCustomer.note) {
+                        <div class="mb-3 small">Not: {{ selectedCustomer.note }}</div>
+                    }
+                    <div class="d-flex flex-wrap gap-2">
+                        @for (tag of selectedCustomer.tags ?? []; track $index) {
+                            <span class="badge bg-primary-subtle text-primary">{{ tag }}</span>
+                        } @empty {
+                            <span class="text-muted small">Etiket yok.</span>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

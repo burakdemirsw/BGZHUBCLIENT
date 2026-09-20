@@ -1,0 +1,135 @@
+<div class="page-surface p-3">
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small mb-1">Listede Ara</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Ürün, varyant, SKU, barkod, konum..."
+                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Barkod</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="barcodeFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Ürün / Stok Kodu</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="productCodeFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2 d-flex gap-1">
+            <button class="btn btn-light btn-sm flex-fill" (click)="clearFilters()" title="Filtreleri temizle">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+            <button class="btn btn-light btn-sm flex-fill" (click)="load()" [disabled]="loading" title="Yenile">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+        <div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Stoklar yükleniyor...</p>
+        </div>
+    } @else {
+        <div class="table-responsive">
+            <table class="table table-centered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>İşlemler</th>
+                        <th>Ürün</th>
+                        <th>Varyant</th>
+                        <th>SKU</th>
+                        <th>Barkod</th>
+                        <th>Fiyat</th>
+                        <th>Toplam Stok</th>
+                        <th>Konumlar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (stock of pagedItems; track $index) {
+                        <tr>
+                            <td class="text-nowrap">
+                                <button class="btn btn-soft-primary btn-sm" (click)="openDetail(stock)" title="Konum kırılımı">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </td>
+                            <td class="fw-semibold">{{ stock.productTitle || '-' }}</td>
+                            <td>{{ stock.variantTitle || '-' }}</td>
+                            <td>{{ stock.productCode || '-' }}</td>
+                            <td>{{ stock.barcode || '-' }}</td>
+                            <td class="text-nowrap">{{ price(stock.price) | number:'1.2-2' }}</td>
+                            <td>
+                                <span class="badge" [ngClass]="stockClass(stock.totalAvailable)">{{ stock.totalAvailable ?? 0 }}</span>
+                                @if (stock.isTracked === false) {
+                                    <span class="badge bg-secondary-subtle text-secondary ms-1">Takipsiz</span>
+                                }
+                            </td>
+                            <td class="location-cell small">{{ locationSummary(stock) }}</td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">Stok kaydı bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <app-table-pager [currentPage]="currentPage" [totalPages]="totalPages" [totalCount]="filteredItems.length"
+            [shownCount]="pagedItems.length" (pageChange)="setPage($event)" />
+    }
+</div>
+
+@if (showModal && selectedStock) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-warehouse me-2"></i>{{ selectedStock.productTitle }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex flex-wrap gap-4 small mb-3">
+                        <span>Varyant: <strong>{{ selectedStock.variantTitle || '-' }}</strong></span>
+                        <span>SKU: <strong>{{ selectedStock.productCode || '-' }}</strong></span>
+                        <span>Barkod: <strong>{{ selectedStock.barcode || '-' }}</strong></span>
+                        <span>Fiyat: <strong>{{ price(selectedStock.price) | number:'1.2-2' }}</strong></span>
+                        <span>Toplam: <strong>{{ selectedStock.totalAvailable ?? 0 }}</strong></span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-centered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Konum</th>
+                                    <th class="text-end">Satılabilir</th>
+                                    <th class="text-end">Elde</th>
+                                    <th class="text-end">Rezerve</th>
+                                    <th class="text-end">Gelen</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (location of locations(selectedStock); track $index) {
+                                    <tr>
+                                        <td>{{ location.locationName || '-' }}</td>
+                                        <td class="text-end">{{ location.available ?? 0 }}</td>
+                                        <td class="text-end">{{ location.onHand ?? 0 }}</td>
+                                        <td class="text-end">{{ location.committed ?? 0 }}</td>
+                                        <td class="text-end">{{ location.incoming ?? 0 }}</td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="5" class="text-center text-muted">Konum kaydı yok.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

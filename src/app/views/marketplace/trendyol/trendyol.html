@@ -1,0 +1,37 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex align-items-center gap-2">
+                <span class="brand-mark">T</span>
+                <h4 class="card-title mb-0">Trendyol Mağazam</h4>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs mb-3">
+                    @for (tab of tabs; track tab.key) {
+                        <li class="nav-item">
+                            <button class="nav-link" [class.active]="activeTab === tab.key" (click)="selectTab(tab.key)">
+                                <i [class]="tab.icon + ' me-1'"></i>{{ tab.label }}
+                            </button>
+                        </li>
+                    }
+                </ul>
+
+                @if (visited.has('orders')) {
+                    <app-trendyol-orders [hidden]="activeTab !== 'orders'" />
+                }
+                @if (visited.has('products')) {
+                    <app-trendyol-products [hidden]="activeTab !== 'products'" />
+                }
+                @if (visited.has('claims')) {
+                    <app-trendyol-claims [hidden]="activeTab !== 'claims'" />
+                }
+                @if (visited.has('questions')) {
+                    <app-trendyol-questions [hidden]="activeTab !== 'questions'" />
+                }
+                @if (visited.has('customers')) {
+                    <app-marketplace-customers [hidden]="activeTab !== 'customers'" [fetch]="loadCustomers" />
+                }
+            </div>
+        </div>
+    </div>
+</div>

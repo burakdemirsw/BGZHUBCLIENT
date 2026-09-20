@@ -4,7 +4,7 @@
             <span class="cl-header-icon"><i class="fa-solid fa-wave-square"></i></span>
             <div>
                 <h5 class="mb-0">Sohbet Logları</h5>
-                <small class="text-muted">AI ve extension istekleri, zaman sırasına göre</small>
+                <small class="text-muted">AI ve extension istekleri — en yeni en üstte</small>
             </div>
         </div>
         <div class="cl-header-actions">
@@ -140,8 +140,8 @@
                                 <div class="cl-card-main">
                                     <div class="cl-card-top">
                                         <span class="cl-kind">{{ entry.kind === 'ai' ? 'AI' : entry.subtitle }}</span>
-                                        <span class="cl-time">{{ entry.createdDate | date:'HH:mm:ss' }}</span>
-                                        <span class="cl-date">{{ entry.createdDate | date:'dd.MM.yyyy' }}</span>
+                                        <span class="cl-time">{{ entry.time | date:'HH:mm:ss' }}</span>
+                                        <span class="cl-date">{{ entry.time | date:'dd.MM.yyyy' }}</span>
                                     </div>
                                     <div class="cl-title">{{ entry.title }}</div>
                                     <div class="cl-chips">

@@ -1,0 +1,122 @@
+<div class="page-surface p-3">
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label small mb-1">Sayfada Ara</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Ürün adı, marka, SKU, barkod..."
+                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-md-5">
+            <label class="form-label small mb-1">Shopify Araması</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="searchFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2 d-flex gap-1">
+            <button class="btn btn-light btn-sm flex-fill" (click)="clearFilters()" title="Filtreleri temizle">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+            <button class="btn btn-light btn-sm flex-fill" (click)="load()" [disabled]="loading" title="Yenile">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+        <div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Ürünler yükleniyor...</p>
+        </div>
+    } @else {
+        <div class="table-responsive">
+            <table class="table table-centered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>İşlemler</th>
+                        <th>Ürün</th>
+                        <th>Marka</th>
+                        <th>Tür</th>
+                        <th>Varyant</th>
+                        <th>Toplam Stok</th>
+                        <th>Fiyat</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (product of pagedItems; track $index) {
+                        <tr>
+                            <td class="text-nowrap">
+                                <button class="btn btn-soft-primary btn-sm" (click)="toggle(product)" title="Varyantlar">
+                                    <i class="fa-solid" [ngClass]="expanded.has(product) ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                                </button>
+                                @if (product.onlineStoreUrl) {
+                                    <a class="btn btn-light btn-sm ms-1" [href]="product.onlineStoreUrl" target="_blank" rel="noopener" title="Mağazada aç">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                    </a>
+                                }
+                            </td>
+                            <td class="product-cell fw-semibold">{{ product.title || '-' }}</td>
+                            <td>{{ product.vendor || '-' }}</td>
+                            <td>{{ product.productType || '-' }}</td>
+                            <td>{{ variants(product).length }}</td>
+                            <td><span class="badge" [ngClass]="stockClass(product.totalInventory)">{{ product.totalInventory ?? 0 }}</span></td>
+                            <td class="text-nowrap">{{ priceRange(product) }}</td>
+                            <td><span class="badge" [ngClass]="statusClass(product.status)">{{ statusLabel(product.status) }}</span></td>
+                        </tr>
+                        @if (expanded.has(product)) {
+                            <tr class="variant-row">
+                                <td></td>
+                                <td colspan="7">
+                                    <table class="table table-sm mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Varyant</th>
+                                                <th>SKU</th>
+                                                <th>Barkod</th>
+                                                <th class="text-end">Fiyat</th>
+                                                <th class="text-end">Stok</th>
+                                                <th>Takip</th>
+                                                <th>Konumlar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (variant of variants(product); track $index) {
+                                                <tr>
+                                                    <td>{{ variant.title || '-' }}</td>
+                                                    <td>{{ variant.sku || '-' }}</td>
+                                                    <td>{{ variant.barcode || '-' }}</td>
+                                                    <td class="text-end text-nowrap">{{ price(variant.price) | number:'1.2-2' }}</td>
+                                                    <td class="text-end">
+                                                        <span class="badge" [ngClass]="stockClass(variant.inventoryQuantity)">{{ variant.inventoryQuantity ?? 0 }}</span>
+                                                    </td>
+                                                    <td>{{ variant.inventoryItem?.tracked ? 'Evet' : 'Hayır' }}</td>
+                                                    <td class="small">
+                                                        @for (level of levels(variant); track $index) {
+                                                            <div>{{ level.location?.name }}: {{ availableAt(level) }}</div>
+                                                        } @empty {
+                                                            <span class="text-muted">-</span>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            } @empty {
+                                                <tr><td colspan="7" class="text-muted text-center">Varyant yok.</td></tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        }
+                    } @empty {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">Ürün bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <app-table-pager [currentPage]="currentPage" [totalPages]="totalPages" [totalCount]="totalCount"
+            [shownCount]="filteredItems.length" [knownTotal]="knownTotal" (pageChange)="setPage($event)" />
+    }
+</div>

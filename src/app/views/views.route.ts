@@ -68,4 +68,8 @@ export const VIEWS_ROUTES: Routes = [
         path: '',
         loadChildren: () => import('@/app/views/admin/admin.route').then((mod) => mod.ADMIN_ROUTES)
     },
+    {
+        path: '',
+        loadChildren: () => import('@/app/views/wms/wms.route').then((mod) => mod.WMS_ROUTES)
+    },
 ];

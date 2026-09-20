@@ -16,6 +16,19 @@ import { AiAssistant, UpdateAiAssistantRequest } from '@/app/core/models/ai-assi
 import { ExtensionDefinition } from '@/app/core/models/extension/extension-definition.models';
 import { PagedResult } from '@/app/core/models/pagination.model';
 
+type PropagateStatus = 'update' | 'same' | 'create';
+
+/** Bir bilgi kaydının diğer asistanlara uygulanması için hedef satırı */
+interface PropagateTarget {
+    assistant: AiAssistant;
+    /** Hedef asistanın aynı extension + özellik adına sahip kayıtları */
+    existing: AiKnowledgeResponse[];
+    /** Asistanın bu extension için herhangi bir bilgi kaydı var mı */
+    usesExtension: boolean;
+    status: PropagateStatus;
+    selected: boolean;
+}
+
 @Component({
     selector: 'app-ai-knowledge-page',
     imports: [CommonModule, FormsModule],
@@ -58,6 +71,15 @@ export class AiKnowledgePage implements OnInit {
         value: '',
         shortDescription: '',
     };
+
+    // ────── Diğer asistanlara uygula ──────
+    showPropagateModal = false;
+    propagateSource: AiKnowledgeResponse | null = null;
+    propagateTargets: PropagateTarget[] = [];
+    propagateLoading = false;
+    propagateSaving = false;
+    /** true ise bu extension'ı hiç kullanmayan asistanlar da listelenir */
+    propagateShowAll = false;
 
     // ────── Asistan Adı Güncelleme ──────
     showRenameModal = false;
@@ -106,7 +128,7 @@ export class AiKnowledgePage implements OnInit {
     async loadAssistants(): Promise<void> {
         try {
             const companyId = this.authState.profile?.companyId || '';
-            const resp = await this.aiProvidersService.getAssistantsPaged({ companyId });
+            const resp = await this.aiProvidersService.getAssistantsPaged({ companyId, pageNumber: 1, pageSize: 1000 });
             this.assistants = this.extractArray(resp?.data);
         } catch (err) {
             console.error('Assistants yükleme hatası:', err);
@@ -280,6 +302,170 @@ export class AiKnowledgePage implements OnInit {
         if (response?.items) return response.items;
         if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
         return [];
+    }
+
+    // ────── Diğer asistanlara uygula ──────
+    /**
+     * Seçilen satırın değerini, aynı extension + aynı özellik adına sahip diğer asistanların
+     * kayıtlarına uygular; kaydı olmayan asistanlara isteğe bağlı olarak yeni kayıt ekler.
+     */
+    async openPropagate(item: AiKnowledgeResponse): Promise<void> {
+        this.propagateSource = item;
+        this.propagateTargets = [];
+        this.propagateShowAll = false;
+        this.showPropagateModal = true;
+        this.propagateLoading = true;
+        try {
+            const companyId = this.authState.profile?.companyId || '';
+            const resp = await this.knowledgeService.getByCompany(companyId);
+            const all = (this.extractArray(resp?.data) as AiKnowledgeResponse[])
+                .filter(k => k.extensionId === item.extensionId && k.id !== item.id);
+            const propKey = this.normalizeProp(item.prop);
+
+            this.propagateTargets = this.assistants
+                .filter(a => a.id !== item.aiAssistantId)
+                .map(assistant => {
+                    const ownRows = all.filter(k => k.aiAssistantId === assistant.id);
+                    const existing = ownRows.filter(k => this.normalizeProp(k.prop) === propKey);
+                    const status: PropagateStatus = !existing.length
+                        ? 'create'
+                        : existing.every(k => (k.value ?? '') === (item.value ?? '')) ? 'same' : 'update';
+                    return {
+                        assistant,
+                        existing,
+                        usesExtension: ownRows.length > 0,
+                        status,
+                        selected: status === 'update',
+                    };
+                })
+                .sort((a, b) => this.statusOrder(a.status) - this.statusOrder(b.status)
+                    || (a.assistant.name || '').localeCompare(b.assistant.name || '', 'tr'));
+        } catch (err) {
+            console.error('Hedef kayıtlar yüklenemedi:', err);
+            alert('Diğer asistanların kayıtları yüklenemedi.');
+            this.closePropagate();
+        } finally {
+            this.propagateLoading = false;
+        }
+    }
+
+    get visiblePropagateTargets(): PropagateTarget[] {
+        return this.propagateShowAll
+            ? this.propagateTargets
+            : this.propagateTargets.filter(t => t.usesExtension);
+    }
+
+    get selectedPropagateCount(): number {
+        return this.visiblePropagateTargets.filter(t => t.selected && t.status !== 'same').length;
+    }
+
+    get hiddenPropagateCount(): number {
+        return this.propagateTargets.length - this.visiblePropagateTargets.length;
+    }
+
+    setAllPropagate(selected: boolean): void {
+        for (const target of this.visiblePropagateTargets) {
+            if (target.status !== 'same') target.selected = selected;
+        }
+    }
+
+    onPropagateShowAllChange(): void {
+        // Gizlenen hedefler seçili kalıp yanlışlıkla işlenmesin
+        if (!this.propagateShowAll) {
+            for (const t of this.propagateTargets) if (!t.usesExtension) t.selected = false;
+        }
+    }
+
+    async applyPropagate(): Promise<void> {
+        const source = this.propagateSource;
+        if (!source) return;
+        const targets = this.visiblePropagateTargets.filter(t => t.selected && t.status !== 'same');
+        if (!targets.length) return;
+
+        const updateCount = targets.filter(t => t.status === 'update').reduce((n, t) => n + t.existing.length, 0);
+        const createCount = targets.filter(t => t.status === 'create').length;
+        const parts = [
+            updateCount ? `${updateCount} kayıt güncellenecek` : '',
+            createCount ? `${createCount} yeni kayıt eklenecek` : '',
+        ].filter(Boolean).join(', ');
+        if (!confirm(`"${source.prop}" değeri ${targets.length} asistana uygulanacak (${parts}). Devam edilsin mi?`)) return;
+
+        const userId = this.authState.profile?.userId || '';
+        const companyId = this.authState.profile?.companyId || '';
+        const requests: Promise<unknown>[] = [];
+
+        for (const target of targets) {
+            if (target.status === 'update') {
+                for (const row of target.existing) {
+                    // Hedef kaydın tipi, açıklaması ve özellik adı korunur; yalnızca değer güncellenir
+                    const req: UpdateAiKnowledgeRequest = {
+                        companyId,
+                        userId,
+                        aiAssistantId: row.aiAssistantId,
+                        extensionId: row.extensionId,
+                        aiKnowledgeTypeId: row.aiKnowledgeTypeId || null,
+                        prop: row.prop || source.prop || '',
+                        value: source.value || '',
+                        shortDescription: row.shortDescription || null,
+                    };
+                    requests.push(this.knowledgeService.update(row.id, req));
+                }
+            } else {
+                const req: CreateAiKnowledgeRequest = {
+                    companyId,
+                    userId,
+                    aiAssistantId: target.assistant.id,
+                    extensionId: source.extensionId,
+                    aiKnowledgeTypeId: source.aiKnowledgeTypeId || null,
+                    prop: source.prop || '',
+                    value: source.value || '',
+                    shortDescription: source.shortDescription || null,
+                };
+                requests.push(this.knowledgeService.create(req).catch(err => {
+                    // Backend CreatedAtAction route hatası — kayıt oluşmuş olabilir
+                    if (err?.status === 400 && JSON.stringify(err.error)?.includes('No route matches')) return null;
+                    throw err;
+                }));
+            }
+        }
+
+        this.propagateSaving = true;
+        try {
+            const results = await Promise.allSettled(requests);
+            const failed = results.filter(r => r.status === 'rejected').length;
+            if (failed) {
+                console.error('Uygulama hataları:', results.filter(r => r.status === 'rejected'));
+                alert(`${requests.length - failed} işlem başarılı, ${failed} işlem başarısız oldu.`);
+            }
+            this.closePropagate();
+            await this.loadKnowledge();
+        } finally {
+            this.propagateSaving = false;
+        }
+    }
+
+    closePropagate(): void {
+        this.showPropagateModal = false;
+        this.propagateSource = null;
+        this.propagateTargets = [];
+    }
+
+    getAssistantModelName(assistant: AiAssistant): string {
+        return assistant.modelName || '';
+    }
+
+    shortValue(value?: string | null, max = 80): string {
+        const v = (value ?? '').trim();
+        if (!v) return '—';
+        return v.length > max ? v.substring(0, max) + '…' : v;
+    }
+
+    private normalizeProp(prop?: string | null): string {
+        return (prop ?? '').trim().toLocaleLowerCase('tr');
+    }
+
+    private statusOrder(status: PropagateStatus): number {
+        return status === 'update' ? 0 : status === 'create' ? 1 : 2;
     }
 
     // ────── Asistan Adı Güncelleme ──────

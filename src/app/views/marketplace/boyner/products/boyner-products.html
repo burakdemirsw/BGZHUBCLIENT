@@ -1,0 +1,200 @@
+<div class="page-surface p-3">
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Sayfada Ara</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Ürün, marka, barkod, renk..."
+                [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Barkod</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="barcodeFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Stok Kodu</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="stockCodeFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Model Kodu</label>
+            <input type="text" class="form-control form-control-sm" placeholder="Enter ile ara"
+                [(ngModel)]="productMainIdFilter" (keyup.enter)="onServerFilterChange()">
+        </div>
+        <div class="col-md-1">
+            <label class="form-label small mb-1">Satışta</label>
+            <select class="form-select form-select-sm" [(ngModel)]="onSaleFilter" (ngModelChange)="onServerFilterChange()">
+                <option value="">Hepsi</option>
+                <option value="true">Evet</option>
+                <option value="false">Hayır</option>
+            </select>
+        </div>
+        <div class="col-md-1">
+            <label class="form-label small mb-1">Onaylı</label>
+            <select class="form-select form-select-sm" [(ngModel)]="approvedFilter" (ngModelChange)="onServerFilterChange()">
+                <option value="">Hepsi</option>
+                <option value="true">Evet</option>
+                <option value="false">Hayır</option>
+            </select>
+        </div>
+        <div class="col-md-1 d-flex gap-1">
+            <button class="btn btn-light btn-sm flex-fill" (click)="clearFilters()" title="Filtreleri temizle">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+            <button class="btn btn-light btn-sm flex-fill" (click)="load()" [disabled]="loading" title="Yenile">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="loading"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+        <div class="alert alert-danger py-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ errorMessage }}</div>
+    }
+
+    @if (loading) {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Ürünler yükleniyor...</p>
+        </div>
+    } @else {
+        <div class="table-responsive">
+            <table class="table table-centered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>İşlemler</th>
+                        <th>Ürün</th>
+                        <th>Marka</th>
+                        <th>Kategori</th>
+                        <th>Barkod</th>
+                        <th>Renk / Beden</th>
+                        <th>Stok</th>
+                        <th>Fiyat</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (product of pagedItems; track $index) {
+                        <tr>
+                            <td class="text-nowrap">
+                                <button class="btn btn-soft-primary btn-sm" (click)="openDetail(product)" title="Detay">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </td>
+                            <td class="product-cell">
+                                <div class="d-flex align-items-center gap-2">
+                                    @if (firstImage(product); as url) {
+                                        <img [src]="url" [alt]="product.title || ''" class="product-thumb">
+                                    }
+                                    <span class="text-truncate fw-semibold">{{ product.title || '-' }}</span>
+                                </div>
+                            </td>
+                            <td>{{ product.brand || '-' }}</td>
+                            <td>{{ product.categoryName || '-' }}</td>
+                            <td class="text-nowrap">{{ product.barcode || '-' }}</td>
+                            <td class="text-nowrap">{{ product.color || '-' }} / {{ product.size || '-' }}</td>
+                            <td><span class="badge" [ngClass]="stockClass(product.quantity)">{{ product.quantity ?? 0 }}</span></td>
+                            <td class="text-nowrap">{{ product.salePrice | number:'1.2-2' }} {{ product.currencyType }}</td>
+                            <td class="text-nowrap">
+                                @if (product.onSale) {
+                                    <span class="badge bg-success-subtle text-success">Satışta</span>
+                                }
+                                @if (product.approved) {
+                                    <span class="badge bg-primary-subtle text-primary">Onaylı</span>
+                                }
+                                @if (product.archived) {
+                                    <span class="badge bg-danger-subtle text-danger">Arşiv</span>
+                                }
+                                @if (!product.onSale && !product.approved && !product.archived) {
+                                    <span class="badge bg-secondary-subtle text-secondary">Pasif</span>
+                                }
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-4">Ürün bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <app-table-pager [currentPage]="currentPage" [totalPages]="totalPages" [totalCount]="totalCount"
+            [shownCount]="filteredItems.length" [knownTotal]="knownTotal" (pageChange)="setPage($event)" />
+    }
+</div>
+
+@if (showModal && selectedProduct) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-tag me-2"></i>{{ selectedProduct.title || 'Ürün' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        @for (image of selectedProduct.images ?? []; track $index) {
+                            @if (image.url) {
+                                <img [src]="image.url" [alt]="selectedProduct.title || ''" class="detail-thumb">
+                            }
+                        } @empty {
+                            <span class="text-muted small">Görsel yok.</span>
+                        }
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="detail-box small">
+                                <div class="fw-semibold mb-2">Ürün Bilgileri</div>
+                                <div>Marka: {{ selectedProduct.brand || '-' }}</div>
+                                <div>Kategori: {{ selectedProduct.categoryName || '-' }}</div>
+                                <div>Barkod: {{ selectedProduct.barcode || '-' }}</div>
+                                <div>Stok Kodu: {{ selectedProduct.stockCode || '-' }}</div>
+                                <div>Model Kodu: {{ selectedProduct.productMainId || '-' }}</div>
+                                <div>Renk / Beden: {{ selectedProduct.color || '-' }} / {{ selectedProduct.size || '-' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-box small">
+                                <div class="fw-semibold mb-2">Fiyat &amp; Stok</div>
+                                <div>Liste Fiyatı: {{ selectedProduct.listPrice | number:'1.2-2' }} {{ selectedProduct.currencyType }}</div>
+                                <div>Satış Fiyatı: {{ selectedProduct.salePrice | number:'1.2-2' }} {{ selectedProduct.currencyType }}</div>
+                                <div>KDV Oranı: {{ selectedProduct.vatRate ?? '-' }}</div>
+                                <div>Stok:
+                                    <span class="badge" [ngClass]="stockClass(selectedProduct.quantity)">{{ selectedProduct.quantity ?? 0 }}</span>
+                                </div>
+                                <div>Oluşturma:
+                                    {{ selectedProduct.createDateTime ? (selectedProduct.createDateTime | date:'dd.MM.yyyy HH:mm') : '-' }}
+                                </div>
+                                <div>Güncelleme:
+                                    {{ selectedProduct.lastUpdateDate ? (selectedProduct.lastUpdateDate | date:'dd.MM.yyyy HH:mm') : '-' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        @if (selectedProduct.onSale) {
+                            <span class="badge bg-success-subtle text-success">Satışta</span>
+                        }
+                        @if (selectedProduct.approved) {
+                            <span class="badge bg-primary-subtle text-primary">Onaylı</span>
+                        }
+                        @if (selectedProduct.archived) {
+                            <span class="badge bg-danger-subtle text-danger">Arşiv</span>
+                        }
+                        @if (selectedProduct.locked) {
+                            <span class="badge bg-warning-subtle text-warning">Kilitli</span>
+                        }
+                        @if (selectedProduct.productUrl) {
+                            <a [href]="selectedProduct.productUrl" target="_blank" rel="noopener" class="small ms-auto">
+                                Mağazada Görüntüle <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

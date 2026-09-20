@@ -38,6 +38,12 @@ export class AuthGuard {
       return true;
     }
 
+    // Menüsü veritabanında tutulmayan bölümler (ör. WMS) menü bazlı yetki
+    // kontrolünden muaftır; token kontrolü yine de yukarıda uygulanır.
+    if (next.data?.['skipMenuAuth'] === true) {
+      return true;
+    }
+
     // Menü yetki kontrolü
     try {
       const userId = this.userMenuService.getUserIdFromToken();

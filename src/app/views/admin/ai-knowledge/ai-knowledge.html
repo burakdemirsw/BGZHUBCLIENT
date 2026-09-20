@@ -103,6 +103,10 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="action-buttons">
+                                        <button class="btn-action btn-action-propagate" title="Diğer asistanlara uygula"
+                                                (click)="openPropagate(item)">
+                                            <i class="fa-solid fa-share-nodes"></i>
+                                        </button>
                                         <button class="btn-action btn-action-copy" title="Kopyala"
                                                 (click)="copyItem(item)">
                                             <i class="fa-regular fa-copy"></i>
@@ -261,6 +265,114 @@
 }
 
 <!-- ══════ Asistan Adı Düzenleme Modal ══════ -->
+@if (showPropagateModal && propagateSource) {
+    <div class="modal-backdrop-custom" (click)="closePropagate()"></div>
+    <div class="modal-container">
+        <div class="modal-card modal-card-lg">
+            <div class="modal-card-header">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-share-nodes"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold">Diğer Asistanlara Uygula</h5>
+                        <small class="text-muted">Aynı extension ve özellik adına sahip kayıtlar güncellenir</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close-custom" (click)="closePropagate()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-card-body">
+                <!-- Kaynak -->
+                <div class="propagate-source">
+                    <div class="d-flex flex-wrap gap-2 mb-2">
+                        <span class="entity-chip chip-integration"><i class="fa-solid fa-puzzle-piece"></i><span>{{ getExtensionName(propagateSource.extensionId) }}</span></span>
+                        <span class="entity-chip chip-assistant"><i class="fa-solid fa-robot"></i><span>{{ getAssistantName(propagateSource.aiAssistantId) }}</span></span>
+                    </div>
+                    <div class="small text-muted">Özellik</div>
+                    <div class="fw-semibold mb-1">{{ propagateSource.prop || '—' }}</div>
+                    <div class="small text-muted">Uygulanacak değer</div>
+                    <div class="propagate-value">{{ propagateSource.value || '—' }}</div>
+                </div>
+
+                @if (propagateLoading) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                    </div>
+                } @else {
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 my-3">
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-light" (click)="setAllPropagate(true)">Tümünü seç</button>
+                            <button type="button" class="btn btn-sm btn-light" (click)="setAllPropagate(false)">Seçimi kaldır</button>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="propagateShowAll"
+                                   [(ngModel)]="propagateShowAll" (ngModelChange)="onPropagateShowAllChange()">
+                            <label class="form-check-label small" for="propagateShowAll">
+                                Bu extension'ı kullanmayan asistanları da göster
+                                @if (!propagateShowAll && hiddenPropagateCount) {
+                                    <span class="text-muted">({{ hiddenPropagateCount }})</span>
+                                }
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="propagate-list">
+                        @for (target of visiblePropagateTargets; track target.assistant.id) {
+                            <label class="propagate-item" [class.is-disabled]="target.status === 'same'" [class.is-selected]="target.selected && target.status !== 'same'">
+                                <input class="form-check-input mt-0" type="checkbox"
+                                       [(ngModel)]="target.selected"
+                                       [disabled]="target.status === 'same'">
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="d-flex flex-wrap align-items-center gap-2">
+                                        <span class="fw-semibold">{{ target.assistant.name }}</span>
+                                        @if (getAssistantModelName(target.assistant)) {
+                                            <span class="badge bg-light text-dark"><i class="fa-solid fa-microchip me-1"></i>{{ getAssistantModelName(target.assistant) }}</span>
+                                        }
+                                        @switch (target.status) {
+                                            @case ('update') { <span class="badge bg-warning-subtle text-warning">Güncellenecek</span> }
+                                            @case ('create') { <span class="badge bg-info-subtle text-info">Eklenecek</span> }
+                                            @case ('same') { <span class="badge bg-success-subtle text-success">Aynı değer</span> }
+                                        }
+                                    </div>
+                                    @if (target.status === 'update') {
+                                        @for (row of target.existing; track row.id) {
+                                            <div class="propagate-diff">
+                                                <span class="text-muted">Mevcut:</span> {{ shortValue(row.value) }}
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </label>
+                        } @empty {
+                            <div class="text-center text-muted py-3">
+                                Bu extension'ı kullanan başka asistan yok.
+                                @if (hiddenPropagateCount) {
+                                    <div class="small">Diğer asistanlara eklemek için yukarıdaki anahtarı açın.</div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="modal-card-footer">
+                <button type="button" class="btn btn-light" (click)="closePropagate()">
+                    <i class="fa-solid fa-xmark me-1"></i>İptal
+                </button>
+                <button type="button" class="btn btn-primary" (click)="applyPropagate()"
+                        [disabled]="!selectedPropagateCount || propagateSaving || propagateLoading">
+                    @if (propagateSaving) {
+                        <i class="fa-solid fa-spinner fa-spin me-1"></i>Uygulanıyor...
+                    } @else {
+                        <i class="fa-solid fa-check me-1"></i>{{ selectedPropagateCount }} asistana uygula
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 @if (showRenameModal) {
     <div class="modal-backdrop-custom" (click)="closeRenameModal()"></div>
     <div class="modal-container">
