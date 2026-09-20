@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiResponse } from '@/app/core/models/api-response.model';
+import { PagedResult, PaginationRequest } from '@/app/core/models/pagination.model';
 import { WmsCrudPage } from '@/app/views/wms/shared/wms-crud-page';
 import { WmsDistrictsService } from '@/app/core/services/wms/wms-districts.service';
 import { WmsCitiesService } from '@/app/core/services/wms/wms-cities.service';
@@ -40,15 +40,8 @@ export class WmsDistrictsPage extends WmsCrudPage<WmsDistrictResponse, Districts
         void this.loadLookups();
     }
 
-    protected fetchItems(): Promise<ApiResponse<WmsDistrictResponse[]>> {
-        return this.service.getAll();
-    }
-
-    protected filterFields(item: WmsDistrictResponse) {
-        return [
-            item.districtCode,
-            item.cityCode,
-        ];
+    protected fetchPage(request: Partial<PaginationRequest>): Promise<PagedResult<WmsDistrictResponse>> {
+        return this.service.getPaged(request);
     }
 
     protected emptyForm(): DistrictsForm {
@@ -97,8 +90,7 @@ export class WmsDistrictsPage extends WmsCrudPage<WmsDistrictResponse, Districts
     /** Formdaki seçim listeleri */
     private async loadLookups(): Promise<void> {
         try {
-            const response = await this.citiesService.getAll();
-            this.cities = this.extractArray<WmsCityResponse>(response?.data);
+            this.cities = await this.citiesService.getLookupItems();
         } catch (err) {
             console.error('İlçeler: seçim listeleri yüklenemedi:', err);
         }

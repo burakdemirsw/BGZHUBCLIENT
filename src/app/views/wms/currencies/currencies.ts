@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiResponse } from '@/app/core/models/api-response.model';
+import { PagedResult, PaginationRequest } from '@/app/core/models/pagination.model';
 import { WmsCrudPage } from '@/app/views/wms/shared/wms-crud-page';
 import { WmsCurrenciesService } from '@/app/core/services/wms/wms-currencies.service';
 import {
@@ -28,14 +28,8 @@ const EMPTY_FORM: CurrenciesForm = {
 export class WmsCurrenciesPage extends WmsCrudPage<CurrencyResponse, CurrenciesForm> {
     private readonly service = inject(WmsCurrenciesService);
 
-    protected fetchItems(): Promise<ApiResponse<CurrencyResponse[]>> {
-        return this.service.getAll();
-    }
-
-    protected filterFields(item: CurrencyResponse) {
-        return [
-            item.currencyCode,
-        ];
+    protected fetchPage(request: Partial<PaginationRequest>): Promise<PagedResult<CurrencyResponse>> {
+        return this.service.getPaged(request);
     }
 
     protected emptyForm(): CurrenciesForm {

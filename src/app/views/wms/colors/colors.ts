@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiResponse } from '@/app/core/models/api-response.model';
+import { PagedResult, PaginationRequest } from '@/app/core/models/pagination.model';
 import { WmsCrudPage } from '@/app/views/wms/shared/wms-crud-page';
 import { WmsColorsService } from '@/app/core/services/wms/wms-colors.service';
 import {
@@ -30,15 +30,8 @@ const EMPTY_FORM: ColorsForm = {
 export class WmsColorsPage extends WmsCrudPage<ColorResponse, ColorsForm> {
     private readonly service = inject(WmsColorsService);
 
-    protected fetchItems(): Promise<ApiResponse<ColorResponse[]>> {
-        return this.service.getAll();
-    }
-
-    protected filterFields(item: ColorResponse) {
-        return [
-            item.colorCode,
-            item.sortOrder,
-        ];
+    protected fetchPage(request: Partial<PaginationRequest>): Promise<PagedResult<ColorResponse>> {
+        return this.service.getPaged(request);
     }
 
     protected emptyForm(): ColorsForm {

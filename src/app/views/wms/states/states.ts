@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiResponse } from '@/app/core/models/api-response.model';
+import { PagedResult, PaginationRequest } from '@/app/core/models/pagination.model';
 import { WmsCrudPage } from '@/app/views/wms/shared/wms-crud-page';
 import { WmsStatesService } from '@/app/core/services/wms/wms-states.service';
 import { WmsCountriesService } from '@/app/core/services/wms/wms-countries.service';
@@ -40,15 +40,8 @@ export class WmsStatesPage extends WmsCrudPage<WmsStateResponse, StatesForm> {
         void this.loadLookups();
     }
 
-    protected fetchItems(): Promise<ApiResponse<WmsStateResponse[]>> {
-        return this.service.getAll();
-    }
-
-    protected filterFields(item: WmsStateResponse) {
-        return [
-            item.stateCode,
-            item.countryCode,
-        ];
+    protected fetchPage(request: Partial<PaginationRequest>): Promise<PagedResult<WmsStateResponse>> {
+        return this.service.getPaged(request);
     }
 
     protected emptyForm(): StatesForm {
@@ -97,8 +90,7 @@ export class WmsStatesPage extends WmsCrudPage<WmsStateResponse, StatesForm> {
     /** Formdaki seçim listeleri */
     private async loadLookups(): Promise<void> {
         try {
-            const response = await this.countriesService.getAll();
-            this.countries = this.extractArray<WmsCountryResponse>(response?.data);
+            this.countries = await this.countriesService.getLookupItems();
         } catch (err) {
             console.error('Bölgeler: seçim listeleri yüklenemedi:', err);
         }

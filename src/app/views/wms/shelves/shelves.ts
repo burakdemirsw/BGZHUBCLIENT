@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiResponse } from '@/app/core/models/api-response.model';
+import { PagedResult, PaginationRequest } from '@/app/core/models/pagination.model';
 import { WmsCrudPage } from '@/app/views/wms/shared/wms-crud-page';
 import { WmsShelvesService } from '@/app/core/services/wms/wms-shelves.service';
 import { WmsWarehousesService } from '@/app/core/services/wms/wms-warehouses.service';
@@ -66,19 +66,8 @@ export class WmsShelvesPage extends WmsCrudPage<ShelfResponse, ShelvesForm> {
         void this.loadLookups();
     }
 
-    protected fetchItems(): Promise<ApiResponse<ShelfResponse[]>> {
-        return this.service.getAll();
-    }
-
-    protected filterFields(item: ShelfResponse) {
-        return [
-            item.shelfCode,
-            item.shelfDescription,
-            item.warehouseCode,
-            item.zone,
-            item.aisle,
-            item.shelfLevel,
-        ];
+    protected fetchPage(request: Partial<PaginationRequest>): Promise<PagedResult<ShelfResponse>> {
+        return this.service.getPaged(request);
     }
 
     protected emptyForm(): ShelvesForm {
@@ -151,12 +140,12 @@ export class WmsShelvesPage extends WmsCrudPage<ShelfResponse, ShelvesForm> {
     /** Formdaki seçim listeleri */
     private async loadLookups(): Promise<void> {
         try {
-            const [warehousesResponse, officesResponse] = await Promise.all([
-                this.warehousesService.getAll(),
-                this.officesService.getAll(),
+            const [warehousesItems, officesItems] = await Promise.all([
+                this.warehousesService.getLookupItems(),
+                this.officesService.getLookupItems(),
             ]);
-            this.warehouses = this.extractArray<WarehouseResponse>(warehousesResponse?.data);
-            this.offices = this.extractArray<OfficeResponse>(officesResponse?.data);
+            this.warehouses = warehousesItems;
+            this.offices = officesItems;
         } catch (err) {
             console.error('Raflar: seçim listeleri yüklenemedi:', err);
         }

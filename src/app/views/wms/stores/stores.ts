@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiResponse } from '@/app/core/models/api-response.model';
+import { PagedResult, PaginationRequest } from '@/app/core/models/pagination.model';
 import { WmsCrudPage } from '@/app/views/wms/shared/wms-crud-page';
 import { WmsStoresService } from '@/app/core/services/wms/wms-stores.service';
 import { WmsOfficesService } from '@/app/core/services/wms/wms-offices.service';
@@ -50,18 +50,8 @@ export class WmsStoresPage extends WmsCrudPage<StoreResponse, StoresForm> {
         void this.loadLookups();
     }
 
-    protected fetchItems(): Promise<ApiResponse<StoreResponse[]>> {
-        return this.service.getAll();
-    }
-
-    protected filterFields(item: StoreResponse) {
-        return [
-            item.storeCode,
-            item.storeDescription,
-            item.officeCode,
-            item.customerCode,
-            item.phone,
-        ];
+    protected fetchPage(request: Partial<PaginationRequest>): Promise<PagedResult<StoreResponse>> {
+        return this.service.getPaged(request);
     }
 
     protected emptyForm(): StoresForm {
@@ -122,8 +112,7 @@ export class WmsStoresPage extends WmsCrudPage<StoreResponse, StoresForm> {
     /** Formdaki seçim listeleri */
     private async loadLookups(): Promise<void> {
         try {
-            const response = await this.officesService.getAll();
-            this.offices = this.extractArray<OfficeResponse>(response?.data);
+            this.offices = await this.officesService.getLookupItems();
         } catch (err) {
             console.error('Mağazalar: seçim listeleri yüklenemedi:', err);
         }

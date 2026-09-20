@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiResponse } from '@/app/core/models/api-response.model';
+import { PagedResult, PaginationRequest } from '@/app/core/models/pagination.model';
 import { WmsCrudPage } from '@/app/views/wms/shared/wms-crud-page';
 import { WmsCountriesService } from '@/app/core/services/wms/wms-countries.service';
 import {
@@ -30,15 +30,8 @@ const EMPTY_FORM: CountriesForm = {
 export class WmsCountriesPage extends WmsCrudPage<WmsCountryResponse, CountriesForm> {
     private readonly service = inject(WmsCountriesService);
 
-    protected fetchItems(): Promise<ApiResponse<WmsCountryResponse[]>> {
-        return this.service.getAll();
-    }
-
-    protected filterFields(item: WmsCountryResponse) {
-        return [
-            item.countryCode,
-            item.countryISOCode,
-        ];
+    protected fetchPage(request: Partial<PaginationRequest>): Promise<PagedResult<WmsCountryResponse>> {
+        return this.service.getPaged(request);
     }
 
     protected emptyForm(): CountriesForm {

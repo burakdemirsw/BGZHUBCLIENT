@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiResponse } from '@/app/core/models/api-response.model';
+import { PagedResult, PaginationRequest } from '@/app/core/models/pagination.model';
 import { WmsCrudPage } from '@/app/views/wms/shared/wms-crud-page';
 import { WmsWarehousesService } from '@/app/core/services/wms/wms-warehouses.service';
 import { WmsWarehouseTypesService } from '@/app/core/services/wms/wms-warehouse-types.service';
@@ -48,18 +48,8 @@ export class WmsWarehousesPage extends WmsCrudPage<WarehouseResponse, WarehouseF
         void this.loadLookups();
     }
 
-    protected fetchItems(): Promise<ApiResponse<WarehouseResponse[]>> {
-        return this.service.getAll();
-    }
-
-    protected filterFields(item: WarehouseResponse) {
-        return [
-            item.warehouseCode,
-            item.warehouseDescription,
-            item.officeCode,
-            item.officeDescription,
-            this.warehouseTypeLabel(item.warehouseTypeCode),
-        ];
+    protected fetchPage(request: Partial<PaginationRequest>): Promise<PagedResult<WarehouseResponse>> {
+        return this.service.getPaged(request);
     }
 
     protected emptyForm(): WarehouseForm {
@@ -123,12 +113,12 @@ export class WmsWarehousesPage extends WmsCrudPage<WarehouseResponse, WarehouseF
     /** Formdaki seçim listeleri */
     private async loadLookups(): Promise<void> {
         try {
-            const [typesResponse, officesResponse] = await Promise.all([
-                this.warehouseTypesService.getAll(),
-                this.officesService.getAll(),
+            const [warehouseTypeItems, officeItems] = await Promise.all([
+                this.warehouseTypesService.getLookupItems(),
+                this.officesService.getLookupItems(),
             ]);
-            this.warehouseTypes = this.extractArray<WarehouseTypeResponse>(typesResponse?.data);
-            this.offices = this.extractArray<OfficeResponse>(officesResponse?.data);
+            this.warehouseTypes = warehouseTypeItems;
+            this.offices = officeItems;
         } catch (err) {
             console.error('Depolar: seçim listeleri yüklenemedi:', err);
         }

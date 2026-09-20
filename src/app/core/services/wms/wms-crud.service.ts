@@ -2,18 +2,28 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClientService } from '../http-client.service';
 import { AuthStateService } from '../auth-state.service';
 import { ApiResponse } from '../../models/api-response.model';
+import {
+    DEFAULT_PAGINATION,
+    PagedResult,
+    PaginationRequest,
+} from '../../models/pagination.model';
 
 /** Tüm /api/wms/* çağrılarının controller segmenti */
 const WMS_CONTROLLER = 'wms';
 
 /**
+ * Seçim listeleri (dropdown) için tek seferde çekilen kayıt sayısı.
+ * Sayfalı uçlardan tam liste alınamadığı için lookup'lar tek büyük sayfa ister.
+ */
+export const WMS_LOOKUP_PAGE_SIZE = 500;
+
+/**
  * WMS kaynaklarının tamamı aynı beş uçlu kalıbı kullanır:
- *   GET  {resource}/by-company/{companyId}   → liste (şirket bazlı kaynaklarda)
- *   GET  {resource}                          → liste (global kaynaklarda)
- *   GET  {resource}/{id}                     → tekil kayıt
- *   POST {resource}                          → oluştur
- *   POST {resource}/update/{id}              → güncelle
- *   POST {resource}/delete/{id}              → sil
+ *   POST {resource}/paged        → sayfalı liste (PaginationRequest → PagedResult)
+ *   GET  {resource}/{id}         → tekil kayıt
+ *   POST {resource}              → oluştur
+ *   POST {resource}/update/{id}  → güncelle
+ *   POST {resource}/delete/{id}  → sil
  *
  * Bu temel sınıf kalıbı tek yerde çözer; her kaynak servisi yalnızca
  * `resource` alanını ve gerekiyorsa ek uçlarını tanımlar.
@@ -38,6 +48,26 @@ export abstract class WmsCrudServiceBase<TResponse, TCreate extends object, TUpd
         };
     }
 
+    /**
+     * Sayfalı liste. `companyId` oturumdan doldurulur; şirketten bağımsız
+     * kaynaklarda da istek şeması bu alanı zorunlu tuttuğu için gönderilir.
+     */
+    async getPaged(request?: Partial<PaginationRequest>): Promise<PagedResult<TResponse>> {
+        const body: PaginationRequest = {
+            ...DEFAULT_PAGINATION,
+            ...request,
+            companyId: request?.companyId || this.companyId,
+        };
+        const response = await this.http.post<PagedResult<TResponse>>(this.action('paged'), body);
+        return PagedResult.from<TResponse>(response);
+    }
+
+    /** Seçim listeleri için tek sayfada olabildiğince çok kayıt getirir */
+    async getLookupItems(searchTerm?: string): Promise<TResponse[]> {
+        const page = await this.getPaged({ pageSize: WMS_LOOKUP_PAGE_SIZE, searchTerm });
+        return page.items;
+    }
+
     getById(id: string): Promise<ApiResponse<TResponse>> {
         return this.http.get<TResponse>(this.action(id));
     }
@@ -56,8 +86,8 @@ export abstract class WmsCrudServiceBase<TResponse, TCreate extends object, TUpd
 }
 
 /**
- * Şirket bazlı WMS kaynakları — listeleme `by-company/{companyId}` ile yapılır
- * ve oluşturma isteğine `companyId` otomatik eklenir.
+ * Şirket bazlı WMS kaynakları — oluşturma isteğine `companyId` otomatik eklenir,
+ * böylece form modelinde ve şablonda bu alan bulunmaz.
  */
 @Injectable()
 export abstract class WmsCompanyCrudService<
@@ -66,11 +96,6 @@ export abstract class WmsCompanyCrudService<
     TUpdate extends object,
 > extends WmsCrudServiceBase<TResponse, TCreate, TUpdate> {
 
-    getAll(companyId?: string): Promise<ApiResponse<TResponse[]>> {
-        return this.http.get<TResponse[]>(this.action(`by-company/${companyId ?? this.companyId}`));
-    }
-
-    /** companyId oturumdan eklenir; çağıran tarafın göndermesi gerekmez */
     override create(request: TCreate): Promise<ApiResponse<TResponse>> {
         return this.http.post<TResponse>(this.action(), { ...request, companyId: this.companyId });
     }
@@ -78,7 +103,7 @@ export abstract class WmsCompanyCrudService<
 
 /**
  * Şirketten bağımsız (global) WMS kaynakları — ör. depo tipleri, ülkeler.
- * Listeleme doğrudan kaynak kökünden yapılır.
+ * Oluşturma isteği `companyId` taşımaz.
  */
 @Injectable()
 export abstract class WmsGlobalCrudService<
@@ -86,8 +111,4 @@ export abstract class WmsGlobalCrudService<
     TCreate extends object,
     TUpdate extends object,
 > extends WmsCrudServiceBase<TResponse, TCreate, TUpdate> {
-
-    getAll(): Promise<ApiResponse<TResponse[]>> {
-        return this.http.get<TResponse[]>(this.action());
-    }
 }

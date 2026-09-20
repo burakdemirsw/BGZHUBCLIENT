@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiResponse } from '@/app/core/models/api-response.model';
+import { PagedResult, PaginationRequest } from '@/app/core/models/pagination.model';
 import { WmsCrudPage } from '@/app/views/wms/shared/wms-crud-page';
 import { WmsTaxOfficesService } from '@/app/core/services/wms/wms-tax-offices.service';
 import {
@@ -30,15 +30,8 @@ const EMPTY_FORM: TaxOfficesForm = {
 export class WmsTaxOfficesPage extends WmsCrudPage<WmsTaxOfficeResponse, TaxOfficesForm> {
     private readonly service = inject(WmsTaxOfficesService);
 
-    protected fetchItems(): Promise<ApiResponse<WmsTaxOfficeResponse[]>> {
-        return this.service.getAll();
-    }
-
-    protected filterFields(item: WmsTaxOfficeResponse) {
-        return [
-            item.taxOfficeCode,
-            item.cityCode,
-        ];
+    protected fetchPage(request: Partial<PaginationRequest>): Promise<PagedResult<WmsTaxOfficeResponse>> {
+        return this.service.getPaged(request);
     }
 
     protected emptyForm(): TaxOfficesForm {

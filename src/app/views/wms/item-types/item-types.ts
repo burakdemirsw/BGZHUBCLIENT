@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiResponse } from '@/app/core/models/api-response.model';
+import { PagedResult, PaginationRequest } from '@/app/core/models/pagination.model';
 import { WmsCrudPage } from '@/app/views/wms/shared/wms-crud-page';
 import { WmsItemTypesService } from '@/app/core/services/wms/wms-item-types.service';
 import {
@@ -30,15 +30,8 @@ const EMPTY_FORM: ItemTypesForm = {
 export class WmsItemTypesPage extends WmsCrudPage<ItemTypeResponse, ItemTypesForm> {
     private readonly service = inject(WmsItemTypesService);
 
-    protected fetchItems(): Promise<ApiResponse<ItemTypeResponse[]>> {
-        return this.service.getAll();
-    }
-
-    protected filterFields(item: ItemTypeResponse) {
-        return [
-            item.itemTypeCode,
-            item.itemTypeDescription,
-        ];
+    protected fetchPage(request: Partial<PaginationRequest>): Promise<PagedResult<ItemTypeResponse>> {
+        return this.service.getPaged(request);
     }
 
     protected emptyForm(): ItemTypesForm {

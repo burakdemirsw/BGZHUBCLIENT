@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiResponse } from '@/app/core/models/api-response.model';
+import { PagedResult, PaginationRequest } from '@/app/core/models/pagination.model';
 import { WmsCrudPage } from '@/app/views/wms/shared/wms-crud-page';
 import { WmsItemBarcodeTypesService } from '@/app/core/services/wms/wms-item-barcode-types.service';
 import {
@@ -32,16 +32,8 @@ const EMPTY_FORM: ItemBarcodeTypesForm = {
 export class WmsItemBarcodeTypesPage extends WmsCrudPage<ItemBarcodeTypeResponse, ItemBarcodeTypesForm> {
     private readonly service = inject(WmsItemBarcodeTypesService);
 
-    protected fetchItems(): Promise<ApiResponse<ItemBarcodeTypeResponse[]>> {
-        return this.service.getAll();
-    }
-
-    protected filterFields(item: ItemBarcodeTypeResponse) {
-        return [
-            item.barcodeTypeCode,
-            item.barcodeTypeDescription,
-            item.barcodeLength,
-        ];
+    protected fetchPage(request: Partial<PaginationRequest>): Promise<PagedResult<ItemBarcodeTypeResponse>> {
+        return this.service.getPaged(request);
     }
 
     protected emptyForm(): ItemBarcodeTypesForm {

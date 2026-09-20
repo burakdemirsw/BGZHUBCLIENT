@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiResponse } from '@/app/core/models/api-response.model';
+import { PagedResult, PaginationRequest } from '@/app/core/models/pagination.model';
 import { WmsCrudPage } from '@/app/views/wms/shared/wms-crud-page';
 import { WmsCodeSequencesService } from '@/app/core/services/wms/wms-code-sequences.service';
 import {
@@ -28,15 +28,8 @@ const EMPTY_FORM: CodeSequencesForm = {
 export class WmsCodeSequencesPage extends WmsCrudPage<CodeSequenceResponse, CodeSequencesForm> {
     private readonly service = inject(WmsCodeSequencesService);
 
-    protected fetchItems(): Promise<ApiResponse<CodeSequenceResponse[]>> {
-        return this.service.getAll();
-    }
-
-    protected filterFields(item: CodeSequenceResponse) {
-        return [
-            item.sequenceCode,
-            item.lastNumber,
-        ];
+    protected fetchPage(request: Partial<PaginationRequest>): Promise<PagedResult<CodeSequenceResponse>> {
+        return this.service.getPaged(request);
     }
 
     protected emptyForm(): CodeSequencesForm {
