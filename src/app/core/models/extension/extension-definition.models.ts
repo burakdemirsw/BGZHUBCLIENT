@@ -2,7 +2,9 @@ export interface ExtensionDefinition {
     id: string;
     code: string;
     name: string;
-    category: string;
+    /** dbo.ExtensionCategories (Code) */
+    categoryCode: string;
+    categoryName?: string | null;
     mention?: string;
     photoUrl?: string;
     isActive: boolean;
@@ -14,7 +16,7 @@ export interface ExtensionDefinition {
 export interface CreateExtensionDefinitionRequest {
     code: string;
     name: string;
-    category: string;
+    categoryCode: string;
     mention?: string;
     photoUrl?: string;
     isActive?: boolean;
@@ -22,7 +24,7 @@ export interface CreateExtensionDefinitionRequest {
 
 export interface UpdateExtensionDefinitionRequest {
     name: string;
-    category: string;
+    categoryCode: string;
     mention?: string;
     photoUrl?: string;
     isActive: boolean;

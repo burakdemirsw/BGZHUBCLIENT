@@ -48,3 +48,81 @@ export interface BeymenReportQuestionIssueRequest {
     questionId?: BeymenQuestionId | null;
     reportReason?: string | null;
 }
+
+/** POST /api/Extension/beymen/products */
+export interface BeymenProductQuery {
+    barcode?: string | null;
+    modelCode?: string | null;
+    stockCode?: string | null;
+    status?: string | null;
+    /** 0 tabanlı sayfa numarası (varsayılan 0) */
+    page?: number;
+    /** Sayfa boyutu (varsayılan 50) */
+    size?: number;
+}
+
+/** POST /api/Extension/beymen/products/by-product-code */
+export interface BeymenProductCodeQuery {
+    productCode: string;
+}
+
+/** POST /api/Extension/beymen/products/by-barcode */
+export interface BeymenProductBarcodeQuery {
+    barcode: string;
+}
+
+export interface BeymenNamedValue {
+    id?: string | null;
+    name?: string | null;
+    code?: string | null;
+}
+
+export interface BeymenPrice {
+    value?: number | string | null;
+    currency?: string | null;
+}
+
+export interface BeymenStock {
+    count?: number | string | null;
+}
+
+export interface BeymenProductImage {
+    id?: number | string | null;
+    thumbnailPath?: string | null;
+    originalPath?: string | null;
+}
+
+export interface BeymenCatalogProduct {
+    id?: string | null;
+    externalId?: string | null;
+    merchantId?: string | null;
+    name?: string | null;
+    barcode?: string | null;
+    modelCode?: string | null;
+    stockCode?: string | null;
+    description?: string | null;
+    merchantColorCode?: string | null;
+    brand?: BeymenNamedValue | null;
+    category?: BeymenNamedValue | null;
+    size?: BeymenNamedValue | null;
+    gender?: BeymenNamedValue | null;
+    platformColor?: BeymenNamedValue | null;
+    salesPrice?: BeymenPrice | null;
+    platformSalesPrice?: BeymenPrice | null;
+    vatRate?: number | string | null;
+    desi?: number | string | null;
+    stock?: BeymenStock | null;
+    status?: string | null;
+    subStatus?: string | null;
+    images?: BeymenProductImage[];
+    version?: string | null;
+}
+
+/** POST /api/Extension/beymen/products yanıtı */
+export interface BeymenProductListResponse {
+    items?: BeymenCatalogProduct[];
+    page?: number | string | null;
+    itemsPerPage?: number | string | null;
+    pageCount?: number | string | null;
+    total?: number | string | null;
+}

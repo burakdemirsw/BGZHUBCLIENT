@@ -2,6 +2,8 @@ export interface ExtensionSettingDefinition {
     id: string;
     extensionId: string;
     key: string;
+    categoryCode: string;
+    categoryName?: string | null;
     displayName: string;
     inputType: string;
     isRequired: boolean;
@@ -23,6 +25,7 @@ export interface CreateExtensionSettingDefinitionRequest {
     defaultValue?: string;
     sortOrder: number;
     isActive?: boolean;
+    categoryCode?: string | null;
 }
 
 export interface UpdateExtensionSettingDefinitionRequest {
@@ -34,4 +37,5 @@ export interface UpdateExtensionSettingDefinitionRequest {
     defaultValue?: string;
     sortOrder: number;
     isActive: boolean;
+    categoryCode?: string | null;
 }

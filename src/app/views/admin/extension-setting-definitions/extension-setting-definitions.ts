@@ -8,10 +8,12 @@ import {
     CreateExtensionSettingDefinitionRequest,
     UpdateExtensionSettingDefinitionRequest,
 } from '@/app/core/models/extension/extension-setting-definition.models';
+import { ExtensionSettingCategory } from '@/app/core/models/extension/extension-setting-category.models';
 
 interface ExtensionSettingDefinitionForm {
     extensionId: string;
     key: string;
+    categoryCode: string;
     displayName: string;
     inputType: string;
     isRequired: boolean;
@@ -35,6 +37,7 @@ interface ExtensionCategoryGroup {
 export class ExtensionSettingDefinitionsPage implements OnInit {
     definitions: ExtensionDefinition[] = [];
     items: ExtensionSettingDefinition[] = [];
+    settingCategories: ExtensionSettingCategory[] = [];
 
     loading = false;
     showModal = false;
@@ -55,6 +58,7 @@ export class ExtensionSettingDefinitionsPage implements OnInit {
     form: ExtensionSettingDefinitionForm = {
         extensionId: '',
         key: '',
+        categoryCode: '',
         displayName: '',
         inputType: 'text',
         isRequired: false,
@@ -79,6 +83,18 @@ export class ExtensionSettingDefinitionsPage implements OnInit {
 
     ngOnInit(): void {
         this.loadDefinitions();
+        this.loadSettingCategories();
+    }
+
+    async loadSettingCategories(): Promise<void> {
+        try {
+            const response = await this.extensionService.getExtensionSettingCategories();
+            this.settingCategories = this.extractArray<ExtensionSettingCategory>(response)
+                .sort((a, b) => Number(a.sortOrder) - Number(b.sortOrder));
+        } catch (err) {
+            console.error('ExtensionSettingDefinitions categories load error:', err);
+            this.settingCategories = [];
+        }
     }
 
     async loadDefinitions(): Promise<void> {
@@ -109,8 +125,8 @@ export class ExtensionSettingDefinitionsPage implements OnInit {
         this.loading = true;
         try {
             const response = await this.extensionService.getExtensionSettingDefinitions(this.selectedExtensionId);
-            this.items = this.extractArray<ExtensionSettingDefinition>(response)
-                .sort((a, b) => Number(a.sortOrder) - Number(b.sortOrder));
+            // API alanlari kategori sirasina, sonra alan sirasina gore sirali doner
+            this.items = this.extractArray<ExtensionSettingDefinition>(response);
             this.applyFilterAndPaging();
         } catch (err) {
             console.error('ExtensionSettingDefinitions load error:', err);
@@ -194,6 +210,8 @@ export class ExtensionSettingDefinitionsPage implements OnInit {
         const filter = (this.filterText || '').toLowerCase();
         this.filteredItems = this.items.filter(item =>
             (item.key || '').toLowerCase().includes(filter) ||
+            (item.categoryCode || '').toLowerCase().includes(filter) ||
+            (item.categoryName || '').toLowerCase().includes(filter) ||
             (item.displayName || '').toLowerCase().includes(filter) ||
             (item.inputType || '').toLowerCase().includes(filter) ||
             (item.placeholder || '').toLowerCase().includes(filter) ||
@@ -214,6 +232,7 @@ export class ExtensionSettingDefinitionsPage implements OnInit {
         this.form = {
             extensionId: this.selectedExtensionId,
             key: '',
+            categoryCode: '',
             displayName: '',
             inputType: 'text',
             isRequired: false,
@@ -230,7 +249,8 @@ export class ExtensionSettingDefinitionsPage implements OnInit {
         this.selectedItem = item;
         this.form = {
             extensionId: item.extensionId,
-            key: item.key,  
+            key: item.key,
+            categoryCode: item.categoryCode || '',
             displayName: item.displayName,
             inputType: item.inputType,
             isRequired: item.isRequired,
@@ -254,6 +274,7 @@ export class ExtensionSettingDefinitionsPage implements OnInit {
                     defaultValue: this.form.defaultValue,
                     sortOrder: Number(this.form.sortOrder),
                     isActive: this.form.isActive,
+                    categoryCode: this.form.categoryCode || null,
                 };
                 await this.extensionService.updateExtensionSettingDefinition(this.selectedItem.id, request);
             } else {
@@ -267,6 +288,7 @@ export class ExtensionSettingDefinitionsPage implements OnInit {
                     defaultValue: this.form.defaultValue,
                     sortOrder: Number(this.form.sortOrder),
                     isActive: this.form.isActive,
+                    categoryCode: this.form.categoryCode || null,
                 };
                 await this.extensionService.createExtensionSettingDefinition(request);
             }
@@ -305,6 +327,7 @@ export class ExtensionSettingDefinitionsPage implements OnInit {
                 defaultValue: item.defaultValue || '',
                 sortOrder: Number(item.sortOrder ?? 0) + 1,
                 isActive: item.isActive,
+                categoryCode: item.categoryCode || null,
             };
 
             await this.extensionService.createExtensionSettingDefinition(request);

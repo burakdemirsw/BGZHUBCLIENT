@@ -4,6 +4,8 @@ import { MenusService } from './menus.service';
 import { MenuItemType } from '@/app/types/layout';
 import { Menu, RoleMenu } from '@/app/core/models/menu/menu.models';
 import { WMS_MENU_ITEMS } from '@/app/views/wms/wms-menu';
+import { SYSTEM_MENU_ITEMS } from '@/app/views/background-jobs/background-jobs-menu';
+import { MARKETPLACE_QUESTIONS_MENU_ITEMS } from '@/app/views/marketplace-questions/marketplace-questions-menu';
 
 @Injectable({
   providedIn: 'root',
@@ -114,6 +116,13 @@ export class UserMenuService {
     for (const item of items.sort((a, b) => a.orderIndex - b.orderIndex)) {
       const children = childMap.get(item.id);
       const hasChildren = children && children.length > 0;
+
+      if (item.isTitle) {
+        // Başlık → tıklanamaz bölüm başlığı; alt menüleri başlığın altında aynı seviyede listelenir
+        result.push({ label: item.name, isTitle: true });
+        if (hasChildren) result.push(...this.buildMenuLevel(children, childMap));
+        continue;
+      }
       const hasUrl = !!item.url; // boş string "" → false
 
       // Ana başlık mı yoksa alt menü mü? parentId varsa alt menü öğesi
@@ -145,10 +154,10 @@ export class UserMenuService {
 
   /**
    * Veritabanından gelen menülere kod tarafında tanımlı statik bölümleri ekler.
-   * WMS menüsü veritabanına kaydedilmediği için buradan eklenir.
+   * Soru & Cevap, Sistem ve WMS menüleri veritabanına kaydedilmediği için buradan eklenir.
    */
   private withStaticMenus(items: MenuItemType[]): MenuItemType[] {
-    return [...items, ...WMS_MENU_ITEMS];
+    return [...items, ...MARKETPLACE_QUESTIONS_MENU_ITEMS, ...SYSTEM_MENU_ITEMS, ...WMS_MENU_ITEMS];
   }
 
   /** Menüleri temizle */

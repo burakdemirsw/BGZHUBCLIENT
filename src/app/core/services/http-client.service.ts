@@ -66,4 +66,49 @@ export class HttpClientService {
     );
     return ApiResponse.from<T>(raw);
   }
+
+  /**
+   * HTTP PUT isteği gönderir.
+   * Tüm API yanıtları ApiResponse<T> olarak döner.
+   */
+  async put<T>(
+    requestParameter: Partial<RequestParameters>,
+    body: Partial<any>
+  ): Promise<ApiResponse<T>> {
+    const url = requestParameter.fullEndPoint
+      ? requestParameter.fullEndPoint
+      : `${this.url(requestParameter)}${
+          requestParameter.queryString ? `?${requestParameter.queryString}` : ''
+        }`;
+
+    const raw = await firstValueFrom(
+      this.httpClient.put<any>(url, body, {
+        headers: requestParameter.headers,
+        responseType: requestParameter.responseType as 'json',
+      })
+    );
+    return ApiResponse.from<T>(raw);
+  }
+
+  /**
+   * HTTP DELETE isteği gönderir.
+   * Tüm API yanıtları ApiResponse<T> olarak döner.
+   */
+  async delete<T>(
+    requestParameter: Partial<RequestParameters>
+  ): Promise<ApiResponse<T>> {
+    const url = requestParameter.fullEndPoint
+      ? requestParameter.fullEndPoint
+      : `${this.url(requestParameter)}${
+          requestParameter.queryString ? `?${requestParameter.queryString}` : ''
+        }`;
+
+    const raw = await firstValueFrom(
+      this.httpClient.delete<any>(url, {
+        headers: requestParameter.headers,
+        responseType: requestParameter.responseType as 'json',
+      })
+    );
+    return ApiResponse.from<T>(raw);
+  }
 }

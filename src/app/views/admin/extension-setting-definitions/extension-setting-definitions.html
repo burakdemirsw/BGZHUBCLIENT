@@ -95,6 +95,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>#</th>
+                                    <th>Kategori</th>
                                     <th>Key</th>
                                     <th>Gorunen Ad</th>
                                     <th>Input Tipi</th>
@@ -110,6 +111,13 @@
                                 @for (item of pagedItems; track item.id; let idx = $index) {
                                     <tr>
                                         <td><span class="badge bg-primary-subtle text-primary">{{ (currentPage - 1) * pageSize + idx + 1 }}</span></td>
+                                        <td>
+                                            @if (item.categoryName || item.categoryCode) {
+                                                <span class="badge bg-info-subtle text-info">{{ item.categoryName || item.categoryCode }}</span>
+                                            } @else {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
                                         <td>
                                             <div class="setting-key-cell">
                                                 <code>{{ item.key }}</code>
@@ -150,7 +158,7 @@
                                         </td>
                                     </tr>
                                 } @empty {
-                                    <tr><td colspan="10" class="text-center text-muted">Kayit bulunamadi.</td></tr>
+                                    <tr><td colspan="11" class="text-center text-muted">Kayit bulunamadi.</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -220,6 +228,20 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Gorunen Ad</label>
                                 <input type="text" class="form-control" [(ngModel)]="form.displayName" name="displayName" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Kategori</label>
+                                <select class="form-select" [(ngModel)]="form.categoryCode" name="categoryCode">
+                                    <option value="">Varsayilan</option>
+                                    @for (category of settingCategories; track category.id) {
+                                        @if (category.isActive || category.code === form.categoryCode) {
+                                            <option [value]="category.code">{{ category.name }}{{ category.isActive ? '' : ' (Pasif)' }}</option>
+                                        }
+                                    }
+                                </select>
                             </div>
                         </div>
 

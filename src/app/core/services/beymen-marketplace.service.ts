@@ -8,14 +8,19 @@ import {
 } from '@/app/core/models/marketplace/marketplace.models';
 import {
     BeymenAnswerQuestionRequest,
+    BeymenCatalogProduct,
     BeymenOrderQuery,
+    BeymenProductBarcodeQuery,
+    BeymenProductCodeQuery,
+    BeymenProductListResponse,
+    BeymenProductQuery,
     BeymenQuestionQuery,
     BeymenReportQuestionIssueRequest,
 } from '@/app/core/models/marketplace/beymen.models';
 
 /**
  * ExtensionController üzerinden Beymen pazaryeri verileri.
- * Müşteriler dışındaki uç noktalar tipli şema yerine `MarketplaceToolResult` döner.
+ * Müşteriler ve ürünler dışındaki uç noktalar tipli şema yerine `MarketplaceToolResult` döner.
  */
 @Injectable({
     providedIn: 'root'
@@ -25,6 +30,18 @@ export class BeymenMarketplaceService extends MarketplaceExtensionService {
 
     async getOrders(query: BeymenOrderQuery): Promise<ApiResponse<MarketplaceToolResult>> {
         return this.send<MarketplaceToolResult, BeymenOrderQuery>('orders', query);
+    }
+
+    async getProducts(query: BeymenProductQuery): Promise<ApiResponse<BeymenProductListResponse>> {
+        return this.send<BeymenProductListResponse, BeymenProductQuery>('products', query);
+    }
+
+    async getProductsByProductCode(query: BeymenProductCodeQuery): Promise<ApiResponse<BeymenCatalogProduct[]>> {
+        return this.send<BeymenCatalogProduct[], BeymenProductCodeQuery>('products/by-product-code', query);
+    }
+
+    async getProductsByBarcode(query: BeymenProductBarcodeQuery): Promise<ApiResponse<BeymenCatalogProduct[]>> {
+        return this.send<BeymenCatalogProduct[], BeymenProductBarcodeQuery>('products/by-barcode', query);
     }
 
     async getQuestions(query: BeymenQuestionQuery): Promise<ApiResponse<MarketplaceToolResult>> {

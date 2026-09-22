@@ -1,0 +1,227 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-list-check me-2"></i>Arka Plan Ayar Tanımları</h4>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-soft-primary" (click)="loadItems()" [disabled]="loading">
+                        <i class="fa-solid fa-rotate me-1" [class.fa-spin]="loading"></i>Yenile
+                    </button>
+                    <button class="btn btn-sm btn-primary" (click)="openCreate()" [disabled]="!jobs.length">
+                        <i class="fa-solid fa-plus me-1"></i>Yeni Tanım
+                    </button>
+                </div>
+            </div>
+            <div class="card-body page-surface">
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <input
+                        type="text"
+                        class="form-control form-control-sm w-auto"
+                        placeholder="Anahtar, ad, açıklama ara..."
+                        [(ngModel)]="filterText"
+                        (ngModelChange)="onFilterChange()">
+                    <select class="form-select form-select-sm w-auto" [(ngModel)]="jobFilter" (ngModelChange)="onFilterChange()">
+                        <option value="">Tüm servisler</option>
+                        @for (job of jobs; track job.id) {
+                            <option [value]="job.code">{{ job.name || job.code }}</option>
+                        }
+                    </select>
+                </div>
+
+                @if (loading && !items.length) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>İşlemler</th>
+                                    <th>Servis</th>
+                                    <th>Ayar</th>
+                                    <th>Veri Tipi</th>
+                                    <th>Varsayılan</th>
+                                    <th>Geçerli Değer</th>
+                                    <th>Aralık</th>
+                                    <th>Sıra</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of pagedItems; track item.definitionId) {
+                                    <tr>
+                                        <td class="text-nowrap">
+                                            <button class="btn btn-sm btn-soft-primary me-1" title="Düzenle" (click)="openEdit(item)">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-soft-danger" title="Sil"
+                                                (click)="remove(item)" [disabled]="deletingId === item.definitionId">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">{{ item.jobName }}</div>
+                                            <code class="small">{{ item.jobCode }}</code>
+                                        </td>
+                                        <td class="setting-cell">
+                                            <div>
+                                                {{ item.displayName || item.key }}
+                                                @if (item.isRequired) {
+                                                    <span class="badge bg-danger-subtle text-danger ms-1">Zorunlu</span>
+                                                }
+                                            </div>
+                                            <code class="small">{{ item.key }}</code>
+                                            @if (item.description) {
+                                                <div class="small text-muted text-truncate setting-desc" [title]="item.description">{{ item.description }}</div>
+                                            }
+                                        </td>
+                                        <td><span class="badge bg-info-subtle text-info text-lowercase">{{ item.dataType || '-' }}</span></td>
+                                        <td class="small">{{ item.defaultValue ?? '-' }}</td>
+                                        <td class="small">
+                                            {{ item.effectiveValue ?? '-' }}
+                                            @if (item.value !== null) {
+                                                <span class="badge bg-warning-subtle text-warning ms-1">Özel</span>
+                                            }
+                                        </td>
+                                        <td class="small text-nowrap">
+                                            @if (item.minValue || item.maxValue) {
+                                                {{ item.minValue || '…' }} – {{ item.maxValue || '…' }}
+                                            } @else {
+                                                -
+                                            }
+                                        </td>
+                                        <td class="small">{{ item.sortOrder }}</td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="form-check form-switch mb-0">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        [checked]="item.isActive"
+                                                        [disabled]="togglingId === item.definitionId"
+                                                        (click)="$event.preventDefault(); toggleActive(item)">
+                                                </div>
+                                                @if (item.isActive) {
+                                                    <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                } @else {
+                                                    <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td colspan="9" class="text-center text-muted py-4">Ayar tanımı bulunamadı.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="small text-muted">Toplam: {{ filteredItems.length }} tanım</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track page) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (showModal) {
+    <div class="modal fade show d-block modal-mask" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ editing ? 'Ayar Tanımını Düzenle' : 'Yeni Ayar Tanımı' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body page-surface">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Servis <span class="text-danger">*</span></label>
+                            <select class="form-select" [(ngModel)]="form.jobCode" (ngModelChange)="onFormJobChange()" [disabled]="!!editing">
+                                <option value="">Servis seçin...</option>
+                                @for (job of jobs; track job.id) {
+                                    <option [value]="job.code">{{ job.name || job.code }}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Anahtar <span class="text-danger">*</span></label>
+                            <input class="form-control" [(ngModel)]="form.key" [disabled]="!!editing" placeholder="örn. BatchSize">
+                            @if (editing) {
+                                <div class="form-text">Anahtar ve veri tipi oluşturulduktan sonra değiştirilemez.</div>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Veri Tipi <span class="text-danger">*</span></label>
+                            <input class="form-control" list="bgDefDataTypes" [(ngModel)]="form.dataType" [disabled]="!!editing">
+                            <datalist id="bgDefDataTypes">
+                                @for (type of dataTypeOptions; track type) {
+                                    <option [value]="type"></option>
+                                }
+                            </datalist>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Görünen Ad</label>
+                            <input class="form-control" [(ngModel)]="form.displayName">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Açıklama</label>
+                            <textarea class="form-control" rows="2" [(ngModel)]="form.description"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Varsayılan Değer</label>
+                            <input class="form-control" [(ngModel)]="form.defaultValue">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Sıra</label>
+                            <input type="number" class="form-control" [(ngModel)]="form.sortOrder">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Min Değer</label>
+                            <input class="form-control" [(ngModel)]="form.minValue">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Max Değer</label>
+                            <input class="form-control" [(ngModel)]="form.maxValue">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="defIsRequired" [(ngModel)]="form.isRequired">
+                                <label class="form-check-label" for="defIsRequired">Zorunlu</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="defIsActive" [(ngModel)]="form.isActive">
+                                <label class="form-check-label" for="defIsActive">Aktif</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving">
+                        {{ saving ? 'Kaydediliyor...' : 'Kaydet' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

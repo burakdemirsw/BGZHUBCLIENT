@@ -11,10 +11,20 @@ import {
     UpdateCompanyExtensionSettingRequest,
 } from '@/app/core/models/extension/company-extension-setting.models';
 import { CompanyExtension } from '@/app/core/models/extension/company-extension.models';
+import { ExtensionSettingCategory } from '@/app/core/models/extension/extension-setting-category.models';
 
 interface ExtensionCategoryGroup {
     category: string;
     items: ExtensionDefinition[];
+}
+
+/** Modalda ayar alanlarının Extension Ayar Kategorilerine göre gruplanmış hali */
+interface SettingFieldGroup {
+    code: string;
+    name: string;
+    description: string | null;
+    sortOrder: number;
+    fields: ExtensionSettingDefinition[];
 }
 
 @Component({
@@ -36,6 +46,8 @@ export class CompanyExtensionSettingsPage implements OnInit {
 
     selectedExtension: ExtensionDefinition | null = null;
     selectedExtensionSettings: ExtensionSettingDefinition[] = [];
+    selectedSettingGroups: SettingFieldGroup[] = [];
+    settingCategories: ExtensionSettingCategory[] = [];
     formValues: Record<string, string> = {};
 
     loading = false;
@@ -61,8 +73,12 @@ export class CompanyExtensionSettingsPage implements OnInit {
         this.loading = true;
         try {
             const companyId = this.authStateService.profile?.companyId || '';
-            const response = await this.extensionService.getExtensionDefinitions();
+            const [response, categoryResponse] = await Promise.all([
+                this.extensionService.getExtensionDefinitions(),
+                this.extensionService.getExtensionSettingCategories().catch(() => null),
+            ]);
             this.definitions = this.extractArray<ExtensionDefinition>(response);
+            this.settingCategories = this.extractArray<ExtensionSettingCategory>(categoryResponse);
 
             if (!companyId) {
                 this.filteredExtensions = [...this.definitions];
@@ -171,6 +187,7 @@ export class CompanyExtensionSettingsPage implements OnInit {
         this.selectedExtensionSettings = [
             ...(this.settingDefinitionsByExtension[extension.id] || []),
         ].sort((a, b) => Number(a.sortOrder) - Number(b.sortOrder));
+        this.selectedSettingGroups = this.buildSettingGroups(this.selectedExtensionSettings);
 
         const existing = this.companySettingsByExtension[extension.id] || [];
         this.formValues = {};
@@ -271,7 +288,33 @@ export class CompanyExtensionSettingsPage implements OnInit {
         this.showModal = false;
         this.selectedExtension = null;
         this.selectedExtensionSettings = [];
+        this.selectedSettingGroups = [];
         this.formValues = {};
+    }
+
+    /** Alanları kategori sırasına, kategori içinde alan sırasına göre gruplar; kategorisiz alanlar en sonda "Genel" altında toplanır. */
+    private buildSettingGroups(fields: ExtensionSettingDefinition[]): SettingFieldGroup[] {
+        const groups = new Map<string, SettingFieldGroup>();
+
+        for (const field of fields) {
+            const code = (field.categoryCode || '').trim().toLowerCase();
+            let group = groups.get(code);
+            if (!group) {
+                const category = code ? this.settingCategories.find(c => (c.code || '').toLowerCase() === code) : undefined;
+                group = {
+                    code,
+                    name: category?.name || field.categoryName || field.categoryCode || 'Genel',
+                    description: category?.description ?? null,
+                    sortOrder: category ? Number(category.sortOrder) || 0 : Number.MAX_SAFE_INTEGER,
+                    fields: [],
+                };
+                groups.set(code, group);
+            }
+            group.fields.push(field);
+        }
+
+        return Array.from(groups.values())
+            .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, 'tr-TR'));
     }
 
     private normalizeInputType(inputType: string): string {

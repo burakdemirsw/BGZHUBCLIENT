@@ -1,0 +1,492 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-gears me-2"></i>Arka Plan Servisleri</h4>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="badge bg-success-subtle text-success">Aktif: {{ enabledCount }} / {{ items.length }}</span>
+                    @if (runningCount) {
+                        <span class="badge bg-info-subtle text-info">Çalışan: {{ runningCount }}</span>
+                    }
+                    @if (failedCount) {
+                        <span class="badge bg-danger-subtle text-danger">Hatalı: {{ failedCount }}</span>
+                    }
+                    <button class="btn btn-sm btn-soft-primary" (click)="loadItems()" [disabled]="loading">
+                        <i class="fa-solid fa-rotate me-1" [class.fa-spin]="loading"></i>Yenile
+                    </button>
+                </div>
+            </div>
+            <div class="card-body page-surface">
+                <div class="d-flex mb-3">
+                    <input
+                        type="text"
+                        class="form-control form-control-sm w-auto"
+                        placeholder="Servis ara (ad, kod, açıklama)..."
+                        [(ngModel)]="filterText"
+                        (ngModelChange)="onFilterChange()">
+                </div>
+
+                @if (loading && !items.length) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>İşlemler</th>
+                                    <th>Servis</th>
+                                    <th>Zamanlama</th>
+                                    <th>Son Çalışma</th>
+                                    <th>Sonraki Çalışma</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of pagedItems; track item.id) {
+                                    <tr>
+                                        <td class="text-nowrap">
+                                            <button class="btn btn-sm btn-soft-primary me-1" title="Zamanlamayı düzenle" (click)="openEdit(item)">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-soft-secondary me-1" title="Ayarlar" (click)="openSettings(item)">
+                                                <i class="fa-solid fa-sliders"></i>
+                                                @if (settingCount(item)) {
+                                                    <span class="ms-1">{{ settingCount(item) }}</span>
+                                                }
+                                            </button>
+                                            <button class="btn btn-sm btn-soft-success" title="Şimdi çalıştır"
+                                                (click)="runNow(item)" [disabled]="runningCode === item.code">
+                                                @if (runningCode === item.code) {
+                                                    <i class="fa-solid fa-spinner fa-spin"></i>
+                                                } @else {
+                                                    <i class="fa-solid fa-play"></i>
+                                                }
+                                            </button>
+                                        </td>
+                                        <td class="job-cell">
+                                            <div class="fw-semibold">{{ item.name || item.code }}</div>
+                                            <code class="small">{{ item.code }}</code>
+                                            @if (item.description) {
+                                                <div class="small text-muted text-truncate job-desc" [title]="item.description">{{ item.description }}</div>
+                                            }
+                                        </td>
+                                        <td class="text-nowrap small">
+                                            <div><i class="fa-regular fa-clock me-1 text-muted"></i>Her {{ formatSeconds(item.intervalSeconds) }}</div>
+                                            <div class="text-muted">
+                                                Kilit: {{ formatSeconds(item.lockTimeoutSeconds) }}
+                                                @if (item.maxParallelism) {
+                                                    · Paralel: {{ item.maxParallelism }}
+                                                }
+                                            </div>
+                                        </td>
+                                        <td class="small">
+                                            <button type="button" class="badge border-0 {{ runStateView(item).css }}"
+                                                [class.clickable]="!!item.lastErrorMessage"
+                                                (click)="item.lastErrorMessage && toggleError(item)">
+                                                <i class="{{ runStateView(item).icon }} me-1"></i>{{ runStateView(item).label }}
+                                            </button>
+                                            @if (item.lastRunStartDate) {
+                                                <div class="text-nowrap mt-1">{{ item.lastRunStartDate | date: 'dd.MM.yyyy HH:mm:ss' }}</div>
+                                                <div class="text-muted text-nowrap">
+                                                    {{ formatDuration(item.lastDurationMs) }}
+                                                    @if (item.lastProcessedCount !== null) {
+                                                        · {{ item.lastProcessedCount }} kayıt
+                                                    }
+                                                </div>
+                                            }
+                                            @if (item.lockedBy && runState(item) === 'running') {
+                                                <div class="text-muted text-truncate job-desc" [title]="item.lockedBy">{{ item.lockedBy }}</div>
+                                            }
+                                            @if (expandedErrorId === item.id && item.lastErrorMessage) {
+                                                <pre class="error-box mt-2 mb-0">{{ item.lastErrorMessage }}</pre>
+                                            }
+                                        </td>
+                                        <td class="text-nowrap small">
+                                            @if (item.isEnabled) {
+                                                <span [class.text-warning]="isOverdue(item)">{{ item.nextRunDate | date: 'dd.MM.yyyy HH:mm:ss' }}</span>
+                                                @if (isOverdue(item)) {
+                                                    <div class="text-warning"><i class="fa-solid fa-hourglass-end me-1"></i>Gecikmede</div>
+                                                }
+                                            } @else {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="form-check form-switch mb-0">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        [checked]="item.isEnabled"
+                                                        [disabled]="togglingId === item.id"
+                                                        (click)="$event.preventDefault(); toggleActive(item)">
+                                                </div>
+                                                @if (item.isEnabled) {
+                                                    <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                } @else {
+                                                    <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">Arka plan servisi bulunamadı.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="small text-muted">Toplam: {{ filteredItems.length }} servis</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track page) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Zamanlama modalı -->
+@if (showModal && editingJob) {
+    <div class="modal fade show d-block modal-mask" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ editingJob.name || editingJob.code }} — Zamanlama</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body page-surface">
+                    <form (ngSubmit)="save()">
+                        <div class="mb-3">
+                            <label class="form-label">Çalışma Aralığı (saniye) <span class="text-danger">*</span></label>
+                            <input type="number" min="1" class="form-control" name="intervalSeconds" [(ngModel)]="form.intervalSeconds" required>
+                            <div class="form-text">Her {{ formatSeconds(form.intervalSeconds) }} bir çalışır.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Kilit Zaman Aşımı (saniye) <span class="text-danger">*</span></label>
+                            <input type="number" min="1" class="form-control" name="lockTimeoutSeconds" [(ngModel)]="form.lockTimeoutSeconds" required>
+                            <div class="form-text">Bir çalışma bu süreyi aşarsa kilit serbest bırakılır.</div>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label">Maksimum Paralellik</label>
+                            <input type="number" min="1" class="form-control" name="maxParallelism" [(ngModel)]="form.maxParallelism" placeholder="Varsayılan">
+                            <div class="form-text">Boş bırakılırsa servisin varsayılanı kullanılır.</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving">
+                        {{ saving ? 'Kaydediliyor...' : 'Kaydet' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Ayarlar modalı -->
+@if (showSettingsModal && settingsJob) {
+    <div class="modal fade show d-block modal-mask" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ settingsJob.name || settingsJob.code }} — Ayarlar</h5>
+                    <button type="button" class="btn-close" (click)="closeSettingsModal()"></button>
+                </div>
+                <div class="modal-body page-surface">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="small text-muted">
+                            {{ settings.length }} ayar tanımı
+                            @if (loadingSettings) {
+                                <i class="fa-solid fa-spinner fa-spin ms-1"></i>
+                            }
+                        </div>
+                        @if (!showCreateDefinition) {
+                            <button class="btn btn-sm btn-soft-primary" (click)="openCreateDefinition()">
+                                <i class="fa-solid fa-plus me-1"></i>Yeni Ayar Tanımı
+                            </button>
+                        }
+                    </div>
+
+                    @if (showCreateDefinition) {
+                        <div class="setting-row create-box">
+                            <div class="fw-semibold small mb-2"><i class="fa-solid fa-plus me-1"></i>Yeni Ayar Tanımı</div>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-1">Anahtar <span class="text-danger">*</span></label>
+                                    <input class="form-control form-control-sm" [(ngModel)]="createForm.key" placeholder="örn. BatchSize">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-1">Veri Tipi <span class="text-danger">*</span></label>
+                                    <input class="form-control form-control-sm" list="bgJobDataTypes" [(ngModel)]="createForm.dataType">
+                                    <datalist id="bgJobDataTypes">
+                                        @for (type of dataTypeOptions; track type) {
+                                            <option [value]="type"></option>
+                                        }
+                                    </datalist>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-1">Görünen Ad</label>
+                                    <input class="form-control form-control-sm" [(ngModel)]="createForm.displayName">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-1">Varsayılan Değer</label>
+                                    <input class="form-control form-control-sm" [(ngModel)]="createForm.defaultValue">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small mb-1">Açıklama</label>
+                                    <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="createForm.description"></textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-1">Min</label>
+                                    <input class="form-control form-control-sm" [(ngModel)]="createForm.minValue">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-1">Max</label>
+                                    <input class="form-control form-control-sm" [(ngModel)]="createForm.maxValue">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-1">Sıra</label>
+                                    <input type="number" class="form-control form-control-sm" [(ngModel)]="createForm.sortOrder">
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" [(ngModel)]="createForm.isRequired">
+                                        <label class="form-check-label small">Zorunlu</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" [(ngModel)]="createForm.isActive">
+                                        <label class="form-check-label small">Aktif</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end gap-2 mt-2">
+                                <button class="btn btn-sm btn-light" (click)="showCreateDefinition = false">Vazgeç</button>
+                                <button class="btn btn-sm btn-primary" (click)="createDefinition()" [disabled]="savingDefinition">
+                                    {{ savingDefinition ? 'Ekleniyor...' : 'Ekle' }}
+                                </button>
+                            </div>
+                        </div>
+                    }
+
+                    @for (setting of settings; track setting.definitionId) {
+                        @if (setting.key) {
+                            <div class="setting-row" [class.inactive]="!setting.isActive">
+                                <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                                    <div>
+                                        <label class="form-label mb-0">{{ setting.displayName || setting.key }}</label>
+                                        <div class="small text-muted"><code>{{ setting.key }}</code></div>
+                                    </div>
+                                    <div class="d-flex flex-wrap justify-content-end gap-1">
+                                        @if (setting.dataType) {
+                                            <span class="badge bg-info-subtle text-info text-lowercase">{{ setting.dataType }}</span>
+                                        }
+                                        @if (setting.isRequired) {
+                                            <span class="badge bg-danger-subtle text-danger">Zorunlu</span>
+                                        }
+                                        @if (!setting.isActive) {
+                                            <span class="badge bg-secondary-subtle text-secondary">Pasif</span>
+                                        }
+                                        @if (setting.value === null) {
+                                            <span class="badge bg-warning-subtle text-warning">Varsayılan</span>
+                                        }
+                                    </div>
+                                </div>
+                                @if (setting.description) {
+                                    <div class="small text-muted mb-2">{{ setting.description }}</div>
+                                }
+
+                                <div class="d-flex gap-2 align-items-start">
+                                    <div class="flex-grow-1">
+                                        @switch (inputKind(setting)) {
+                                            @case ('checkbox') {
+                                                <div class="form-check form-switch mt-1">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        [ngModel]="isChecked(setting.key)"
+                                                        (ngModelChange)="setChecked(setting.key, $event)">
+                                                    <label class="form-check-label">{{ isChecked(setting.key) ? 'Açık' : 'Kapalı' }}</label>
+                                                </div>
+                                            }
+                                            @case ('textarea') {
+                                                <textarea class="form-control form-control-sm" rows="3" [(ngModel)]="settingValues[setting.key]"></textarea>
+                                            }
+                                            @default {
+                                                <input class="form-control form-control-sm" [type]="inputKind(setting)"
+                                                    [attr.min]="setting.minValue" [attr.max]="setting.maxValue"
+                                                    [(ngModel)]="settingValues[setting.key]">
+                                            }
+                                        }
+                                        <div class="small text-muted mt-1">
+                                            Geçerli: <strong>{{ setting.effectiveValue ?? '-' }}</strong>
+                                            @if (setting.defaultValue !== null) {
+                                                · Varsayılan: {{ setting.defaultValue }}
+                                            }
+                                            @if (setting.minValue || setting.maxValue) {
+                                                · Aralık: {{ setting.minValue || '…' }} – {{ setting.maxValue || '…' }}
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="text-nowrap">
+                                        <button class="btn btn-sm btn-soft-primary me-1" title="Kaydet"
+                                            (click)="saveSetting(setting)" [disabled]="savingSettingKey === setting.key">
+                                            <i class="fa-solid fa-floppy-disk"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-soft-danger me-1" title="Varsayılana döndür"
+                                            (click)="resetSetting(setting)" [disabled]="savingSettingKey === setting.key || setting.value === null">
+                                            <i class="fa-solid fa-rotate-left"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-soft-secondary me-1" title="Tanımı düzenle" (click)="openDefinition(setting)">
+                                            <i class="fa-solid fa-wrench"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-soft-info me-1" title="Extension bağlantıları"
+                                            [class.active]="linkKey === setting.key" (click)="openLinks(setting)">
+                                            <i class="fa-solid fa-puzzle-piece"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-soft-danger" title="Tanımı sil"
+                                            (click)="deleteDefinition(setting)" [disabled]="savingSettingKey === setting.key">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                @if (linkKey === setting.key) {
+                                    <div class="definition-box mt-3">
+                                        <div class="fw-semibold small mb-2">
+                                            <i class="fa-solid fa-puzzle-piece me-1"></i>Extension Bağlantıları
+                                            @if (loadingLinks) {
+                                                <i class="fa-solid fa-spinner fa-spin ms-1"></i>
+                                            }
+                                        </div>
+
+                                        @for (link of links; track link.id) {
+                                            <div class="link-row d-flex justify-content-between align-items-center gap-2">
+                                                <div class="small">
+                                                    <span class="badge bg-primary-subtle text-primary me-1">{{ link.extensionCode }}</span>
+                                                    <strong>{{ link.extensionSettingDisplayName || link.extensionSettingKey }}</strong>
+                                                    <code class="ms-1">{{ link.extensionSettingKey }}</code>
+                                                    @if (link.extensionSettingCategoryCode) {
+                                                        <span class="text-muted ms-1">· {{ link.extensionSettingCategoryCode }}</span>
+                                                    }
+                                                    @if (link.extensionSettingDefaultValue) {
+                                                        <span class="text-muted ms-1">· Varsayılan: {{ link.extensionSettingDefaultValue }}</span>
+                                                    }
+                                                </div>
+                                                <button class="btn btn-sm btn-soft-danger" title="Bağlantıyı kaldır"
+                                                    (click)="removeLink(link)" [disabled]="linking">
+                                                    <i class="fa-solid fa-link-slash"></i>
+                                                </button>
+                                            </div>
+                                        } @empty {
+                                            @if (!loadingLinks) {
+                                                <div class="small text-muted mb-2">Bu ayara bağlı extension ayarı yok.</div>
+                                            }
+                                        }
+
+                                        <div class="row g-2 mt-1">
+                                            <div class="col-md-5">
+                                                <select class="form-select form-select-sm" [(ngModel)]="linkExtensionId" (ngModelChange)="onLinkExtensionChange()">
+                                                    <option value="">Extension seçin...</option>
+                                                    @for (extension of extensions; track extension.id) {
+                                                        <option [value]="extension.id">{{ extension.name }} ({{ extension.code }})</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <select class="form-select form-select-sm" [(ngModel)]="linkSettingDefId" [disabled]="!linkExtensionId">
+                                                    <option value="">Extension ayarı seçin...</option>
+                                                    @for (def of linkableExtensionSettings; track def.id) {
+                                                        <option [value]="def.id">{{ def.displayName || def.key }} ({{ def.key }})</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 d-grid">
+                                                <button class="btn btn-sm btn-primary" (click)="addLink()" [disabled]="linking || !linkSettingDefId">
+                                                    <i class="fa-solid fa-link me-1"></i>Bağla
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (definitionKey === setting.key) {
+                                    <div class="definition-box mt-3">
+                                        <div class="fw-semibold small mb-2"><i class="fa-solid fa-wrench me-1"></i>Ayar Tanımı</div>
+                                        <div class="row g-2">
+                                            <div class="col-md-6">
+                                                <label class="form-label small mb-1">Görünen Ad</label>
+                                                <input class="form-control form-control-sm" [(ngModel)]="definitionForm.displayName">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small mb-1">Varsayılan Değer</label>
+                                                <input class="form-control form-control-sm" [(ngModel)]="definitionForm.defaultValue">
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label small mb-1">Açıklama</label>
+                                                <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="definitionForm.description"></textarea>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label small mb-1">Min</label>
+                                                <input class="form-control form-control-sm" [(ngModel)]="definitionForm.minValue">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label small mb-1">Max</label>
+                                                <input class="form-control form-control-sm" [(ngModel)]="definitionForm.maxValue">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label small mb-1">Sıra</label>
+                                                <input type="number" class="form-control form-control-sm" [(ngModel)]="definitionForm.sortOrder">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" [(ngModel)]="definitionForm.isRequired">
+                                                    <label class="form-check-label small">Zorunlu</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" [(ngModel)]="definitionForm.isActive">
+                                                    <label class="form-check-label small">Aktif</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-end gap-2 mt-2">
+                                            <button class="btn btn-sm btn-light" (click)="definitionKey = null">Vazgeç</button>
+                                            <button class="btn btn-sm btn-primary" (click)="saveDefinition()" [disabled]="savingSettingKey === setting.key">Tanımı Kaydet</button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    } @empty {
+                        @if (!showCreateDefinition) {
+                            <div class="text-center text-muted py-3">Bu servis için ayar tanımlanmamış.</div>
+                        }
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeSettingsModal()">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

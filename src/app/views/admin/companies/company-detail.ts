@@ -11,9 +11,10 @@ import { CompanySettingsService } from '@/app/core/services/company-settings.ser
 import { Company, UpdateCompanyRequest } from '@/app/core/models/customer/company.models';
 import { UserResponse, UpdateUserRequest } from '@/app/core/models/user/user.models';
 import {
-    CompanySetting,
-    CreateCompanySettingRequest,
-    UpdateCompanySettingRequest,
+    CompanySettingField,
+    CompanySettingGroup,
+    CompanySettingsResponse,
+    CompanySettingValueRequest,
 } from '@/app/core/models/company-setting/company-setting.models';
 import { PAGE_SIZE_OPTIONS, DEFAULT_PAGE_SIZE } from '@/app/constants';
 
@@ -88,18 +89,16 @@ export class CompanyDetailPage implements OnInit {
     };
 
     // ═══ SETTINGS TAB ═══
-    setting: CompanySetting | null = null;
+    settingGroups: CompanySettingGroup[] = [];
+    /** Formdaki değerler (anahtar → string); boş değer şirket değerini silip varsayılana döner */
+    settingValues: Record<string, string> = {};
+    settingsLastUpdated: string | null = null;
     settingsLoading = false;
     settingsSaving = false;
+    resettingKey: string | null = null;
     settingsSuccessMessage = '';
     settingsErrorMessage = '';
-    settingsForm = {
-        isTwoFactorAuthEnabled: false,
-        isAutoReplyEnabled: false,
-        isUseWorkHours: false,
-        workHoursStart: '09:00' as string | null,
-        workHoursEnd: '18:00' as string | null,
-    };
+    private originalSettingValues: Record<string, string> = {};
 
     private companyId = '';
 
@@ -492,68 +491,107 @@ export class CompanyDetailPage implements OnInit {
         this.settingsErrorMessage = '';
         try {
             const response = await this.companySettingsService.getByCompany(this.companyId);
-            const data = this.extractData(response);
-            if (data) {
-                this.setting = data;
-                this.settingsForm = {
-                    isTwoFactorAuthEnabled: data.isTwoFactorAuthEnabled,
-                    isAutoReplyEnabled: data.isAutoReplyEnabled,
-                    isUseWorkHours: data.isUseWorkHours ?? false,
-                    workHoursStart: data.workHoursStart ?? '09:00',
-                    workHoursEnd: data.workHoursEnd ?? '18:00',
-                };
-            }
+            this.applySettings(response.data);
         } catch (err: any) {
             console.error('CompanySettings load error:', err);
-            this.setting = null;
+            this.applySettings(null);
+            this.settingsErrorMessage = 'Ayarlar yüklenemedi: ' + this.settingsError(err);
         } finally {
             this.settingsLoading = false;
         }
     }
 
     async saveSettings(): Promise<void> {
-        this.settingsSaving = true;
+        // Yalnızca değişen alanlar gönderilir; dokunulmayan alanlar varsayılanı izlemeye devam eder
+        const settings: CompanySettingValueRequest[] = Object.keys(this.settingValues)
+            .filter(key => this.normalizedSettingValue(key) !== (this.originalSettingValues[key] ?? ''))
+            .map(key => ({ key, value: this.normalizedSettingValue(key) || null }));
+
         this.settingsSuccessMessage = '';
         this.settingsErrorMessage = '';
+        if (!settings.length) {
+            this.settingsSuccessMessage = 'Değişiklik yok.';
+            return;
+        }
 
+        this.settingsSaving = true;
         try {
-            if (this.setting) {
-                const req: UpdateCompanySettingRequest = {
-                    isTwoFactorAuthEnabled: this.settingsForm.isTwoFactorAuthEnabled,
-                    isAutoReplyEnabled: this.settingsForm.isAutoReplyEnabled,
-                    isUseWorkHours: this.settingsForm.isUseWorkHours,
-                    workHoursStart: this.settingsForm.isUseWorkHours ? this.settingsForm.workHoursStart : null,
-                    workHoursEnd: this.settingsForm.isUseWorkHours ? this.settingsForm.workHoursEnd : null,
-                };
-                await this.companySettingsService.update(this.setting.id, req);
-                this.settingsSuccessMessage = 'Ayarlar başarıyla güncellendi.';
-            } else {
-                const req: CreateCompanySettingRequest = {
-                    companyId: this.companyId,
-                    isTwoFactorAuthEnabled: this.settingsForm.isTwoFactorAuthEnabled,
-                    isAutoReplyEnabled: this.settingsForm.isAutoReplyEnabled,
-                    isUseWorkHours: this.settingsForm.isUseWorkHours,
-                    workHoursStart: this.settingsForm.isUseWorkHours ? this.settingsForm.workHoursStart : null,
-                    workHoursEnd: this.settingsForm.isUseWorkHours ? this.settingsForm.workHoursEnd : null,
-                };
-                await this.companySettingsService.create(req);
-                this.settingsSuccessMessage = 'Ayarlar başarıyla oluşturuldu.';
-            }
-            await this.loadSettings();
+            const response = await this.companySettingsService.updateByCompany(this.companyId, { settings });
+            this.applySettings(response.data);
+            this.settingsSuccessMessage = 'Ayarlar başarıyla güncellendi.';
         } catch (err: any) {
             console.error('CompanySettings save error:', err);
-            this.settingsErrorMessage = 'Ayarlar kaydedilirken hata oluştu.';
+            this.settingsErrorMessage = 'Ayarlar kaydedilemedi: ' + this.settingsError(err);
         } finally {
             this.settingsSaving = false;
         }
     }
 
-    private extractData(response: any): CompanySetting | null {
-        if (!response) return null;
-        if (response.data) return response.data;
-        if (response.result) return response.result;
-        if (response.id) return response;
+    /** Şirket değerini siler; alan tanımdaki varsayılan değere döner. */
+    async resetSetting(field: CompanySettingField): Promise<void> {
+        this.resettingKey = field.key;
+        this.settingsSuccessMessage = '';
+        this.settingsErrorMessage = '';
+        try {
+            const response = await this.companySettingsService.updateByCompany(this.companyId, {
+                settings: [{ key: field.key, value: null }],
+            });
+            this.applySettings(response.data);
+            this.settingsSuccessMessage = `"${field.displayName}" varsayılan değere döndürüldü.`;
+        } catch (err: any) {
+            console.error('CompanySettings reset error:', err);
+            this.settingsErrorMessage = 'Ayar sıfırlanamadı: ' + this.settingsError(err);
+        } finally {
+            this.resettingKey = null;
+        }
+    }
+
+    isSettingOn(key: string): boolean {
+        return this.settingValues[key] === 'true';
+    }
+
+    setSettingOn(key: string, on: boolean): void {
+        this.settingValues[key] = on ? 'true' : 'false';
+    }
+
+    settingInputType(field: CompanySettingField): string {
+        if (field.dataType === 'int' || field.dataType === 'decimal') return 'number';
+        if (field.dataType === 'time') return 'time';
+        return ['password', 'email', 'url'].includes(field.inputType) ? field.inputType : 'text';
+    }
+
+    /** Sayı alanları ngModel üzerinden number dönebilir; karşılaştırma string üzerinden yapılır. */
+    private normalizedSettingValue(key: string): string {
+        const value: unknown = this.settingValues[key];
+        return value === null || value === undefined ? '' : String(value).trim();
+    }
+
+    settingStep(field: CompanySettingField): string | null {
+        if (field.dataType === 'int') return '1';
+        if (field.dataType === 'decimal') return 'any';
         return null;
+    }
+
+    private applySettings(data: CompanySettingsResponse | null): void {
+        const groups = data?.categories ?? [];
+        this.settingGroups = groups;
+
+        const values: Record<string, string> = {};
+        let lastUpdated: string | null = null;
+        for (const group of groups) {
+            for (const field of group.settings ?? []) {
+                values[field.key] = field.value ?? field.effectiveValue ?? '';
+                if (field.updatedDate && (!lastUpdated || field.updatedDate > lastUpdated)) lastUpdated = field.updatedDate;
+            }
+        }
+        this.settingValues = values;
+        this.originalSettingValues = { ...values };
+        this.settingsLastUpdated = lastUpdated;
+    }
+
+    private settingsError(err: any): string {
+        if (err?.status === 0) return 'Sunucuya bağlanılamadı.';
+        return err?.error?.innerError ?? err?.error?.message ?? err?.error?.title ?? err?.message ?? 'Bilinmeyen hata';
     }
 
     // Tab switching

@@ -60,6 +60,9 @@ import { TeamSettingsPage } from './teams/team-settings/team-settings';
 import { TeamsPage } from './teams/teams';
 import { ExtensionDefinitionsPage } from './extension-definitions/extension-definitions';
 import { ExtensionSettingDefinitionsPage } from './extension-setting-definitions/extension-setting-definitions';
+import { ExtensionSettingCategoriesPage } from './extension-setting-categories/extension-setting-categories';
+import { CompanySettingCategoriesPage } from './company-setting-categories/company-setting-categories';
+import { CompanySettingDefinitionsPage } from './company-setting-definitions/company-setting-definitions';
 import { UserTypesPage } from './user-types/user-types';
 
 export const ADMIN_ROUTES: Routes = [
@@ -86,6 +89,11 @@ export const ADMIN_ROUTES: Routes = [
     {
         path: 'extension-setting-definitions',
         redirectTo: 'admin/extension-setting-definitions',
+        pathMatch: 'full',
+    },
+    {
+        path: 'extension-setting-categories',
+        redirectTo: 'admin/extension-setting-categories',
         pathMatch: 'full',
     },
     {
@@ -205,6 +213,24 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/extension-setting-definitions',
         component: ExtensionSettingDefinitionsPage,
         data: { title: 'Extension Key Tanimlari' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/extension-setting-categories',
+        component: ExtensionSettingCategoriesPage,
+        data: { title: 'Extension Ayar Kategorileri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/company-setting-categories',
+        component: CompanySettingCategoriesPage,
+        data: { title: 'Şirket Ayar Kategorileri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/company-setting-definitions',
+        component: CompanySettingDefinitionsPage,
+        data: { title: 'Şirket Ayar Tanımları' },
         canActivate: [AuthGuard],
     },
     {
@@ -457,6 +483,45 @@ export const ADMIN_ROUTES: Routes = [
         path: 'marketplace/shopify',
         component: ShopifyPage,
         data: { title: 'Shopify' },
+        canActivate: [AuthGuard],
+    },
+    {
+        // Menü kaydı henüz veritabanında yok → menü bazlı yetki kontrolü atlanır
+        path: 'marketplace-questions',
+        loadComponent: () =>
+            import('@/app/views/marketplace-questions/marketplace-questions').then(m => m.MarketplaceQuestionsPage),
+        data: { title: 'Soru & Cevap Merkezi', skipMenuAuth: true },
+        canActivate: [AuthGuard],
+    },
+    {
+        // Menü kaydı veritabanında yok → menü bazlı yetki kontrolü atlanır
+        path: 'background-jobs',
+        loadComponent: () =>
+            import('@/app/views/background-jobs/background-jobs').then(m => m.BackgroundJobsPage),
+        data: { title: 'Arka Plan Servisleri', skipMenuAuth: true },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'background-jobs/setting-definitions',
+        loadComponent: () =>
+            import('@/app/views/background-jobs/setting-definitions/background-job-setting-definitions')
+                .then(m => m.BackgroundJobSettingDefinitionsPage),
+        data: { title: 'Arka Plan Ayar Tanımları', skipMenuAuth: true },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'background-jobs/extension-settings',
+        loadComponent: () =>
+            import('@/app/views/background-jobs/extension-settings/background-job-extension-settings')
+                .then(m => m.BackgroundJobExtensionSettingsPage),
+        data: { title: 'Arka Plan Extension Ayarları', skipMenuAuth: true },
+        canActivate: [AuthGuard],
+    },
+    {
+        // Menü kaydı veritabanında yok → menü bazlı yetki kontrolü atlanır
+        path: 'system/apps',
+        loadComponent: () => import('@/app/views/system/apps/apps').then(m => m.AppsPage),
+        data: { title: 'Uygulamalar', skipMenuAuth: true },
         canActivate: [AuthGuard],
     },
 ];

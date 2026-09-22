@@ -1,0 +1,179 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-layer-group me-2"></i>Extension Kategorileri</h4>
+                <button class="btn btn-primary btn-sm" (click)="openCreate()">
+                    <i class="fa-solid fa-plus me-1"></i>Yeni Kategori
+                </button>
+            </div>
+            <div class="card-body page-surface">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                    <div class="small text-muted">Extensionlar bu kategoriler altinda gruplanir (Pazaryeri, Web Sitesi, Kargo vb.).</div>
+                    <input
+                        type="text"
+                        class="form-control search-input"
+                        placeholder="Kod, ad veya aciklama ara..."
+                        [(ngModel)]="filterText"
+                        (ngModelChange)="onFilterChange()">
+                </div>
+
+                @if (loading) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yukleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>İşlemler</th>
+                                    <th>Sira</th>
+                                    <th>Kod</th>
+                                    <th>Gorsel</th>
+                                    <th>Ad</th>
+                                    <th>Aciklama</th>
+                                    <th class="text-center">Extension Sayisi</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of pagedItems; track item.id) {
+                                    <tr>
+                                        <td class="text-nowrap">
+                                            <button class="btn btn-soft-primary btn-sm me-1" title="Duzenle" (click)="openEdit(item)">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </button>
+                                            <button
+                                                class="btn btn-soft-danger btn-sm"
+                                                [title]="item.extensionCount > 0 ? 'Bagli extension oldugu icin silinemez' : 'Sil'"
+                                                (click)="deleteItem(item)">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                        <td>{{ item.sortOrder }}</td>
+                                        <td><code>{{ item.code }}</code></td>
+                                        <td>
+                                            @if (item.photoUrl) {
+                                                <img [src]="item.photoUrl" [alt]="item.name" class="category-thumb">
+                                            } @else {
+                                                <span class="small text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td><strong>{{ item.name }}</strong></td>
+                                        <td class="small text-muted">{{ item.description || '-' }}</td>
+                                        <td class="text-center">
+                                            <span class="badge" [class.bg-primary-subtle]="item.extensionCount > 0" [class.text-primary]="item.extensionCount > 0" [class.bg-secondary-subtle]="!item.extensionCount" [class.text-secondary]="!item.extensionCount">
+                                                {{ item.extensionCount }}
+                                            </span>
+                                        </td>
+                                        <td class="text-nowrap">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="form-check form-switch mb-0">
+                                                    <input
+                                                        class="form-check-input"
+                                                        type="checkbox"
+                                                        [checked]="item.isActive"
+                                                        [disabled]="togglingId === item.id"
+                                                        (click)="$event.preventDefault(); toggleActive(item)">
+                                                </div>
+                                                @if (item.isActive) {
+                                                    <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                } @else {
+                                                    <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="8" class="text-center text-muted">Kayit bulunamadi.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="small text-muted">Toplam: {{ filteredItems.length }} kayit</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track page) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (showModal) {
+    <div class="modal fade show d-block modal-backdrop-custom" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ editMode ? 'Kategori Duzenle' : 'Yeni Kategori' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Kod</label>
+                            <input type="text" class="form-control" [(ngModel)]="form.code" name="code" [disabled]="editMode" placeholder="ornek: marketplace" required>
+                            <div class="form-text">
+                                @if (editMode) {
+                                    Kod olusturulduktan sonra degistirilemez.
+                                } @else {
+                                    Kucuk harfe cevrilir ve benzersiz olmalidir.
+                                }
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ad</label>
+                            <input type="text" class="form-control" [(ngModel)]="form.name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Aciklama</label>
+                            <textarea class="form-control" rows="3" [(ngModel)]="form.description" name="description"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Foto URL</label>
+                            <input type="text" class="form-control" [(ngModel)]="form.photoUrl" name="photoUrl" placeholder="https://...">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Sira</label>
+                                <input type="number" class="form-control" [(ngModel)]="form.sortOrder" name="sortOrder">
+                            </div>
+                            <div class="col-md-6 mb-3 d-flex align-items-end">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="form.isActive" name="isActive" id="extensionCategoryActiveSwitch">
+                                    <label class="form-check-label" for="extensionCategoryActiveSwitch">Aktif</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">Iptal</button>
+                    <button type="button" class="btn btn-primary" [disabled]="saving" (click)="save()">
+                        @if (saving) {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        {{ editMode ? 'Guncelle' : 'Kaydet' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,158 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-puzzle-piece me-2"></i>Arka Plan Extension Ayarları</h4>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-soft-primary" (click)="loadItems()" [disabled]="loading">
+                        <i class="fa-solid fa-rotate me-1" [class.fa-spin]="loading"></i>Yenile
+                    </button>
+                    <button class="btn btn-sm btn-primary" (click)="openCreate()">
+                        <i class="fa-solid fa-link me-1"></i>Yeni Bağlantı
+                    </button>
+                </div>
+            </div>
+            <div class="card-body page-surface">
+                <div class="d-flex mb-3">
+                    <input
+                        type="text"
+                        class="form-control form-control-sm w-auto"
+                        placeholder="Servis, ayar veya extension ara..."
+                        [(ngModel)]="filterText"
+                        (ngModelChange)="onFilterChange()">
+                </div>
+
+                @if (loading && !items.length) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>İşlemler</th>
+                                    <th>Servis</th>
+                                    <th>İş Ayarı</th>
+                                    <th>Extension</th>
+                                    <th>Extension Ayarı</th>
+                                    <th>Kategori</th>
+                                    <th>Varsayılan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of pagedItems; track item.id) {
+                                    <tr>
+                                        <td class="text-nowrap">
+                                            <button class="btn btn-sm btn-soft-danger" title="Bağlantıyı kaldır"
+                                                (click)="remove(item)" [disabled]="deletingId === item.id">
+                                                <i class="fa-solid fa-link-slash"></i>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">{{ item.jobName }}</div>
+                                            <code class="small">{{ item.jobCode }}</code>
+                                        </td>
+                                        <td>
+                                            <div>{{ item.jobSettingName }}</div>
+                                            <code class="small">{{ item.jobSettingKey }}</code>
+                                        </td>
+                                        <td><span class="badge bg-primary-subtle text-primary">{{ item.extensionCode }}</span></td>
+                                        <td>
+                                            <div>{{ item.extensionSettingDisplayName || item.extensionSettingKey }}</div>
+                                            <code class="small">{{ item.extensionSettingKey }}</code>
+                                        </td>
+                                        <td class="small text-muted">{{ item.extensionSettingCategoryCode || '-' }}</td>
+                                        <td class="small text-muted">{{ item.extensionSettingDefaultValue ?? '-' }}</td>
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-4">Extension bağlantısı bulunamadı.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="small text-muted">Toplam: {{ filteredItems.length }} bağlantı</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track page) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (showModal) {
+    <div class="modal fade show d-block modal-mask" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Yeni Extension Bağlantısı</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body page-surface">
+                    <div class="mb-3">
+                        <label class="form-label">Servis <span class="text-danger">*</span></label>
+                        <select class="form-select" [(ngModel)]="form.jobCode" (ngModelChange)="onJobChange()">
+                            <option value="">Servis seçin...</option>
+                            @for (job of jobs; track job.id) {
+                                <option [value]="job.code">{{ job.name || job.code }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">İş Ayarı <span class="text-danger">*</span></label>
+                        <select class="form-select" [(ngModel)]="form.settingKey" [disabled]="!form.jobCode">
+                            <option value="">İş ayarı seçin...</option>
+                            @for (setting of jobSettings; track setting.definitionId) {
+                                <option [value]="setting.key">{{ setting.displayName || setting.key }} ({{ setting.key }})</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Extension <span class="text-danger">*</span></label>
+                        <select class="form-select" [(ngModel)]="form.extensionId" (ngModelChange)="onExtensionChange()">
+                            <option value="">Extension seçin...</option>
+                            @for (extension of extensions; track extension.id) {
+                                <option [value]="extension.id">{{ extension.name }} ({{ extension.code }})</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label">Extension Ayarı <span class="text-danger">*</span></label>
+                        <select class="form-select" [(ngModel)]="form.extensionSettingDefinitionId"
+                            [disabled]="!form.extensionId || !form.settingKey">
+                            <option value="">Extension ayarı seçin...</option>
+                            @for (def of linkableExtensionSettings; track def.id) {
+                                <option [value]="def.id">{{ def.displayName || def.key }} ({{ def.key }})</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving">
+                        {{ saving ? 'Kaydediliyor...' : 'Bağla' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

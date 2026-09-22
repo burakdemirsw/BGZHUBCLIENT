@@ -21,6 +21,16 @@ import {
     CreateExtensionSettingDefinitionRequest,
     UpdateExtensionSettingDefinitionRequest,
 } from '../models/extension/extension-setting-definition.models';
+import {
+    ExtensionSettingCategory,
+    CreateExtensionSettingCategoryRequest,
+    UpdateExtensionSettingCategoryRequest,
+} from '../models/extension/extension-setting-category.models';
+import {
+    ExtensionCategory,
+    CreateExtensionCategoryRequest,
+    UpdateExtensionCategoryRequest,
+} from '../models/extension/extension-category.models';
 
 @Injectable({
     providedIn: 'root',
@@ -96,5 +106,37 @@ export class ExtensionManagementService {
 
     deleteExtensionSettingDefinition(id: string): Promise<ApiResponse<object>> {
         return this.http.post<object>({ controller: 'CompanyExtensions', action: `definitions/setting-keys/delete/${id}` }, {});
+    }
+
+    getExtensionCategories(): Promise<ApiResponse<ExtensionCategory[]>> {
+        return this.http.get<ExtensionCategory[]>({ controller: 'CompanyExtensions', action: 'categories' });
+    }
+
+    createExtensionCategory(request: CreateExtensionCategoryRequest): Promise<ApiResponse<ExtensionCategory>> {
+        return this.http.post<ExtensionCategory>({ controller: 'CompanyExtensions', action: 'categories' }, request);
+    }
+
+    updateExtensionCategory(id: string, request: UpdateExtensionCategoryRequest): Promise<ApiResponse<object>> {
+        return this.http.post<object>({ controller: 'CompanyExtensions', action: `categories/update/${id}` }, request);
+    }
+
+    deleteExtensionCategory(id: string): Promise<ApiResponse<object>> {
+        return this.http.post<object>({ controller: 'CompanyExtensions', action: `categories/delete/${id}` }, {});
+    }
+
+    getExtensionSettingCategories(): Promise<ApiResponse<ExtensionSettingCategory[]>> {
+        return this.http.get<ExtensionSettingCategory[]>({ controller: 'CompanyExtensions', action: 'setting-categories' });
+    }
+
+    createExtensionSettingCategory(request: CreateExtensionSettingCategoryRequest): Promise<ApiResponse<ExtensionSettingCategory>> {
+        return this.http.post<ExtensionSettingCategory>({ controller: 'CompanyExtensions', action: 'setting-categories' }, request);
+    }
+
+    updateExtensionSettingCategory(id: string, request: UpdateExtensionSettingCategoryRequest): Promise<ApiResponse<object>> {
+        return this.http.post<object>({ controller: 'CompanyExtensions', action: `setting-categories/update/${id}` }, request);
+    }
+
+    deleteExtensionSettingCategory(id: string): Promise<ApiResponse<object>> {
+        return this.http.post<object>({ controller: 'CompanyExtensions', action: `setting-categories/delete/${id}` }, {});
     }
 }

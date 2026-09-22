@@ -1,0 +1,59 @@
+.page-surface {
+    background-color: #f7f7f9;
+}
+
+.modal-mask {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.job-cell {
+    min-width: 220px;
+}
+
+.job-desc {
+    max-width: 320px;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.error-box {
+    max-width: 420px;
+    max-height: 160px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.65rem;
+    border-radius: 0.5rem;
+    background: #fdf1f1;
+    color: #b02a37;
+    border: 1px solid #f5c2c7;
+}
+
+.setting-row {
+    border: 1px solid #e9ecef;
+    border-radius: 0.75rem;
+    padding: 0.85rem;
+    margin-bottom: 0.85rem;
+    background: #fff;
+
+    &.inactive {
+        opacity: 0.7;
+    }
+}
+
+.definition-box {
+    border-top: 1px dashed #dee2e6;
+    padding-top: 0.75rem;
+}
+
+.create-box {
+    border-color: #86b7fe;
+}
+
+.link-row {
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #f1f3f5;
+}

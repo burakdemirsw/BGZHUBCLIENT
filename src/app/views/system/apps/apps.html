@@ -1,0 +1,273 @@
+<div class="container-fluid">
+  <div class="page-title-head d-flex align-items-center mb-4">
+    <div class="flex-grow-1">
+      <h4 class="fs-xl fw-bold m-0">Uygulamalar</h4>
+      <p class="text-muted mb-0">Sistemdeki uygulamalar ve bu uygulamalara bağlı kullanıcılar</p>
+    </div>
+    <div class="text-end">
+      <button class="btn btn-soft-primary" (click)="openCreateModal()">
+        <i class="fa-solid fa-plus me-2"></i> Yeni Uygulama
+      </button>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ error }}
+      <button type="button" class="btn-close" (click)="error = null"></button>
+    </div>
+  }
+
+  <div class="card">
+    <div class="card-body border-bottom">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Kod, ad veya açıklama ile ara..."
+              [(ngModel)]="filterText"
+              (ngModelChange)="onFilterChange()"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-centered table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>İşlemler</th>
+            <th>Kod</th>
+            <th>Ad</th>
+            <th>Açıklama</th>
+            <th>Durum</th>
+            <th>Oluşturulma</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading) {
+            <tr>
+              <td colspan="6" class="text-center py-4">
+                <div class="spinner-border spinner-border-sm" role="status">
+                  <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+              </td>
+            </tr>
+          } @else {
+            @for (item of pagedItems; track item.id) {
+              <tr>
+                <td class="text-nowrap">
+                  <button class="btn btn-sm btn-soft-primary me-1" (click)="openEditModal(item)" title="Düzenle">
+                    <i class="fa-solid fa-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-soft-info me-1" (click)="openUsersModal(item)" title="Kullanıcılar">
+                    <i class="fa-solid fa-users"></i>
+                  </button>
+                  <button class="btn btn-sm btn-soft-danger" (click)="deleteItem(item)" title="Sil">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+                <td><code>{{ item.code }}</code></td>
+                <td class="fw-medium">{{ item.name }}</td>
+                <td class="text-muted desc-cell">{{ item.description || '—' }}</td>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="form-check form-switch mb-0">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        [checked]="item.isActive"
+                        [disabled]="togglingId === item.id"
+                        (click)="$event.preventDefault(); toggleActive(item)"
+                      />
+                    </div>
+                    <span class="badge" [class]="item.isActive ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
+                      {{ item.isActive ? 'Aktif' : 'Pasif' }}
+                    </span>
+                  </div>
+                </td>
+                <td class="text-muted">{{ item.createdDate | date: 'dd.MM.yyyy HH:mm' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="text-center py-4 text-muted">Kayıt bulunamadı</td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div class="text-muted">
+        Toplam <strong>{{ filteredItems.length }}</strong> kayıt
+      </div>
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <button class="page-link" (click)="setPage(currentPage - 1)">&laquo; Önceki</button>
+          </li>
+          @for (page of totalPagesArray; track page) {
+            <li class="page-item" [class.active]="page === currentPage">
+              <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+            </li>
+          }
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <button class="page-link" (click)="setPage(currentPage + 1)">Sonraki &raquo;</button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Uygulama modalı -->
+@if (showModal) {
+  <div class="modal fade show d-block modal-backdrop-custom" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ isEditMode ? 'Uygulamayı Düzenle' : 'Yeni Uygulama' }}</h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body">
+          @if (modalError) {
+            <div class="alert alert-danger mb-3">{{ modalError }}</div>
+          }
+          <div class="mb-3">
+            <label for="appCode" class="form-label">Kod <span class="text-danger">*</span></label>
+            <input
+              id="appCode"
+              type="text"
+              class="form-control text-uppercase"
+              [(ngModel)]="form.code"
+              [disabled]="isEditMode"
+              placeholder="ör: NEBIM_AI"
+            />
+            <small class="text-muted">
+              {{ isEditMode ? 'Uygulama kodu değiştirilemez.' : 'Tekil olmalıdır, büyük harfe çevrilir.' }}
+            </small>
+          </div>
+          <div class="mb-3">
+            <label for="appName" class="form-label">Ad <span class="text-danger">*</span></label>
+            <input id="appName" type="text" class="form-control" [(ngModel)]="form.name" />
+          </div>
+          <div class="mb-3">
+            <label for="appDesc" class="form-label">Açıklama</label>
+            <textarea id="appDesc" rows="3" class="form-control" [(ngModel)]="form.description"></textarea>
+          </div>
+          <div class="form-check form-switch">
+            <input id="appActive" type="checkbox" class="form-check-input" [(ngModel)]="form.isActive" />
+            <label class="form-check-label" for="appActive">Aktif</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+          <button type="button" class="btn btn-soft-primary" [disabled]="saving" (click)="save()">
+            @if (saving) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            Kaydet
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Uygulama kullanıcıları modalı -->
+@if (showUsersModal && usersApp) {
+  <div class="modal fade show d-block modal-backdrop-custom" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-users me-2 text-muted"></i>{{ usersApp.name }} — Kullanıcılar
+          </h5>
+          <button type="button" class="btn-close" (click)="closeUsersModal()"></button>
+        </div>
+        <div class="modal-body">
+          @if (usersError) {
+            <div class="alert alert-danger mb-3">{{ usersError }}</div>
+          }
+
+          <div class="add-user-panel d-flex gap-2 mb-3">
+            <select class="form-select" [(ngModel)]="newUserId">
+              <option value="">Eklenecek kullanıcıyı seçin...</option>
+              @for (user of availableUsers; track user.id) {
+                <option [value]="user.id">{{ user.name }} {{ user.lastName }} — {{ user.email }}</option>
+              }
+            </select>
+            <button class="btn btn-soft-primary text-nowrap" [disabled]="!newUserId || addingUser" (click)="addUser()">
+              <i class="fa-solid fa-user-plus me-1"></i> Ekle
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-centered table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>İşlemler</th>
+                  <th>Kullanıcı</th>
+                  <th>Durum</th>
+                  <th>Eklenme</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (usersLoading) {
+                  <tr>
+                    <td colspan="4" class="text-center py-4">
+                      <div class="spinner-border spinner-border-sm" role="status"></div>
+                    </td>
+                  </tr>
+                } @else {
+                  @for (link of appUsers; track link.id) {
+                    <tr>
+                      <td class="text-nowrap">
+                        <button class="btn btn-sm btn-soft-danger" (click)="removeUser(link)" title="Uygulamadan çıkar">
+                          <i class="fa-solid fa-user-minus"></i>
+                        </button>
+                      </td>
+                      <td>
+                        <div class="fw-medium">{{ userName(link.userId) }}</div>
+                        <small class="text-muted">{{ userEmail(link.userId) }}</small>
+                      </td>
+                      <td>
+                        <div class="d-flex align-items-center gap-2">
+                          <div class="form-check form-switch mb-0">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              [checked]="link.isActive"
+                              [disabled]="togglingUserId === link.id"
+                              (click)="$event.preventDefault(); toggleUserActive(link)"
+                            />
+                          </div>
+                          <span class="badge" [class]="link.isActive ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
+                            {{ link.isActive ? 'Aktif' : 'Pasif' }}
+                          </span>
+                        </div>
+                      </td>
+                      <td class="text-muted">{{ link.createdDate | date: 'dd.MM.yyyy HH:mm' }}</td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="4" class="text-center py-4 text-muted">Bu uygulamaya bağlı kullanıcı yok</td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" (click)="closeUsersModal()">Kapat</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

@@ -7,7 +7,7 @@ export type CountType = {
 export type VariantType = "primary" | "danger" | "warning" | "success" | "info" | "dark" | "secondary" | "light"
 
 export type StatisticWidget1Type = {
-    title: string;
+    title: string;  
     description: string;
     label: string;
     icon: string;

@@ -12,6 +12,7 @@ const LAST_PARENT_KEY = 'admin.menus.lastParentId';
     selector: 'app-menus-page',
     imports: [CommonModule, FormsModule],
     templateUrl: './menus.html',
+    styleUrls: ['./menus.scss'],
 })
 export class MenusPage implements OnInit {
     menus: Menu[] = [];
@@ -41,6 +42,7 @@ export class MenusPage implements OnInit {
         orderIndex: 0,
         isBlocked: false,
         isInvisible: false,
+        isTitle: false,
     };
 
     // İkon seçici
@@ -48,6 +50,10 @@ export class MenusPage implements OnInit {
     iconSearchText = '';
     filteredIcons = FA_ICONS;
     showIconDropdown = false;
+
+    // Üst menü seçici
+    parentSearchText = '';
+    showParentDropdown = false;
 
     constructor(
         private menusService: MenusService,
@@ -114,7 +120,28 @@ export class MenusPage implements OnInit {
         this.selectedMenu = null;
         // Son kullanılan üst menü hâlâ mevcutsa hatırlanır
         const parentId = this.lastParentId && this.menus.some((m) => m.id === this.lastParentId) ? this.lastParentId : null;
-        this.form = { parentId, name: '', description: '', url: '', icon: '', colorCode: '', orderIndex: 0, isBlocked: false, isInvisible: false };
+        this.form = { parentId, name: '', description: '', url: '', icon: '', colorCode: '', orderIndex: 0, isBlocked: false, isInvisible: false, isTitle: false };
+        this.resetParentPicker();
+        this.showModal = true;
+    }
+
+    /** Satırı kopyalar: yeni kayıt formu seçili menünün değerleriyle açılır, kaydetmeden önce düzenlenebilir. */
+    openCopy(menu: Menu): void {
+        this.editMode = false;
+        this.selectedMenu = null;
+        this.form = {
+            parentId: menu.parentId,
+            name: `${menu.name} (Kopya)`,
+            description: menu.description,
+            url: menu.url,
+            icon: menu.icon,
+            colorCode: menu.colorCode || '',
+            orderIndex: (Number(menu.orderIndex) || 0) + 1,
+            isBlocked: false,
+            isInvisible: menu.isInvisible ?? false,
+            isTitle: menu.isTitle ?? false,
+        };
+        this.resetParentPicker();
         this.showModal = true;
     }
 
@@ -131,7 +158,9 @@ export class MenusPage implements OnInit {
             orderIndex: menu.orderIndex,
             isBlocked: menu.isBlocked,
             isInvisible: menu.isInvisible ?? false,
+            isTitle: menu.isTitle ?? false,
         };
+        this.resetParentPicker();
         this.showModal = true;
     }
 
@@ -148,6 +177,7 @@ export class MenusPage implements OnInit {
                     orderIndex: this.form.orderIndex,
                     isBlocked: this.form.isBlocked,
                     isInvisible: this.form.isInvisible,
+                    isTitle: this.form.isTitle,
                 };
                 await this.menusService.update(this.selectedMenu.id, req);
             } else {
@@ -160,6 +190,7 @@ export class MenusPage implements OnInit {
                     colorCode: this.form.colorCode,
                     orderIndex: this.form.orderIndex,
                     isInvisible: this.form.isInvisible,
+                    isTitle: this.form.isTitle,
                 };
                 await this.menusService.create(req);
                 this.rememberLastParentId(req.parentId);
@@ -223,6 +254,71 @@ export class MenusPage implements OnInit {
         return parent ? parent.name : '—';
     }
 
+    // ── Üst Menü Seçici ──
+
+    /** Aramaya uyan menüler; düzenlenen menü ve alt menüleri döngü oluşmaması için listelenmez. */
+    get parentOptions(): Menu[] {
+        const excluded = this.editMode && this.selectedMenu ? this.getDescendantIds(this.selectedMenu.id) : new Set<string>();
+        const q = (this.parentSearchText || '').toLocaleLowerCase('tr-TR').trim();
+        return this.menus
+            .filter(m => !excluded.has(m.id))
+            .filter(m => !q ||
+                this.getMenuPath(m).toLocaleLowerCase('tr-TR').includes(q) ||
+                (m.url || '').toLocaleLowerCase('tr-TR').includes(q))
+            .sort((a, b) => this.getMenuPath(a).localeCompare(this.getMenuPath(b), 'tr-TR'));
+    }
+
+    /** "Üst › Alt › Menü" biçiminde tam yol */
+    getMenuPath(menu: Menu): string {
+        const names = [menu.name];
+        const visited = new Set<string>([menu.id]);
+        let parentId = menu.parentId;
+        while (parentId && !visited.has(parentId)) {
+            visited.add(parentId);
+            const parent = this.menus.find(m => m.id === parentId);
+            if (!parent) break;
+            names.unshift(parent.name);
+            parentId = parent.parentId;
+        }
+        return names.join(' › ');
+    }
+
+    getParentPath(parentId: string | null): string {
+        const parent = parentId ? this.menus.find(m => m.id === parentId) : null;
+        return parent ? this.getMenuPath(parent) : '— Ana Menü —';
+    }
+
+    selectParent(menu: Menu | null): void {
+        this.form.parentId = menu?.id ?? null;
+        this.parentSearchText = '';
+        this.showParentDropdown = false;
+    }
+
+    toggleParentDropdown(): void {
+        this.showParentDropdown = !this.showParentDropdown;
+        if (this.showParentDropdown) this.parentSearchText = '';
+    }
+
+    private resetParentPicker(): void {
+        this.parentSearchText = '';
+        this.showParentDropdown = false;
+    }
+
+    private getDescendantIds(rootId: string): Set<string> {
+        const ids = new Set<string>([rootId]);
+        let added = true;
+        while (added) {
+            added = false;
+            for (const m of this.menus) {
+                if (m.parentId && ids.has(m.parentId) && !ids.has(m.id)) {
+                    ids.add(m.id);
+                    added = true;
+                }
+            }
+        }
+        return ids;
+    }
+
     // ── İkon Seçici ──
     onIconSearch(): void {
         const q = (this.iconSearchText || '').toLowerCase();
@@ -256,5 +352,6 @@ export class MenusPage implements OnInit {
     closeModal(): void {
         this.showModal = false;
         this.showIconDropdown = false;
+        this.showParentDropdown = false;
     }
 }

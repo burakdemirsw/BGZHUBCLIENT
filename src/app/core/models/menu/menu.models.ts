@@ -7,6 +7,7 @@ export interface CreateMenuRequest {
   colorCode: string;
   orderIndex: number;
   isInvisible?: boolean;
+  isTitle?: boolean;
 }
 
 export interface UpdateMenuRequest {
@@ -19,6 +20,7 @@ export interface UpdateMenuRequest {
   orderIndex: number;
   isBlocked: boolean;
   isInvisible: boolean;
+  isTitle: boolean;
 }
 
 export interface Menu {
@@ -32,6 +34,7 @@ export interface Menu {
   orderIndex: number;
   isBlocked: boolean;
   isInvisible: boolean;
+  isTitle?: boolean;
   createdDate?: string;
   updatedDate?: string;
 }
