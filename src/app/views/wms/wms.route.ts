@@ -72,6 +72,15 @@ export const WMS_ROUTES: Routes = [
     wmsRoute('item-barcode-types', 'Barkod Tipleri', () =>
         import('./item-barcode-types/item-barcode-types').then(m => m.WmsItemBarcodeTypesPage),
     ),
+    wmsRoute('customer-communication-types', 'Müşteri İletişim Tipleri', () =>
+        import('./customer-communication-types/customer-communication-types').then(m => m.WmsCustomerCommunicationTypesPage),
+    ),
+    wmsRoute('picking-types', 'Toplama Tipleri', () =>
+        import('./picking-types/picking-types').then(m => m.WmsPickingTypesPage),
+    ),
+    wmsRoute('shelf-count-types', 'Raf Sayım Tipleri', () =>
+        import('./shelf-count-types/shelf-count-types').then(m => m.WmsShelfCountTypesPage),
+    ),
     wmsRoute('code-sequences', 'Kod Sekansları', () =>
         import('./code-sequences/code-sequences').then(m => m.WmsCodeSequencesPage),
     ),

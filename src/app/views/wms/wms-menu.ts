@@ -10,6 +10,8 @@ import { MenuItemType } from '@/app/types/layout';
  * Gruplama, kaynağın kapsamını izler: ilk gruplar şirket bazlı kaynakları
  * (`by-company/{companyId}` ucu olanlar) taşır. Şirketten bağımsız, tüm
  * şirketlerde ortak olan tanım tabloları ise "WMS Genel" altında toplanır.
+ * İstisna: raf (shelf) ile ilgili tüm sayfalar kapsamından bağımsız olarak
+ * "Raf Takip" grubunda birlikte durur.
  *
  * Yeni bir WMS sayfası yazıldıkça ilgili grubun `children` dizisine eklenir.
  */
@@ -31,7 +33,16 @@ export const WMS_MENU_ITEMS: MenuItemType[] = [
         isCollapsed: true,
         children: [
             { label: 'Depolar', url: '/wms/warehouses', faIcon: 'fa-solid fa-circle' },
+        ],
+    },
+    {
+        // Raf (shelf) ile ilgili tüm sayfalar — şirket bazlı ve global olanlar birlikte
+        label: 'Raf Takip',
+        faIcon: 'fa-solid fa-layer-group',
+        isCollapsed: true,
+        children: [
             { label: 'Raflar', url: '/wms/shelves', faIcon: 'fa-solid fa-circle' },
+            { label: 'Raf Sayım Tipleri', url: '/wms/shelf-count-types', faIcon: 'fa-solid fa-circle' },
         ],
     },
     {
@@ -69,6 +80,8 @@ export const WMS_MENU_ITEMS: MenuItemType[] = [
             { label: 'Depo Tipleri', url: '/wms/warehouse-types', faIcon: 'fa-solid fa-circle' },
             { label: 'Ürün Tipleri', url: '/wms/item-types', faIcon: 'fa-solid fa-circle' },
             { label: 'Barkod Tipleri', url: '/wms/item-barcode-types', faIcon: 'fa-solid fa-circle' },
+            { label: 'Müşteri İletişim Tipleri', url: '/wms/customer-communication-types', faIcon: 'fa-solid fa-circle' },
+            { label: 'Toplama Tipleri', url: '/wms/picking-types', faIcon: 'fa-solid fa-circle' },
             { label: 'Vergi Daireleri', url: '/wms/tax-offices', faIcon: 'fa-solid fa-circle' },
             { label: 'Para Birimleri', url: '/wms/currencies', faIcon: 'fa-solid fa-circle' },
             { label: 'Ülkeler', url: '/wms/countries', faIcon: 'fa-solid fa-circle' },
