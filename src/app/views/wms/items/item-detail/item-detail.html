@@ -1,0 +1,345 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <a class="btn btn-light btn-sm" routerLink="/wms/items">
+        <i class="fa-solid fa-arrow-left me-1"></i>Ürünler
+    </a>
+</div>
+
+@if (loading) {
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Yükleniyor...</p>
+    </div>
+} @else if (loadError) {
+    <div class="alert alert-danger">{{ loadError }}</div>
+} @else if (detail) {
+    <!-- Ürün kartı -->
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-3">
+                @if (detail.card.imageUrl) {
+                    <img [src]="detail.card.imageUrl" alt="" class="wms-item-image">
+                } @else {
+                    <div class="wms-item-image wms-item-image-empty"><i class="fa-regular fa-image fs-2"></i></div>
+                }
+                <div class="flex-grow-1">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                        <div>
+                            <h4 class="mb-1">{{ detail.card.itemCode }}</h4>
+                            <div class="text-muted">{{ detail.card.itemDescription || '—' }}</div>
+                        </div>
+                        <div class="d-flex gap-1">
+                            <span class="badge bg-secondary-subtle text-secondary">{{ detail.card.itemTypeDescription || detail.card.itemTypeCode }}</span>
+                            @if (detail.card.isActive) {
+                                <span class="badge bg-success-subtle text-success">Aktif</span>
+                            } @else {
+                                <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                            }
+                        </div>
+                    </div>
+                    @if (detail.card.longDescription) {
+                        <p class="small mt-2 mb-0">{{ detail.card.longDescription }}</p>
+                    }
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-6 col-md">
+                            <div class="wms-stat">
+                                <div class="text-muted small">Stok</div>
+                                <div class="fs-4 fw-semibold" [class.text-danger]="detail.card.stockQuantity <= 0">{{ detail.card.stockQuantity }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md">
+                            <div class="wms-stat">
+                                <div class="text-muted small">Sipariş</div>
+                                <div class="fs-4 fw-semibold">{{ detail.orderStats.orderCount }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md">
+                            <div class="wms-stat">
+                                <div class="text-muted small">Sipariş Edilen</div>
+                                <div class="fs-4 fw-semibold">{{ detail.orderStats.orderedQuantity }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md">
+                            <div class="wms-stat">
+                                <div class="text-muted small">İptal / İade</div>
+                                <div class="fs-4 fw-semibold">{{ detail.orderStats.cancelledQuantity }} / {{ detail.orderStats.returnedQuantity }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md">
+                            <div class="wms-stat">
+                                <div class="text-muted small">Son Sipariş</div>
+                                <div class="fs-5 fw-semibold">{{ (detail.orderStats.lastOrderDate | date:'dd.MM.yyyy') || '—' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sekmeler -->
+    <div class="card">
+        <div class="card-header pb-0">
+            <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                    <button class="nav-link" [class.active]="activeTab === 'variants'" (click)="setTab('variants')">
+                        Varyantlar &amp; Barkodlar <span class="badge bg-secondary-subtle text-secondary">{{ detail.variants.length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" [class.active]="activeTab === 'prices'" (click)="setTab('prices')">
+                        Fiyatlar <span class="badge bg-secondary-subtle text-secondary">{{ detail.prices.length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" [class.active]="activeTab === 'stocks'" (click)="setTab('stocks')">
+                        Stok <span class="badge bg-secondary-subtle text-secondary">{{ detail.stocks.length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" [class.active]="activeTab === 'attributes'" (click)="setTab('attributes')">
+                        Özellikler &amp; Notlar <span class="badge bg-secondary-subtle text-secondary">{{ detail.attributes.length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" [class.active]="activeTab === 'orders'" (click)="setTab('orders')">
+                        Son Siparişler <span class="badge bg-secondary-subtle text-secondary">{{ detail.recentOrders.length }}</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            @switch (activeTab) {
+                @case ('variants') {
+                    <h6 class="text-muted text-uppercase small">Varyantlar</h6>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-centered table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Renk</th>
+                                    <th>Beden / Boyut</th>
+                                    <th>Barkodlar</th>
+                                    <th>Kanal</th>
+                                    <th class="text-end">Stok</th>
+                                    <th class="text-center">Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (variant of detail.variants; track variant.id) {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                @if (variant.imageUrl) {
+                                                    <img [src]="variant.imageUrl" alt="" class="wms-thumb">
+                                                }
+                                                {{ variant.colorDescription || variant.colorCode || '—' }}
+                                            </div>
+                                        </td>
+                                        <td>{{ variant.itemDim1Description || variant.itemDim1Code || '—' }}</td>
+                                        <td class="small">{{ variant.barcodes || '—' }}</td>
+                                        <td>
+                                            @if (variant.useInternet) {
+                                                <span class="badge bg-info-subtle text-info">İnternet</span>
+                                            } @else {
+                                                <span class="text-muted">—</span>
+                                            }
+                                        </td>
+                                        <td class="text-end fw-semibold" [class.text-danger]="variant.stockQuantity <= 0">{{ variant.stockQuantity }}</td>
+                                        <td class="text-center">
+                                            @if (variant.isActive) {
+                                                <span class="badge bg-success-subtle text-success">Aktif</span>
+                                            } @else {
+                                                <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="6" class="text-center text-muted">Varyant yok.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h6 class="text-muted text-uppercase small">Barkodlar</h6>
+                    <div class="table-responsive">
+                        <table class="table table-centered table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Barkod</th>
+                                    <th>Tip</th>
+                                    <th>Varyant</th>
+                                    <th class="text-end">Miktar</th>
+                                    <th>Kaynak</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (barcode of detail.barcodes; track barcode.id) {
+                                    <tr>
+                                        <td>
+                                            <span class="fw-semibold">{{ barcode.barcode }}</span>
+                                            @if (barcode.isDefault) {
+                                                <span class="badge bg-primary-subtle text-primary ms-1">Varsayılan</span>
+                                            }
+                                        </td>
+                                        <td>{{ barcode.barcodeTypeDescription || barcode.barcodeTypeCode }}</td>
+                                        <td>{{ variantLabel(barcode.colorCode, barcode.itemDim1Code) }}</td>
+                                        <td class="text-end">{{ barcode.quantity }}</td>
+                                        <td class="small">{{ barcode.sourceProvider || '—' }}</td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="5" class="text-center text-muted">Barkod yok.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                @case ('prices') {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Fiyat Tipi</th>
+                                    <th>Varyant</th>
+                                    <th>Geçerlilik</th>
+                                    <th>KDV</th>
+                                    <th class="text-end">Fiyat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (price of detail.prices; track price.id) {
+                                    <tr>
+                                        <td>{{ price.basePriceDescription || price.basePriceCode }}</td>
+                                        <td>{{ variantLabel(price.colorCode, price.itemDim1Code) }}</td>
+                                        <td>{{ price.priceDate | date:'dd.MM.yyyy' }}</td>
+                                        <td>
+                                            @if (price.isVatIncluded === null) {
+                                                <span class="text-muted">—</span>
+                                            } @else {
+                                                {{ price.isVatIncluded ? 'Dahil' : 'Hariç' }}
+                                            }
+                                        </td>
+                                        <td class="text-end text-nowrap fw-semibold">{{ price.price | number:'1.2-2' }} {{ price.currencyCode }}</td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="5" class="text-center text-muted">Fiyat tanımı yok.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                @case ('stocks') {
+                    <h6 class="text-muted text-uppercase small">Depo Bakiyesi</h6>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-centered table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Depo</th>
+                                    <th>Varyant</th>
+                                    <th class="text-end">Giriş</th>
+                                    <th class="text-end">Çıkış</th>
+                                    <th class="text-end">Bakiye</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (stock of detail.stocks; track $index) {
+                                    <tr>
+                                        <td>
+                                            {{ stock.warehouseDescription || stock.warehouseCode }}
+                                            <div class="small text-muted">{{ stock.officeCode }}</div>
+                                        </td>
+                                        <td>{{ variantLabel(stock.colorCode, stock.itemDim1Code) }}</td>
+                                        <td class="text-end">{{ stock.inQuantity }}</td>
+                                        <td class="text-end">{{ stock.outQuantity }}</td>
+                                        <td class="text-end fw-semibold" [class.text-danger]="stock.quantity <= 0">{{ stock.quantity }}</td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="5" class="text-center text-muted">Depo stoğu yok.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h6 class="text-muted text-uppercase small">Raf Bakiyesi</h6>
+                    <div class="table-responsive">
+                        <table class="table table-centered table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Depo / Raf</th>
+                                    <th>Varyant</th>
+                                    <th>Parti</th>
+                                    <th>Son Hareket</th>
+                                    <th>Son Sayım</th>
+                                    <th class="text-end">Miktar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (shelf of detail.shelfStocks; track $index) {
+                                    <tr>
+                                        <td>{{ shelf.warehouseCode }} / <span class="fw-semibold">{{ shelf.shelfCode }}</span></td>
+                                        <td>{{ variantLabel(shelf.colorCode, shelf.itemDim1Code) }}</td>
+                                        <td>{{ shelf.batchCode || '—' }}</td>
+                                        <td class="small">{{ (shelf.lastMovementDate | date:'dd.MM.yyyy HH:mm') || '—' }}</td>
+                                        <td class="small">{{ (shelf.lastCountDate | date:'dd.MM.yyyy') || '—' }}</td>
+                                        <td class="text-end fw-semibold">{{ shelf.quantity }}</td>
+                                    </tr>
+                                } @empty {
+                                    <tr><td colspan="6" class="text-center text-muted">Raf stoğu yok.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                @case ('attributes') {
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <h6 class="text-muted text-uppercase small">Özellikler</h6>
+                            <table class="table table-sm mb-0">
+                                <tbody>
+                                    @for (attr of detail.attributes; track attr.attributeTypeCode + attr.attributeCode) {
+                                        <tr>
+                                            <td class="text-muted">{{ attr.attributeTypeDescription || attr.attributeTypeCode }}</td>
+                                            <td class="fw-semibold">{{ attr.attributeDescription || attr.attributeCode }}</td>
+                                        </tr>
+                                    } @empty {
+                                        <tr><td class="text-center text-muted">Özellik tanımı yok.</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-lg-6">
+                            <h6 class="text-muted text-uppercase small">Notlar</h6>
+                            @for (note of detail.notes; track note.lineNumber) {
+                                <div class="wms-stat small mb-2">{{ note.note }}</div>
+                            } @empty {
+                                <div class="text-muted small">Not yok.</div>
+                            }
+                        </div>
+                        <div class="col-12">
+                            <h6 class="text-muted text-uppercase small">Dil Bazlı Açıklamalar</h6>
+                            <table class="table table-sm mb-0">
+                                <tbody>
+                                    @for (desc of detail.descriptions; track desc.langCode) {
+                                        <tr>
+                                            <td class="text-muted text-nowrap">{{ desc.langCode }}</td>
+                                            <td>
+                                                <div class="fw-semibold">{{ desc.itemDescription }}</div>
+                                                @if (desc.longDescription) {
+                                                    <div class="small text-muted">{{ desc.longDescription }}</div>
+                                                }
+                                            </td>
+                                        </tr>
+                                    } @empty {
+                                        <tr><td class="text-center text-muted">Açıklama yok.</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+                @case ('orders') {
+                    <app-wms-order-summary-table [orders]="detail.recentOrders" />
+                }
+            }
+        </div>
+    </div>
+}

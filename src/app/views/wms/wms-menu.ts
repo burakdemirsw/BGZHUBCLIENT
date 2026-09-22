@@ -16,6 +16,16 @@ import { MenuItemType } from '@/app/types/layout';
 export const WMS_MENU_ITEMS: MenuItemType[] = [
     { label: 'WMS', isTitle: true },
     {
+        label: 'Satış',
+        faIcon: 'fa-solid fa-cart-shopping',
+        isCollapsed: true,
+        children: [
+            { label: 'Siparişler', url: '/wms/orders', faIcon: 'fa-solid fa-circle' },
+            { label: 'Müşteriler', url: '/wms/customers', faIcon: 'fa-solid fa-circle' },
+            { label: 'Ürünler', url: '/wms/items', faIcon: 'fa-solid fa-circle' },
+        ],
+    },
+    {
         label: 'Depo Tanımları',
         faIcon: 'fa-solid fa-warehouse',
         isCollapsed: true,

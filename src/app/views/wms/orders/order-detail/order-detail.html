@@ -1,0 +1,432 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <a class="btn btn-light btn-sm" routerLink="/wms/orders">
+        <i class="fa-solid fa-arrow-left me-1"></i>Siparişler
+    </a>
+</div>
+
+@if (loading) {
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Yükleniyor...</p>
+    </div>
+} @else if (loadError) {
+    <div class="alert alert-danger">{{ loadError }}</div>
+} @else if (detail) {
+    <!-- Başlık -->
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                <div>
+                    <h4 class="mb-1">
+                        <i class="fa-solid fa-cart-shopping me-2"></i>{{ detail.header.orderNumber }}
+                    </h4>
+                    <div class="text-muted small">
+                        {{ detail.header.orderDate | date:'dd.MM.yyyy' }} {{ detail.header.orderTime }}
+                        · {{ detail.header.extensionName || detail.header.extensionCode }}
+                        @if (detail.header.salesChannel) { · {{ detail.header.salesChannel }} }
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-1">
+                    @if (detail.header.isCancelOrder) {
+                        <span class="badge bg-danger-subtle text-danger">İptal</span>
+                    } @else {
+                        <span class="badge bg-primary-subtle text-primary">{{ detail.header.statusDescription || detail.header.statusCode }}</span>
+                    }
+                    @if (detail.header.isCashOnDelivery) {
+                        <span class="badge bg-warning-subtle text-warning">Kapıda Ödeme</span>
+                    }
+                    @if (detail.header.isCommercial) {
+                        <span class="badge bg-info-subtle text-info">Ticari</span>
+                    }
+                    @if (detail.header.isGiftBoxRequested) {
+                        <span class="badge bg-success-subtle text-success">Hediye Paketi</span>
+                    }
+                </div>
+            </div>
+
+            <div class="row g-3 mt-1 small">
+                <div class="col-6 col-md-3">
+                    <div class="text-muted">Belge No</div>
+                    <div class="fw-semibold">{{ detail.header.documentNumber || '—' }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted">Pazaryeri Sipariş No</div>
+                    <div class="fw-semibold">{{ detail.header.externalOrderId || '—' }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted">Sipariş Tipi / Süreç</div>
+                    <div class="fw-semibold">
+                        {{ detail.header.orderTypeDescription || detail.header.orderTypeCode }}
+                        / {{ detail.header.processDescription || detail.header.processCode }}
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted">Depo</div>
+                    <div class="fw-semibold">{{ detail.header.warehouseDescription || detail.header.warehouseCode }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted">Sevk Yöntemi</div>
+                    <div class="fw-semibold">{{ detail.header.shipmentMethodDescription || detail.header.shipmentMethodCode || '—' }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted">Para Birimi</div>
+                    <div class="fw-semibold">
+                        {{ detail.header.doc_CurrencyCode }}
+                        @if (detail.header.doc_CurrencyCode !== detail.header.localCurrencyCode) {
+                            <span class="text-muted">(kur {{ detail.header.exchangeRate | number:'1.2-4' }})</span>
+                        }
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted">Anlaşılan Teslim</div>
+                    <div class="fw-semibold">{{ (detail.header.agreedDeliveryDate | date:'dd.MM.yyyy HH:mm') || '—' }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted">Son Senkron</div>
+                    <div class="fw-semibold">{{ detail.header.lastSyncedDate | date:'dd.MM.yyyy HH:mm' }}</div>
+                </div>
+            </div>
+
+            @if (detail.header.description || detail.header.giftMessage) {
+                <div class="wms-note mt-3 small">
+                    @if (detail.header.description) {
+                        <div><span class="text-muted">Açıklama:</span> {{ detail.header.description }}</div>
+                    }
+                    @if (detail.header.giftMessage) {
+                        <div><span class="text-muted">Hediye Notu:</span> {{ detail.header.giftMessage }}</div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sekmeler -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <button class="nav-link" [class.active]="activeTab === 'lines'" (click)="setTab('lines')">
+                                Satırlar <span class="badge bg-secondary-subtle text-secondary">{{ detail.lines.length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" [class.active]="activeTab === 'payments'" (click)="setTab('payments')">
+                                Ödemeler <span class="badge bg-secondary-subtle text-secondary">{{ detail.payments.length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" [class.active]="activeTab === 'cargos'" (click)="setTab('cargos')">
+                                Kargo <span class="badge bg-secondary-subtle text-secondary">{{ detail.cargos.length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" [class.active]="activeTab === 'invoices'" (click)="setTab('invoices')">
+                                Faturalar <span class="badge bg-secondary-subtle text-secondary">{{ detail.invoices.length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" [class.active]="activeTab === 'claims'" (click)="setTab('claims')">
+                                İadeler <span class="badge bg-secondary-subtle text-secondary">{{ detail.claims.length }}</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    @switch (activeTab) {
+                        @case ('lines') {
+                            <div class="table-responsive">
+                                <table class="table table-centered table-hover table-sm mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>İşlemler</th>
+                                            <th>Ürün</th>
+                                            <th>Barkod</th>
+                                            <th>Durum</th>
+                                            <th class="text-end">Adet</th>
+                                            <th class="text-end">İptal / Toplanan / İade</th>
+                                            <th class="text-end">Birim Fiyat</th>
+                                            <th class="text-end">KDV</th>
+                                            <th class="text-end">Net Tutar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (line of detail.lines; track line.id) {
+                                            <tr>
+                                                <td class="text-nowrap">
+                                                    @if (line.itemId) {
+                                                        <a class="btn btn-soft-primary btn-sm" [routerLink]="['/wms/items', line.itemId]" title="Ürün detayı">
+                                                            <i class="fa-solid fa-box"></i>
+                                                        </a>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        @if (line.imageUrl) {
+                                                            <img [src]="line.imageUrl" alt="" class="wms-thumb">
+                                                        }
+                                                        <div>
+                                                            <div class="fw-semibold">{{ line.itemDescription || line.itemCode || line.lineDescription }}</div>
+                                                            <div class="small text-muted">
+                                                                {{ line.itemCode }}@if (lineVariant(line)) { · {{ lineVariant(line) }} }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="small">{{ line.usedBarcode || '—' }}</td>
+                                                <td>
+                                                    <span class="badge bg-primary-subtle text-primary">{{ line.statusDescription || line.statusCode }}</span>
+                                                    @if (line.cancelReason) {
+                                                        <div class="small text-danger">{{ line.cancelReason }}</div>
+                                                    }
+                                                </td>
+                                                <td class="text-end fw-semibold">{{ line.quantity }}</td>
+                                                <td class="text-end small">{{ line.cancelQuantity }} / {{ line.pickedQuantity }} / {{ line.returnedQuantity }}</td>
+                                                <td class="text-end text-nowrap">{{ line.price | number:'1.2-2' }} {{ line.priceCurrencyCode }}</td>
+                                                <td class="text-end">%{{ line.vatRate }}</td>
+                                                <td class="text-end text-nowrap fw-semibold">
+                                                    {{ (lineNetAmount(line) | number:'1.2-2') ?? '—' }} {{ line.doc_CurrencyCode }}
+                                                </td>
+                                            </tr>
+                                        } @empty {
+                                            <tr><td colspan="9" class="text-center text-muted">Satır bulunamadı.</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        @case ('payments') {
+                            <div class="table-responsive">
+                                <table class="table table-centered table-sm mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Ödeme Yöntemi</th>
+                                            <th>Taksit</th>
+                                            <th>Ödeme Tarihi</th>
+                                            <th class="text-end">Tutar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (payment of detail.payments; track payment.id) {
+                                            <tr>
+                                                <td>{{ payment.paymentMethodDescription || payment.paymentMethodCode }}</td>
+                                                <td>{{ payment.installmentCount ?? '—' }}</td>
+                                                <td>{{ (payment.paymentDate | date:'dd.MM.yyyy HH:mm') || '—' }}</td>
+                                                <td class="text-end text-nowrap fw-semibold">{{ payment.amount | number:'1.2-2' }} {{ payment.currencyCode }}</td>
+                                            </tr>
+                                        } @empty {
+                                            <tr><td colspan="4" class="text-center text-muted">Ödeme kaydı yok.</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        @case ('cargos') {
+                            <div class="table-responsive">
+                                <table class="table table-centered table-sm mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Kargo Firması</th>
+                                            <th>Takip No</th>
+                                            <th>Paket / Desi</th>
+                                            <th>Tahmini Teslim</th>
+                                            <th>Gönderim</th>
+                                            <th>Teslim</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (cargo of detail.cargos; track cargo.id) {
+                                            <tr>
+                                                <td>
+                                                    {{ cargo.deliveryCompanyDescription || cargo.deliveryCompanyCode || '—' }}
+                                                    @if (cargo.isCurrent) {
+                                                        <span class="badge bg-success-subtle text-success ms-1">Güncel</span>
+                                                    }
+                                                    @if (cargo.isFastDelivery) {
+                                                        <span class="badge bg-warning-subtle text-warning ms-1">Hızlı</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (cargo.cargoTrackingLink && cargo.cargoTrackingNumber) {
+                                                        <a [href]="cargo.cargoTrackingLink" target="_blank" rel="noopener noreferrer">
+                                                            {{ cargo.cargoTrackingNumber }} <i class="fa-solid fa-arrow-up-right-from-square small"></i>
+                                                        </a>
+                                                    } @else {
+                                                        {{ cargo.cargoTrackingNumber || '—' }}
+                                                    }
+                                                </td>
+                                                <td>{{ cargo.packageCount }} / {{ cargo.cargoDeci ?? '—' }}</td>
+                                                <td class="small">
+                                                    {{ (cargo.estimatedDeliveryStartDate | date:'dd.MM') || '—' }}
+                                                    @if (cargo.estimatedDeliveryEndDate) { – {{ cargo.estimatedDeliveryEndDate | date:'dd.MM.yyyy' }} }
+                                                </td>
+                                                <td class="small">{{ (cargo.shippedDate | date:'dd.MM.yyyy HH:mm') || '—' }}</td>
+                                                <td class="small">{{ (cargo.deliveredDate | date:'dd.MM.yyyy HH:mm') || '—' }}</td>
+                                            </tr>
+                                        } @empty {
+                                            <tr><td colspan="6" class="text-center text-muted">Kargo kaydı yok.</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        @case ('invoices') {
+                            <div class="table-responsive">
+                                <table class="table table-centered table-sm mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Fatura No</th>
+                                            <th>Tarih</th>
+                                            <th>Tür</th>
+                                            <th>Durum</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (invoice of detail.invoices; track invoice.id) {
+                                            <tr>
+                                                <td>
+                                                    @if (invoice.invoiceLink) {
+                                                        <a [href]="invoice.invoiceLink" target="_blank" rel="noopener noreferrer">
+                                                            {{ invoice.invoiceNumber }} <i class="fa-solid fa-arrow-up-right-from-square small"></i>
+                                                        </a>
+                                                    } @else {
+                                                        <span class="fw-semibold">{{ invoice.invoiceNumber }}</span>
+                                                    }
+                                                    @if (invoice.eInvoiceNumber) {
+                                                        <div class="small text-muted">e-Fatura: {{ invoice.eInvoiceNumber }}</div>
+                                                    }
+                                                </td>
+                                                <td>{{ invoice.invoiceDate | date:'dd.MM.yyyy' }}</td>
+                                                <td>
+                                                    {{ invoice.isReturn ? 'İade' : 'Satış' }}
+                                                    @if (invoice.isEInvoice) {
+                                                        <span class="badge bg-info-subtle text-info ms-1">e-Fatura</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (invoice.isCompleted) {
+                                                        <span class="badge bg-success-subtle text-success">Tamamlandı</span>
+                                                    } @else {
+                                                        <span class="badge bg-warning-subtle text-warning">Bekliyor</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        } @empty {
+                                            <tr><td colspan="4" class="text-center text-muted">Fatura yok.</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        @case ('claims') {
+                            <div class="table-responsive">
+                                <table class="table table-centered table-sm mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>İade No</th>
+                                            <th>Tarih</th>
+                                            <th>Durum</th>
+                                            <th class="text-end">Satır / Adet</th>
+                                            <th>Kargo Takip</th>
+                                            <th>Teslim Alındı</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (claim of detail.claims; track claim.id) {
+                                            <tr>
+                                                <td class="fw-semibold">{{ claim.externalClaimId }}</td>
+                                                <td>{{ claim.claimDate | date:'dd.MM.yyyy' }}</td>
+                                                <td><span class="badge bg-primary-subtle text-primary">{{ claim.statusDescription || claim.statusCode }}</span></td>
+                                                <td class="text-end">{{ claim.lineCount }} / {{ claim.totalQuantity }}</td>
+                                                <td>{{ claim.cargoTrackingNumber || '—' }}</td>
+                                                <td>{{ (claim.receivedDate | date:'dd.MM.yyyy') || '—' }}</td>
+                                            </tr>
+                                        } @empty {
+                                            <tr><td colspan="6" class="text-center text-muted">İade yok.</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Yan panel -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header"><h5 class="card-title mb-0">Tutar Özeti</h5></div>
+                <div class="card-body small">
+                    <div class="d-flex justify-content-between"><span class="text-muted">Brüt</span><span>{{ detail.totals.grossAmount | number:'1.2-2' }}</span></div>
+                    <div class="d-flex justify-content-between"><span class="text-muted">İndirim</span><span>-{{ detail.totals.discountAmount | number:'1.2-2' }}</span></div>
+                    <div class="d-flex justify-content-between"><span class="text-muted">Matrah</span><span>{{ detail.totals.taxBase | number:'1.2-2' }}</span></div>
+                    <div class="d-flex justify-content-between"><span class="text-muted">KDV</span><span>{{ detail.totals.vatAmount | number:'1.2-2' }}</span></div>
+                    <hr class="my-2">
+                    <div class="d-flex justify-content-between fs-5 fw-semibold">
+                        <span>Net</span><span>{{ detail.totals.netAmount | number:'1.2-2' }} {{ detail.totals.currencyCode }}</span>
+                    </div>
+                    <div class="text-muted mt-2">
+                        {{ detail.totals.lineCount }} satır · {{ detail.totals.totalQuantity }} adet
+                        · {{ detail.totals.totalPickedQuantity }} toplandı
+                        · {{ detail.totals.totalCancelQuantity }} iptal
+                        · {{ detail.totals.totalReturnedQuantity }} iade
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Müşteri</h5>
+                    @if (detail.customer) {
+                        <a class="btn btn-soft-primary btn-sm" [routerLink]="['/wms/customers', detail.customer.customerId]" title="Müşteri detayı">
+                            <i class="fa-solid fa-user"></i>
+                        </a>
+                    }
+                </div>
+                <div class="card-body small">
+                    @if (detail.customer; as customer) {
+                        <div class="fw-semibold">{{ customer.customerName || customer.customerCode }}</div>
+                        <div class="text-muted mb-2">
+                            {{ customer.customerCode }} · {{ customer.isIndividualAcc ? 'Bireysel' : 'Kurumsal' }}
+                        </div>
+                        @if (customer.email) { <div><i class="fa-regular fa-envelope me-1"></i>{{ customer.email }}</div> }
+                        @if (customer.mobile) { <div><i class="fa-solid fa-phone me-1"></i>{{ customer.mobile }}</div> }
+                        @if (customer.taxNumber) {
+                            <div class="mt-1"><span class="text-muted">VKN:</span> {{ customer.taxNumber }}
+                                @if (customer.taxOfficeDescription) { ({{ customer.taxOfficeDescription }}) }
+                            </div>
+                        }
+                    } @else {
+                        <span class="text-muted">Müşteri bilgisi yok.</span>
+                    }
+                </div>
+            </div>
+
+            <ng-template #addressCard let-address let-title="title">
+                <div class="card">
+                    <div class="card-header"><h5 class="card-title mb-0">{{ title }}</h5></div>
+                    <div class="card-body small">
+                        @if (address) {
+                            <div class="fw-semibold">{{ recipientName(address) }}</div>
+                            @if (address.phone) { <div class="text-muted">{{ address.phone }}</div> }
+                            <div class="mt-1">{{ address.address }}</div>
+                            <div class="text-muted">{{ addressLocation(address) }}</div>
+                            @if (address.taxNumber) {
+                                <div class="mt-1"><span class="text-muted">VKN:</span> {{ address.taxNumber }}
+                                    @if (address.taxOfficeDescription) { ({{ address.taxOfficeDescription }}) }
+                                </div>
+                            }
+                        } @else {
+                            <span class="text-muted">Adres bilgisi yok.</span>
+                        }
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-container *ngTemplateOutlet="addressCard; context: { $implicit: detail.shippingAddress, title: 'Teslimat Adresi' }"></ng-container>
+            <ng-container *ngTemplateOutlet="addressCard; context: { $implicit: detail.billingAddress, title: 'Fatura Adresi' }"></ng-container>
+        </div>
+    </div>
+}

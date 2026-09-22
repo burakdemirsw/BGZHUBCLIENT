@@ -26,3 +26,9 @@ export type WmsCode = number | string;
 export interface WmsCompanyScoped {
     companyId: string;
 }
+
+/** Para birimi bazında toplam — ör. müşterinin TRY ve USD cinsinden ciroları */
+export interface WmsCurrencyAmount {
+    currencyCode: string;
+    amount: number;
+}

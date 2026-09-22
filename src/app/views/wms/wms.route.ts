@@ -24,6 +24,26 @@ function wmsRoute(
 
 /** WMS (Depo Yönetim Sistemi) sayfaları — /api/wms/* uçlarını karşılar */
 export const WMS_ROUTES: Routes = [
+    // ────── Sipariş, Müşteri, Ürün (liste + detay) ──────
+    wmsRoute('orders', 'Siparişler', () =>
+        import('./orders/orders').then(m => m.WmsOrdersPage),
+    ),
+    wmsRoute('orders/:id', 'Sipariş Detayı', () =>
+        import('./orders/order-detail/order-detail').then(m => m.WmsOrderDetailPage),
+    ),
+    wmsRoute('customers', 'Müşteriler', () =>
+        import('./customers/customers').then(m => m.WmsCustomersPage),
+    ),
+    wmsRoute('customers/:id', 'Müşteri Detayı', () =>
+        import('./customers/customer-detail/customer-detail').then(m => m.WmsCustomerDetailPage),
+    ),
+    wmsRoute('items', 'Ürünler', () =>
+        import('./items/items').then(m => m.WmsItemsPage),
+    ),
+    wmsRoute('items/:id', 'Ürün Detayı', () =>
+        import('./items/item-detail/item-detail').then(m => m.WmsItemDetailPage),
+    ),
+
     // ────── Temel Tanımlar ──────
     wmsRoute('warehouses', 'Depolar', () =>
         import('./warehouses/warehouses').then(m => m.WmsWarehousesPage),

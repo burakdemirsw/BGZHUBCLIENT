@@ -1,0 +1,138 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-box me-2"></i>Ürünler</h4>
+            </div>
+            <div class="card-body">
+                <div class="wms-filter-bar d-flex flex-wrap align-items-end gap-2 mb-3">
+                    <div>
+                        <label class="form-label small mb-1">Ara</label>
+                        <input type="text" class="form-control form-control-sm"
+                               placeholder="Ürün kodu, açıklama, barkod..."
+                               [(ngModel)]="filterText"
+                               (ngModelChange)="onFilterChange()">
+                    </div>
+                    <div>
+                        <label class="form-label small mb-1">Ürün Tipi</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="itemTypeFilter" (ngModelChange)="applyFilters()">
+                            <option value="">Tümü</option>
+                            @for (type of itemTypes; track type.id) {
+                                <option [value]="type.itemTypeCode">{{ type.itemTypeDescription || type.itemTypeCode }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label small mb-1">Durum</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="activeFilter" (ngModelChange)="applyFilters()">
+                            <option value="">Tümü</option>
+                            <option value="true">Aktif</option>
+                            <option value="false">Pasif</option>
+                        </select>
+                    </div>
+                    @if (hasActiveFilters) {
+                        <button class="btn btn-light btn-sm" (click)="clearFilters()">
+                            <i class="fa-solid fa-xmark me-1"></i>Temizle
+                        </button>
+                    }
+                </div>
+
+                @if (loading) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>İşlemler</th>
+                                    <th>#</th>
+                                    <th>Ürün</th>
+                                    <th>Tip</th>
+                                    <th>Varsayılan Barkod</th>
+                                    <th class="text-end">Varyant</th>
+                                    <th class="text-end">Barkod</th>
+                                    <th class="text-end">Stok</th>
+                                    <th class="text-center">Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of pagedItems; track item.id; let idx = $index) {
+                                    <tr>
+                                        <td class="text-nowrap">
+                                            <a class="btn btn-soft-primary btn-sm" [routerLink]="['/wms/items', item.id]" title="Detay">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">{{ rowNumber(idx) }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                @if (item.imageUrl) {
+                                                    <img [src]="item.imageUrl" alt="" class="wms-thumb">
+                                                } @else {
+                                                    <span class="wms-thumb wms-thumb-empty"><i class="fa-regular fa-image"></i></span>
+                                                }
+                                                <div>
+                                                    <div class="fw-semibold">{{ item.itemCode }}</div>
+                                                    <div class="small text-muted">{{ item.itemDescription || '—' }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ item.itemTypeDescription || item.itemTypeCode }}</td>
+                                        <td class="small">{{ item.defaultBarcode || '—' }}</td>
+                                        <td class="text-end">{{ item.variantCount }}</td>
+                                        <td class="text-end">{{ item.barcodeCount }}</td>
+                                        <td class="text-end fw-semibold" [class.text-danger]="item.stockQuantity <= 0">{{ item.stockQuantity }}</td>
+                                        <td class="text-center">
+                                            <div class="form-check form-switch mb-0 d-inline-flex align-items-center gap-2">
+                                                <input class="form-check-input" type="checkbox" role="switch"
+                                                       [checked]="item.isActive"
+                                                       [disabled]="togglingId === item.id"
+                                                       (click)="$event.preventDefault(); toggleActive(item)">
+                                                @if (item.isActive) {
+                                                    <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                } @else {
+                                                    <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td colspan="9" class="text-center text-muted">Ürün bulunamadı.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Sayfalama -->
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="small text-muted">
+                            Toplam: {{ totalCount }} kayıt
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track $index) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

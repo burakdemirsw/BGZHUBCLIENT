@@ -1,0 +1,249 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <a class="btn btn-light btn-sm" routerLink="/wms/customers">
+        <i class="fa-solid fa-arrow-left me-1"></i>Müşteriler
+    </a>
+</div>
+
+@if (loading) {
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Yükleniyor...</p>
+    </div>
+} @else if (loadError) {
+    <div class="alert alert-danger">{{ loadError }}</div>
+} @else if (detail) {
+    <div class="row">
+        <!-- Kart -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="mb-1">{{ detail.card.customerName || detail.card.customerCode }}</h4>
+                            <div class="text-muted small">{{ detail.card.customerCode }}</div>
+                        </div>
+                        @if (detail.card.isActive) {
+                            <span class="badge bg-success-subtle text-success">Aktif</span>
+                        } @else {
+                            <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                        }
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-1 mt-2">
+                        <span class="badge bg-info-subtle text-info">{{ detail.card.isIndividualAcc ? 'Bireysel' : 'Kurumsal' }}</span>
+                        @if (detail.card.customerTypeDescription) {
+                            <span class="badge bg-secondary-subtle text-secondary">{{ detail.card.customerTypeDescription }}</span>
+                        }
+                        @if (detail.card.isSubjectToEInvoice) {
+                            <span class="badge bg-primary-subtle text-primary">e-Fatura Mükellefi</span>
+                        }
+                    </div>
+
+                    <dl class="row small mt-3 mb-0">
+                        <dt class="col-5 text-muted fw-normal">Ofis</dt>
+                        <dd class="col-7">{{ detail.card.officeDescription || detail.card.officeCode }}</dd>
+
+                        @if (detail.card.taxNumber) {
+                            <dt class="col-5 text-muted fw-normal">Vergi No</dt>
+                            <dd class="col-7">{{ detail.card.taxNumber }}</dd>
+                            <dt class="col-5 text-muted fw-normal">Vergi Dairesi</dt>
+                            <dd class="col-7">{{ detail.card.taxOfficeDescription || detail.card.taxOfficeCode || '—' }}</dd>
+                        }
+                        @if (detail.card.identityNum) {
+                            <dt class="col-5 text-muted fw-normal">TC Kimlik No</dt>
+                            <dd class="col-7">{{ detail.card.identityNum }}</dd>
+                        }
+
+                        <dt class="col-5 text-muted fw-normal">Para Birimi</dt>
+                        <dd class="col-7">{{ detail.card.currencyDescription || detail.card.currencyCode }}</dd>
+
+                        <dt class="col-5 text-muted fw-normal">Dil</dt>
+                        <dd class="col-7">{{ detail.card.dataLanguageCode }}</dd>
+
+                        <dt class="col-5 text-muted fw-normal">İzinler</dt>
+                        <dd class="col-7">
+                            SMS {{ detail.card.isSendAdvertSMS ? '✓' : '✗' }} · E-posta {{ detail.card.isSendAdvertMail ? '✓' : '✗' }}
+                        </dd>
+
+                        <dt class="col-5 text-muted fw-normal">Kaynak</dt>
+                        <dd class="col-7">
+                            {{ detail.card.sourceProvider }}
+                            @if (detail.card.externalCustomerId) {
+                                <div class="text-muted">{{ detail.card.externalCustomerId }}</div>
+                            }
+                        </dd>
+
+                        <dt class="col-5 text-muted fw-normal">Oluşturulma</dt>
+                        <dd class="col-7 mb-0">
+                            {{ detail.card.createdDate | date:'dd.MM.yyyy HH:mm' }}
+                            @if (detail.card.createdUserName) {
+                                <div class="text-muted">{{ detail.card.createdUserName }}</div>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <!-- Sipariş istatistikleri -->
+            <div class="row g-3 mb-3">
+                <div class="col-6 col-md-3">
+                    <div class="wms-stat">
+                        <div class="text-muted small">Sipariş</div>
+                        <div class="fs-4 fw-semibold">{{ detail.orderStats.orderCount }}</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="wms-stat">
+                        <div class="text-muted small">İptal</div>
+                        <div class="fs-4 fw-semibold">{{ detail.orderStats.cancelledOrderCount }}</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="wms-stat">
+                        <div class="text-muted small">İlk / Son Sipariş</div>
+                        <div class="fw-semibold">
+                            {{ (detail.orderStats.firstOrderDate | date:'dd.MM.yy') || '—' }}
+                            / {{ (detail.orderStats.lastOrderDate | date:'dd.MM.yy') || '—' }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="wms-stat">
+                        <div class="text-muted small">Toplam Ciro</div>
+                        @for (total of detail.orderStats.totalNetAmounts; track total.currencyCode) {
+                            <div class="fw-semibold">{{ total.amount | number:'1.2-2' }} {{ total.currencyCode }}</div>
+                        } @empty {
+                            <div class="fw-semibold">—</div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sekmeler -->
+            <div class="card">
+                <div class="card-header pb-0">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <button class="nav-link" [class.active]="activeTab === 'orders'" (click)="setTab('orders')">
+                                Son Siparişler <span class="badge bg-secondary-subtle text-secondary">{{ detail.recentOrders.length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" [class.active]="activeTab === 'addresses'" (click)="setTab('addresses')">
+                                Adresler <span class="badge bg-secondary-subtle text-secondary">{{ detail.addresses.length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" [class.active]="activeTab === 'communications'" (click)="setTab('communications')">
+                                İletişim <span class="badge bg-secondary-subtle text-secondary">{{ detail.communications.length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" [class.active]="activeTab === 'attributes'" (click)="setTab('attributes')">
+                                Özellikler <span class="badge bg-secondary-subtle text-secondary">{{ detail.attributes.length }}</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    @switch (activeTab) {
+                        @case ('orders') {
+                            <app-wms-order-summary-table [orders]="detail.recentOrders" [showCustomer]="false" />
+                        }
+                        @case ('addresses') {
+                            <div class="row g-3">
+                                @for (address of detail.addresses; track address.id) {
+                                    <div class="col-md-6">
+                                        <div class="wms-stat h-100 small">
+                                            <div class="d-flex justify-content-between">
+                                                <span class="fw-semibold">{{ recipientName(address) }}</span>
+                                                <span>
+                                                    @if (address.isDefaultShipping) {
+                                                        <span class="badge bg-success-subtle text-success">Teslimat</span>
+                                                    }
+                                                    @if (address.isDefaultBilling) {
+                                                        <span class="badge bg-info-subtle text-info ms-1">Fatura</span>
+                                                    }
+                                                </span>
+                                            </div>
+                                            @if (address.recipientPhone) {
+                                                <div class="text-muted">{{ address.recipientPhone }}</div>
+                                            }
+                                            <div class="mt-1">{{ address.address }}</div>
+                                            <div class="text-muted">{{ addressLocation(address) }}</div>
+                                            @if (address.taxNumber) {
+                                                <div class="mt-1"><span class="text-muted">VKN:</span> {{ address.taxNumber }}
+                                                    @if (address.taxOfficeDescription) { ({{ address.taxOfficeDescription }}) }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                } @empty {
+                                    <div class="col-12 text-center text-muted">Kayıtlı adres yok.</div>
+                                }
+                            </div>
+                        }
+                        @case ('communications') {
+                            <div class="table-responsive">
+                                <table class="table table-centered table-sm mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Tip</th>
+                                            <th>Adres</th>
+                                            <th>Özellikler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (comm of detail.communications; track comm.id) {
+                                            <tr>
+                                                <td>{{ comm.communicationTypeDescription || comm.communicationTypeCode }}</td>
+                                                <td class="fw-semibold">{{ comm.commAddress }}</td>
+                                                <td>
+                                                    @if (comm.isDefault) {
+                                                        <span class="badge bg-primary-subtle text-primary">Varsayılan</span>
+                                                    }
+                                                    @if (comm.isConfirmed) {
+                                                        <span class="badge bg-success-subtle text-success ms-1">Doğrulanmış</span>
+                                                    }
+                                                    @if (comm.canSendAdvert) {
+                                                        <span class="badge bg-info-subtle text-info ms-1">Reklam İzni</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        } @empty {
+                                            <tr><td colspan="3" class="text-center text-muted">İletişim bilgisi yok.</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        @case ('attributes') {
+                            <div class="table-responsive">
+                                <table class="table table-centered table-sm mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Özellik</th>
+                                            <th>Değer</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (attr of detail.attributes; track attr.id) {
+                                            <tr>
+                                                <td>{{ attr.attributeTypeDescription || attr.attributeTypeCode }}</td>
+                                                <td class="fw-semibold">{{ attr.attributeValue }}</td>
+                                            </tr>
+                                        } @empty {
+                                            <tr><td colspan="2" class="text-center text-muted">Özellik tanımı yok.</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}

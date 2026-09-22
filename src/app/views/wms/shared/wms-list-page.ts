@@ -57,6 +57,13 @@ export abstract class WmsListPage<T extends { id: string }> implements OnInit, O
         }, SEARCH_DEBOUNCE_MS);
     }
 
+    /** Arama dışındaki filtreler (tarih, durum, tip) değiştiğinde ilk sayfadan yeniden yükler */
+    applyFilters(): void {
+        if (this.searchTimer) clearTimeout(this.searchTimer);
+        this.currentPage = 1;
+        void this.loadItems();
+    }
+
     setPage(page: number): void {
         if (page < 1 || page > this.totalPages || page === this.currentPage) return;
         this.currentPage = page;

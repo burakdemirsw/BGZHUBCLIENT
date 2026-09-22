@@ -1,0 +1,32 @@
+:host {
+    display: block;
+}
+
+.wms-item-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 0.375rem;
+}
+
+.wms-item-image-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f7f7f9;
+    color: #adb5bd;
+}
+
+.wms-thumb {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border-radius: 0.25rem;
+}
+
+/* İstatistik ve not kutuları off-white zeminle ayrışır */
+.wms-stat {
+    background-color: #f7f7f9;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+}

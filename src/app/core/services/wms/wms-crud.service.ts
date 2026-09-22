@@ -18,18 +18,12 @@ const WMS_CONTROLLER = 'wms';
 export const WMS_LOOKUP_PAGE_SIZE = 500;
 
 /**
- * WMS kaynaklarının tamamı aynı beş uçlu kalıbı kullanır:
- *   POST {resource}/paged        → sayfalı liste (PaginationRequest → PagedResult)
- *   GET  {resource}/{id}         → tekil kayıt
- *   POST {resource}              → oluştur
- *   POST {resource}/update/{id}  → güncelle
- *   POST {resource}/delete/{id}  → sil
- *
- * Bu temel sınıf kalıbı tek yerde çözer; her kaynak servisi yalnızca
- * `resource` alanını ve gerekiyorsa ek uçlarını tanımlar.
+ * Tüm WMS servislerinin ortak temeli: URL üretimi, oturumdaki şirket ve
+ * sayfalı istek gövdesi. Ayrıca bazı kaynakların sunduğu zenginleştirilmiş
+ * görünüm uçlarını (`{resource}/list`, `{resource}/{id}/details`) karşılar.
  */
 @Injectable()
-export abstract class WmsCrudServiceBase<TResponse, TCreate extends object, TUpdate extends object> {
+export abstract class WmsResourceService {
     protected readonly http = inject(HttpClientService);
     protected readonly authState = inject(AuthStateService);
 
@@ -49,16 +43,52 @@ export abstract class WmsCrudServiceBase<TResponse, TCreate extends object, TUpd
     }
 
     /**
-     * Sayfalı liste. `companyId` oturumdan doldurulur; şirketten bağımsız
-     * kaynaklarda da istek şeması bu alanı zorunlu tuttuğu için gönderilir.
+     * Sayfalı istek gövdesi. `companyId` oturumdan doldurulur; şirketten
+     * bağımsız kaynaklarda da istek şeması bu alanı zorunlu tuttuğu için gönderilir.
      */
-    async getPaged(request?: Partial<PaginationRequest>): Promise<PagedResult<TResponse>> {
-        const body: PaginationRequest = {
+    protected pagedBody<TRequest extends Partial<PaginationRequest>>(
+        request?: TRequest,
+    ): TRequest & PaginationRequest {
+        return {
             ...DEFAULT_PAGINATION,
             ...request,
             companyId: request?.companyId || this.companyId,
-        };
-        const response = await this.http.post<PagedResult<TResponse>>(this.action('paged'), body);
+        } as TRequest & PaginationRequest;
+    }
+
+    /** `POST {resource}/list` — filtreli, açıklamalarla zenginleştirilmiş liste */
+    protected async postListView<TItem>(request: Partial<PaginationRequest>): Promise<PagedResult<TItem>> {
+        const response = await this.http.post<PagedResult<TItem>>(this.action('list'), this.pagedBody(request));
+        return PagedResult.from<TItem>(response);
+    }
+
+    /** `GET {resource}/{id}/details` — kaydın tüm alt tablolarıyla birlikte detayı */
+    protected async getDetailView<TDetail>(id: string): Promise<TDetail | null> {
+        const response = await this.http.get<TDetail>(this.action(`${id}/details`));
+        return response.data;
+    }
+}
+
+/**
+ * WMS kaynaklarının tamamı aynı beş uçlu kalıbı kullanır:
+ *   POST {resource}/paged        → sayfalı liste (PaginationRequest → PagedResult)
+ *   GET  {resource}/{id}         → tekil kayıt
+ *   POST {resource}              → oluştur
+ *   POST {resource}/update/{id}  → güncelle
+ *   POST {resource}/delete/{id}  → sil
+ *
+ * Bu temel sınıf kalıbı tek yerde çözer; her kaynak servisi yalnızca
+ * `resource` alanını ve gerekiyorsa ek uçlarını tanımlar.
+ */
+@Injectable()
+export abstract class WmsCrudServiceBase<
+    TResponse,
+    TCreate extends object,
+    TUpdate extends object,
+> extends WmsResourceService {
+
+    async getPaged(request?: Partial<PaginationRequest>): Promise<PagedResult<TResponse>> {
+        const response = await this.http.post<PagedResult<TResponse>>(this.action('paged'), this.pagedBody(request));
         return PagedResult.from<TResponse>(response);
     }
 
