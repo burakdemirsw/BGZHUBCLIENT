@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { ExtensionManagementService } from '@/app/core/services/extension-management.service';
 import { ExtensionDefinition } from '@/app/core/models/extension/extension-definition.models';
+import { ExtensionCategory } from '@/app/core/models/extension/extension-category.models';
 import { ExtensionSettingDefinition } from '@/app/core/models/extension/extension-setting-definition.models';
 import {
     CompanyExtensionSetting,
@@ -48,6 +49,7 @@ export class CompanyExtensionSettingsPage implements OnInit {
     selectedExtensionSettings: ExtensionSettingDefinition[] = [];
     selectedSettingGroups: SettingFieldGroup[] = [];
     settingCategories: ExtensionSettingCategory[] = [];
+    extensionCategories: ExtensionCategory[] = [];
     formValues: Record<string, string> = {};
 
     loading = false;
@@ -73,12 +75,14 @@ export class CompanyExtensionSettingsPage implements OnInit {
         this.loading = true;
         try {
             const companyId = this.authStateService.profile?.companyId || '';
-            const [response, categoryResponse] = await Promise.all([
+            const [response, categoryResponse, extensionCategoryResponse] = await Promise.all([
                 this.extensionService.getExtensionDefinitions(),
                 this.extensionService.getExtensionSettingCategories().catch(() => null),
+                this.extensionService.getExtensionCategories().catch(() => null),
             ]);
             this.definitions = this.extractArray<ExtensionDefinition>(response);
             this.settingCategories = this.extractArray<ExtensionSettingCategory>(categoryResponse);
+            this.extensionCategories = this.extractArray<ExtensionCategory>(extensionCategoryResponse);
 
             if (!companyId) {
                 this.filteredExtensions = [...this.definitions];
@@ -153,7 +157,7 @@ export class CompanyExtensionSettingsPage implements OnInit {
             this.isExtensionEnabled(item.id) && (
                 (item.name || '').toLowerCase().includes(filter) ||
                 (item.code || '').toLowerCase().includes(filter) ||
-                (item.category || '').toLowerCase().includes(filter)
+                this.getExtensionCategoryName(item).toLowerCase().includes(filter)
             )
         );
 
@@ -322,22 +326,34 @@ export class CompanyExtensionSettingsPage implements OnInit {
     }
 
     private buildCategoryGroups(items: ExtensionDefinition[]): ExtensionCategoryGroup[] {
-        const groups: Record<string, ExtensionDefinition[]> = {};
+        const groups = new Map<string, { order: number; items: ExtensionDefinition[] }>();
 
         items.forEach(item => {
-            const category = (item.category || '').trim() || 'Diger';
-            if (!groups[category]) {
-                groups[category] = [];
-            }
-            groups[category].push(item);
+            const category = this.getExtensionCategoryName(item);
+            const group = groups.get(category) || { order: this.getExtensionCategoryOrder(item), items: [] };
+            group.items.push(item);
+            groups.set(category, group);
         });
 
-        return Object.keys(groups)
-            .sort((a, b) => a.localeCompare(b, 'tr'))
-            .map(category => ({
+        return Array.from(groups.entries())
+            .sort(([a, ga], [b, gb]) => ga.order - gb.order || a.localeCompare(b, 'tr'))
+            .map(([category, group]) => ({
                 category,
-                items: groups[category],
+                items: group.items,
             }));
+    }
+
+    /** Extension'ın kategori adı; kategori listesi yüklenmediyse API'nin döndüğü ada/koda düşer. */
+    getExtensionCategoryName(extension: ExtensionDefinition): string {
+        return extension.categoryName
+            || this.extensionCategories.find(c => c.code === extension.categoryCode)?.name
+            || extension.categoryCode
+            || 'Diger';
+    }
+
+    private getExtensionCategoryOrder(extension: ExtensionDefinition): number {
+        const category = this.extensionCategories.find(c => c.code === extension.categoryCode);
+        return category ? Number(category.sortOrder) || 0 : Number.MAX_SAFE_INTEGER;
     }
 
     private extractArray<T>(response: unknown): T[] {

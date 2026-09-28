@@ -1,0 +1,577 @@
+<div class="ot-page">
+    <div class="ot-container">
+
+        <!-- ── Marka başlığı ── -->
+        <header class="ot-brand">
+            @if (order?.brand?.logoUrl) {
+                <img [src]="order?.brand?.logoUrl" [alt]="brandName" class="ot-brand-logo"/>
+            } @else {
+                <span class="ot-brand-mark"><i class="fa-solid fa-box-open"></i></span>
+                <span class="ot-brand-name">{{ brandName || 'Sipariş Paneli' }}</span>
+            }
+        </header>
+
+        @if (isDemo) {
+            <div class="ot-demo">
+                <i class="fa-solid fa-flask"></i>
+                <span>Test modu — örnek verilerle çalışıyorsunuz. Doğrulama kodu <strong>123456</strong></span>
+            </div>
+        }
+
+        <!-- ── Adım göstergesi ── -->
+        <nav class="ot-steps">
+            @for (item of stepLabels; track item.key; let i = $index) {
+                <div class="ot-step" [class.active]="isStepActive(item.key)" [class.done]="isStepDone(item.key)">
+                    <span class="ot-step-dot">
+                        @if (isStepDone(item.key)) {
+                            <i class="fa-solid fa-check"></i>
+                        } @else {
+                            {{ i + 1 }}
+                        }
+                    </span>
+                    <span class="ot-step-label">{{ item.label }}</span>
+                </div>
+            }
+        </nav>
+
+        <!-- ══════════════ 1. Sorgulama ══════════════ -->
+        @if (step === 'search') {
+            <section class="ot-card ot-hero">
+                <span class="ot-hero-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <h1 class="ot-hero-title">Sipariş Durumunu Sorgula</h1>
+                <p class="ot-hero-sub">Sipariş kodunuzu girerek siparişinizin güncel durumuna ulaşın.</p>
+
+                <div class="ot-chips">
+                    <span class="ot-chip"><i class="fa-solid fa-truck-fast"></i> Sipariş durumu</span>
+                    <span class="ot-chip"><i class="fa-solid fa-barcode"></i> Kargo takip no</span>
+                    <span class="ot-chip"><i class="fa-solid fa-rotate-left"></i> İade talebi</span>
+                </div>
+
+                <div class="ot-search-box" [class.busy]="searching">
+                    <i class="fa-solid fa-receipt ot-search-icon"></i>
+                    <input type="text" class="ot-search-input"
+                           [placeholder]="'Sipariş kodunuz (ör. ' + demoOrderNo + ')'"
+                           [(ngModel)]="searchQuery" (keyup.enter)="search()"/>
+                    <button type="button" class="ot-btn ot-btn-dark" (click)="search()" [disabled]="searching">
+                        @if (searching) {
+                            <span class="spinner-border spinner-border-sm"></span>
+                        } @else {
+                            Sorgula
+                        }
+                    </button>
+                </div>
+
+                @if (searchError) {
+                    <div class="ot-alert ot-alert-danger">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>{{ searchError }}</span>
+                    </div>
+                }
+            </section>
+
+            @if (searchResults.length) {
+                <div class="ot-results">
+                    @for (summary of searchResults; track summary.orderNo) {
+                        <article class="ot-card ot-result">
+                            <div class="ot-result-head">
+                                <div>
+                                    <span class="ot-result-no">{{ summary.orderNo }}</span>
+                                    <span class="ot-result-customer">{{ summary.maskedCustomerName }}</span>
+                                </div>
+                                <span class="ot-pill ot-pill-success">{{ summary.statusName }}</span>
+                            </div>
+
+                            <div class="ot-result-meta">
+                                <div>
+                                    <span class="ot-label">Sipariş Tarihi</span>
+                                    <span class="ot-value">{{ summary.orderDate | date:'dd.MM.yyyy' }}</span>
+                                </div>
+                                <div>
+                                    <span class="ot-label">Kargo Şirketi</span>
+                                    <span class="ot-value">{{ summary.cargoCompanyName || '—' }}</span>
+                                </div>
+                                <div>
+                                    <span class="ot-label">Kargo Takip No</span>
+                                    <span class="ot-value">{{ summary.trackingNumber || '—' }}</span>
+                                </div>
+                            </div>
+
+                            <div class="ot-result-actions">
+                                <button type="button" class="ot-btn ot-btn-ghost" (click)="selectOrder(summary, false)">
+                                    <i class="fa-regular fa-eye"></i> Sipariş Detayı
+                                </button>
+                                @if (summary.canCreateReturn) {
+                                    <button type="button" class="ot-btn ot-btn-rose" (click)="selectOrder(summary, true)">
+                                        <i class="fa-solid fa-rotate-left"></i> İade Talebi Yap
+                                    </button>
+                                } @else {
+                                    <span class="ot-note">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                        {{ summary.returnDisabledReason || 'Bu sipariş için iade talebi oluşturulamaz.' }}
+                                    </span>
+                                }
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        }
+
+        <!-- ══════════════ 2. Doğrulama ══════════════ -->
+        @if (step === 'verify') {
+            <section class="ot-card ot-hero">
+                <span class="ot-hero-icon ot-hero-icon-accent"><i class="fa-solid fa-shield-halved"></i></span>
+                <h1 class="ot-hero-title">Sipariş Doğrulama</h1>
+
+                @if (selectedSummary) {
+                    <div class="ot-hero-tag">
+                        <span class="ot-pill ot-pill-soft">{{ selectedSummary!.orderNo }}</span>
+                        <span>{{ selectedSummary!.maskedCustomerName }}</span>
+                    </div>
+                }
+
+                @if (verifyPhase === 'idle') {
+                    <p class="ot-hero-sub">
+                        Sipariş detaylarını görebilmek ve iade talebi oluşturabilmek için siparişin size ait
+                        olduğunu doğrulamanız gerekiyor. Kodu, siparişte kayıtlı telefon numaranıza SMS ile göndereceğiz.
+                    </p>
+                    <button type="button" class="ot-btn ot-btn-primary ot-btn-block" (click)="sendCode()" [disabled]="sendingCode">
+                        @if (sendingCode) {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        <i class="fa-solid fa-comment-sms me-2"></i>Doğrulama Kodunu Gönder
+                    </button>
+                } @else {
+                    <p class="ot-hero-sub">
+                        <strong>{{ maskedPhone }}</strong> numarasına gönderilen 6 haneli kodu girin.
+                    </p>
+                    <input type="text" inputmode="numeric" maxlength="6" class="ot-code-input"
+                           placeholder="••••••" [ngModel]="verificationCode"
+                           (ngModelChange)="onCodeInput($event)" (keyup.enter)="verifyCode()"/>
+                    <button type="button" class="ot-btn ot-btn-primary ot-btn-block" (click)="verifyCode()"
+                            [disabled]="!isCodeComplete || verifying">
+                        @if (verifying) {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Doğrula ve Devam Et
+                    </button>
+                    <div class="ot-resend">
+                        @if (resendCountdown > 0) {
+                            <span>Yeni kod isteyebilmek için <strong>{{ resendCountdownText }}</strong></span>
+                        } @else {
+                            <button type="button" class="ot-link" (click)="sendCode()" [disabled]="sendingCode">
+                                Kodu yeniden gönder
+                            </button>
+                        }
+                    </div>
+                }
+
+                @if (verifyError) {
+                    <div class="ot-alert ot-alert-danger">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>{{ verifyError }}</span>
+                    </div>
+                }
+
+                <button type="button" class="ot-link ot-link-back" (click)="backToSearch()">
+                    <i class="fa-solid fa-arrow-left"></i> Sorgulama ekranına dön
+                </button>
+            </section>
+        }
+
+        <!-- ══════════════ 3. Sipariş detayı ══════════════ -->
+        @if (step === 'detail' && order) {
+            <section class="ot-card ot-order-head">
+                <div class="ot-order-head-top">
+                    <div>
+                        <span class="ot-label">Sipariş No</span>
+                        <div class="ot-order-no">{{ order!.orderNo }}</div>
+                    </div>
+                    <span class="ot-pill ot-pill-success">{{ order!.statusName }}</span>
+                </div>
+                <div class="ot-stats">
+                    <div class="ot-stat">
+                        <span class="ot-label">Müşteri</span>
+                        <span class="ot-value">{{ order!.maskedCustomerName }}</span>
+                    </div>
+                    <div class="ot-stat">
+                        <span class="ot-label">Sipariş Tarihi</span>
+                        <span class="ot-value">{{ order!.orderDate | date:'dd.MM.yyyy HH:mm' }}</span>
+                    </div>
+                    <div class="ot-stat">
+                        <span class="ot-label">Toplam Tutar</span>
+                        <span class="ot-value ot-value-strong">{{ order!.totalAmount | number:'1.2-2' }} {{ order!.currencyCode }}</span>
+                    </div>
+                    @if (order!.shipment) {
+                        <div class="ot-stat">
+                            <span class="ot-label">Kargo</span>
+                            <span class="ot-value">{{ order!.shipment!.cargoCompanyName }}</span>
+                            @if (order!.shipment!.trackingNumber) {
+                                <span class="ot-hint">Takip No: {{ order!.shipment!.trackingNumber }}</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <section class="ot-card">
+                <div class="ot-card-head">
+                    <i class="fa-solid fa-route"></i>
+                    <h2>Sipariş Tarihçesi</h2>
+                </div>
+                <div class="ot-card-body">
+                    <ul class="ot-timeline">
+                        @for (history of order!.history; track $index) {
+                            <li [class.done]="history.isCompleted">
+                                <div>
+                                    <div class="ot-timeline-title">{{ history.title }}</div>
+                                    @if (history.date) {
+                                        <div class="ot-timeline-meta">{{ history.date | date:'dd.MM.yyyy HH:mm' }}</div>
+                                    }
+                                    @if (history.description) {
+                                        <div class="ot-timeline-meta">{{ history.description }}</div>
+                                    }
+                                </div>
+                                @if (history.logoUrl) {
+                                    <img [src]="history.logoUrl" [alt]="history.title" class="ot-timeline-logo"/>
+                                }
+                            </li>
+                        } @empty {
+                            <li class="done">
+                                <div class="ot-timeline-title">Henüz hareket bulunmuyor</div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </section>
+
+            <section class="ot-card">
+                <div class="ot-card-head">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <h2>Ürünler</h2>
+                    <span class="ot-count">{{ order!.products.length }}</span>
+                </div>
+                <div class="ot-card-body ot-card-body-flush">
+                    @for (product of order!.products; track product.id) {
+                        <div class="ot-product">
+                            <div class="ot-thumb">
+                                @if (product.imageUrl) {
+                                    <img [src]="product.imageUrl" [alt]="product.name"/>
+                                } @else {
+                                    <i class="fa-regular fa-image"></i>
+                                }
+                            </div>
+                            <div class="ot-product-info">
+                                <div class="ot-product-name">{{ product.name }}</div>
+                                @if (product.variantText) {
+                                    <span class="ot-tag">{{ product.variantText }}</span>
+                                }
+                                <div class="ot-hint">{{ product.quantity }} adet × {{ product.unitPrice | number:'1.2-2' }} {{ product.currencyCode }}</div>
+                            </div>
+                            <div class="ot-product-total">{{ product.totalPrice | number:'1.2-2' }} {{ product.currencyCode }}</div>
+                        </div>
+                    }
+                </div>
+            </section>
+
+            @if (returnError) {
+                <div class="ot-alert ot-alert-danger">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>{{ returnError }}</span>
+                </div>
+            }
+
+            <div class="ot-actionbar">
+                <button type="button" class="ot-btn ot-btn-ghost" (click)="backToSearch()">
+                    <i class="fa-solid fa-arrow-left"></i> Yeni Sorgu
+                </button>
+                @if (order!.canCreateReturn) {
+                    <button type="button" class="ot-btn ot-btn-rose ot-btn-grow" (click)="openReturnFlow()" [disabled]="loadingOptions">
+                        @if (loadingOptions) {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        <i class="fa-solid fa-rotate-left"></i> İade İşlemleri
+                    </button>
+                } @else {
+                    <span class="ot-note ot-btn-grow">
+                        <i class="fa-solid fa-circle-info"></i>
+                        {{ order!.returnDisabledReason || 'Bu sipariş için iade talebi oluşturulamaz.' }}
+                    </span>
+                }
+            </div>
+        }
+
+        <!-- ══════════════ 4. İade talebi ══════════════ -->
+        @if (step === 'return' && order) {
+            <section class="ot-card ot-return-head">
+                <div>
+                    <span class="ot-label">İade İşlemleri</span>
+                    <div class="ot-order-no">{{ order!.orderNo }}</div>
+                </div>
+                <span class="ot-result-customer">{{ order!.maskedCustomerName }}</span>
+            </section>
+
+            <!-- 1. Adım: ürün seçimi -->
+            <section class="ot-card ot-step-card" [class.collapsed]="returnStep !== 1" [class.completed]="returnStep > 1 && isStep1Valid">
+                <button type="button" class="ot-step-head" (click)="goToReturnStep(1)">
+                    <span class="ot-step-badge">
+                        @if (returnStep > 1 && isStep1Valid) {
+                            <i class="fa-solid fa-check"></i>
+                        } @else { 1 }
+                    </span>
+                    <span class="ot-step-text">
+                        <strong>Ürün Seçimi</strong>
+                        <small>Geri gönderilecek ürünleri ve iade nedenini seçin</small>
+                    </span>
+                    @if (returnStep > 1 && selectedProductCount > 0) {
+                        <span class="ot-pill ot-pill-soft">{{ selectedTotalQuantity }} adet</span>
+                    }
+                </button>
+
+                @if (returnStep === 1) {
+                    <div class="ot-card-body">
+                        <p class="ot-hint ot-hint-block">
+                            Seçtiğinizden fazla, eksik ya da farklı ürün göndermeniz durumunda geri gönderim kabul
+                            edilmez ve ürünler karşı ödemeli olarak tarafınıza iade edilir.
+                        </p>
+
+                        @for (product of order!.products; track product.id) {
+                            <div class="ot-return-product" [class.picked]="quantityOf(product) > 0">
+                                <div class="ot-thumb">
+                                    @if (product.imageUrl) {
+                                        <img [src]="product.imageUrl" [alt]="product.name"/>
+                                    } @else {
+                                        <i class="fa-regular fa-image"></i>
+                                    }
+                                </div>
+                                <div class="ot-product-info">
+                                    <div class="ot-product-name">{{ product.name }}</div>
+                                    @if (product.variantText) {
+                                        <span class="ot-tag">{{ product.variantText }}</span>
+                                    }
+                                    <div class="ot-hint">Birim fiyat {{ product.unitPrice | number:'1.2-2' }} {{ product.currencyCode }}</div>
+
+                                    @if (product.isReturnable) {
+                                        <select class="ot-select" [ngModel]="quantityOf(product)"
+                                                (ngModelChange)="onQuantityChange(product, $event)">
+                                            @for (count of quantityOptions(product); track count) {
+                                                @if (count === 0) {
+                                                    <option [ngValue]="0">İade etmiyorum</option>
+                                                } @else {
+                                                    <option [ngValue]="count">{{ count }} adet iade edeceğim</option>
+                                                }
+                                            }
+                                        </select>
+                                        @if (quantityOf(product) > 0) {
+                                            <select class="ot-select" [class.invalid]="!reasonOf(product)"
+                                                    [ngModel]="reasonOf(product)"
+                                                    (ngModelChange)="onReasonChange(product, $event)">
+                                                <option value="">Neden iade ediyorsunuz?</option>
+                                                @for (reason of options?.reasons; track reason.id) {
+                                                    <option [value]="reason.id">{{ reason.name }}</option>
+                                                }
+                                            </select>
+                                        }
+                                    } @else {
+                                        <span class="ot-pill ot-pill-danger">Bu ürün iade edilemez</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        @if (selectedProductCount > 0) {
+                            <div class="ot-summary-bar">
+                                <span><strong>{{ selectedProductCount }}</strong> ürün · <strong>{{ selectedTotalQuantity }}</strong> adet</span>
+                                <span>Tahmini tutar <strong>{{ selectedTotalAmount | number:'1.2-2' }} {{ order!.currencyCode }}</strong></span>
+                            </div>
+                        }
+                    </div>
+                }
+            </section>
+
+            <!-- 2. Adım: talep tipi -->
+            @if (canEnterStep(2) || returnStep >= 2) {
+                <section class="ot-card ot-step-card" [class.collapsed]="returnStep !== 2" [class.completed]="returnStep > 2 && isStep2Valid">
+                    <button type="button" class="ot-step-head" (click)="goToReturnStep(2)">
+                        <span class="ot-step-badge">
+                            @if (returnStep > 2 && isStep2Valid) {
+                                <i class="fa-solid fa-check"></i>
+                            } @else { 2 }
+                        </span>
+                        <span class="ot-step-text">
+                            <strong>Talep Tipi</strong>
+                            <small>Paket elimize ulaştığında yapmamızı istediğiniz işlem</small>
+                        </span>
+                    </button>
+
+                    @if (returnStep === 2) {
+                        <div class="ot-card-body">
+                            <p class="ot-hint ot-hint-block">
+                                Talebiniz onaylanırken tahmini tutardan düşülebilecek bedeller (kargo ücreti,
+                                kapıda ödeme ücreti, hediye paketi bedeli gibi) olabileceğini unutmayın.
+                            </p>
+
+                            <div class="ot-options">
+                                @for (resolution of options?.resolutions; track resolution.id) {
+                                    <label class="ot-option" [class.selected]="selectedResolutionId === resolution.id">
+                                        <input type="radio" [checked]="selectedResolutionId === resolution.id"
+                                               (change)="selectedResolutionId = resolution.id"/>
+                                        <span class="ot-option-mark"></span>
+                                        <span>
+                                            <strong>{{ resolution.name }}</strong>
+                                            @if (resolution.description) {
+                                                <small>{{ resolution.description }}</small>
+                                            }
+                                        </span>
+                                    </label>
+                                }
+                            </div>
+
+                            <label class="ot-field-label">Eklemek istediğiniz not <span>(opsiyonel)</span></label>
+                            <textarea class="ot-textarea" rows="2" maxlength="500" [(ngModel)]="returnNote"
+                                      placeholder="İade ile ilgili bize iletmek istedikleriniz"></textarea>
+                        </div>
+                    }
+                </section>
+            }
+
+            <!-- 3. Adım: kargo şirketi -->
+            @if (canEnterStep(3) || returnStep >= 3) {
+                <section class="ot-card ot-step-card" [class.collapsed]="returnStep !== 3">
+                    <button type="button" class="ot-step-head" (click)="goToReturnStep(3)">
+                        <span class="ot-step-badge">3</span>
+                        <span class="ot-step-text">
+                            <strong>Kargo Şirketi</strong>
+                            <small>İade paketini göndereceğiniz kargo şirketini seçin</small>
+                        </span>
+                    </button>
+
+                    @if (returnStep === 3) {
+                        <div class="ot-card-body">
+                            <div class="ot-options">
+                                @for (company of options?.cargoCompanies; track company.id) {
+                                    <label class="ot-option" [class.selected]="selectedCargoCompanyId === company.id">
+                                        <input type="radio" [checked]="selectedCargoCompanyId === company.id"
+                                               (change)="selectCargoCompany(company)"/>
+                                        <span class="ot-option-mark"></span>
+                                        @if (company.logoUrl) {
+                                            <img [src]="company.logoUrl" [alt]="company.name" class="ot-cargo-logo"/>
+                                        } @else {
+                                            <strong>{{ company.name }}</strong>
+                                        }
+                                    </label>
+                                }
+                            </div>
+
+                            <div class="ot-review">
+                                <div><span class="ot-label">Ürün</span><span>{{ selectedTotalQuantity }} adet</span></div>
+                                <div><span class="ot-label">Talep</span><span>{{ resolutionName }}</span></div>
+                                <div><span class="ot-label">Kargo</span><span>{{ selectedCargoCompany?.name || '—' }}</span></div>
+                                <div><span class="ot-label">Tahmini Tutar</span><span>{{ selectedTotalAmount | number:'1.2-2' }} {{ order!.currencyCode }}</span></div>
+                            </div>
+                        </div>
+                    }
+                </section>
+            }
+
+            @if (returnError) {
+                <div class="ot-alert ot-alert-danger">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>{{ returnError }}</span>
+                </div>
+            }
+
+            <div class="ot-actionbar">
+                <button type="button" class="ot-btn ot-btn-ghost" (click)="previousReturnStep()">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    {{ returnStep === 1 ? 'Sipariş Detayı' : 'Geri' }}
+                </button>
+                @if (returnStep < 3) {
+                    <button type="button" class="ot-btn ot-btn-primary ot-btn-grow" (click)="nextReturnStep()">
+                        Devam Et <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                } @else {
+                    <button type="button" class="ot-btn ot-btn-success ot-btn-grow" (click)="submitReturn()"
+                            [disabled]="!isStep3Valid || submittingReturn">
+                        @if (submittingReturn) {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        <i class="fa-solid fa-check"></i> İade Talebini Oluştur
+                    </button>
+                }
+            </div>
+        }
+
+    </div>
+</div>
+
+<!-- ── Uyarı modalı ── -->
+@if (showDisclaimerModal) {
+    <div class="ot-overlay">
+        <div class="ot-dialog">
+            <div class="ot-dialog-head">
+                <span class="ot-dialog-icon ot-dialog-icon-warn"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                <h2>Talep Oluşturmadan Önce</h2>
+                <p>Lütfen aşağıdaki maddeleri okuyun.</p>
+            </div>
+            <div class="ot-dialog-body">
+                <ul class="ot-disclaimers">
+                    @for (text of options?.disclaimers; track $index) {
+                        <li>{{ text }}</li>
+                    }
+                </ul>
+            </div>
+            <div class="ot-dialog-foot">
+                <button type="button" class="ot-btn ot-btn-ghost" (click)="backToDetail()">Vazgeç</button>
+                <button type="button" class="ot-btn ot-btn-success ot-btn-grow" (click)="acceptDisclaimers()">Okudum, Anladım</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ── Sonuç modalı ── -->
+@if (showResultModal && returnResult) {
+    <div class="ot-overlay">
+        <div class="ot-dialog">
+            <div class="ot-dialog-head">
+                <span class="ot-dialog-icon ot-dialog-icon-success"><i class="fa-solid fa-check"></i></span>
+                <h2>İade Kodunuz Hazır</h2>
+                <p>
+                    Seçtiğiniz ürünleri tek pakete koyup <strong>{{ returnResult!.cargoCompanyName }}</strong> şubesine
+                    gidin; cari bilgimizi ve aşağıdaki kodu şube yetkilisine gösterin.
+                </p>
+            </div>
+
+            <div class="ot-dialog-body">
+                <div class="ot-code-card">
+                    <span class="ot-label">İade Kargo Kodunuz</span>
+                    <div class="ot-code-value">{{ returnResult!.returnCode }}</div>
+                    <button type="button" class="ot-btn ot-btn-ghost ot-btn-sm" (click)="copyReturnCode()">
+                        <i class="fa-regular fa-copy"></i> Kodu Kopyala
+                    </button>
+                </div>
+
+                <div class="ot-cari">
+                    <span class="ot-label">Kargo Cari Bilgimiz</span>
+                    <div>{{ returnResult!.cargoCustomerNo }} — {{ returnResult!.cargoAccountTitle }}</div>
+                </div>
+
+                <div class="ot-alert ot-alert-warn">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>Şube çalışanına sormasa bile iade kodunuz olduğunu belirtin, işlemi bu kodla yaptırın.</span>
+                </div>
+
+                <p class="ot-hint">
+                    Kod <strong>{{ returnResult!.validUntil | date:'dd.MM.yyyy' }}</strong> tarihinde kargo şirketinin
+                    son alım saatine kadar geçerlidir. Süre dolduğunda iade süre sınırı içinde yeniden kod alabilirsiniz.
+                </p>
+            </div>
+
+            <div class="ot-dialog-foot">
+                <button type="button" class="ot-btn ot-btn-primary ot-btn-grow" (click)="closeResultModal()">
+                    Sipariş Detayına Dön
+                </button>
+            </div>
+        </div>
+    </div>
+}

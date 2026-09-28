@@ -33,6 +33,20 @@ export const routes: Routes = [
             import('./views/admin/nebim-ai-chat/nebim-ai-chat/nebim-ai-chat').then(m => m.NebimAiChatPage),
         data: {title: 'Nebim AI Chat'}
     },
+    /**
+     * Sipariş Detay & İade İşlemleri paneli — public, guard ve layout yok.
+     * Parametreler verilmezse sayfa test verileriyle çalışır.
+     */
+    {
+        path: 'order-tracking/:companyId/:extensionId/:orderNo',
+        loadComponent: () => import('./views/order-tracking/order-tracking').then(m => m.OrderTrackingPage),
+        data: {title: 'Sipariş Detayı'}
+    },
+    {
+        path: 'order-tracking',
+        loadComponent: () => import('./views/order-tracking/order-tracking').then(m => m.OrderTrackingPage),
+        data: {title: 'Sipariş Detayı'}
+    },
     {
         path: '',
         component: MainLayout,

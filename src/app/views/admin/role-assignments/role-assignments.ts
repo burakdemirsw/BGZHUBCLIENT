@@ -45,18 +45,23 @@ export class RoleAssignmentsPage implements OnInit {
     async loadData(): Promise<void> {
         this.loading = true;
         try {
-            const usersResp = await this.usersService.getAll();
-            this.users = this.extractArray(usersResp);
+            // Istekler birbirinden bagimsiz: biri hata verse de kullanici listesi basilsin
+            const [usersResp, rolesResp, ruResp] = await Promise.allSettled([
+                this.usersService.getAll({ pageSize: 1000 }),
+                this.rolesService.getAll(),
+                this.rolesService.getRoleUsers(),
+            ]);
 
-            const rolesResp = await this.rolesService.getAll();
-            this.roles = this.extractArray(rolesResp);
+            if (usersResp.status === 'fulfilled') this.users = this.extractArray(usersResp.value);
+            else console.error('Kullanicilar yuklenemedi:', usersResp.reason);
 
-            const ruResp = await this.rolesService.getRoleUsers();
-            this.roleUsers = this.extractArray(ruResp);
+            if (rolesResp.status === 'fulfilled') this.roles = this.extractArray(rolesResp.value);
+            else console.error('Roller yuklenemedi:', rolesResp.reason);
+
+            if (ruResp.status === 'fulfilled') this.roleUsers = this.extractArray(ruResp.value);
+            else console.error('Rol atamalari yuklenemedi:', ruResp.reason);
 
             this.applyFilterAndPaging();
-        } catch (err) {
-            console.error('LoadData error:', err);
         } finally {
             this.loading = false;
         }

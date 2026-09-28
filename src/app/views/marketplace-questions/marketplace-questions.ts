@@ -4,29 +4,30 @@ import { FormsModule } from '@angular/forms';
 import {
     AnswerTone,
     CannedAnswer,
-    MarketplaceQuestion,
-    PlatformSlaRow,
-    QuestionPlatform,
-    QuestionProduct,
-    QuestionStatus,
-    QuestionTab,
+    MarketplaceQuestionDetailResponse,
+    MarketplaceQuestionListItemResponse,
+    MarketplaceQuestionPlatformResponse,
+    MarketplaceQuestionProviderResponse,
+    MarketplaceQuestionStatusResponse,
+    MarketplaceQuestionSyncResult,
 } from '@/app/core/models/marketplace-questions/marketplace-questions.models';
-import {
-    MOCK_CANNED_ANSWERS,
-    MOCK_PLATFORMS,
-    MOCK_PRODUCTS,
-    buildMockQuestions,
-} from './marketplace-questions.mock';
+import { MarketplaceQuestionsService } from '@/app/core/services/marketplace-questions.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
 
 const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;
 /** Kalan süre bunun altına düşünce geri sayım turuncuya döner */
 const URGENT_HOURS = 6;
+const SEARCH_DEBOUNCE_MS = 350;
+/** Pazaryerinden tarih aralığıyla çekmede izin verilen en uzun aralık (gün, başlangıç dahil) */
+const SYNC_MAX_DAYS = 7;
+
+type QuestionTab = 'all' | 'open' | 'closed';
+type QuestionRow = MarketplaceQuestionListItemResponse | MarketplaceQuestionDetailResponse;
 
 /**
  * Soru & Cevap Merkezi — tüm pazaryeri müşteri sorularını tek ekrandan yönetir.
- * Sol: platformlar, orta: soru listesi, sağ: soru detayı ve cevap yazma alanı.
- * Şimdilik test verileriyle çalışır (bkz. marketplace-questions.mock.ts).
+ * Sol: platformlar, orta: soru listesi (sunucu tarafı sayfalama), sağ: soru detayı ve cevap yazma alanı.
  */
 @Component({
     selector: 'app-marketplace-questions',
@@ -35,14 +36,15 @@ const URGENT_HOURS = 6;
     styleUrls: ['./marketplace-questions.scss'],
 })
 export class MarketplaceQuestionsPage implements OnInit, OnDestroy {
-    readonly platforms: QuestionPlatform[] = MOCK_PLATFORMS;
-    readonly cannedAnswers: CannedAnswer[] = MOCK_CANNED_ANSWERS;
-    readonly scoreOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    readonly cannedAnswers: CannedAnswer[] = [
+        { id: 'c1', text: 'Merhaba, ürünümüz standart kalıptadır. Boy ve kilonuzu paylaşırsanız size en uygun bedeni önerebiliriz.' },
+        { id: 'c2', text: 'Merhaba, saat 14:00\'e kadar verilen siparişler aynı gün kargoya teslim edilmektedir. İyi alışverişler dileriz.' },
+        { id: 'c3', text: 'Merhaba, ürün içeriği ve bakım talimatları ürün açıklamasında yer almaktadır. Başka sorunuz olursa memnuniyetle yardımcı oluruz.' },
+    ];
     readonly tabs: { key: QuestionTab; label: string }[] = [
         { key: 'all', label: 'Tümü' },
-        { key: 'waiting', label: 'Bekleyen' },
-        { key: 'answered', label: 'Yanıtlandı' },
-        { key: 'expired', label: 'Süresi Dolan' },
+        { key: 'open', label: 'Açık' },
+        { key: 'closed', label: 'Kapalı' },
     ];
     readonly tones: { key: AnswerTone; label: string }[] = [
         { key: 'friendly', label: 'Samimi' },
@@ -50,58 +52,223 @@ export class MarketplaceQuestionsPage implements OnInit, OnDestroy {
         { key: 'short', label: 'Kısa' },
     ];
 
-    items: MarketplaceQuestion[] = [];
+    // ── Sol panel ──
+    platforms: MarketplaceQuestionPlatformResponse[] = [];
+    platformsOpenCount = 0;
+    platformsTotalCount = 0;
+    platformsLoading = false;
+    selectedPlatform: string | null = null;
 
-    // ── Liste filtre + sayfalama ──
+    // ── Liste filtre + sayfalama (sunucu tarafı) ──
     filterText = '';
-    filteredItems: MarketplaceQuestion[] = [];
-    pagedItems: MarketplaceQuestion[] = [];
+    filteredItems: MarketplaceQuestionListItemResponse[] = [];
+    pagedItems: MarketplaceQuestionListItemResponse[] = [];
+    totalCount = 0;
     currentPage = 1;
     pageSize = 10;
     totalPages = 1;
     totalPagesArray: number[] = [];
+    listLoading = false;
 
-    selectedPlatform: string | null = null;
     activeTab: QuestionTab = 'all';
     showFilters = false;
-    customerFilter = '';
-    unreadOnly = false;
-    unmatchedOnly = false;
+    statuses: MarketplaceQuestionStatusResponse[] = [];
+    statusFilter = '';
+    startDate = '';
+    endDate = '';
 
     // ── Detay / cevap ──
-    selected: MarketplaceQuestion | null = null;
+    selected: MarketplaceQuestionDetailResponse | null = null;
+    selectedId: string | null = null;
+    detailLoading = false;
     draft = '';
     tone: AnswerTone = 'friendly';
     aiLoading = false;
     aiCredit = 25;
-    sending = false;
 
-    // ── SLA raporu ──
-    showReport = false;
-    slaRows: PlatformSlaRow[] = [];
-    reportTotal = 0;
-    reportWaiting = 0;
-    reportAvgMinutes = 0;
-    reportCompliance = 0;
-    reportExpired = 0;
-
-    // ── Ürün eşleştirme modalı ──
-    showMatchModal = false;
-    matchSearch = '';
-    matchResults: QuestionProduct[] = [];
+    // ── Pazaryerinden çekme (sync) ──
+    showSyncModal = false;
+    providers: MarketplaceQuestionProviderResponse[] = [];
+    providersLoading = false;
+    /** Çekme süren sağlayıcı kodları; tümü çekilirken '*' */
+    syncingCodes = new Set<string>();
+    syncStartDate = '';
+    syncEndDate = '';
+    /** Sağlayıcı koduna göre son çekme sonucu */
+    syncResults: Record<string, MarketplaceQuestionSyncResult> = {};
+    readonly syncMaxDays = SYNC_MAX_DAYS;
 
     now = Date.now();
     private timer?: ReturnType<typeof setInterval>;
+    private searchTimer?: ReturnType<typeof setTimeout>;
+    /** Geç dönen eski isteklerin sonucu ezmemesi için */
+    private listRequestSeq = 0;
+
+    constructor(
+        private questionsService: MarketplaceQuestionsService,
+        private authStateService: AuthStateService,
+    ) {}
+
+    private get companyId(): string {
+        return this.authStateService.profile?.companyId ?? '';
+    }
 
     ngOnInit(): void {
-        this.items = buildMockQuestions(this.now);
+        this.loadPlatforms();
+        this.loadStatuses();
         this.applyFilterAndPaging();
-        this.buildReport();
         this.timer = setInterval(() => (this.now = Date.now()), 30 * 1000);
     }
 
     ngOnDestroy(): void {
         if (this.timer) clearInterval(this.timer);
+        if (this.searchTimer) clearTimeout(this.searchTimer);
+    }
+
+    refresh(): void {
+        this.loadPlatforms();
+        this.applyFilterAndPaging();
+        if (this.selectedId) this.loadDetail(this.selectedId);
+    }
+
+    // ────────────── Pazaryerinden çekme ──────────────
+
+    get syncing(): boolean {
+        return this.syncingCodes.size > 0;
+    }
+
+    get syncableProviders(): MarketplaceQuestionProviderResponse[] {
+        return this.providers.filter(p => this.canSyncProvider(p));
+    }
+
+    openSyncModal(): void {
+        this.syncStartDate = '';
+        this.syncEndDate = '';
+        this.syncResults = {};
+        this.showSyncModal = true;
+        this.loadProviders();
+    }
+
+    closeSyncModal(): void {
+        if (!this.syncing) this.showSyncModal = false;
+    }
+
+    private async loadProviders(): Promise<void> {
+        this.providersLoading = true;
+        try {
+            const res = await this.questionsService.getProviders(this.companyId || undefined);
+            this.providers = this.extractArray<MarketplaceQuestionProviderResponse>(res.data);
+        } catch (err) {
+            console.error('Sağlayıcılar yüklenemedi', err);
+            this.providers = [];
+        } finally {
+            this.providersLoading = false;
+        }
+    }
+
+    /** Şirkette extension kaydı olmayan veya pasif sağlayıcıdan çekilemez */
+    canSyncProvider(p: MarketplaceQuestionProviderResponse): boolean {
+        return !!p.companyExtensionId && p.isCompanyEnabled;
+    }
+
+    isProviderSyncing(providerCode: string): boolean {
+        return this.syncingCodes.has(providerCode) || this.syncingCodes.has('*');
+    }
+
+    /**
+     * providerCode verilirse yalnız o sağlayıcı, verilmezse şirketin tüm aktif sağlayıcıları çekilir.
+     * Tarih boşsa kaldığı yerden devam eder; doluysa o aralık taranır (kaldığı yer değişmez).
+     */
+    async runSync(providerCode: string | null = null): Promise<void> {
+        const key = providerCode ?? '*';
+        if (!this.companyId || this.syncingCodes.has(key) || this.syncingCodes.has('*')) return;
+        if (!providerCode && this.syncing) return;
+        if (!!this.syncStartDate !== !!this.syncEndDate) {
+            alert('Tarih aralığı için başlangıç ve bitiş tarihini birlikte seçin.');
+            return;
+        }
+        if (this.syncStartDate && this.syncStartDate > this.syncEndDate) {
+            alert('Başlangıç tarihi bitiş tarihinden sonra olamaz.');
+            return;
+        }
+        if (this.syncStartDate && this.syncEndDate > this.syncMaxEndDate) {
+            alert(`Tarih aralığı en fazla ${SYNC_MAX_DAYS} gün olabilir.`);
+            return;
+        }
+
+        this.syncingCodes.add(key);
+        try {
+            const res = await this.questionsService.sync({
+                companyId: this.companyId,
+                providerCode,
+                startDate: this.syncStartDate ? new Date(`${this.syncStartDate}T00:00:00`).toISOString() : null,
+                endDate: this.syncEndDate ? new Date(`${this.syncEndDate}T23:59:59`).toISOString() : null,
+            });
+            const results = this.extractArray<MarketplaceQuestionSyncResult>(res.data);
+            const next = { ...this.syncResults };
+            for (const r of results) next[r.providerCode] = r;
+            this.syncResults = next;
+            this.refresh();
+        } catch (err) {
+            console.error('Sorular pazaryerinden çekilemedi', err);
+            alert(`${providerCode ? this.syncProviderName(providerCode) + ' için s' : 'S'}orular pazaryerinden çekilemedi.`);
+        } finally {
+            this.syncingCodes.delete(key);
+        }
+    }
+
+    /** Bitiş için seçilebilecek son gün: başlangıç dahil SYNC_MAX_DAYS gün (yyyy-MM-dd) */
+    get syncMaxEndDate(): string {
+        if (!this.syncStartDate) return '';
+        const d = new Date(`${this.syncStartDate}T00:00:00`);
+        d.setDate(d.getDate() + SYNC_MAX_DAYS - 1);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    /** Başlangıç değişince bitiş aralık dışında kalırsa sınıra çekilir */
+    onSyncStartChange(): void {
+        if (!this.syncStartDate) return;
+        const max = this.syncMaxEndDate;
+        if (!this.syncEndDate || this.syncEndDate < this.syncStartDate || this.syncEndDate > max) this.syncEndDate = max;
+    }
+
+    syncProviderName(providerCode: string): string {
+        return this.providers.find(p => p.providerCode === providerCode)?.providerName
+            ?? this.platforms.find(p => p.providerCode === providerCode)?.providerName
+            ?? providerCode;
+    }
+
+    // ────────────── Sol panel ──────────────
+
+    async loadPlatforms(): Promise<void> {
+        if (!this.companyId) return;
+        this.platformsLoading = true;
+        try {
+            const res = await this.questionsService.getPlatforms(this.companyId);
+            const data = res.data;
+            this.platforms = data?.platforms ?? [];
+            this.platformsOpenCount = data?.openCount ?? 0;
+            this.platformsTotalCount = data?.totalCount ?? 0;
+        } catch (err) {
+            console.error('Platformlar yüklenemedi', err);
+            this.platforms = [];
+        } finally {
+            this.platformsLoading = false;
+        }
+    }
+
+    private async loadStatuses(): Promise<void> {
+        try {
+            const res = await this.questionsService.getStatuses();
+            this.statuses = this.extractArray<MarketplaceQuestionStatusResponse>(res.data).sort((a, b) => a.sortOrder - b.sortOrder);
+        } catch (err) {
+            console.error('Soru durumları yüklenemedi', err);
+        }
+    }
+
+    selectPlatform(providerCode: string | null): void {
+        this.selectedPlatform = providerCode;
+        this.onFilterChange();
     }
 
     // ────────────── Liste ──────────────
@@ -111,9 +278,10 @@ export class MarketplaceQuestionsPage implements OnInit, OnDestroy {
         this.applyFilterAndPaging();
     }
 
-    selectPlatform(key: string | null): void {
-        this.selectedPlatform = key;
-        this.onFilterChange();
+    /** Arama kutusu her tuşta istek atmasın */
+    onSearchChange(): void {
+        if (this.searchTimer) clearTimeout(this.searchTimer);
+        this.searchTimer = setTimeout(() => this.onFilterChange(), SEARCH_DEBOUNCE_MS);
     }
 
     selectTab(tab: QuestionTab): void {
@@ -127,64 +295,91 @@ export class MarketplaceQuestionsPage implements OnInit, OnDestroy {
         this.applyFilterAndPaging();
     }
 
-    applyFilterAndPaging(): void {
-        const text = this.filterText.trim().toLocaleLowerCase('tr');
-        const customer = this.customerFilter.trim().toLocaleLowerCase('tr');
+    async applyFilterAndPaging(): Promise<void> {
+        if (!this.companyId) return;
+        const seq = ++this.listRequestSeq;
+        this.listLoading = true;
+        try {
+            const res = await this.questionsService.getPaged({
+                companyId: this.companyId,
+                pageNumber: this.currentPage,
+                pageSize: this.pageSize,
+                searchTerm: this.filterText.trim() || null,
+                providerCode: this.selectedPlatform,
+                statusCode: this.statusFilter || null,
+                isOpen: this.activeTab === 'all' ? null : this.activeTab === 'open',
+                startDate: this.startDate ? new Date(`${this.startDate}T00:00:00`).toISOString() : null,
+                endDate: this.endDate ? new Date(`${this.endDate}T23:59:59`).toISOString() : null,
+            });
+            if (seq !== this.listRequestSeq) return;
 
-        this.filteredItems = this.items
-            .filter(q => !this.selectedPlatform || q.platformKey === this.selectedPlatform)
-            .filter(q => this.activeTab === 'all' || q.status === this.activeTab)
-            .filter(q => !this.unreadOnly || !q.isRead)
-            .filter(q => !this.unmatchedOnly || !q.product)
-            .filter(q => !customer || q.customerName.toLocaleLowerCase('tr').includes(customer))
-            .filter(q => !text
-                || this.questionText(q).toLocaleLowerCase('tr').includes(text)
-                || q.platformProductName.toLocaleLowerCase('tr').includes(text))
-            .sort((a, b) => b.createdDate.localeCompare(a.createdDate));
-
-        this.totalPages = Math.max(1, Math.ceil(this.filteredItems.length / this.pageSize));
-        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
-        this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-
-        const start = (this.currentPage - 1) * this.pageSize;
-        this.pagedItems = this.filteredItems.slice(start, start + this.pageSize);
+            const paged = res.data;
+            this.filteredItems = this.extractArray<MarketplaceQuestionListItemResponse>(paged?.items ?? paged);
+            this.pagedItems = this.filteredItems;
+            this.totalCount = paged?.totalCount ?? this.filteredItems.length;
+            this.totalPages = Math.max(1, paged?.totalPages ?? Math.ceil(this.totalCount / this.pageSize));
+            this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        } catch (err) {
+            if (seq !== this.listRequestSeq) return;
+            console.error('Sorular yüklenemedi', err);
+            this.filteredItems = [];
+            this.pagedItems = [];
+            this.totalCount = 0;
+            this.totalPages = 1;
+            this.totalPagesArray = [1];
+        } finally {
+            if (seq === this.listRequestSeq) this.listLoading = false;
+        }
     }
 
-    waitingCount(platformKey: string | null): number {
-        return this.items.filter(q => q.status === 'waiting' && (!platformKey || q.platformKey === platformKey)).length;
-    }
-
-    platformOf(q: MarketplaceQuestion): QuestionPlatform | undefined {
-        return this.platforms.find(p => p.key === q.platformKey);
-    }
-
-    questionText(q: MarketplaceQuestion): string {
-        return q.messages[0]?.text ?? '';
+    clearFilters(): void {
+        this.statusFilter = '';
+        this.startDate = '';
+        this.endDate = '';
+        this.onFilterChange();
     }
 
     // ────────────── Detay ──────────────
 
-    openQuestion(q: MarketplaceQuestion): void {
-        this.selected = q;
-        q.isRead = true;
+    openQuestion(q: MarketplaceQuestionListItemResponse): void {
+        if (this.selectedId === q.id) return;
+        this.selectedId = q.id;
         this.draft = '';
+        this.loadDetail(q.id);
+    }
+
+    private async loadDetail(id: string): Promise<void> {
+        this.detailLoading = true;
+        try {
+            const res = await this.questionsService.getById(id);
+            if (this.selectedId !== id) return;
+            this.selected = res.data;
+        } catch (err) {
+            if (this.selectedId !== id) return;
+            console.error('Soru detayı yüklenemedi', err);
+            this.selected = null;
+            alert('Soru detayı yüklenemedi.');
+        } finally {
+            if (this.selectedId === id) this.detailLoading = false;
+        }
     }
 
     get canAnswer(): boolean {
-        return this.selected?.status === 'waiting' && this.remainingMs(this.selected) > 0;
+        const q = this.selected;
+        return !!q && q.isOpen && (!q.expireDate || this.remainingMs(q) > 0);
     }
 
-    remainingMs(q: MarketplaceQuestion): number {
-        return new Date(q.deadlineDate).getTime() - this.now;
+    remainingMs(q: QuestionRow): number {
+        return q.expireDate ? new Date(q.expireDate).getTime() - this.now : Number.POSITIVE_INFINITY;
     }
 
-    countdownClass(q: MarketplaceQuestion): string {
+    countdownClass(q: QuestionRow): string {
         const ms = this.remainingMs(q);
         if (ms <= 0) return 'over';
         return ms < URGENT_HOURS * HOUR ? 'urgent' : '';
     }
 
-    countdownText(q: MarketplaceQuestion): string {
+    countdownText(q: QuestionRow): string {
         const ms = this.remainingMs(q);
         if (ms <= 0) return 'Cevaplama süresi doldu, bu soru artık yanıtlanamaz.';
         const h = Math.floor(ms / HOUR);
@@ -192,13 +387,13 @@ export class MarketplaceQuestionsPage implements OnInit, OnDestroy {
         return `Cevaplamak için ${h} sa ${m} dk kaldı`;
     }
 
-    statusLabel(status: QuestionStatus): string {
-        switch (status) {
-            case 'waiting': return 'Bekliyor';
-            case 'answered': return 'Yanıtlandı';
-            case 'rejected': return 'Reddedildi';
-            default: return 'Süresi Doldu';
-        }
+    statusLabel(q: QuestionRow): string {
+        return q.statusName || (q.isOpen ? 'Açık' : 'Kapalı');
+    }
+
+    statusClass(q: QuestionRow): string {
+        if (q.isOpen) return this.remainingMs(q) <= 0 ? 'st-expired' : 'st-waiting';
+        return 'st-answered';
     }
 
     timeAgo(date: string): string {
@@ -215,7 +410,7 @@ export class MarketplaceQuestionsPage implements OnInit, OnDestroy {
         this.draft = c.text;
     }
 
-    /** Test ortamında AI cevabı taklit edilir; gerçek entegrasyonda API çağrılacak */
+    /** AI cevap ucu henüz yok; taslak istemci tarafında şablonla üretilir */
     generateAi(): void {
         if (!this.selected || this.aiLoading || this.aiCredit <= 0) return;
         const q = this.selected;
@@ -227,9 +422,9 @@ export class MarketplaceQuestionsPage implements OnInit, OnDestroy {
         }, 900);
     }
 
-    private buildAiAnswer(q: MarketplaceQuestion): string {
-        const text = this.questionText(q).toLocaleLowerCase('tr');
-        const product = q.product?.name ?? q.platformProductName;
+    private buildAiAnswer(q: MarketplaceQuestionDetailResponse): string {
+        const text = q.questionText.toLocaleLowerCase('tr');
+        const product = q.productName || 'Ürünümüz';
         let body: string;
         if (/beden|boy|kilo|kg|ölçü/.test(text)) {
             body = `${product} standart kalıptadır. Paylaştığınız ölçülere göre M beden önerilmektedir; daha rahat bir kullanım isterseniz bir üst bedeni tercih edebilirsiniz.`;
@@ -247,94 +442,12 @@ export class MarketplaceQuestionsPage implements OnInit, OnDestroy {
         }
     }
 
-    send(): void {
-        const q = this.selected;
-        const text = this.draft.trim();
-        if (!q || !text || this.sending || !this.canAnswer) return;
-        this.sending = true;
-        setTimeout(() => {
-            const nowIso = new Date().toISOString();
-            q.messages.push({ id: `${q.id}-${q.messages.length + 1}`, from: 'merchant', text, createdDate: nowIso });
-            q.status = 'answered';
-            q.answeredDate = nowIso;
-            this.draft = '';
-            this.sending = false;
-            this.applyFilterAndPaging();
-            this.buildReport();
-        }, 500);
-    }
-
-    setScore(score: number): void {
-        if (this.selected) this.selected.score = score;
-    }
-
-    // ────────────── Ürün eşleştirme ──────────────
-
-    openMatchModal(): void {
-        this.matchSearch = this.selected?.platformProductName ?? '';
-        this.searchProducts();
-        this.showMatchModal = true;
-    }
-
-    searchProducts(): void {
-        const words = this.matchSearch.toLocaleLowerCase('tr').split(/\s+/).filter(w => w.length > 2);
-        this.matchResults = !words.length
-            ? [...MOCK_PRODUCTS]
-            : MOCK_PRODUCTS.filter(p => {
-                const hay = `${p.name} ${p.sku} ${p.barcode}`.toLocaleLowerCase('tr');
-                return words.some(w => hay.includes(w));
-            });
-    }
-
-    matchProduct(p: QuestionProduct): void {
-        if (this.selected) this.selected.product = p;
-        this.showMatchModal = false;
-    }
-
-    // ────────────── SLA raporu ──────────────
-
-    toggleReport(): void {
-        this.showReport = !this.showReport;
-        if (this.showReport) this.buildReport();
-    }
-
-    private buildReport(): void {
-        const stats = (list: MarketplaceQuestion[]) => {
-            const answered = list.filter(q => q.answeredDate);
-            const minutes = answered.map(q => (new Date(q.answeredDate!).getTime() - new Date(q.createdDate).getTime()) / MINUTE);
-            const inSla = answered.filter(q => q.answeredDate! <= q.deadlineDate).length;
-            const closed = answered.length + list.filter(q => q.status === 'expired').length;
-            return {
-                total: list.length,
-                answered: answered.length,
-                expired: list.filter(q => q.status === 'expired').length,
-                avg: minutes.length ? Math.round(minutes.reduce((a, b) => a + b, 0) / minutes.length) : 0,
-                compliance: closed ? Math.round((inSla / closed) * 100) : 100,
-            };
-        };
-
-        const all = stats(this.items);
-        this.reportTotal = all.total;
-        this.reportAvgMinutes = all.avg;
-        this.reportCompliance = all.compliance;
-        this.reportExpired = all.expired;
-        this.reportWaiting = this.waitingCount(null);
-
-        this.slaRows = this.platforms
-            .map(platform => {
-                const s = stats(this.items.filter(q => q.platformKey === platform.key));
-                return { platform, total: s.total, answered: s.answered, expired: s.expired, avgResponseMinutes: s.avg, complianceRate: s.compliance };
-            })
-            .filter(r => r.total > 0);
-    }
-
-    formatMinutes(min: number): string {
-        if (min < 60) return `${min} dk`;
-        return `${Math.floor(min / 60)} sa ${min % 60} dk`;
-    }
-
-    complianceClass(rate: number): string {
-        if (rate >= 90) return 'good';
-        return rate >= 70 ? 'warn' : 'bad';
+    private extractArray<T>(response: any): T[] {
+        if (Array.isArray(response)) return response;
+        if (response?.$values) return response.$values;
+        if (response?.data) return Array.isArray(response.data) ? response.data : [response.data];
+        if (response?.items) return response.items;
+        if (response?.result) return Array.isArray(response.result) ? response.result : [response.result];
+        return [];
     }
 }

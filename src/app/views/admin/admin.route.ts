@@ -61,6 +61,7 @@ import { TeamsPage } from './teams/teams';
 import { ExtensionDefinitionsPage } from './extension-definitions/extension-definitions';
 import { ExtensionSettingDefinitionsPage } from './extension-setting-definitions/extension-setting-definitions';
 import { ExtensionSettingCategoriesPage } from './extension-setting-categories/extension-setting-categories';
+import { ExtensionCategoriesPage } from './extension-categories/extension-categories';
 import { CompanySettingCategoriesPage } from './company-setting-categories/company-setting-categories';
 import { CompanySettingDefinitionsPage } from './company-setting-definitions/company-setting-definitions';
 import { UserTypesPage } from './user-types/user-types';
@@ -219,6 +220,12 @@ export const ADMIN_ROUTES: Routes = [
         path: 'admin/extension-setting-categories',
         component: ExtensionSettingCategoriesPage,
         data: { title: 'Extension Ayar Kategorileri' },
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'admin/extension-categories',
+        component: ExtensionCategoriesPage,
+        data: { title: 'Extension Kategorileri' },
         canActivate: [AuthGuard],
     },
     {

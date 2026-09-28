@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { ApiResponse } from '../models/api-response.model';
-import { CreateRoleRequest, UpdateRoleRequest } from '../models/role/role.models';
+import { CreateRoleRequest, UpdateRoleRequest, Role } from '../models/role/role.models';
 import { RoleUser, RoleUserResponse, CreateRoleUserRequest, CreateBulkRoleUserRequest } from '../models/role/role.models';
 
 @Injectable({
@@ -11,8 +11,8 @@ export class RolesService {
   constructor(private http: HttpClientService) {}
 
   // Roles
-  getAll(): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'Roles' });
+  getAll(): Promise<ApiResponse<Role[]>> {
+    return this.http.get<Role[]>({ controller: 'Roles' });
   }
 
   getById(id: string): Promise<ApiResponse<any>> {
@@ -32,8 +32,8 @@ export class RolesService {
   }
 
   // Role-Users
-  getRoleUsers(): Promise<ApiResponse<any[]>> {
-    return this.http.get<any[]>({ controller: 'RoleUsers' });
+  getRoleUsers(): Promise<ApiResponse<RoleUserResponse[]>> {
+    return this.http.get<RoleUserResponse[]>({ controller: 'RoleUsers' });
   }
 
   getUsersByRole(roleId: string): Promise<ApiResponse<any[]>> {
@@ -44,8 +44,8 @@ export class RolesService {
     return this.http.get<RoleUserResponse[]>({ controller: 'RoleUsers', action: 'by-user' }, userId);
   }
 
-  assignRole(request: CreateRoleUserRequest): Promise<ApiResponse<any>> {
-    return this.http.post<any>({ controller: 'RoleUsers' }, request);
+  assignRole(request: CreateRoleUserRequest): Promise<ApiResponse<RoleUserResponse>> {
+    return this.http.post<RoleUserResponse>({ controller: 'RoleUsers' }, request);
   }
 
   bulkAssignRoles(request: CreateBulkRoleUserRequest): Promise<ApiResponse<any>> {

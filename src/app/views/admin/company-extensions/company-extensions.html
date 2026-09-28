@@ -64,7 +64,20 @@
                                         <td>
                                             <span class="badge bg-primary-subtle text-primary">{{ (currentPage - 1) * pageSize + idx + 1 }}</span>
                                         </td>
-                                        <td><strong>{{ getExtensionName(item.extensionId) }}</strong></td>
+                                        <td>
+                                            <strong>{{ getExtensionName(item.extensionId) }}</strong>
+                                            <button
+                                                type="button"
+                                                class="btn btn-link btn-sm p-0 ms-2 align-baseline copy-id-btn"
+                                                title="Extension ID'sini kopyala"
+                                                (click)="copyId(item.extensionId, 'ext-' + item.id)">
+                                                @if (isCopied('ext-' + item.id)) {
+                                                    <i class="fa-solid fa-check text-success"></i>
+                                                } @else {
+                                                    <i class="fa-regular fa-copy"></i>
+                                                }
+                                            </button>
+                                        </td>
                                         <td>
                                             @if (getExtensionPhotoUrl(item)) {
                                                 <img [src]="getExtensionPhotoUrl(item)" alt="{{ getExtensionName(item.extensionId) }}" class="extension-thumb" />
@@ -81,7 +94,17 @@
                                             }
                                         </td>
                                         <td class="small text-muted">{{ item.createdDate | date:'dd.MM.yyyy HH:mm' }}</td>
-                                        <td class="text-end">
+                                        <td class="text-end text-nowrap">
+                                            <button
+                                                class="btn btn-soft-secondary btn-sm me-1"
+                                                title="Kayit ID'sini kopyala"
+                                                (click)="copyId(item.id, 'row-' + item.id)">
+                                                @if (isCopied('row-' + item.id)) {
+                                                    <i class="fa-solid fa-check"></i>
+                                                } @else {
+                                                    <i class="fa-regular fa-copy"></i>
+                                                }
+                                            </button>
                                             <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(item)">
                                                 <i class="fa-solid fa-pen-to-square"></i>
                                             </button>

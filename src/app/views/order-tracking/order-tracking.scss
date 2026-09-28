@@ -1,0 +1,948 @@
+/* Sipariş Detay & İade İşlemleri paneli — public sayfa, layout dışında çalışır */
+
+:host {
+    --ot-bg: #f2f3f6;
+    --ot-surface: #ffffff;
+    --ot-soft: #f7f7f9;
+    --ot-line: #e6e8ee;
+    --ot-ink: #161a2e;
+    --ot-ink-2: #4f566f;
+    --ot-muted: #8d94ad;
+    --ot-primary: #232a3d;
+    --ot-primary-soft: #eceef4;
+    --ot-accent: #0f766e;
+    --ot-rose: #e8506b;
+    --ot-success: #0fa968;
+    --ot-success-soft: #e4f7ee;
+    --ot-warn: #b45309;
+    --ot-warn-soft: #fef3e2;
+    --ot-radius: 18px;
+    --ot-shadow: 0 1px 2px rgba(22, 26, 46, .04), 0 12px 28px -18px rgba(22, 26, 46, .35);
+}
+
+.ot-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(900px 420px at 50% -120px, #e3e8ef 0%, rgba(227, 232, 239, 0) 70%),
+        var(--ot-bg);
+    padding: 2.5rem 1rem 4rem;
+    color: var(--ot-ink);
+}
+
+.ot-container {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ── Marka ── */
+.ot-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .65rem;
+    margin-bottom: .25rem;
+}
+
+.ot-brand-logo { max-height: 42px; }
+
+.ot-brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #232a3d, #3d4763);
+    color: #fff;
+    font-size: .95rem;
+}
+
+.ot-brand-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.ot-demo {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    justify-content: center;
+    background: var(--ot-warn-soft);
+    border: 1px solid #f7dcb0;
+    color: var(--ot-warn);
+    border-radius: 12px;
+    padding: .5rem .875rem;
+    font-size: .8rem;
+}
+
+/* ── Adım göstergesi ── */
+.ot-steps {
+    display: flex;
+    gap: .25rem;
+    padding: .5rem;
+    background: rgba(255, 255, 255, .7);
+    border: 1px solid var(--ot-line);
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
+}
+
+.ot-step {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding: .4rem .5rem;
+    border-radius: 999px;
+    font-size: .75rem;
+    color: var(--ot-muted);
+    transition: background-color .2s, color .2s;
+
+    &.active {
+        background: var(--ot-primary-soft);
+        color: var(--ot-ink);
+        font-weight: 600;
+
+        .ot-step-dot {
+            background: var(--ot-primary);
+            color: #fff;
+        }
+    }
+
+    &.done {
+        color: var(--ot-success);
+
+        .ot-step-dot {
+            background: var(--ot-success);
+            color: #fff;
+        }
+    }
+}
+
+.ot-step-dot {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: #e6e8ee;
+    color: var(--ot-muted);
+    font-size: .7rem;
+    font-weight: 700;
+}
+
+/* ── Kart ── */
+.ot-card {
+    background: var(--ot-surface);
+    border: 1px solid var(--ot-line);
+    border-radius: var(--ot-radius);
+    box-shadow: var(--ot-shadow);
+    overflow: hidden;
+}
+
+.ot-card-head {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--ot-line);
+    background: var(--ot-soft);
+
+    i { color: var(--ot-accent); }
+
+    h2 {
+        font-size: .95rem;
+        font-weight: 700;
+        margin: 0;
+    }
+}
+
+.ot-count {
+    margin-left: auto;
+    background: #fff;
+    border: 1px solid var(--ot-line);
+    border-radius: 999px;
+    padding: .05rem .5rem;
+    font-size: .75rem;
+    color: var(--ot-ink-2);
+}
+
+.ot-card-body { padding: 1.25rem; }
+.ot-card-body-flush { padding: 0; }
+
+/* ── Ortak metin ── */
+.ot-label {
+    display: block;
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--ot-muted);
+    margin-bottom: .2rem;
+}
+
+.ot-value {
+    font-size: .9rem;
+    color: var(--ot-ink);
+}
+
+.ot-value-strong { font-weight: 700; }
+
+.ot-hint {
+    font-size: .8rem;
+    color: var(--ot-muted);
+    line-height: 1.6;
+}
+
+.ot-hint-block { margin-bottom: 1rem; }
+
+.ot-note {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .78rem;
+    color: var(--ot-muted);
+}
+
+.ot-tag {
+    display: inline-block;
+    background: var(--ot-soft);
+    border: 1px solid var(--ot-line);
+    border-radius: 6px;
+    padding: 0 .4rem;
+    font-size: .72rem;
+    color: var(--ot-ink-2);
+    margin: .15rem 0;
+}
+
+.ot-pill {
+    display: inline-block;
+    border-radius: 999px;
+    padding: .2rem .7rem;
+    font-size: .75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ot-pill-success { background: var(--ot-success-soft); color: var(--ot-success); }
+.ot-pill-danger { background: #fdeaee; color: var(--ot-rose); }
+.ot-pill-soft { background: var(--ot-primary-soft); color: var(--ot-ink-2); }
+
+/* ── Butonlar ── */
+.ot-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: .65rem 1.25rem;
+    font-size: .875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .12s, box-shadow .2s, background-color .2s;
+
+    &:disabled { opacity: .6; cursor: not-allowed; }
+    &:not(:disabled):active { transform: translateY(1px); }
+}
+
+.ot-btn-sm { padding: .4rem .85rem; font-size: .8rem; }
+.ot-btn-block { width: 100%; }
+.ot-btn-grow { flex: 1; }
+
+.ot-btn-primary {
+    background: var(--ot-primary);
+    color: #fff;
+    &:not(:disabled):hover { background: #333c55; }
+}
+
+.ot-btn-dark {
+    background: var(--ot-ink);
+    color: #fff;
+    &:not(:disabled):hover { background: #262c47; }
+}
+
+.ot-btn-rose {
+    background: var(--ot-rose);
+    color: #fff;
+    &:not(:disabled):hover { background: #d93f5b; }
+}
+
+.ot-btn-success {
+    background: var(--ot-success);
+    color: #fff;
+    &:not(:disabled):hover { background: #0c8f58; }
+}
+
+.ot-btn-ghost {
+    background: #fff;
+    border-color: var(--ot-line);
+    color: var(--ot-ink-2);
+    &:not(:disabled):hover { background: var(--ot-soft); }
+}
+
+.ot-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: var(--ot-ink);
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.ot-link-back {
+    display: block;
+    margin: 1.25rem auto 0;
+    color: var(--ot-muted);
+}
+
+/* ── Uyarı kutuları ── */
+.ot-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: .6rem;
+    border-radius: 12px;
+    padding: .75rem 1rem;
+    font-size: .82rem;
+    line-height: 1.5;
+    margin-top: 1rem;
+    text-align: left;
+}
+
+.ot-alert-danger { background: #fdeaee; color: #b42340; }
+.ot-alert-warn { background: var(--ot-warn-soft); color: var(--ot-warn); }
+
+/* ── Hero (sorgulama & doğrulama) ── */
+.ot-hero {
+    padding: 2.25rem 1.5rem;
+    text-align: center;
+}
+
+.ot-hero-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 1rem;
+    background: var(--ot-ink);
+    color: #fff;
+    font-size: 1.15rem;
+}
+
+.ot-hero-icon-accent { background: linear-gradient(135deg, #232a3d, #3d4763); }
+
+.ot-hero-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 0 0 .4rem;
+}
+
+.ot-hero-sub {
+    color: var(--ot-ink-2);
+    font-size: .875rem;
+    line-height: 1.7;
+    max-width: 460px;
+    margin: 0 auto 1.25rem;
+}
+
+.ot-hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .82rem;
+    color: var(--ot-ink-2);
+    margin-bottom: 1rem;
+}
+
+.ot-chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .5rem;
+    margin-bottom: 1.5rem;
+}
+
+.ot-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    background: var(--ot-soft);
+    border: 1px solid var(--ot-line);
+    border-radius: 999px;
+    padding: .35rem .75rem;
+    font-size: .78rem;
+    color: var(--ot-ink-2);
+
+    i { color: var(--ot-accent); }
+}
+
+.ot-search-box {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    background: var(--ot-soft);
+    border: 1px solid var(--ot-line);
+    border-radius: 14px;
+    padding: .35rem .35rem .35rem .9rem;
+    max-width: 460px;
+    margin: 0 auto;
+    transition: border-color .2s, box-shadow .2s;
+
+    &:focus-within {
+        border-color: var(--ot-primary);
+        box-shadow: 0 0 0 4px var(--ot-primary-soft);
+    }
+}
+
+.ot-search-icon { color: var(--ot-muted); font-size: .85rem; }
+
+.ot-search-input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    padding: .55rem 0;
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--ot-ink);
+    outline: none;
+
+    &::placeholder { font-weight: 400; color: var(--ot-muted); }
+}
+
+.ot-code-input {
+    display: block;
+    width: 220px;
+    margin: 0 auto 1.25rem;
+    border: 1px solid var(--ot-line);
+    background: var(--ot-soft);
+    border-radius: 14px;
+    padding: .75rem;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: .45rem;
+    text-indent: .45rem;
+    color: var(--ot-ink);
+    outline: none;
+
+    &:focus {
+        border-color: var(--ot-primary);
+        box-shadow: 0 0 0 4px var(--ot-primary-soft);
+    }
+}
+
+.ot-resend {
+    margin-top: .9rem;
+    font-size: .8rem;
+    color: var(--ot-muted);
+}
+
+/* ── Sorgu sonucu ── */
+.ot-results {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ot-result { padding: 1.25rem; }
+
+.ot-result-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed var(--ot-line);
+}
+
+.ot-result-no {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+}
+
+.ot-result-customer {
+    font-size: .82rem;
+    color: var(--ot-muted);
+}
+
+.ot-result-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: .9rem;
+    padding: 1rem 0;
+}
+
+.ot-result-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding-top: .25rem;
+}
+
+/* ── Sipariş başlığı & istatistikler ── */
+.ot-order-head { padding: 1.25rem; }
+
+.ot-order-head-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed var(--ot-line);
+}
+
+.ot-order-no {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.ot-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: .9rem;
+    padding-top: 1rem;
+}
+
+.ot-stat {
+    background: var(--ot-soft);
+    border-radius: 12px;
+    padding: .7rem .8rem;
+}
+
+/* ── Tarihçe ── */
+.ot-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0 0 1.35rem 1.65rem;
+        border-left: 2px solid var(--ot-line);
+        margin-left: .4rem;
+
+        &:last-child {
+            border-left-color: transparent;
+            padding-bottom: 0;
+        }
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 1px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--ot-line);
+        }
+
+        &.done {
+            border-left-color: var(--ot-success);
+
+            &::before {
+                border-color: var(--ot-success);
+                box-shadow: 0 0 0 3px var(--ot-success-soft);
+            }
+        }
+    }
+}
+
+.ot-timeline-title {
+    font-weight: 600;
+    font-size: .9rem;
+}
+
+.ot-timeline-meta {
+    font-size: .78rem;
+    color: var(--ot-muted);
+}
+
+.ot-timeline-logo { max-height: 26px; }
+
+/* ── Ürünler ── */
+.ot-product {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--ot-line);
+
+    &:last-child { border-bottom: 0; }
+}
+
+.ot-thumb {
+    width: 54px;
+    height: 68px;
+    flex: 0 0 54px;
+    border-radius: 12px;
+    background: var(--ot-soft);
+    border: 1px solid var(--ot-line);
+    display: grid;
+    place-items: center;
+    color: #c4c9da;
+    overflow: hidden;
+
+    img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+.ot-product-info { flex: 1; min-width: 0; }
+
+.ot-product-name {
+    font-weight: 600;
+    font-size: .9rem;
+    line-height: 1.4;
+}
+
+.ot-product-total {
+    font-weight: 700;
+    font-size: .9rem;
+    white-space: nowrap;
+}
+
+/* ── İade adımları ── */
+.ot-return-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+}
+
+.ot-step-card {
+    &.collapsed { background: var(--ot-soft); }
+    &.completed .ot-step-badge { background: var(--ot-success); }
+}
+
+.ot-step-head {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: none;
+    border: 0;
+    text-align: left;
+    cursor: pointer;
+}
+
+.ot-step-badge {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: var(--ot-ink);
+    color: #fff;
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.ot-step-text {
+    flex: 1;
+    min-width: 0;
+
+    strong {
+        display: block;
+        font-size: .92rem;
+    }
+
+    small {
+        color: var(--ot-muted);
+        font-size: .78rem;
+    }
+}
+
+.ot-return-product {
+    display: flex;
+    gap: .9rem;
+    padding: 1rem 0;
+    border-bottom: 1px dashed var(--ot-line);
+
+    &:last-of-type { border-bottom: 0; }
+
+    &.picked .ot-product-name { color: var(--ot-accent); }
+}
+
+.ot-select,
+.ot-textarea {
+    display: block;
+    width: 100%;
+    margin-top: .5rem;
+    border: 1px solid var(--ot-line);
+    background: #fff;
+    border-radius: 10px;
+    padding: .55rem .75rem;
+    font-size: .85rem;
+    color: var(--ot-ink);
+    outline: none;
+
+    &:focus {
+        border-color: var(--ot-primary);
+        box-shadow: 0 0 0 3px var(--ot-primary-soft);
+    }
+
+    &.invalid {
+        border-color: var(--ot-rose);
+        background: #fff7f8;
+    }
+}
+
+.ot-field-label {
+    display: block;
+    margin: 1.25rem 0 0;
+    font-size: .85rem;
+    font-weight: 600;
+
+    span { color: var(--ot-muted); font-weight: 400; }
+}
+
+.ot-summary-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-top: 1rem;
+    background: var(--ot-soft);
+    color: var(--ot-ink-2);
+    border: 1px solid var(--ot-line);
+    border-radius: 12px;
+    padding: .75rem 1rem;
+    font-size: .82rem;
+}
+
+/* ── Seçenek listeleri ── */
+.ot-options {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+}
+
+.ot-option {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    border: 1px solid var(--ot-line);
+    background: var(--ot-soft);
+    border-radius: 14px;
+    padding: .85rem 1rem;
+    cursor: pointer;
+    transition: border-color .2s, background-color .2s;
+
+    input { position: absolute; opacity: 0; pointer-events: none; }
+
+    strong { display: block; font-size: .87rem; font-weight: 600; }
+    small { color: var(--ot-muted); font-size: .78rem; }
+
+    &.selected {
+        border-color: var(--ot-primary);
+        background: var(--ot-primary-soft);
+
+        .ot-option-mark {
+            border-color: var(--ot-primary);
+
+            &::after { transform: scale(1); }
+        }
+    }
+}
+
+.ot-option-mark {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    border-radius: 50%;
+    border: 2px solid #c8ccd8;
+    display: grid;
+    place-items: center;
+
+    &::after {
+        content: '';
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--ot-primary);
+        transform: scale(0);
+        transition: transform .15s;
+    }
+}
+
+.ot-cargo-logo { max-height: 26px; }
+
+.ot-review {
+    margin-top: 1rem;
+    background: var(--ot-soft);
+    border-radius: 12px;
+    padding: .5rem 1rem;
+    font-size: .85rem;
+
+    > div {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: .5rem 0;
+        border-bottom: 1px dashed var(--ot-line);
+
+        &:last-child { border-bottom: 0; }
+
+        .ot-label { margin: 0; }
+    }
+}
+
+/* ── Alt aksiyon çubuğu ── */
+.ot-actionbar {
+    display: flex;
+    gap: .6rem;
+    margin-top: .25rem;
+}
+
+/* ── Modal ── */
+.ot-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1060;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(16, 19, 35, .45);
+    backdrop-filter: blur(4px);
+    overflow-y: auto;
+}
+
+.ot-dialog {
+    width: 100%;
+    max-width: 520px;
+    background: var(--ot-surface);
+    border-radius: 20px;
+    box-shadow: 0 24px 60px -20px rgba(16, 19, 35, .5);
+    margin: auto;
+    overflow: hidden;
+}
+
+.ot-dialog-head {
+    padding: 1.75rem 1.5rem 1rem;
+    text-align: center;
+
+    h2 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin: 0 0 .4rem;
+    }
+
+    p {
+        margin: 0;
+        font-size: .85rem;
+        color: var(--ot-ink-2);
+        line-height: 1.6;
+    }
+}
+
+.ot-dialog-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto .9rem;
+    font-size: 1.1rem;
+}
+
+.ot-dialog-icon-warn { background: var(--ot-warn-soft); color: var(--ot-warn); }
+.ot-dialog-icon-success { background: var(--ot-success-soft); color: var(--ot-success); }
+
+.ot-dialog-body {
+    padding: 0 1.5rem 1rem;
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+.ot-dialog-foot {
+    display: flex;
+    gap: .6rem;
+    padding: 1rem 1.5rem 1.5rem;
+    border-top: 1px solid var(--ot-line);
+}
+
+.ot-disclaimers {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+        position: relative;
+        padding: .7rem 0 .7rem 1.5rem;
+        font-size: .83rem;
+        color: var(--ot-ink-2);
+        line-height: 1.65;
+        border-bottom: 1px dashed var(--ot-line);
+
+        &:last-child { border-bottom: 0; }
+
+        &::before {
+            content: '\f06a';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            top: .8rem;
+            color: var(--ot-rose);
+            font-size: .8rem;
+        }
+    }
+}
+
+.ot-code-card {
+    background: var(--ot-success-soft);
+    border: 1px dashed #9fdcc0;
+    border-radius: 16px;
+    padding: 1.1rem;
+    text-align: center;
+    margin-bottom: .85rem;
+}
+
+.ot-code-value {
+    font-size: 1.7rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    color: #0b7a4b;
+    margin-bottom: .6rem;
+    word-break: break-all;
+}
+
+.ot-cari {
+    background: var(--ot-soft);
+    border-radius: 12px;
+    padding: .8rem 1rem;
+    font-size: .83rem;
+    color: var(--ot-ink-2);
+}
+
+/* ── Duyarlı ── */
+@media (max-width: 575.98px) {
+    .ot-page { padding: 1.5rem .75rem 3rem; }
+    .ot-step-label { display: none; }
+    .ot-step { justify-content: center; }
+    .ot-hero { padding: 1.75rem 1.1rem; }
+    .ot-hero-title { font-size: 1.15rem; }
+    .ot-search-box { flex-wrap: wrap; }
+    .ot-search-input { width: 100%; text-align: center; }
+    .ot-btn-dark { width: 100%; }
+    .ot-actionbar { flex-direction: column-reverse; }
+    .ot-code-value { font-size: 1.35rem; }
+}

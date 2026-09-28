@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExtensionManagementService } from '@/app/core/services/extension-management.service';
 import { ExtensionDefinition } from '@/app/core/models/extension/extension-definition.models';
+import { ExtensionCategory } from '@/app/core/models/extension/extension-category.models';
 import {
     ExtensionSettingDefinition,
     CreateExtensionSettingDefinitionRequest,
@@ -36,6 +37,7 @@ interface ExtensionCategoryGroup {
 })
 export class ExtensionSettingDefinitionsPage implements OnInit {
     definitions: ExtensionDefinition[] = [];
+    extensionCategories: ExtensionCategory[] = [];
     items: ExtensionSettingDefinition[] = [];
     settingCategories: ExtensionSettingCategory[] = [];
 
@@ -100,8 +102,12 @@ export class ExtensionSettingDefinitionsPage implements OnInit {
     async loadDefinitions(): Promise<void> {
         this.loading = true;
         try {
-            const response = await this.extensionService.getExtensionDefinitions();
+            const [response, categoryResponse] = await Promise.all([
+                this.extensionService.getExtensionDefinitions(),
+                this.extensionService.getExtensionCategories().catch(() => null),
+            ]);
             this.definitions = this.extractArray<ExtensionDefinition>(response);
+            this.extensionCategories = this.extractArray<ExtensionCategory>(categoryResponse);
 
             if (!this.selectedExtensionId && this.definitions.length > 0) {
                 this.selectedExtensionId = this.definitions[0].id;
@@ -162,27 +168,40 @@ export class ExtensionSettingDefinitionsPage implements OnInit {
         return this.definitions.filter((extension) =>
             (extension.name || '').toLowerCase().includes(filter)
             || (extension.code || '').toLowerCase().includes(filter)
-            || (extension.category || '').toLowerCase().includes(filter)
+            || this.getExtensionCategoryName(extension).toLowerCase().includes(filter)
             || (extension.mention || '').toLowerCase().includes(filter),
         );
     }
 
     get groupedFilteredDefinitions(): ExtensionCategoryGroup[] {
-        const groups = new Map<string, ExtensionDefinition[]>();
+        const groups = new Map<string, { order: number; items: ExtensionDefinition[] }>();
 
         for (const extension of this.filteredDefinitions) {
-            const category = (extension.category || '').trim() || 'Diger';
-            const list = groups.get(category) || [];
-            list.push(extension);
-            groups.set(category, list);
+            const category = this.getExtensionCategoryName(extension);
+            const group = groups.get(category) || { order: this.getExtensionCategoryOrder(extension), items: [] };
+            group.items.push(extension);
+            groups.set(category, group);
         }
 
         return Array.from(groups.entries())
-            .map(([category, items]) => ({
+            .sort(([a, ga], [b, gb]) => ga.order - gb.order || a.localeCompare(b, 'tr-TR'))
+            .map(([category, group]) => ({
                 category,
-                items: [...items].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'tr-TR')),
-            }))
-            .sort((a, b) => a.category.localeCompare(b.category, 'tr-TR'));
+                items: [...group.items].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'tr-TR')),
+            }));
+    }
+
+    /** Extension'ın kategori adı; kategori listesi yüklenmediyse API'nin döndüğü ada/koda düşer. */
+    getExtensionCategoryName(extension: ExtensionDefinition): string {
+        return extension.categoryName
+            || this.extensionCategories.find(c => c.code === extension.categoryCode)?.name
+            || extension.categoryCode
+            || 'Diger';
+    }
+
+    private getExtensionCategoryOrder(extension: ExtensionDefinition): number {
+        const category = this.extensionCategories.find(c => c.code === extension.categoryCode);
+        return category ? Number(category.sortOrder) || 0 : Number.MAX_SAFE_INTEGER;
     }
 
     get selectedExtensionName(): string {

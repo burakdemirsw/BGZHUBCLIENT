@@ -4,76 +4,15 @@
             <h4 class="qi-title">Soru &amp; Cevap Merkezi</h4>
             <p class="qi-desc">Tüm pazaryeri sorularını tek ekrandan yönetin — AI ile saniyeler içinde cevaplayın, her soruyu satışa dönüştürün.</p>
         </div>
-        <button type="button" class="qi-reportbtn" [class.on]="showReport" (click)="toggleReport()">
-            <i class="fa-solid fa-chart-column"></i> SLA Raporu
-        </button>
-    </div>
-
-    <!-- SLA raporu -->
-    @if (showReport) {
-        <div class="qi-report">
-            <div class="rp-cards">
-                <div class="rp-card">
-                    <div class="rp-lbl"><i class="fa-regular fa-comments"></i> Toplam Soru</div>
-                    <div class="rp-val">{{ reportTotal }}</div>
-                    <div class="rp-sub">Son 3 gün</div>
-                </div>
-                <div class="rp-card" [class.warn]="reportWaiting > 0">
-                    <div class="rp-lbl"><i class="fa-regular fa-hourglass-half"></i> Bekleyen</div>
-                    <div class="rp-val">{{ reportWaiting }}</div>
-                    <div class="rp-sub">Cevap bekliyor</div>
-                </div>
-                <div class="rp-card">
-                    <div class="rp-lbl"><i class="fa-solid fa-stopwatch"></i> Ort. Cevap Süresi</div>
-                    <div class="rp-val">{{ formatMinutes(reportAvgMinutes) }}</div>
-                    <div class="rp-sub">Soru → ilk cevap</div>
-                </div>
-                <div class="rp-card" [class]="'rp-card ' + complianceClass(reportCompliance)">
-                    <div class="rp-lbl"><i class="fa-solid fa-shield-halved"></i> SLA Uyumu</div>
-                    <div class="rp-val">%{{ reportCompliance }}</div>
-                    <div class="rp-sub">Süresinde yanıtlanan</div>
-                </div>
-                <div class="rp-card" [class.bad]="reportExpired > 0">
-                    <div class="rp-lbl"><i class="fa-solid fa-triangle-exclamation"></i> Süresi Dolan</div>
-                    <div class="rp-val">{{ reportExpired }}</div>
-                    <div class="rp-sub">Yanıtlanamadı</div>
-                </div>
-            </div>
-
-            <h6 class="rp-title">Platform Bazında</h6>
-            <div class="table-responsive">
-                <table class="rp-table">
-                    <thead>
-                        <tr>
-                            <th>Platform</th>
-                            <th class="num">Soru</th>
-                            <th class="num">Yanıtlanan</th>
-                            <th class="num">Süresi Dolan</th>
-                            <th class="num">Ort. Süre</th>
-                            <th class="num">SLA Uyumu</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (row of slaRows; track row.platform.key) {
-                            <tr>
-                                <td><span class="rp-plat"><img [src]="row.platform.logo" alt="">{{ row.platform.name }}</span></td>
-                                <td class="num">{{ row.total }}</td>
-                                <td class="num">{{ row.answered }}</td>
-                                <td class="num">{{ row.expired }}</td>
-                                <td class="num">{{ formatMinutes(row.avgResponseMinutes) }}</td>
-                                <td class="num">
-                                    <span class="rp-bar"><i [class]="complianceClass(row.complianceRate)" [style.width.%]="row.complianceRate"></i></span>
-                                    <span class="rp-comp" [class]="'rp-comp ' + complianceClass(row.complianceRate)">%{{ row.complianceRate }}</span>
-                                </td>
-                            </tr>
-                        } @empty {
-                            <tr><td colspan="6" class="rp-empty">Rapor için veri yok.</td></tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+        <div class="qi-headbtns">
+            <button type="button" class="qi-reportbtn" [disabled]="listLoading || platformsLoading" (click)="refresh()">
+                <i class="fa-solid fa-rotate" [class.fa-spin]="listLoading || platformsLoading"></i> Yenile
+            </button>
+            <button type="button" class="qi-reportbtn primary" (click)="openSyncModal()">
+                <i class="fa-solid fa-cloud-arrow-down"></i> Pazaryerinden Çek
+            </button>
         </div>
-    }
+    </div>
 
     <div class="qi-wrap">
         <!-- Sol: platformlar -->
@@ -83,14 +22,22 @@
                 <div class="l-item" [class.active]="selectedPlatform === null" (click)="selectPlatform(null)">
                     <div class="l-ico"><i class="fa-solid fa-inbox"></i></div>
                     <div class="l-name">Tüm Platformlar</div>
-                    <div class="l-count" [class.warn]="waitingCount(null) > 0">{{ waitingCount(null) }}</div>
+                    <div class="l-count" [class.warn]="platformsOpenCount > 0" title="Açık / Toplam">{{ platformsOpenCount }}<small>/{{ platformsTotalCount }}</small></div>
                 </div>
-                @for (p of platforms; track p.key) {
-                    <div class="l-item" [class.active]="selectedPlatform === p.key" (click)="selectPlatform(p.key)">
-                        <img [src]="p.logo" [alt]="p.name">
-                        <div class="l-name">{{ p.name }}</div>
-                        <div class="l-count" [class.warn]="waitingCount(p.key) > 0">{{ waitingCount(p.key) }}</div>
+                @for (p of platforms; track p.companyExtensionId) {
+                    <div class="l-item" [class.active]="selectedPlatform === p.providerCode" [class.off]="!p.isEnabled" (click)="selectPlatform(p.providerCode)">
+                        @if (p.providerPhotoUrl) {
+                            <img [src]="p.providerPhotoUrl" [alt]="p.providerName">
+                        } @else {
+                            <div class="l-ico"><i class="fa-solid fa-store"></i></div>
+                        }
+                        <div class="l-name">{{ p.providerName }}</div>
+                        <div class="l-count" [class.warn]="p.openCount > 0" title="Açık / Toplam">{{ p.openCount }}<small>/{{ p.totalCount }}</small></div>
                     </div>
+                } @empty {
+                    @if (!platformsLoading) {
+                        <div class="l-empty">Soru senkronu açık platform yok.</div>
+                    }
                 }
             </div>
         </div>
@@ -101,7 +48,7 @@
                 <div class="m-search-row">
                     <div class="m-search">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Soru veya ürün adında ara..." [(ngModel)]="filterText" (ngModelChange)="onFilterChange()">
+                        <input type="text" placeholder="Soru, ürün veya müşteri ara..." [(ngModel)]="filterText" (ngModelChange)="onSearchChange()">
                     </div>
                     <button type="button" class="m-icobtn" title="Filtreler" [class.on]="showFilters" (click)="showFilters = !showFilters">
                         <i class="fa-solid fa-sliders"></i>
@@ -116,59 +63,61 @@
 
             @if (showFilters) {
                 <div class="m-filters">
-                    <input type="text" placeholder="Müşteri adı" [(ngModel)]="customerFilter" (ngModelChange)="onFilterChange()">
+                    <select [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
+                        <option value="">Tüm durumlar</option>
+                        @for (s of statuses; track s.code) {
+                            <option [value]="s.code">{{ s.name }}</option>
+                        }
+                    </select>
                     <div class="ff-row">
-                        <label class="form-check">
-                            <input class="form-check-input" type="checkbox" [(ngModel)]="unreadOnly" (ngModelChange)="onFilterChange()">
-                            <span class="form-check-label">Sadece okunmamış</span>
-                        </label>
-                        <label class="form-check">
-                            <input class="form-check-input" type="checkbox" [(ngModel)]="unmatchedOnly" (ngModelChange)="onFilterChange()">
-                            <span class="form-check-label">Eşleşmeyen ürün</span>
-                        </label>
+                        <input type="date" title="Başlangıç" [(ngModel)]="startDate" (ngModelChange)="onFilterChange()">
+                        <input type="date" title="Bitiş" [(ngModel)]="endDate" (ngModelChange)="onFilterChange()">
+                        <button type="button" class="ff-clear" title="Filtreleri temizle" (click)="clearFilters()"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 </div>
             }
 
-            <div class="m-list">
+            <div class="m-list" [class.loading]="listLoading">
                 @for (q of pagedItems; track q.id) {
-                    <div class="m-row" [class.active]="selected?.id === q.id" [class.unread]="!q.isRead" (click)="openQuestion(q)">
-                        @if (q.product) {
-                            <img class="m-thumb" [src]="q.product.image" alt="">
+                    <div class="m-row" [class.active]="selectedId === q.id" [class.unread]="q.isOpen" (click)="openQuestion(q)">
+                        @if (q.imageUrl) {
+                            <img class="m-thumb" [src]="q.imageUrl" alt="">
                         } @else {
                             <div class="m-thumb m-thumb-empty"><i class="fa-regular fa-image"></i></div>
                         }
                         <div class="m-body">
                             <div class="m-top">
-                                <img class="m-plogo" [src]="platformOf(q)?.logo" alt="">
-                                <div class="m-prod">{{ q.platformProductName }}</div>
-                                @if (!q.isRead) {
-                                    <i class="m-readicon fa-solid fa-circle" title="Okunmadı"></i>
+                                @if (q.providerPhotoUrl) {
+                                    <img class="m-plogo" [src]="q.providerPhotoUrl" [alt]="q.providerName" [title]="q.providerName">
                                 }
+                                <div class="m-prod">{{ q.productName || q.providerName }}</div>
                             </div>
-                            <div class="m-q">{{ questionText(q) }}</div>
+                            <div class="m-q">{{ q.questionText }}</div>
                             <div class="m-foot">
-                                <span class="st-badge" [class]="'st-badge st-' + q.status">{{ statusLabel(q.status) }}</span>
-                                @if (!q.product) {
-                                    <span class="m-nomatch"><i class="fa-solid fa-link-slash"></i> Eşleşmedi</span>
+                                <span class="st-badge" [class]="'st-badge ' + statusClass(q)">{{ statusLabel(q) }}</span>
+                                @if (q.answerCount > 0) {
+                                    <span class="m-ask" title="Cevap sayısı"><i class="fa-regular fa-comment"></i> {{ q.answerCount }}</span>
                                 }
-                                <span class="m-ask" [class.hot]="q.askCount > 1">{{ q.askCount }}x</span>
-                                <span class="m-date">{{ timeAgo(q.createdDate) }}</span>
+                                <span class="m-date">{{ timeAgo(q.questionDate) }}</span>
                             </div>
                         </div>
                     </div>
                 } @empty {
-                    <div class="m-empty">
-                        <i class="fa-regular fa-folder-open"></i>
-                        <div>Bu filtreye uygun soru bulunamadı.</div>
-                    </div>
+                    @if (listLoading) {
+                        <div class="m-empty"><span class="spinner-border spinner-border-sm"></span></div>
+                    } @else {
+                        <div class="m-empty">
+                            <i class="fa-regular fa-folder-open"></i>
+                            <div>Bu filtreye uygun soru bulunamadı.</div>
+                        </div>
+                    }
                 }
             </div>
 
             <div class="m-pager">
-                <button type="button" [disabled]="currentPage === 1" (click)="setPage(currentPage - 1)"><i class="fa-solid fa-angle-left"></i></button>
-                <span>{{ currentPage }} / {{ totalPages }} <small>({{ filteredItems.length }} soru)</small></span>
-                <button type="button" [disabled]="currentPage === totalPages" (click)="setPage(currentPage + 1)"><i class="fa-solid fa-angle-right"></i></button>
+                <button type="button" [disabled]="currentPage === 1 || listLoading" (click)="setPage(currentPage - 1)"><i class="fa-solid fa-angle-left"></i></button>
+                <span>{{ currentPage }} / {{ totalPages }} <small>({{ totalCount }} soru)</small></span>
+                <button type="button" [disabled]="currentPage === totalPages || listLoading" (click)="setPage(currentPage + 1)"><i class="fa-solid fa-angle-right"></i></button>
             </div>
         </div>
 
@@ -176,50 +125,59 @@
         <div class="qi-right">
             @if (selected; as q) {
                 <div class="qi-r-head">
-                    @if (q.product) {
-                        <img class="rp" [src]="q.product.image" alt="">
+                    @if (q.imageUrl) {
+                        <img class="rp" [src]="q.imageUrl" alt="">
                     } @else {
                         <div class="rp rp-empty"><i class="fa-regular fa-image"></i></div>
                     }
                     <div class="rh-mid">
-                        <div class="rh-name">{{ q.product?.name ?? q.platformProductName }}</div>
-                        @if (q.product) {
-                            <div class="rh-chips">
-                                <span class="rh-chip">SKU: <b>{{ q.product.sku }}</b></span>
-                                <span class="rh-chip">Barkod: <b>{{ q.product.barcode }}</b></span>
-                                @if (q.product.color) {
-                                    <span class="rh-chip">Renk: <b>{{ q.product.color }}</b></span>
-                                }
-                                <span class="rh-chip">Müşteri: <b>{{ q.customerName }}</b></span>
-                            </div>
-                        } @else {
-                            <div class="rh-unmatched">
-                                <span class="rh-nomatch"><i class="fa-solid fa-link-slash"></i> Ürün kataloğunuzla eşleşmedi</span>
-                                <button type="button" class="rh-matchbtn" (click)="openMatchModal()"><i class="fa-solid fa-link"></i> Ürün Eşleştir</button>
-                            </div>
-                        }
+                        <div class="rh-name">
+                            @if (q.productUrl) {
+                                <a [href]="q.productUrl" target="_blank" rel="noopener">{{ q.productName || 'Ürün' }} <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                            } @else {
+                                {{ q.productName || 'Ürün bilgisi yok' }}
+                            }
+                        </div>
+                        <div class="rh-chips">
+                            @if (q.productCode) { <span class="rh-chip">Ürün Kodu: <b>{{ q.productCode }}</b></span> }
+                            @if (q.barcode) { <span class="rh-chip">Barkod: <b>{{ q.barcode }}</b></span> }
+                            @if (q.customerName) { <span class="rh-chip">Müşteri: <b>{{ q.customerName }}</b></span> }
+                            @if (q.orderNumber) { <span class="rh-chip">Sipariş: <b>{{ q.orderNumber }}</b></span> }
+                            @if (q.isPublic !== null) { <span class="rh-chip"><b>{{ q.isPublic ? 'Herkese açık' : 'Özel' }}</b> soru</span> }
+                        </div>
                     </div>
                     <div class="rh-right">
-                        <span class="rh-plat"><img [src]="platformOf(q)?.logo" alt="">{{ platformOf(q)?.name }}</span>
-                        <span class="st-badge" [class]="'st-badge st-' + q.status">{{ statusLabel(q.status) }}</span>
+                        <span class="rh-plat">
+                            @if (q.providerPhotoUrl) { <img [src]="q.providerPhotoUrl" alt=""> }
+                            {{ q.providerName }}
+                        </span>
+                        <span class="st-badge" [class]="'st-badge ' + statusClass(q)">{{ statusLabel(q) }}</span>
                     </div>
                 </div>
 
-                @if (q.status === 'waiting') {
+                @if (q.isOpen && q.expireDate) {
                     <div class="qi-countdown" [class]="'qi-countdown ' + countdownClass(q)">
                         <i class="fa-regular fa-clock"></i> {{ countdownText(q) }}
-                        <span class="cd-date">Son tarih: {{ q.deadlineDate | date: 'dd.MM.yyyy HH:mm' }}</span>
+                        <span class="cd-date">Son tarih: {{ q.expireDate | date: 'dd.MM.yyyy HH:mm' }}</span>
                     </div>
                 }
 
-                <div class="qi-thread">
-                    <div class="qi-meta-line">{{ q.createdDate | date: 'dd MMMM yyyy, HH:mm' }} · {{ q.customerName }} sordu</div>
-                    @for (m of q.messages; track m.id) {
-                        <div class="qi-bubble" [class.cust]="m.from === 'customer'" [class.merc]="m.from === 'merchant'">
-                            {{ m.text }}
+                <div class="qi-thread" [class.loading]="detailLoading">
+                    <div class="qi-meta-line">{{ q.questionDate | date: 'dd MMMM yyyy, HH:mm' }} · {{ q.customerName || 'Müşteri' }} sordu</div>
+                    <div class="qi-bubble cust">
+                        @if (q.subject) { <b>{{ q.subject }}</b><br> }
+                        {{ q.questionText }}
+                        <span class="qb-time">{{ q.questionDate | date: 'dd.MM HH:mm' }}</span>
+                    </div>
+                    @for (a of q.answers; track a.id) {
+                        <div class="qi-bubble merc" [class.rejected]="a.isRejected">
+                            {{ a.answerText }}
+                            @if (a.isRejected) {
+                                <span class="qb-reject"><i class="fa-solid fa-ban"></i> Reddedildi{{ a.rejectReason ? ': ' + a.rejectReason : '' }}</span>
+                            }
                             <span class="qb-time">
-                                {{ m.createdDate | date: 'dd.MM HH:mm' }}
-                                @if (m.from === 'merchant') { <i class="fa-solid fa-check-double"></i> }
+                                {{ a.answerDate | date: 'dd.MM HH:mm' }}
+                                @if (!a.isRejected) { <i class="fa-solid fa-check-double"></i> }
                             </span>
                         </div>
                     }
@@ -261,34 +219,20 @@
                                     <i class="fa-solid fa-coins"></i> Kalan AI kredisi: <b>{{ aiCredit }}</b>
                                 </div>
                             </div>
-                            <button type="button" class="btn-send" [disabled]="!draft.trim() || sending" (click)="send()">
-                                @if (sending) {
-                                    <span class="spinner-border spinner-border-sm"></span> Gönderiliyor
-                                } @else {
-                                    <i class="fa-solid fa-paper-plane"></i> Gönder
-                                }
+                            <button type="button" class="btn-send" disabled title="Cevap gönderme henüz API'de yok">
+                                <i class="fa-solid fa-paper-plane"></i> Gönder
                             </button>
                         </div>
                     } @else {
                         <div class="cp-locked">
                             <i class="fa-solid fa-lock"></i>
-                            @switch (q.status) {
-                                @case ('answered') { Bu soru yanıtlandı. }
-                                @case ('rejected') { Bu soru pazaryeri tarafından reddedildi. }
-                                @default { Cevaplama süresi dolduğu için bu soru yanıtlanamaz. }
-                            }
-                        </div>
-                    }
-
-                    @if (q.status === 'answered') {
-                        <div class="cp-score">
-                            <span class="s-label">Cevap kalitesini puanla:</span>
-                            @for (s of scoreOptions; track s) {
-                                <span class="s-dot" [class.on]="q.score === s" (click)="setScore(s)">{{ s }}</span>
-                            }
+                            @if (q.isOpen) { Cevaplama süresi dolduğu için bu soru yanıtlanamaz. }
+                            @else { Bu soru kapandı ({{ statusLabel(q) }}). }
                         </div>
                     }
                 </div>
+            } @else if (detailLoading) {
+                <div class="qi-empty"><span class="spinner-border"></span></div>
             } @else {
                 <div class="qi-empty">
                     <i class="fa-regular fa-comment-dots"></i>
@@ -299,33 +243,122 @@
         </div>
     </div>
 
-    <!-- Ürün eşleştirme modalı -->
-    @if (showMatchModal) {
-        <div class="qm-overlay" (click)="showMatchModal = false">
-            <div class="qm-box" (click)="$event.stopPropagation()">
-                <div class="qm-head">
-                    <h5>Ürün Eşleştir</h5>
-                    <button type="button" class="qm-close" (click)="showMatchModal = false">&times;</button>
-                </div>
-                <div class="qm-search">
-                    <input type="text" placeholder="Ürün adı, SKU veya barkod" [(ngModel)]="matchSearch" (keyup.enter)="searchProducts()">
-                    <button type="button" (click)="searchProducts()"><i class="fa-solid fa-magnifying-glass"></i></button>
-                </div>
-                <div class="qm-list">
-                    @for (p of matchResults; track p.id) {
-                        <div class="qm-item" (click)="matchProduct(p)">
-                            <img [src]="p.image" alt="">
-                            <div class="qm-info">
-                                <div class="qm-name">{{ p.name }}</div>
-                                <div class="qm-sku">{{ p.sku }} · {{ p.barcode }}</div>
+    <!-- Pazaryerinden çekme modalı -->
+    @if (showSyncModal) {
+        <div class="modal fade show d-block" tabindex="-1" (click)="closeSyncModal()">
+            <div class="modal-dialog modal-dialog-centered modal-lg" (click)="$event.stopPropagation()">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fa-solid fa-cloud-arrow-down me-1"></i> Pazaryerinden Soruları Çek</h5>
+                        <button type="button" class="btn-close" [disabled]="syncing" (click)="closeSyncModal()"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label">Başlangıç</label>
+                                <input type="date" class="form-control" [(ngModel)]="syncStartDate" (ngModelChange)="onSyncStartChange()" [disabled]="syncing">
                             </div>
-                            <span class="qm-pick">Seç</span>
+                            <div class="col-6">
+                                <label class="form-label">Bitiş</label>
+                                <input type="date" class="form-control" [(ngModel)]="syncEndDate" [min]="syncStartDate" [max]="syncMaxEndDate" [disabled]="syncing">
+                            </div>
                         </div>
-                    } @empty {
-                        <div class="qm-empty">Eşleşen ürün bulunamadı.</div>
-                    }
+                        <div class="form-text">
+                            Tarih boş bırakılırsa kaldığı yerden devam eder. Tarih seçilirse yalnızca o aralık taranır (en fazla {{ syncMaxDays }} gün), kaldığı yer değişmez.
+                        </div>
+
+                        <div class="table-responsive mt-3">
+                            <table class="table table-centered table-hover table-sm mb-0 qs-table">
+                                <thead>
+                                    <tr>
+                                        <th>İşlemler</th>
+                                        <th>Sağlayıcı</th>
+                                        <th>Durum</th>
+                                        <th class="text-end">Çekilen</th>
+                                        <th class="text-end">Yeni</th>
+                                        <th class="text-end">Güncel.</th>
+                                        <th class="text-end">Hata</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (p of providers; track p.extensionId) {
+                                        <tr>
+                                            <td class="text-nowrap">
+                                                <button type="button" class="btn btn-sm btn-soft-primary" [disabled]="!canSyncProvider(p) || isProviderSyncing(p.providerCode)" (click)="runSync(p.providerCode)">
+                                                    @if (isProviderSyncing(p.providerCode)) {
+                                                        <span class="spinner-border spinner-border-sm"></span>
+                                                    } @else {
+                                                        <i class="fa-solid fa-cloud-arrow-down"></i>
+                                                    }
+                                                    Çek
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <span class="qs-prov">
+                                                    @if (p.providerPhotoUrl) { <img [src]="p.providerPhotoUrl" alt=""> }
+                                                    {{ p.providerName }}
+                                                </span>
+                                                @if (syncResults[p.providerCode]; as r) {
+                                                    <div class="qs-window">{{ r.windowStart | date: 'dd.MM.yyyy HH:mm' }} – {{ r.windowEnd | date: 'dd.MM.yyyy HH:mm' }}</div>
+                                                    @if (r.errorMessage) {
+                                                        <div class="qs-err">{{ r.errorMessage }}</div>
+                                                    }
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!p.companyExtensionId) {
+                                                    <span class="badge bg-secondary-subtle text-secondary">Kurulu değil</span>
+                                                } @else if (p.isCompanyEnabled) {
+                                                    <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                } @else {
+                                                    <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                }
+                                                @if (syncResults[p.providerCode]; as r) {
+                                                    <i class="fa-solid ms-1" [class.fa-circle-check]="r.isSuccess" [class.text-success]="r.isSuccess"
+                                                       [class.fa-circle-xmark]="!r.isSuccess" [class.text-danger]="!r.isSuccess"
+                                                       [title]="r.isSuccess ? 'Son çekme başarılı' : 'Son çekme başarısız'"></i>
+                                                }
+                                            </td>
+                                            @if (syncResults[p.providerCode]; as r) {
+                                                <td class="text-end">{{ r.fetchedCount }}</td>
+                                                <td class="text-end">{{ r.createdCount }}</td>
+                                                <td class="text-end">{{ r.updatedCount }}</td>
+                                                <td class="text-end" [class.text-danger]="r.failedCount > 0">{{ r.failedCount }}</td>
+                                            } @else {
+                                                <td class="text-end text-muted">–</td>
+                                                <td class="text-end text-muted">–</td>
+                                                <td class="text-end text-muted">–</td>
+                                                <td class="text-end text-muted">–</td>
+                                            }
+                                        </tr>
+                                    } @empty {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-3">
+                                                @if (providersLoading) {
+                                                    <span class="spinner-border spinner-border-sm"></span>
+                                                } @else {
+                                                    Soru aktarımı desteklenen sağlayıcı bulunamadı.
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" [disabled]="syncing" (click)="closeSyncModal()">Kapat</button>
+                        <button type="button" class="btn btn-primary" [disabled]="syncing || !syncableProviders.length" (click)="runSync()">
+                            @if (isProviderSyncing('*')) {
+                                <span class="spinner-border spinner-border-sm me-1"></span> Çekiliyor...
+                            } @else {
+                                <i class="fa-solid fa-cloud-arrow-down me-1"></i> Tümünü Çek
+                            }
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
+        <div class="modal-backdrop fade show"></div>
     }
 </div>

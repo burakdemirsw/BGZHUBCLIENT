@@ -72,4 +72,8 @@ export const VIEWS_ROUTES: Routes = [
         path: '',
         loadChildren: () => import('@/app/views/wms/wms.route').then((mod) => mod.WMS_ROUTES)
     },
+    {
+        path: '',
+        loadChildren: () => import('@/app/views/otp/otp.route').then((mod) => mod.OTP_ROUTES)
+    },
 ];

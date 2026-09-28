@@ -8,8 +8,11 @@ import { NeighbourhoodsService } from '@/app/core/services/neighbourhoods.servic
 import { AuthStateService } from '@/app/core/services/auth-state.service';
 import { UsersService } from '@/app/core/services/users.service';
 import { CompanySettingsService } from '@/app/core/services/company-settings.service';
+import { RolesService } from '@/app/core/services/roles.service';
 import { Company, UpdateCompanyRequest } from '@/app/core/models/customer/company.models';
 import { UserResponse, UpdateUserRequest } from '@/app/core/models/user/user.models';
+import { RegisterRequest } from '@/app/core/models/auth/auth.models';
+import { Role, RoleUserResponse } from '@/app/core/models/role/role.models';
 import {
     CompanySettingField,
     CompanySettingGroup,
@@ -21,6 +24,16 @@ import { PAGE_SIZE_OPTIONS, DEFAULT_PAGE_SIZE } from '@/app/constants';
 interface AddressOption {
     id: string;
     name: string;
+}
+
+/** Kullanıcı ekle/düzenle modalının form modeli (companyId/userId TAŞIMAZ) */
+interface UserFormModel {
+    name: string;
+    lastName: string;
+    email: string;
+    password: string;
+    gender: string;
+    isBlocked: boolean;
 }
 
 @Component({
@@ -81,12 +94,24 @@ export class CompanyDetailPage implements OnInit {
     usersTotalPages = 1;
     usersTotalPagesArray: number[] = [];
     usersTotalCount = 0;
-    userForm: any = {
-        name: '',
-        lastName: '',
-        gender: 'Erkek',
-        isBlocked: false,
-    };
+    userModalMode: 'create' | 'edit' = 'edit';
+    userSaving = false;
+    userModalError = '';
+    userForm: UserFormModel = this.emptyUserForm();
+    /** Liste satırındaki Aktif/Pasif switch'i istek sürerken kilitler */
+    togglingUserId: string | null = null;
+
+    // ═══ USER ROLES ═══
+    roles: Role[] = [];
+    roleUsers: RoleUserResponse[] = [];
+    showRolesModal = false;
+    rolesModalUser: UserResponse | null = null;
+    userRoles: RoleUserResponse[] = [];
+    selectedRoleIds: string[] = [];
+    rolesLoading = false;
+    rolesSaving = false;
+    removingRoleUserId: string | null = null;
+    rolesErrorMessage = '';
 
     // ═══ SETTINGS TAB ═══
     settingGroups: CompanySettingGroup[] = [];
@@ -110,6 +135,7 @@ export class CompanyDetailPage implements OnInit {
         private authStateService: AuthStateService,
         private usersService: UsersService,
         private companySettingsService: CompanySettingsService,
+        private rolesService: RolesService,
     ) {}
 
     ngOnInit(): void {
@@ -117,6 +143,7 @@ export class CompanyDetailPage implements OnInit {
         if (this.companyId) {
             this.loadCompany(this.companyId);
             this.loadUsers();
+            this.loadRoles();
             this.loadSettings();
         } else {
             this.errorMessage = 'Şirket bilgisi bulunamadı.';
@@ -445,19 +472,41 @@ export class CompanyDetailPage implements OnInit {
         return [];
     }
 
+    private emptyUserForm(): UserFormModel {
+        return { name: '', lastName: '', email: '', password: '', gender: 'Erkek', isBlocked: false };
+    }
+
+    openCreateUser(): void {
+        this.userModalMode = 'create';
+        this.selectedUser = null;
+        this.userForm = this.emptyUserForm();
+        this.userModalError = '';
+        this.showUserModal = true;
+    }
+
     openEditUser(user: UserResponse): void {
+        this.userModalMode = 'edit';
         this.selectedUser = user;
         this.userForm = {
-            name: user.name,
-            lastName: user.lastName,
-            gender: user.gender,
+            name: user.name ?? '',
+            lastName: user.lastName ?? '',
+            email: user.email ?? '',
+            password: '',
+            gender: user.gender ?? 'Erkek',
             isBlocked: user.isBlocked,
         };
+        this.userModalError = '';
         this.showUserModal = true;
     }
 
     async saveUser(): Promise<void> {
+        if (this.userModalMode === 'create') {
+            await this.createUser();
+            return;
+        }
         if (!this.selectedUser) return;
+        this.userSaving = true;
+        this.userModalError = '';
         try {
             const req: UpdateUserRequest = {
                 name: this.userForm.name,
@@ -470,11 +519,209 @@ export class CompanyDetailPage implements OnInit {
             await this.loadUsers();
         } catch (err) {
             console.error('Save user error:', err);
+            this.userModalError = 'Kullanıcı güncellenirken bir hata oluştu.';
+        } finally {
+            this.userSaving = false;
+        }
+    }
+
+    /** Yeni kullanıcı kaydı; şirket bilgisi backend tarafında token'dan alınır. */
+    private async createUser(): Promise<void> {
+        this.userModalError = '';
+        if (!this.userForm.name.trim() || !this.userForm.lastName.trim()) {
+            this.userModalError = 'Ad ve soyad zorunludur.';
+            return;
+        }
+        if (!this.userForm.email.trim()) {
+            this.userModalError = 'E-posta zorunludur.';
+            return;
+        }
+        if (this.userForm.password.length < 6) {
+            this.userModalError = 'Şifre en az 6 karakter olmalıdır.';
+            return;
+        }
+
+        this.userSaving = true;
+        try {
+            const req: RegisterRequest = {
+                name: this.userForm.name.trim(),
+                lastName: this.userForm.lastName.trim(),
+                email: this.userForm.email.trim(),
+                password: this.userForm.password,
+                gender: this.userForm.gender,
+            };
+            await this.usersService.register(req);
+            this.showUserModal = false;
+            await this.loadUsers();
+        } catch (err: any) {
+            console.error('Create user error:', err);
+            this.userModalError = 'Kullanıcı eklenemedi: ' + this.settingsError(err);
+        } finally {
+            this.userSaving = false;
         }
     }
 
     closeUserModal(): void {
         this.showUserModal = false;
+        this.userModalError = '';
+    }
+
+    /** Listedeki switch ile kullanıcıyı aktif/pasif yapar; diğer alanlar korunur. */
+    async toggleUserActive(user: UserResponse): Promise<void> {
+        if (this.togglingUserId) return;
+        this.togglingUserId = user.id;
+        const nextBlocked = !user.isBlocked;
+        try {
+            const req: UpdateUserRequest = {
+                name: user.name ?? '',
+                lastName: user.lastName ?? '',
+                gender: user.gender ?? '',
+                isBlocked: nextBlocked,
+            };
+            await this.usersService.update(user.id, req);
+            user.isBlocked = nextBlocked;
+        } catch (err) {
+            console.error('Toggle user error:', err);
+            alert('Kullanıcı durumu güncellenirken bir hata oluştu.');
+        } finally {
+            this.togglingUserId = null;
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // USER ROLES
+    // ═══════════════════════════════════════════════════════════════════════
+
+    async loadRoles(): Promise<void> {
+        try {
+            const [rolesResp, roleUsersResp] = await Promise.all([
+                this.rolesService.getAll(),
+                this.rolesService.getRoleUsers(),
+            ]);
+            this.roles = this.extractRoles(rolesResp);
+            this.roleUsers = this.extractRoleUsers(roleUsersResp);
+        } catch (err) {
+            console.error('Roles load error:', err);
+            this.roles = [];
+            this.roleUsers = [];
+        }
+    }
+
+    private extractRoles(response: unknown): Role[] {
+        return this.extractArray(response) as Role[];
+    }
+
+    private extractRoleUsers(response: unknown): RoleUserResponse[] {
+        return this.extractArray(response) as RoleUserResponse[];
+    }
+
+    /** Kullanıcının atanmış rolleri (liste kolonu ve modal için). */
+    getUserRoles(userId: string): RoleUserResponse[] {
+        return this.roleUsers.filter(ru => ru.userId === userId);
+    }
+
+    getRoleName(roleId: string): string {
+        return this.roles.find(r => r.id === roleId)?.roleDescription || '-';
+    }
+
+    /** Modaldaki kullanıcıya henüz atanmamış roller. */
+    get availableRoles(): Role[] {
+        const assigned = this.userRoles.map(ru => ru.roleId);
+        return this.roles.filter(r => !assigned.includes(r.id));
+    }
+
+    async openRolesModal(user: UserResponse): Promise<void> {
+        this.rolesModalUser = user;
+        this.selectedRoleIds = [];
+        this.rolesErrorMessage = '';
+        this.userRoles = this.getUserRoles(user.id);
+        this.showRolesModal = true;
+        if (!this.roles.length) {
+            await this.loadRoles();
+        }
+        await this.refreshUserRoles();
+    }
+
+    closeRolesModal(): void {
+        this.showRolesModal = false;
+        this.rolesModalUser = null;
+        this.userRoles = [];
+        this.selectedRoleIds = [];
+        this.rolesErrorMessage = '';
+    }
+
+    toggleRoleSelection(roleId: string): void {
+        const idx = this.selectedRoleIds.indexOf(roleId);
+        if (idx > -1) {
+            this.selectedRoleIds.splice(idx, 1);
+        } else {
+            this.selectedRoleIds.push(roleId);
+        }
+    }
+
+    isRoleSelected(roleId: string): boolean {
+        return this.selectedRoleIds.includes(roleId);
+    }
+
+    toggleAllRoles(): void {
+        const available = this.availableRoles;
+        this.selectedRoleIds = this.selectedRoleIds.length === available.length ? [] : available.map(r => r.id);
+    }
+
+    async assignSelectedRoles(): Promise<void> {
+        if (!this.rolesModalUser || !this.selectedRoleIds.length) return;
+        const userId = this.rolesModalUser.id;
+        this.rolesSaving = true;
+        this.rolesErrorMessage = '';
+        try {
+            if (this.selectedRoleIds.length === 1) {
+                await this.rolesService.assignRole({ roleId: this.selectedRoleIds[0], userId });
+            } else {
+                await this.rolesService.bulkAssignRoles({
+                    roleUsers: this.selectedRoleIds.map(roleId => ({ roleId, userId })),
+                });
+            }
+            this.selectedRoleIds = [];
+            await this.refreshUserRoles();
+        } catch (err) {
+            console.error('Assign role error:', err);
+            this.rolesErrorMessage = 'Rol atanırken bir hata oluştu.';
+        } finally {
+            this.rolesSaving = false;
+        }
+    }
+
+    async removeUserRole(roleUser: RoleUserResponse): Promise<void> {
+        const roleName = roleUser.roleDescription || this.getRoleName(roleUser.roleId);
+        if (!confirm(`"${roleName}" rolünü kaldırmak istediğinize emin misiniz?`)) return;
+        this.removingRoleUserId = roleUser.id;
+        this.rolesErrorMessage = '';
+        try {
+            await this.rolesService.removeRoleUser(roleUser.id);
+            await this.refreshUserRoles();
+        } catch (err) {
+            console.error('Remove role error:', err);
+            this.rolesErrorMessage = 'Rol kaldırılırken bir hata oluştu.';
+        } finally {
+            this.removingRoleUserId = null;
+        }
+    }
+
+    /** Modaldaki kullanıcının rollerini API'den tazeler ve liste kolonunu da senkronlar. */
+    private async refreshUserRoles(): Promise<void> {
+        if (!this.rolesModalUser) return;
+        const userId = this.rolesModalUser.id;
+        this.rolesLoading = true;
+        try {
+            const resp = await this.rolesService.getRolesByUser(userId);
+            this.userRoles = this.extractRoleUsers(resp);
+            this.roleUsers = [...this.roleUsers.filter(ru => ru.userId !== userId), ...this.userRoles];
+        } catch (err) {
+            console.error('User roles load error:', err);
+            this.rolesErrorMessage = 'Kullanıcı rolleri yüklenemedi.';
+        } finally {
+            this.rolesLoading = false;
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════════

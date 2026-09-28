@@ -513,10 +513,13 @@
         <div class="row">
             <div class="col-12">
                 <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-transparent border-bottom">
+                    <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">
                             <i class="fa-solid fa-users me-2"></i>Kullanıcı Listesi
                         </h5>
+                        <button type="button" class="btn btn-primary btn-sm" (click)="openCreateUser()">
+                            <i class="fa-solid fa-plus me-1"></i>Yeni Kullanıcı
+                        </button>
                     </div>
                     <div class="card-body">
                         @if (usersLoading) {
@@ -536,32 +539,53 @@
                                 <table class="table table-centered table-hover mb-0">
                                     <thead class="table-light">
                                         <tr>
+                                            <th>İşlemler</th>
                                             <th>Ad</th>
                                             <th>Soyad</th>
                                             <th>E-posta</th>
                                             <th>Cinsiyet</th>
+                                            <th>Roller</th>
                                             <th>Durum</th>
-                                            <th class="text-end">İşlemler</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @for (user of pagedUsers; track user.id) {
                                             <tr>
+                                                <td class="text-nowrap">
+                                                    <button class="btn btn-soft-primary btn-sm me-1" (click)="openEditUser(user)">
+                                                        <i class="fa-solid fa-pen me-1"></i>Düzenle
+                                                    </button>
+                                                    <button class="btn btn-soft-secondary btn-sm" (click)="openRolesModal(user)">
+                                                        <i class="fa-solid fa-user-shield me-1"></i>Roller
+                                                    </button>
+                                                </td>
                                                 <td>{{ user.name }}</td>
                                                 <td>{{ user.lastName }}</td>
                                                 <td>{{ user.email }}</td>
                                                 <td>{{ user.gender }}</td>
                                                 <td>
-                                                    <span class="badge" [class]="user.isBlocked ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'">
-                                                        {{ user.isBlocked ? 'Engelli' : 'Aktif' }}
-                                                    </span>
+                                                    @for (ru of getUserRoles(user.id); track ru.id) {
+                                                        <span class="badge bg-primary-subtle text-primary me-1">{{ ru.roleDescription || getRoleName(ru.roleId) }}</span>
+                                                    } @empty {
+                                                        <span class="text-muted small">Rol atanmamış</span>
+                                                    }
                                                 </td>
-                                                <td class="text-end">
-                                                    <button class="btn btn-soft-primary btn-sm" (click)="openEditUser(user)">Düzenle</button>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="form-check form-switch mb-0">
+                                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                                   [checked]="!user.isBlocked"
+                                                                   [disabled]="togglingUserId === user.id"
+                                                                   (click)="$event.preventDefault(); toggleUserActive(user)">
+                                                        </div>
+                                                        <span class="badge" [class]="user.isBlocked ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'">
+                                                            {{ user.isBlocked ? 'Pasif' : 'Aktif' }}
+                                                        </span>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         } @empty {
-                                            <tr><td colspan="6" class="text-center text-muted">Kullanıcı bulunamadı.</td></tr>
+                                            <tr><td colspan="7" class="text-center text-muted">Kullanıcı bulunamadı.</td></tr>
                                         }
                                     </tbody>
                                 </table>
@@ -607,10 +631,13 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Kullanıcı Düzenle</h5>
+                            <h5 class="modal-title">{{ userModalMode === 'create' ? 'Yeni Kullanıcı' : 'Kullanıcı Düzenle' }}</h5>
                             <button type="button" class="btn-close" (click)="closeUserModal()"></button>
                         </div>
                         <div class="modal-body">
+                            @if (userModalError) {
+                                <div class="alert alert-danger py-2">{{ userModalError }}</div>
+                            }
                             <form>
                                 <div class="mb-3">
                                     <label class="form-label">Ad</label>
@@ -620,6 +647,24 @@
                                     <label class="form-label">Soyad</label>
                                     <input type="text" class="form-control" [(ngModel)]="userForm.lastName" name="lastName" required>
                                 </div>
+                                @if (userModalMode === 'create') {
+                                    <div class="mb-3">
+                                        <label class="form-label">E-posta</label>
+                                        <input type="email" class="form-control" [(ngModel)]="userForm.email" name="email" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Şifre</label>
+                                        <input type="password" class="form-control" [(ngModel)]="userForm.password" name="password"
+                                               autocomplete="new-password" required>
+                                        <div class="form-text">En az 6 karakter olmalıdır.</div>
+                                    </div>
+                                } @else {
+                                    <div class="mb-3">
+                                        <label class="form-label">E-posta</label>
+                                        <input type="email" class="form-control" [value]="userForm.email" disabled>
+                                        <div class="form-text">E-posta adresi değiştirilemez.</div>
+                                    </div>
+                                }
                                 <div class="mb-3">
                                     <label class="form-label">Cinsiyet</label>
                                     <select class="form-select" [(ngModel)]="userForm.gender" name="gender">
@@ -628,15 +673,113 @@
                                         <option value="Diğer">Diğer</option>
                                     </select>
                                 </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" [(ngModel)]="userForm.isBlocked" name="isBlocked" id="isBlocked">
-                                    <label class="form-check-label" for="isBlocked">Engelli</label>
-                                </div>
+                                @if (userModalMode === 'edit') {
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" [(ngModel)]="userForm.isBlocked" name="isBlocked" id="isBlocked">
+                                        <label class="form-check-label" for="isBlocked">Engelli</label>
+                                    </div>
+                                }
                             </form>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-light" (click)="closeUserModal()">İptal</button>
-                            <button type="button" class="btn btn-primary" (click)="saveUser()">Güncelle</button>
+                            <button type="button" class="btn btn-primary" (click)="saveUser()" [disabled]="userSaving">
+                                @if (userSaving) {
+                                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                }
+                                {{ userModalMode === 'create' ? 'Kaydet' : 'Güncelle' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- User Roles Modal -->
+        @if (showRolesModal) {
+            <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fa-solid fa-user-shield me-2"></i>Rol Yönetimi
+                                <span class="text-muted fw-normal">— {{ rolesModalUser?.name }} {{ rolesModalUser?.lastName }}</span>
+                            </h5>
+                            <button type="button" class="btn-close" (click)="closeRolesModal()"></button>
+                        </div>
+                        <div class="modal-body">
+                            @if (rolesErrorMessage) {
+                                <div class="alert alert-danger py-2">{{ rolesErrorMessage }}</div>
+                            }
+
+                            <h6 class="mb-2">Atanmış Roller</h6>
+                            @if (rolesLoading) {
+                                <div class="text-center py-3">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                </div>
+                            } @else {
+                                <div class="table-responsive mb-4">
+                                    <table class="table table-centered table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>İşlemler</th>
+                                                <th>Rol</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (ru of userRoles; track ru.id) {
+                                                <tr>
+                                                    <td class="text-nowrap">
+                                                        <button class="btn btn-soft-danger btn-sm" (click)="removeUserRole(ru)"
+                                                                [disabled]="removingRoleUserId === ru.id">
+                                                            <i class="fa-solid fa-trash me-1"></i>Kaldır
+                                                        </button>
+                                                    </td>
+                                                    <td>{{ ru.roleDescription || getRoleName(ru.roleId) }}</td>
+                                                </tr>
+                                            } @empty {
+                                                <tr><td colspan="2" class="text-center text-muted">Bu kullanıcıya rol atanmamış.</td></tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">Rol Ekle</h6>
+                                @if (availableRoles.length) {
+                                    <button type="button" class="btn btn-link btn-sm p-0" (click)="toggleAllRoles()">
+                                        {{ selectedRoleIds.length === availableRoles.length ? 'Seçimi Temizle' : 'Tümünü Seç' }}
+                                    </button>
+                                }
+                            </div>
+                            @if (availableRoles.length) {
+                                <div class="row g-2">
+                                    @for (role of availableRoles; track role.id) {
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" [id]="'role-' + role.id"
+                                                       [checked]="isRoleSelected(role.id)" (change)="toggleRoleSelection(role.id)">
+                                                <label class="form-check-label" [attr.for]="'role-' + role.id">
+                                                    {{ role.roleDescription }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            } @else {
+                                <p class="text-muted mb-0">Eklenebilecek başka rol yok.</p>
+                            }
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" (click)="closeRolesModal()">Kapat</button>
+                            <button type="button" class="btn btn-primary" (click)="assignSelectedRoles()"
+                                    [disabled]="rolesSaving || !selectedRoleIds.length">
+                                @if (rolesSaving) {
+                                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                }
+                                Rolleri Ekle
+                            </button>
                         </div>
                     </div>
                 </div>

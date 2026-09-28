@@ -6,12 +6,13 @@ import {
     CreateExtensionDefinitionRequest,
     UpdateExtensionDefinitionRequest,
 } from '@/app/core/models/extension/extension-definition.models';
+import { ExtensionCategory } from '@/app/core/models/extension/extension-category.models';
 import { ExtensionManagementService } from '@/app/core/services/extension-management.service';
 
 interface ExtensionDefinitionForm {
     code: string;
     name: string;
-    category: string;
+    categoryCode: string;
     mention: string;
     photoUrl: string;
     isActive: boolean;
@@ -25,6 +26,7 @@ interface ExtensionDefinitionForm {
 })
 export class ExtensionDefinitionsPage implements OnInit {
     items: ExtensionDefinition[] = [];
+    categories: ExtensionCategory[] = [];
     loading = false;
     showModal = false;
     editMode = false;
@@ -41,7 +43,7 @@ export class ExtensionDefinitionsPage implements OnInit {
     form: ExtensionDefinitionForm = {
         code: '',
         name: '',
-        category: '',
+        categoryCode: '',
         mention: '',
         photoUrl: '',
         isActive: true,
@@ -50,7 +52,26 @@ export class ExtensionDefinitionsPage implements OnInit {
     constructor(private extensionService: ExtensionManagementService) {}
 
     ngOnInit(): void {
+        this.loadCategories();
         this.loadItems();
+    }
+
+    async loadCategories(): Promise<void> {
+        try {
+            const response = await this.extensionService.getExtensionCategories();
+            this.categories = this.extractArray<ExtensionCategory>(response)
+                .sort((a, b) => Number(a.sortOrder) - Number(b.sortOrder) || (a.name || '').localeCompare(b.name || '', 'tr-TR'));
+        } catch (err) {
+            console.error('ExtensionCategories load error:', err);
+            this.categories = [];
+        }
+    }
+
+    getCategoryName(item: ExtensionDefinition): string {
+        return item.categoryName
+            || this.categories.find(c => c.code === item.categoryCode)?.name
+            || item.categoryCode
+            || '-';
     }
 
     async loadItems(): Promise<void> {
@@ -82,7 +103,8 @@ export class ExtensionDefinitionsPage implements OnInit {
         this.filteredItems = this.items.filter(item =>
             (item.code || '').toLowerCase().includes(filter) ||
             (item.name || '').toLowerCase().includes(filter) ||
-            (item.category || '').toLowerCase().includes(filter) ||
+            (item.categoryCode || '').toLowerCase().includes(filter) ||
+            (item.categoryName || '').toLowerCase().includes(filter) ||
             (item.mention || '').toLowerCase().includes(filter) ||
             (item.photoUrl || '').toLowerCase().includes(filter)
         );
@@ -101,7 +123,7 @@ export class ExtensionDefinitionsPage implements OnInit {
         this.form = {
             code: '',
             name: '',
-            category: '',
+            categoryCode: '',
             mention: '',
             photoUrl: '',
             isActive: true,
@@ -115,7 +137,7 @@ export class ExtensionDefinitionsPage implements OnInit {
         this.form = {
             code: item.code,
             name: item.name,
-            category: item.category,
+            categoryCode: item.categoryCode,
             mention: item.mention || '',
             photoUrl: item.photoUrl || '',
             isActive: item.isActive,
@@ -124,11 +146,15 @@ export class ExtensionDefinitionsPage implements OnInit {
     }
 
     async save(): Promise<void> {
+        if (!this.form.categoryCode) {
+            alert('Kategori seçiniz.');
+            return;
+        }
         try {
             if (this.editMode && this.selectedItem) {
                 const request: UpdateExtensionDefinitionRequest = {
                     name: this.form.name,
-                    category: this.form.category,
+                    categoryCode: this.form.categoryCode,
                     mention: this.form.mention || undefined,
                     photoUrl: this.form.photoUrl || undefined,
                     isActive: this.form.isActive,
@@ -138,7 +164,7 @@ export class ExtensionDefinitionsPage implements OnInit {
                 const request: CreateExtensionDefinitionRequest = {
                     code: this.form.code,
                     name: this.form.name,
-                    category: this.form.category,
+                    categoryCode: this.form.categoryCode,
                     mention: this.form.mention || undefined,
                     photoUrl: this.form.photoUrl || undefined,
                     isActive: this.form.isActive,

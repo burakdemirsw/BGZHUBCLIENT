@@ -3,7 +3,7 @@ import { HttpClientService } from './http-client.service';
 import { CreateUserRequest, UpdateUserRequest, UserResponse } from '../models/user/user.models';
 import { ApiResponse } from '../models/api-response.model';
 import { PaginationRequest, buildPaginationRequest, PagedResult } from '../models/pagination.model';
-import { RegisterWithCompanyRequest } from '../models/auth/auth.models';
+import { AuthResponse, RegisterRequest, RegisterWithCompanyRequest } from '../models/auth/auth.models';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +11,7 @@ import { RegisterWithCompanyRequest } from '../models/auth/auth.models';
 export class UsersService {
   constructor(private http: HttpClientService) {}
 
-  getAll(req?: PaginationRequest): Promise<ApiResponse<PagedResult<UserResponse>>> {
+  getAll(req?: Partial<PaginationRequest>): Promise<ApiResponse<PagedResult<UserResponse>>> {
     return this.http.post<PagedResult<UserResponse>>(
       { controller: 'Users', action: 'paged' },
       buildPaginationRequest(req),
@@ -24,6 +24,11 @@ export class UsersService {
 
   create(request: CreateUserRequest): Promise<ApiResponse<UserResponse>> {
     return this.http.post<UserResponse>({ controller: 'Users' }, request);
+  }
+
+  /** Yeni kullanıcı oluşturur; şirket backend tarafında token'dan belirlenir. */
+  register(request: RegisterRequest): Promise<ApiResponse<AuthResponse>> {
+    return this.http.post<AuthResponse>({ controller: 'Auth', action: 'register' }, request);
   }
 
   registerWithCompany(request: RegisterWithCompanyRequest): Promise<ApiResponse<UserResponse>> {

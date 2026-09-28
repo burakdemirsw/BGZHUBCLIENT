@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
+import { ClipboardService } from '@/app/core/services/clipboard.service';
 import { ExtensionManagementService } from '@/app/core/services/extension-management.service';
 import { ExtensionDefinition } from '@/app/core/models/extension/extension-definition.models';
 import {
@@ -39,6 +40,8 @@ export class CompanyExtensionsPage implements OnInit {
     totalPages = 1;
     totalPagesArray: number[] = [];
     selectedIds = new Set<string>();
+    /** Kopyalandi geri bildirimi icin aktif buton anahtari */
+    copiedKey: string | null = null;
 
     form: CompanyExtensionForm = {
         extensionId: '',
@@ -49,6 +52,7 @@ export class CompanyExtensionsPage implements OnInit {
     constructor(
         private extensionService: ExtensionManagementService,
         private authStateService: AuthStateService,
+        private clipboardService: ClipboardService,
     ) {}
 
     ngOnInit(): void {
@@ -279,6 +283,28 @@ export class CompanyExtensionsPage implements OnInit {
 
     closeModal(): void {
         this.showModal = false;
+    }
+
+    /**
+     * ID'yi panoya kopyalar. ID ekranda metin olarak gosterilmez;
+     * yalnizca teknik kullanim (link olusturma, destek kaydi) icin kopyalanir.
+     */
+    async copyId(value: string, key: string): Promise<void> {
+        if (!value) return;
+        try {
+            await this.clipboardService.copyText(value);
+            this.copiedKey = key;
+            setTimeout(() => {
+                if (this.copiedKey === key) this.copiedKey = null;
+            }, 1500);
+        } catch (err) {
+            console.error('Copy id error:', err);
+            alert('Kopyalama basarisiz oldu.');
+        }
+    }
+
+    isCopied(key: string): boolean {
+        return this.copiedKey === key;
     }
 
     private refreshCreateSelectableDefinitions(): void {

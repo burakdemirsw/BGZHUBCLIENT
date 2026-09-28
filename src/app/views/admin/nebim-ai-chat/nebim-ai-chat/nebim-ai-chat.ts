@@ -1310,7 +1310,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
             name: content?.title || definition.name || item.extensionName || 'Eklenti',
             mention,
             photoUrl: definition.photoUrl || item.photoUrl,
-            category: content?.category || definition.category?.trim() || 'Genel',
+            category: content?.category || definition.categoryName?.trim() || definition.categoryCode?.trim() || 'Genel',
             subtitle: content?.subtitle || 'Bu eklentiyle ilgili sorularını etiket ekleyerek sorabilirsin.',
             order: content?.order ?? 99,
             isEnabled: item.isEnabled,

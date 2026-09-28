@@ -48,7 +48,7 @@
                                                         <h5 class="mb-1 extension-title">{{ extension.name }}</h5>
                                                         <div class="small text-muted mb-1">{{ extension.code }}</div>
                                                         <div class="d-flex gap-2 flex-wrap">
-                                                            <span class="badge bg-primary-subtle text-primary">{{ extension.category || 'Genel' }}</span>
+                                                            <span class="badge bg-primary-subtle text-primary">{{ getExtensionCategoryName(extension) }}</span>
                                                             @if (extension.mention) {
                                                                 <span class="badge bg-success-subtle text-success">{{ extension.mention }}</span>
                                                             }

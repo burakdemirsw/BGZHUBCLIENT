@@ -119,12 +119,19 @@ export function buildAdminPaginationRequest(req?: Partial<AdminPaginationRequest
  * AuthStateService ile aynı kaynağı kullanır.
  */
 function getCompanyIdFromStorage(): string {
-    try {
-        const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-        return profile.companyId || '';
-    } catch {
-        return '';
+    // AuthStateService auth verisini 'authData' anahtari ile saklar.
+    // Eski surumlerde 'userProfile' kullanildigi icin o da fallback olarak okunur.
+    for (const key of ['authData', 'userProfile']) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (!raw) continue;
+            const parsed = JSON.parse(raw);
+            if (parsed?.companyId) return parsed.companyId;
+        } catch {
+            // bozuk JSON -> sonraki anahtara gec
+        }
     }
+    return '';
 }
 
 export function buildPaginationQuery(req?: PaginationRequest, prefix: string = '?', includeCompanyId: boolean = true): string {

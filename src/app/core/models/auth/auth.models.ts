@@ -8,6 +8,8 @@ export interface RegisterRequest {
   lastName: string;
   email: string;
   password: string;
+  gender?: string;
+  applicationCode?: string | null;
 }
 
 export interface RegisterWithCompanyRequest {
