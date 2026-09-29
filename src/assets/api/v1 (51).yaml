@@ -10964,6 +10964,158 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
+  /api/wms/claim-cargo-companies/paged:
+    post:
+      tags:
+        - ClaimCargoCompany
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfClaimCargoCompanyResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfClaimCargoCompanyResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfClaimCargoCompanyResponse"
+      security:
+        - Bearer: []
+  /api/wms/claim-cargo-companies/{id}:
+    get:
+      tags:
+        - ClaimCargoCompany
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfClaimCargoCompanyResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfClaimCargoCompanyResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfClaimCargoCompanyResponse"
+      security:
+        - Bearer: []
+  /api/wms/claim-cargo-companies:
+    post:
+      tags:
+        - ClaimCargoCompany
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClaimCargoCompanyRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateClaimCargoCompanyRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateClaimCargoCompanyRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfClaimCargoCompanyResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfClaimCargoCompanyResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfClaimCargoCompanyResponse"
+      security:
+        - Bearer: []
+  /api/wms/claim-cargo-companies/update/{id}:
+    post:
+      tags:
+        - ClaimCargoCompany
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateClaimCargoCompanyRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateClaimCargoCompanyRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateClaimCargoCompanyRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/wms/claim-cargo-companies/delete/{id}:
+    post:
+      tags:
+        - ClaimCargoCompany
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
   /api/wms/claims/paged:
     post:
       tags:
@@ -11398,158 +11550,6 @@ paths:
     post:
       tags:
         - ClaimStatus
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/wms/claim-status-desc/paged:
-    post:
-      tags:
-        - ClaimStatusDesc
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AdminPaginationRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/AdminPaginationRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/AdminPaginationRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfClaimStatusDescResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfClaimStatusDescResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfClaimStatusDescResponse"
-      security:
-        - Bearer: []
-  /api/wms/claim-status-desc/{id}:
-    get:
-      tags:
-        - ClaimStatusDesc
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimStatusDescResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimStatusDescResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimStatusDescResponse"
-      security:
-        - Bearer: []
-  /api/wms/claim-status-desc:
-    post:
-      tags:
-        - ClaimStatusDesc
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateClaimStatusDescRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/CreateClaimStatusDescRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/CreateClaimStatusDescRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimStatusDescResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimStatusDescResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimStatusDescResponse"
-      security:
-        - Bearer: []
-  /api/wms/claim-status-desc/update/{id}:
-    post:
-      tags:
-        - ClaimStatusDesc
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateClaimStatusDescRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/UpdateClaimStatusDescRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/UpdateClaimStatusDescRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/wms/claim-status-desc/delete/{id}:
-    post:
-      tags:
-        - ClaimStatusDesc
       parameters:
         - name: id
           in: path
@@ -29345,13 +29345,50 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderTrackingResponse"
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingSummaryResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderTrackingResponse"
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingSummaryResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderTrackingResponse"
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingSummaryResponse"
+      security:
+        - Bearer: []
+  /order-tracking/{companyId}/{extensionId}/{orderNo}/detail:
+    get:
+      tags:
+        - OrderTracking
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: extensionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: orderNo
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingDetailResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingDetailResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingDetailResponse"
       security:
         - Bearer: []
   /order-tracking/{companyId}/{extensionId}/{orderNo}/verification-code:
@@ -29431,13 +29468,13 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderTrackingResponse"
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingDetailResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderTrackingResponse"
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingDetailResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderTrackingResponse"
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingDetailResponse"
       security:
         - Bearer: []
   /order-tracking/{companyId}/return-reasons:
@@ -29522,6 +29559,155 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfListOfWmsBeforeClaimInstructionRespons\
                   e"
+      security:
+        - Bearer: []
+  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claim:
+    post:
+      tags:
+        - OrderTracking
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: extensionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: orderNo
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWmsReturnClaimRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateWmsReturnClaimRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateWmsReturnClaimRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimResultResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimResultResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimResultResponse"
+      security:
+        - Bearer: []
+  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims:
+    get:
+      tags:
+        - OrderTracking
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: extensionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: orderNo
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimListResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimListResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimListResponse"
+      security:
+        - Bearer: []
+  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/detail:
+    get:
+      tags:
+        - OrderTracking
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: extensionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: orderNo
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimDetailResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimDetailResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimDetailResponse"
+      security:
+        - Bearer: []
+  /order-tracking/{companyId}/cargo-companies:
+    get:
+      tags:
+        - OrderTracking
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsCargoCompanyResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsCargoCompanyResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsCargoCompanyResponse"
       security:
         - Bearer: []
   /api/marketplace-questions/by-company/{companyId}/platforms:
@@ -40080,6 +40266,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfClaimCargoCompanyResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ClaimCargoCompanyResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfClaimLineResponse:
       type: object
       properties:
@@ -40125,38 +40343,6 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/ClaimResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfClaimStatusDescResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/ClaimStatusDescResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -45964,6 +46150,40 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfListOfWmsCargoCompanyResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/WmsCargoCompanyResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfListOfWmsOrderImportResult:
       type: object
       properties:
@@ -46013,6 +46233,74 @@ components:
             - array
           items:
             $ref: "#/components/schemas/WmsOrderSyncResult"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfListOfWmsReturnClaimDetailResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/WmsReturnClaimDetailResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfListOfWmsReturnClaimListResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/WmsReturnClaimListResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -47375,7 +47663,7 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfOrderTrackingResponse:
+    ApiResponseOfOrderTrackingDetailResponse:
       type: object
       properties:
         statusCode:
@@ -47387,7 +47675,7 @@ components:
         data:
           oneOf:
             - type: "null"
-            - $ref: "#/components/schemas/OrderTrackingResponse"
+            - $ref: "#/components/schemas/OrderTrackingDetailResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -47452,6 +47740,38 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/OrderTrackingSettingResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfOrderTrackingSummaryResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/OrderTrackingSummaryResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -47983,6 +48303,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfPagedResultOfClaimCargoCompanyResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/PagedResultOfClaimCargoCompanyResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfPagedResultOfClaimLineResponse:
       type: object
       properties:
@@ -48028,38 +48380,6 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/PagedResultOfClaimResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfPagedResultOfClaimStatusDescResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/PagedResultOfClaimStatusDescResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -55535,6 +55855,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfWmsReturnClaimResultResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/WmsReturnClaimResultResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfWmsSettingResponse:
       type: object
       properties:
@@ -59207,6 +59559,58 @@ components:
         updatedDate:
           type: string
           format: date-time
+    ClaimCargoCompanyResponse:
+      required:
+        - id
+        - companyId
+        - cargoExtensionId
+        - customerNo
+        - accountTitle
+        - sortOrder
+        - isActive
+        - createdUserId
+        - createdDate
+        - lastUpdatedUserId
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        cargoExtensionId:
+          type: string
+          format: uuid
+        customerNo:
+          type:
+            - "null"
+            - string
+        accountTitle:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
+        createdUserId:
+          type: string
+          format: uuid
+        createdDate:
+          type: string
+          format: date-time
+        lastUpdatedUserId:
+          type: string
+          format: uuid
+        updatedDate:
+          type: string
+          format: date-time
     ClaimLineResponse:
       required:
         - id
@@ -59507,47 +59911,6 @@ components:
         updatedDate:
           type: string
           format: date-time
-    ClaimStatusDescResponse:
-      required:
-        - id
-        - statusCode
-        - langCode
-        - statusDescription
-        - createdUserId
-        - createdDate
-        - lastUpdatedUserId
-        - updatedDate
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: uint8
-        langCode:
-          type:
-            - "null"
-            - string
-        statusDescription:
-          type:
-            - "null"
-            - string
-        createdUserId:
-          type: string
-          format: uuid
-        createdDate:
-          type: string
-          format: date-time
-        lastUpdatedUserId:
-          type: string
-          format: uuid
-        updatedDate:
-          type: string
-          format: date-time
     ClaimStatusMappingResponse:
       required:
         - id
@@ -59596,6 +59959,7 @@ components:
       required:
         - id
         - statusCode
+        - statusDescription
         - matchKeywords
         - isClosed
         - sortOrder
@@ -59615,6 +59979,10 @@ components:
             - integer
             - string
           format: uint8
+        statusDescription:
+          type:
+            - "null"
+            - string
         matchKeywords:
           type:
             - "null"
@@ -61877,6 +62245,38 @@ components:
             - string
         isActive:
           type: boolean
+    CreateClaimCargoCompanyRequest:
+      required:
+        - companyId
+        - cargoExtensionId
+        - customerNo
+        - accountTitle
+        - sortOrder
+        - isActive
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        cargoExtensionId:
+          type: string
+          format: uuid
+        customerNo:
+          type:
+            - "null"
+            - string
+        accountTitle:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
     CreateClaimLineRequest:
       required:
         - claimId
@@ -62137,27 +62537,6 @@ components:
         lastSyncedDate:
           type: string
           format: date-time
-    CreateClaimStatusDescRequest:
-      required:
-        - statusCode
-        - langCode
-        - statusDescription
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: uint8
-        langCode:
-          type:
-            - "null"
-            - string
-        statusDescription:
-          type:
-            - "null"
-            - string
     CreateClaimStatusMappingRequest:
       required:
         - sourceProvider
@@ -62185,6 +62564,7 @@ components:
     CreateClaimStatusRequest:
       required:
         - statusCode
+        - statusDescription
         - matchKeywords
         - isClosed
         - sortOrder
@@ -62197,6 +62577,10 @@ components:
             - integer
             - string
           format: uint8
+        statusDescription:
+          type:
+            - "null"
+            - string
         matchKeywords:
           type:
             - "null"
@@ -67002,6 +67386,8 @@ components:
         - sortOrder
         - orderLineId
         - externalClaimLineId
+        - sourceItemCode
+        - sourceImageUrl
         - itemCode
         - colorCode
         - itemDim1Code
@@ -67035,6 +67421,14 @@ components:
             - string
           format: uuid
         externalClaimLineId:
+          type:
+            - "null"
+            - string
+        sourceItemCode:
+          type:
+            - "null"
+            - string
+        sourceImageUrl:
           type:
             - "null"
             - string
@@ -67102,7 +67496,7 @@ components:
       required:
         - companyId
         - claimNumber
-        - orderHeaderId
+        - orderNumber
         - customerTypeCode
         - customerCode
         - extensionCode
@@ -67122,7 +67516,6 @@ components:
         - cargoTrackingLink
         - cargoSenderNumber
         - receivedDate
-        - receivedByUserId
         - note
         - lastSyncedDate
         - createdIp
@@ -67135,9 +67528,10 @@ components:
           type:
             - "null"
             - string
-        orderHeaderId:
-          type: string
-          format: uuid
+        orderNumber:
+          type:
+            - "null"
+            - string
         customerTypeCode:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -67224,11 +67618,6 @@ components:
             - "null"
             - string
           format: date-time
-        receivedByUserId:
-          type:
-            - "null"
-            - string
-          format: uuid
         note:
           type:
             - "null"
@@ -68664,6 +69053,84 @@ components:
           type: boolean
           default: true
         defaultCurrencyCode:
+          type:
+            - "null"
+            - string
+    CreateWmsReturnClaimLineRequest:
+      required:
+        - quantity
+      type: object
+      properties:
+        quantity:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        returnReasonCode:
+          type:
+            - "null"
+            - string
+        sourceItemCode:
+          type:
+            - "null"
+            - string
+        itemCode:
+          type:
+            - "null"
+            - string
+        colorCode:
+          type:
+            - "null"
+            - string
+        itemDim1Code:
+          type:
+            - "null"
+            - string
+        usedBarcode:
+          type:
+            - "null"
+            - string
+        sourceImageUrl:
+          type:
+            - "null"
+            - string
+        orderLineId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        externalClaimLineId:
+          type:
+            - "null"
+            - string
+        customerNote:
+          type:
+            - "null"
+            - string
+    CreateWmsReturnClaimRequest:
+      required:
+        - items
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateWmsReturnClaimLineRequest"
+        returnReasonCode:
+          type:
+            - "null"
+            - string
+        afterReturnActionCode:
+          type:
+            - "null"
+            - string
+        cargoExtensionId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        customerNote:
           type:
             - "null"
             - string
@@ -81938,6 +82405,119 @@ components:
         updatedDate:
           type: string
           format: date-time
+    OrderTrackingAddressResponse:
+      required:
+        - recipientName
+        - maskedPhone
+        - city
+        - district
+        - town
+      type: object
+      properties:
+        recipientName:
+          type:
+            - "null"
+            - string
+        maskedPhone:
+          type:
+            - "null"
+            - string
+        city:
+          type:
+            - "null"
+            - string
+        district:
+          type:
+            - "null"
+            - string
+        town:
+          type:
+            - "null"
+            - string
+    OrderTrackingDetailResponse:
+      required:
+        - orderNumber
+        - customerName
+        - orderDate
+        - statusCode
+        - statusName
+        - cargoCompanyName
+        - cargoTrackingNumber
+        - cargoTrackingLink
+        - canRequestReturn
+        - totalAmount
+        - totalVat
+        - cargoAmount
+        - orderNote
+        - deliveryAddress
+        - items
+      type: object
+      properties:
+        orderNumber:
+          type: string
+        customerName:
+          type:
+            - "null"
+            - string
+        orderDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        statusName:
+          type:
+            - "null"
+            - string
+        cargoCompanyName:
+          type:
+            - "null"
+            - string
+        cargoTrackingNumber:
+          type:
+            - "null"
+            - string
+        cargoTrackingLink:
+          type:
+            - "null"
+            - string
+        canRequestReturn:
+          type: boolean
+        totalAmount:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        totalVat:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        cargoAmount:
+          pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+          type:
+            - number
+            - string
+          format: double
+        orderNote:
+          type:
+            - "null"
+            - string
+        deliveryAddress:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/OrderTrackingAddressResponse"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderTrackingItemResponse"
     OrderTrackingItemResponse:
       required:
         - lineId
@@ -82007,59 +82587,6 @@ components:
           type: array
           items:
             type: string
-    OrderTrackingResponse:
-      required:
-        - orderNumber
-        - customerName
-        - orderDate
-        - statusCode
-        - statusName
-        - cargoCompanyName
-        - cargoTrackingNumber
-        - cargoTrackingLink
-        - canRequestReturn
-        - items
-      type: object
-      properties:
-        orderNumber:
-          type: string
-        customerName:
-          type:
-            - "null"
-            - string
-        orderDate:
-          type:
-            - "null"
-            - string
-          format: date-time
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        statusName:
-          type:
-            - "null"
-            - string
-        cargoCompanyName:
-          type:
-            - "null"
-            - string
-        cargoTrackingNumber:
-          type:
-            - "null"
-            - string
-        cargoTrackingLink:
-          type:
-            - "null"
-            - string
-        canRequestReturn:
-          type: boolean
-        items:
-          type: array
-          items:
-            $ref: "#/components/schemas/OrderTrackingItemResponse"
     OrderTrackingSettingDefinitionResponse:
       required:
         - id
@@ -82170,6 +82697,42 @@ components:
         updatedDate:
           type: string
           format: date-time
+    OrderTrackingSummaryResponse:
+      required:
+        - orderNumber
+        - customerName
+        - orderDate
+        - statusName
+        - cargoCompanyName
+        - cargoTrackingNumber
+        - canRequestReturn
+      type: object
+      properties:
+        orderNumber:
+          type: string
+        customerName:
+          type:
+            - "null"
+            - string
+        orderDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        statusName:
+          type:
+            - "null"
+            - string
+        cargoCompanyName:
+          type:
+            - "null"
+            - string
+        cargoTrackingNumber:
+          type:
+            - "null"
+            - string
+        canRequestReturn:
+          type: boolean
     OrderTrackingVerificationResponse:
       required:
         - orderNumber
@@ -82853,6 +83416,51 @@ components:
           type: boolean
         hasNextPage:
           type: boolean
+    PagedResultOfClaimCargoCompanyResponse:
+      required:
+        - items
+        - pageNumber
+        - pageSize
+        - totalCount
+        - totalPages
+        - hasPreviousPage
+        - hasNextPage
+      type: object
+      properties:
+        items:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/ClaimCargoCompanyResponse"
+        pageNumber:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalPages:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        hasPreviousPage:
+          type: boolean
+        hasNextPage:
+          type: boolean
     PagedResultOfClaimLineResponse:
       required:
         - items
@@ -82915,51 +83523,6 @@ components:
             - array
           items:
             $ref: "#/components/schemas/ClaimResponse"
-        pageNumber:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        pageSize:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        totalCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        totalPages:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        hasPreviousPage:
-          type: boolean
-        hasNextPage:
-          type: boolean
-    PagedResultOfClaimStatusDescResponse:
-      required:
-        - items
-        - pageNumber
-        - pageSize
-        - totalCount
-        - totalPages
-        - hasPreviousPage
-        - hasNextPage
-      type: object
-      properties:
-        items:
-          type:
-            - "null"
-            - array
-          items:
-            $ref: "#/components/schemas/ClaimStatusDescResponse"
         pageNumber:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -90840,6 +91403,8 @@ components:
         - sortOrder
         - orderLineId
         - externalClaimLineId
+        - sourceItemCode
+        - sourceImageUrl
         - itemCode
         - colorCode
         - itemDim1Code
@@ -90880,6 +91445,14 @@ components:
             - string
           format: uuid
         externalClaimLineId:
+          type:
+            - "null"
+            - string
+        sourceItemCode:
+          type:
+            - "null"
+            - string
+        sourceImageUrl:
           type:
             - "null"
             - string
@@ -90960,7 +91533,7 @@ components:
         - id
         - companyId
         - claimNumber
-        - orderHeaderId
+        - orderNumber
         - customerTypeCode
         - customerCode
         - extensionCode
@@ -90980,7 +91553,6 @@ components:
         - cargoTrackingLink
         - cargoSenderNumber
         - receivedDate
-        - receivedByUserId
         - note
         - lastSyncedDate
         - createdIp
@@ -91000,9 +91572,10 @@ components:
           type:
             - "null"
             - string
-        orderHeaderId:
-          type: string
-          format: uuid
+        orderNumber:
+          type:
+            - "null"
+            - string
         customerTypeCode:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -91089,11 +91662,6 @@ components:
             - "null"
             - string
           format: date-time
-        receivedByUserId:
-          type:
-            - "null"
-            - string
-          format: uuid
         note:
           type:
             - "null"
@@ -98904,6 +99472,34 @@ components:
             - string
         isActive:
           type: boolean
+    UpdateClaimCargoCompanyRequest:
+      required:
+        - cargoExtensionId
+        - customerNo
+        - accountTitle
+        - sortOrder
+        - isActive
+      type: object
+      properties:
+        cargoExtensionId:
+          type: string
+          format: uuid
+        customerNo:
+          type:
+            - "null"
+            - string
+        accountTitle:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
     UpdateClaimLineRequest:
       required:
         - claimId
@@ -99156,27 +99752,6 @@ components:
         lastSyncedDate:
           type: string
           format: date-time
-    UpdateClaimStatusDescRequest:
-      required:
-        - statusCode
-        - langCode
-        - statusDescription
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: uint8
-        langCode:
-          type:
-            - "null"
-            - string
-        statusDescription:
-          type:
-            - "null"
-            - string
     UpdateClaimStatusMappingRequest:
       required:
         - sourceProvider
@@ -99204,6 +99779,7 @@ components:
     UpdateClaimStatusRequest:
       required:
         - statusCode
+        - statusDescription
         - matchKeywords
         - isClosed
         - sortOrder
@@ -99216,6 +99792,10 @@ components:
             - integer
             - string
           format: uint8
+        statusDescription:
+          type:
+            - "null"
+            - string
         matchKeywords:
           type:
             - "null"
@@ -103929,6 +104509,8 @@ components:
         - sortOrder
         - orderLineId
         - externalClaimLineId
+        - sourceItemCode
+        - sourceImageUrl
         - itemCode
         - colorCode
         - itemDim1Code
@@ -103959,6 +104541,14 @@ components:
             - string
           format: uuid
         externalClaimLineId:
+          type:
+            - "null"
+            - string
+        sourceItemCode:
+          type:
+            - "null"
+            - string
+        sourceImageUrl:
           type:
             - "null"
             - string
@@ -104025,7 +104615,7 @@ components:
     UpdateReturnClaimRequest:
       required:
         - claimNumber
-        - orderHeaderId
+        - orderNumber
         - customerTypeCode
         - customerCode
         - extensionCode
@@ -104045,7 +104635,6 @@ components:
         - cargoTrackingLink
         - cargoSenderNumber
         - receivedDate
-        - receivedByUserId
         - note
         - lastSyncedDate
         - createdIp
@@ -104055,9 +104644,10 @@ components:
           type:
             - "null"
             - string
-        orderHeaderId:
-          type: string
-          format: uuid
+        orderNumber:
+          type:
+            - "null"
+            - string
         customerTypeCode:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -104144,11 +104734,6 @@ components:
             - "null"
             - string
           format: date-time
-        receivedByUserId:
-          type:
-            - "null"
-            - string
-          format: uuid
         note:
           type:
             - "null"
@@ -106985,6 +107570,30 @@ components:
           format: int32
         content:
           type: string
+    WmsCargoCompanyResponse:
+      required:
+        - cargoExtensionId
+        - code
+        - name
+        - customerNo
+        - accountTitle
+      type: object
+      properties:
+        cargoExtensionId:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        customerNo:
+          type:
+            - "null"
+            - string
+        accountTitle:
+          type:
+            - "null"
+            - string
     WmsCurrencyAmount:
       required:
         - currencyCode
@@ -110676,6 +111285,399 @@ components:
             - integer
             - string
           format: int32
+    WmsReturnClaimDetailLineResponse:
+      required:
+        - id
+        - sortOrder
+        - orderLineId
+        - externalClaimLineId
+        - sourceItemCode
+        - itemCode
+        - itemName
+        - colorCode
+        - colorName
+        - itemDim1Code
+        - usedBarcode
+        - sourceImageUrl
+        - quantity
+        - acceptedQuantity
+        - rejectedQuantity
+        - returnReasonCode
+        - returnReasonName
+        - sourceReason
+        - customerNote
+        - statusCode
+        - statusName
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        orderLineId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        externalClaimLineId:
+          type:
+            - "null"
+            - string
+        sourceItemCode:
+          type:
+            - "null"
+            - string
+        itemCode:
+          type:
+            - "null"
+            - string
+        itemName:
+          type:
+            - "null"
+            - string
+        colorCode:
+          type:
+            - "null"
+            - string
+        colorName:
+          type:
+            - "null"
+            - string
+        itemDim1Code:
+          type:
+            - "null"
+            - string
+        usedBarcode:
+          type:
+            - "null"
+            - string
+        sourceImageUrl:
+          type:
+            - "null"
+            - string
+        quantity:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        acceptedQuantity:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        rejectedQuantity:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        returnReasonCode:
+          type:
+            - "null"
+            - string
+        returnReasonName:
+          type:
+            - "null"
+            - string
+        sourceReason:
+          type:
+            - "null"
+            - string
+        customerNote:
+          type:
+            - "null"
+            - string
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: uint8
+        statusName:
+          type:
+            - "null"
+            - string
+    WmsReturnClaimDetailResponse:
+      required:
+        - id
+        - claimNumber
+        - claimDate
+        - orderNumber
+        - extensionCode
+        - externalClaimId
+        - syncSource
+        - statusCode
+        - statusName
+        - returnReasonCode
+        - returnReasonName
+        - afterReturnActionCode
+        - afterReturnActionName
+        - customerNote
+        - customerTypeCode
+        - customerCode
+        - cargoExtensionId
+        - cargoExtensionCode
+        - cargoCompanyName
+        - cargoCustomerNo
+        - cargoAccountTitle
+        - deliveryCompanyCode
+        - cargoTrackingNumber
+        - cargoTrackingLink
+        - cargoSenderNumber
+        - receivedDate
+        - note
+        - createdDate
+        - updatedDate
+        - items
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        claimNumber:
+          type: string
+        claimDate:
+          type: string
+          format: date-time
+        orderNumber:
+          type: string
+        extensionCode:
+          type: string
+        externalClaimId:
+          type:
+            - "null"
+            - string
+        syncSource:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: uint8
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: uint8
+        statusName:
+          type:
+            - "null"
+            - string
+        returnReasonCode:
+          type:
+            - "null"
+            - string
+        returnReasonName:
+          type:
+            - "null"
+            - string
+        afterReturnActionCode:
+          type:
+            - "null"
+            - string
+        afterReturnActionName:
+          type:
+            - "null"
+            - string
+        customerNote:
+          type:
+            - "null"
+            - string
+        customerTypeCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: uint8
+        customerCode:
+          type:
+            - "null"
+            - string
+        cargoExtensionId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        cargoExtensionCode:
+          type:
+            - "null"
+            - string
+        cargoCompanyName:
+          type:
+            - "null"
+            - string
+        cargoCustomerNo:
+          type:
+            - "null"
+            - string
+        cargoAccountTitle:
+          type:
+            - "null"
+            - string
+        deliveryCompanyCode:
+          type:
+            - "null"
+            - string
+        cargoTrackingNumber:
+          type:
+            - "null"
+            - string
+        cargoTrackingLink:
+          type:
+            - "null"
+            - string
+        cargoSenderNumber:
+          type:
+            - "null"
+            - string
+        receivedDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        note:
+          type:
+            - "null"
+            - string
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/WmsReturnClaimDetailLineResponse"
+    WmsReturnClaimLineListResponse:
+      required:
+        - sortOrder
+        - sourceItemCode
+        - itemCode
+        - colorCode
+        - itemDim1Code
+        - usedBarcode
+        - quantity
+        - returnReasonCode
+      type: object
+      properties:
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        sourceItemCode:
+          type:
+            - "null"
+            - string
+        itemCode:
+          type:
+            - "null"
+            - string
+        colorCode:
+          type:
+            - "null"
+            - string
+        itemDim1Code:
+          type:
+            - "null"
+            - string
+        usedBarcode:
+          type:
+            - "null"
+            - string
+        quantity:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        returnReasonCode:
+          type:
+            - "null"
+            - string
+    WmsReturnClaimListResponse:
+      required:
+        - id
+        - returnCode
+        - claimDate
+        - statusCode
+        - returnReasonCode
+        - afterReturnActionCode
+        - deliveryCompanyCode
+        - cargoTrackingNumber
+        - items
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        returnCode:
+          type: string
+        claimDate:
+          type: string
+          format: date-time
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: uint8
+        returnReasonCode:
+          type:
+            - "null"
+            - string
+        afterReturnActionCode:
+          type:
+            - "null"
+            - string
+        deliveryCompanyCode:
+          type:
+            - "null"
+            - string
+        cargoTrackingNumber:
+          type:
+            - "null"
+            - string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/WmsReturnClaimLineListResponse"
+    WmsReturnClaimResultResponse:
+      required:
+        - returnCode
+        - cargoCompanyName
+        - cargoCustomerNo
+        - cargoAccountTitle
+        - validUntil
+      type: object
+      properties:
+        returnCode:
+          type: string
+        cargoCompanyName:
+          type:
+            - "null"
+            - string
+        cargoCustomerNo:
+          type:
+            - "null"
+            - string
+        cargoAccountTitle:
+          type:
+            - "null"
+            - string
+        validUntil:
+          type: string
+          format: date-time
     WmsReturnReasonOptionResponse:
       required:
         - returnCode
@@ -110974,10 +111976,10 @@ tags:
   - name: BeforeClaimInstruction
   - name: City
   - name: CityDesc
+  - name: ClaimCargoCompany
   - name: Claim
   - name: ClaimLine
   - name: ClaimStatus
-  - name: ClaimStatusDesc
   - name: ClaimStatusMapping
   - name: CodeSequence
   - name: Color

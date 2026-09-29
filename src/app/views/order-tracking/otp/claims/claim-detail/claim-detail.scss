@@ -1,0 +1,41 @@
+:host {
+    display: block;
+}
+
+/* Beyaz alanları kırmak için off-white form arka planı */
+.wms-form-body {
+    background-color: #f7f7f9;
+}
+
+.modal-backdrop-layer {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* Tablo içinde uzun açıklama ve değer alanlarının satırı taşırmaması için */
+.otp-description {
+    max-width: 320px;
+}
+
+.otp-value {
+    max-width: 280px;
+    word-break: break-word;
+}
+
+.claim-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.claim-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #98a2b3;
+}
+
+.claim-value {
+    font-size: 0.9rem;
+    color: #212529;
+    word-break: break-word;
+}

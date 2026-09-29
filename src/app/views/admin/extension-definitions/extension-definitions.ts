@@ -8,6 +8,7 @@ import {
 } from '@/app/core/models/extension/extension-definition.models';
 import { ExtensionCategory } from '@/app/core/models/extension/extension-category.models';
 import { ExtensionManagementService } from '@/app/core/services/extension-management.service';
+import { ClipboardService } from '@/app/core/services/clipboard.service';
 
 interface ExtensionDefinitionForm {
     code: string;
@@ -40,6 +41,11 @@ export class ExtensionDefinitionsPage implements OnInit {
     totalPages = 1;
     totalPagesArray: number[] = [];
 
+    /** Kopyalandi geri bildirimi gosterilen satirin anahtari */
+    copiedKey: string | null = null;
+    /** Aktif/Pasif switch'i istek sürerken kilitler */
+    togglingId: string | null = null;
+
     form: ExtensionDefinitionForm = {
         code: '',
         name: '',
@@ -49,7 +55,10 @@ export class ExtensionDefinitionsPage implements OnInit {
         isActive: true,
     };
    
-    constructor(private extensionService: ExtensionManagementService) {}
+    constructor(
+        private extensionService: ExtensionManagementService,
+        private clipboardService: ClipboardService,
+    ) {}
 
     ngOnInit(): void {
         this.loadCategories();
@@ -192,6 +201,48 @@ export class ExtensionDefinitionsPage implements OnInit {
 
     closeModal(): void {
         this.showModal = false;
+    }
+
+    /** Kaydin ID'sini panoya kopyalar (ID ekranda gosterilmez, yalnizca kopyalanir). */
+    async copyId(value: string, key: string): Promise<void> {
+        if (!value) return;
+        try {
+            await this.clipboardService.copyText(value);
+            this.copiedKey = key;
+            setTimeout(() => {
+                if (this.copiedKey === key) this.copiedKey = null;
+            }, 1500);
+        } catch (err) {
+            console.error('Copy id error:', err);
+            alert('Kopyalama basarisiz oldu.');
+        }
+    }
+
+    isCopied(key: string): boolean {
+        return this.copiedKey === key;
+    }
+
+    /** Listeden dogrudan aktif/pasif yapar; diger alanlar korunur. */
+    async toggleActive(item: ExtensionDefinition): Promise<void> {
+        if (this.togglingId) return;
+        this.togglingId = item.id;
+        const nextActive = !item.isActive;
+        try {
+            const request: UpdateExtensionDefinitionRequest = {
+                name: item.name,
+                categoryCode: item.categoryCode,
+                mention: item.mention || undefined,
+                photoUrl: item.photoUrl || undefined,
+                isActive: nextActive,
+            };
+            await this.extensionService.updateExtensionDefinition(item.id, request);
+            item.isActive = nextActive;
+        } catch (err) {
+            console.error('ExtensionDefinitions toggle error:', err);
+            alert('Durum guncellenirken bir hata olustu.');
+        } finally {
+            this.togglingId = null;
+        }
     }
 
     private extractArray<T>(response: unknown): T[] {

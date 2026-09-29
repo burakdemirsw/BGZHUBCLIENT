@@ -3,8 +3,8 @@
 
         <!-- ── Marka başlığı ── -->
         <header class="ot-brand">
-            @if (order?.brand?.logoUrl) {
-                <img [src]="order?.brand?.logoUrl" [alt]="brandName" class="ot-brand-logo"/>
+            @if (brandLogoUrl) {
+                <img [src]="brandLogoUrl" [alt]="brandName" class="ot-brand-logo"/>
             } @else {
                 <span class="ot-brand-mark"><i class="fa-solid fa-box-open"></i></span>
                 <span class="ot-brand-name">{{ brandName || 'Sipariş Paneli' }}</span>
@@ -47,7 +47,7 @@
                     <span class="ot-chip"><i class="fa-solid fa-rotate-left"></i> İade talebi</span>
                 </div>
 
-                <div class="ot-search-box" [class.busy]="searching">
+                <div class="ot-search-box">
                     <i class="fa-solid fa-receipt ot-search-icon"></i>
                     <input type="text" class="ot-search-input"
                            [placeholder]="'Sipariş kodunuz (ör. ' + demoOrderNo + ')'"
@@ -69,51 +69,49 @@
                 }
             </section>
 
-            @if (searchResults.length) {
-                <div class="ot-results">
-                    @for (summary of searchResults; track summary.orderNo) {
-                        <article class="ot-card ot-result">
-                            <div class="ot-result-head">
-                                <div>
-                                    <span class="ot-result-no">{{ summary.orderNo }}</span>
-                                    <span class="ot-result-customer">{{ summary.maskedCustomerName }}</span>
-                                </div>
-                                <span class="ot-pill ot-pill-success">{{ summary.statusName }}</span>
-                            </div>
+            @if (searchResult) {
+                <article class="ot-card ot-result">
+                    <div class="ot-result-head">
+                        <div>
+                            <span class="ot-result-no">{{ searchResult!.orderNumber }}</span>
+                            <span class="ot-result-customer">{{ searchResult!.customerName || '' }}</span>
+                        </div>
+                        <span class="ot-pill ot-pill-success">{{ searchResult!.statusName || '—' }}</span>
+                    </div>
 
-                            <div class="ot-result-meta">
-                                <div>
-                                    <span class="ot-label">Sipariş Tarihi</span>
-                                    <span class="ot-value">{{ summary.orderDate | date:'dd.MM.yyyy' }}</span>
-                                </div>
-                                <div>
-                                    <span class="ot-label">Kargo Şirketi</span>
-                                    <span class="ot-value">{{ summary.cargoCompanyName || '—' }}</span>
-                                </div>
-                                <div>
-                                    <span class="ot-label">Kargo Takip No</span>
-                                    <span class="ot-value">{{ summary.trackingNumber || '—' }}</span>
-                                </div>
-                            </div>
+                    <div class="ot-result-meta">
+                        <div>
+                            <span class="ot-label">Sipariş Tarihi</span>
+                            <span class="ot-value">{{ (searchResult!.orderDate | date:'dd.MM.yyyy') || '—' }}</span>
+                        </div>
+                        <div>
+                            <span class="ot-label">Kargo Şirketi</span>
+                            <span class="ot-value">{{ searchResult!.cargoCompanyName || '—' }}</span>
+                        </div>
+                        <div>
+                            <span class="ot-label">Kargo Takip No</span>
+                            <span class="ot-value">
+                                {{ searchResult!.cargoTrackingNumber || '—' }}
+                            </span>
+                        </div>
+                    </div>
 
-                            <div class="ot-result-actions">
-                                <button type="button" class="ot-btn ot-btn-ghost" (click)="selectOrder(summary, false)">
-                                    <i class="fa-regular fa-eye"></i> Sipariş Detayı
-                                </button>
-                                @if (summary.canCreateReturn) {
-                                    <button type="button" class="ot-btn ot-btn-rose" (click)="selectOrder(summary, true)">
-                                        <i class="fa-solid fa-rotate-left"></i> İade Talebi Yap
-                                    </button>
-                                } @else {
-                                    <span class="ot-note">
-                                        <i class="fa-solid fa-circle-info"></i>
-                                        {{ summary.returnDisabledReason || 'Bu sipariş için iade talebi oluşturulamaz.' }}
-                                    </span>
-                                }
-                            </div>
-                        </article>
-                    }
-                </div>
+                    <div class="ot-result-actions">
+                        <button type="button" class="ot-btn ot-btn-ghost" (click)="continueWithOrder(false)">
+                            <i class="fa-regular fa-eye"></i> Sipariş Detayı
+                        </button>
+                        @if (searchResult!.canRequestReturn) {
+                            <button type="button" class="ot-btn ot-btn-rose" (click)="continueWithOrder(true)">
+                                <i class="fa-solid fa-rotate-left"></i> İade Talebi Yap
+                            </button>
+                        } @else {
+                            <span class="ot-note">
+                                <i class="fa-solid fa-circle-info"></i>
+                                Bu sipariş için iade talebi oluşturulamaz.
+                            </span>
+                        }
+                    </div>
+                </article>
             }
         }
 
@@ -123,10 +121,10 @@
                 <span class="ot-hero-icon ot-hero-icon-accent"><i class="fa-solid fa-shield-halved"></i></span>
                 <h1 class="ot-hero-title">Sipariş Doğrulama</h1>
 
-                @if (selectedSummary) {
+                @if (searchResult) {
                     <div class="ot-hero-tag">
-                        <span class="ot-pill ot-pill-soft">{{ selectedSummary!.orderNo }}</span>
-                        <span>{{ selectedSummary!.maskedCustomerName }}</span>
+                        <span class="ot-pill ot-pill-soft">{{ searchResult!.orderNumber }}</span>
+                        <span>{{ searchResult!.customerName || '' }}</span>
                     </div>
                 }
 
@@ -143,7 +141,11 @@
                     </button>
                 } @else {
                     <p class="ot-hero-sub">
-                        <strong>{{ maskedPhone }}</strong> numarasına gönderilen 6 haneli kodu girin.
+                        @if (maskedPhone) {
+                            <strong>{{ maskedPhone }}</strong> numarasına gönderilen 6 haneli kodu girin.
+                        } @else {
+                            Telefonunuza gönderilen 6 haneli kodu girin.
+                        }
                     </p>
                     <input type="text" inputmode="numeric" maxlength="6" class="ot-code-input"
                            placeholder="••••••" [ngModel]="verificationCode"
@@ -185,90 +187,217 @@
                 <div class="ot-order-head-top">
                     <div>
                         <span class="ot-label">Sipariş No</span>
-                        <div class="ot-order-no">{{ order!.orderNo }}</div>
+                        <div class="ot-order-no">{{ order!.orderNumber }}</div>
                     </div>
-                    <span class="ot-pill ot-pill-success">{{ order!.statusName }}</span>
+                    <span class="ot-pill ot-pill-success">{{ order!.statusName || '—' }}</span>
                 </div>
                 <div class="ot-stats">
                     <div class="ot-stat">
                         <span class="ot-label">Müşteri</span>
-                        <span class="ot-value">{{ order!.maskedCustomerName }}</span>
+                        <span class="ot-value">{{ order!.customerName || '—' }}</span>
                     </div>
                     <div class="ot-stat">
                         <span class="ot-label">Sipariş Tarihi</span>
-                        <span class="ot-value">{{ order!.orderDate | date:'dd.MM.yyyy HH:mm' }}</span>
+                        <span class="ot-value">{{ (order!.orderDate | date:'dd.MM.yyyy HH:mm') || '—' }}</span>
                     </div>
                     <div class="ot-stat">
                         <span class="ot-label">Toplam Tutar</span>
-                        <span class="ot-value ot-value-strong">{{ order!.totalAmount | number:'1.2-2' }} {{ order!.currencyCode }}</span>
+                        <span class="ot-value ot-value-strong">{{ orderTotal | number:'1.2-2' }} {{ currencyCode }}</span>
                     </div>
-                    @if (order!.shipment) {
+                    @if (order!.cargoCompanyName) {
                         <div class="ot-stat">
                             <span class="ot-label">Kargo</span>
-                            <span class="ot-value">{{ order!.shipment!.cargoCompanyName }}</span>
-                            @if (order!.shipment!.trackingNumber) {
-                                <span class="ot-hint">Takip No: {{ order!.shipment!.trackingNumber }}</span>
+                            <span class="ot-value">{{ order!.cargoCompanyName }}</span>
+                            @if (order!.cargoTrackingNumber) {
+                                <span class="ot-hint">
+                                    @if (order!.cargoTrackingLink) {
+                                        <a [href]="order!.cargoTrackingLink" target="_blank" rel="noopener">
+                                            Takip No: {{ order!.cargoTrackingNumber }}
+                                        </a>
+                                    } @else {
+                                        Takip No: {{ order!.cargoTrackingNumber }}
+                                    }
+                                </span>
                             }
                         </div>
                     }
+                    @if (cargoAmount > 0) {
+                        <div class="ot-stat">
+                            <span class="ot-label">Kargo Ücreti</span>
+                            <span class="ot-value">{{ cargoAmount | number:'1.2-2' }} {{ currencyCode }}</span>
+                        </div>
+                    }
+                    @if (order!.deliveryAddress; as address) {
+                        <div class="ot-stat">
+                            <span class="ot-label">Teslimat</span>
+                            <span class="ot-value">{{ address.recipientName || '—' }}</span>
+                            <span class="ot-hint">
+                                {{ address.city || '' }}@if (address.district) { / {{ address.district }} }
+                                @if (address.maskedPhone) {
+                                    <br/>{{ address.maskedPhone }}
+                                }
+                            </span>
+                        </div>
+                    }
                 </div>
+
+                @if (order!.orderNote) {
+                    <p class="ot-hint ot-order-note">
+                        <i class="fa-regular fa-note-sticky"></i> {{ order!.orderNote }}
+                    </p>
+                }
             </section>
 
-            <section class="ot-card">
-                <div class="ot-card-head">
-                    <i class="fa-solid fa-route"></i>
-                    <h2>Sipariş Tarihçesi</h2>
-                </div>
-                <div class="ot-card-body">
-                    <ul class="ot-timeline">
-                        @for (history of order!.history; track $index) {
-                            <li [class.done]="history.isCompleted">
-                                <div>
-                                    <div class="ot-timeline-title">{{ history.title }}</div>
-                                    @if (history.date) {
-                                        <div class="ot-timeline-meta">{{ history.date | date:'dd.MM.yyyy HH:mm' }}</div>
+            @if (hasReturnClaim) {
+                <section class="ot-card">
+                    <div class="ot-card-head">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <h2>İade Talebiniz</h2>
+                        <span class="ot-count">{{ returnClaims.length }}</span>
+                    </div>
+                    <div class="ot-card-body ot-card-body-flush">
+                        @for (claim of returnClaims; track claim.id) {
+                            <div class="ot-claim">
+                                <div class="ot-claim-head">
+                                    <div>
+                                        <span class="ot-label">Talep No</span>
+                                        <span class="ot-value ot-value-strong">{{ claim.claimNumber }}</span>
+                                    </div>
+                                    <span class="ot-pill ot-pill-soft">{{ claim.statusName || '-' }}</span>
+                                </div>
+
+                                <div class="ot-claim-meta">
+                                    <div>
+                                        <span class="ot-label">Talep Tarihi</span>
+                                        <span class="ot-value">{{ claim.claimDate | date:'dd.MM.yyyy HH:mm' }}</span>
+                                    </div>
+                                    @if (claim.returnReasonName) {
+                                        <div>
+                                            <span class="ot-label">İade Nedeni</span>
+                                            <span class="ot-value">{{ claim.returnReasonName }}</span>
+                                        </div>
                                     }
-                                    @if (history.description) {
-                                        <div class="ot-timeline-meta">{{ history.description }}</div>
+                                    @if (claim.afterReturnActionName) {
+                                        <div>
+                                            <span class="ot-label">Talep Tipi</span>
+                                            <span class="ot-value">{{ claim.afterReturnActionName }}</span>
+                                        </div>
+                                    }
+                                    @if (claim.cargoCompanyName) {
+                                        <div>
+                                            <span class="ot-label">Kargo</span>
+                                            <span class="ot-value">{{ claim.cargoCompanyName }}</span>
+                                        </div>
                                     }
                                 </div>
-                                @if (history.logoUrl) {
-                                    <img [src]="history.logoUrl" [alt]="history.title" class="ot-timeline-logo"/>
+
+                                @if (claim.cargoSenderNumber) {
+                                    <div class="ot-claim-code">
+                                        <span class="ot-label">İade Kargo Kodunuz</span>
+                                        <strong>{{ claim.cargoSenderNumber }}</strong>
+                                        @if (claim.cargoCustomerNo) {
+                                            <span class="ot-hint">
+                                                Kargo cari: {{ claim.cargoCustomerNo }}
+                                                @if (claim.cargoAccountTitle) { — {{ claim.cargoAccountTitle }} }
+                                            </span>
+                                        }
+                                    </div>
                                 }
-                            </li>
-                        } @empty {
-                            <li class="done">
-                                <div class="ot-timeline-title">Henüz hareket bulunmuyor</div>
-                            </li>
+
+                                @if (claim.cargoTrackingNumber) {
+                                    <p class="ot-hint">
+                                        @if (claim.cargoTrackingLink) {
+                                            <a [href]="claim.cargoTrackingLink" target="_blank" rel="noopener">
+                                                İade kargo takip no: {{ claim.cargoTrackingNumber }}
+                                            </a>
+                                        } @else {
+                                            İade kargo takip no: {{ claim.cargoTrackingNumber }}
+                                        }
+                                    </p>
+                                }
+
+                                <div class="ot-claim-items">
+                                    <span class="ot-label">İade Edilen Ürünler</span>
+                                    @for (line of claim.items; track line.id) {
+                                        @let lineImage = claimLineImage(line);
+                                        <div class="ot-product ot-product-sm">
+                                            <div class="ot-thumb">
+                                                @if (lineImage) {
+                                                    <img [src]="lineImage" [alt]="claimLineName(line)"/>
+                                                } @else {
+                                                    <i class="fa-regular fa-image"></i>
+                                                }
+                                            </div>
+                                            <div class="ot-product-info">
+                                                <div class="ot-product-name">{{ claimLineName(line) }}</div>
+                                                @if (claimLineVariant(line)) {
+                                                    <span class="ot-tag">{{ claimLineVariant(line) }}</span>
+                                                }
+                                                <div class="ot-hint">
+                                                    {{ line.quantity }} adet
+                                                    @if (line.returnReasonName) { · {{ line.returnReasonName }} }
+                                                </div>
+                                                @if (line.customerNote) {
+                                                    <div class="ot-hint">
+                                                        <i class="fa-regular fa-comment-dots"></i> {{ line.customerNote }}
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="ot-claim-line-state">
+                                                @if (line.statusName) {
+                                                    <span class="ot-pill ot-pill-soft">{{ line.statusName }}</span>
+                                                }
+                                                @if (toNumber(line.acceptedQuantity) > 0) {
+                                                    <span class="ot-hint">{{ line.acceptedQuantity }} kabul</span>
+                                                }
+                                                @if (toNumber(line.rejectedQuantity) > 0) {
+                                                    <span class="ot-hint">{{ line.rejectedQuantity }} ret</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    } @empty {
+                                        <span class="ot-hint">Bu talepte ürün satırı bulunamadı.</span>
+                                    }
+                                </div>
+                            </div>
                         }
-                    </ul>
-                </div>
-            </section>
+                    </div>
+                </section>
+            }
 
             <section class="ot-card">
                 <div class="ot-card-head">
                     <i class="fa-solid fa-bag-shopping"></i>
                     <h2>Ürünler</h2>
-                    <span class="ot-count">{{ order!.products.length }}</span>
+                    <span class="ot-count">{{ order!.items.length }}</span>
                 </div>
                 <div class="ot-card-body ot-card-body-flush">
-                    @for (product of order!.products; track product.id) {
+                    @for (item of order!.items; track item.lineId) {
                         <div class="ot-product">
                             <div class="ot-thumb">
-                                @if (product.imageUrl) {
-                                    <img [src]="product.imageUrl" [alt]="product.name"/>
+                                @if (item.imageUrl) {
+                                    <img [src]="item.imageUrl" [alt]="item.productName || ''"/>
                                 } @else {
                                     <i class="fa-regular fa-image"></i>
                                 }
                             </div>
                             <div class="ot-product-info">
-                                <div class="ot-product-name">{{ product.name }}</div>
-                                @if (product.variantText) {
-                                    <span class="ot-tag">{{ product.variantText }}</span>
+                                <div class="ot-product-name">{{ item.productName || '—' }}</div>
+                                @if (optionsText(item)) {
+                                    <span class="ot-tag">{{ optionsText(item) }}</span>
                                 }
-                                <div class="ot-hint">{{ product.quantity }} adet × {{ product.unitPrice | number:'1.2-2' }} {{ product.currencyCode }}</div>
+                                <div class="ot-hint">
+                                    {{ item.quantity }} adet × {{ item.unitPrice | number:'1.2-2' }} {{ currencyCode }}
+                                    @if (item.statusName) {
+                                        · {{ item.statusName }}
+                                    }
+                                </div>
                             </div>
-                            <div class="ot-product-total">{{ product.totalPrice | number:'1.2-2' }} {{ product.currencyCode }}</div>
+                            <div class="ot-product-total">{{ item.totalAmount | number:'1.2-2' }} {{ currencyCode }}</div>
+                        </div>
+                    } @empty {
+                        <div class="ot-card-body">
+                            <span class="ot-hint">Bu siparişte ürün bilgisi bulunamadı.</span>
                         </div>
                     }
                 </div>
@@ -285,7 +414,7 @@
                 <button type="button" class="ot-btn ot-btn-ghost" (click)="backToSearch()">
                     <i class="fa-solid fa-arrow-left"></i> Yeni Sorgu
                 </button>
-                @if (order!.canCreateReturn) {
+                @if (canOpenReturnFlow) {
                     <button type="button" class="ot-btn ot-btn-rose ot-btn-grow" (click)="openReturnFlow()" [disabled]="loadingOptions">
                         @if (loadingOptions) {
                             <span class="spinner-border spinner-border-sm me-2"></span>
@@ -295,7 +424,7 @@
                 } @else {
                     <span class="ot-note ot-btn-grow">
                         <i class="fa-solid fa-circle-info"></i>
-                        {{ order!.returnDisabledReason || 'Bu sipariş için iade talebi oluşturulamaz.' }}
+                        {{ returnDisabledReason }}
                     </span>
                 }
             </div>
@@ -306,9 +435,9 @@
             <section class="ot-card ot-return-head">
                 <div>
                     <span class="ot-label">İade İşlemleri</span>
-                    <div class="ot-order-no">{{ order!.orderNo }}</div>
+                    <div class="ot-order-no">{{ order!.orderNumber }}</div>
                 </div>
-                <span class="ot-result-customer">{{ order!.maskedCustomerName }}</span>
+                <span class="ot-result-customer">{{ order!.customerName || '' }}</span>
             </section>
 
             <!-- 1. Adım: ürün seçimi -->
@@ -323,7 +452,7 @@
                         <strong>Ürün Seçimi</strong>
                         <small>Geri gönderilecek ürünleri ve iade nedenini seçin</small>
                     </span>
-                    @if (returnStep > 1 && selectedProductCount > 0) {
+                    @if (returnStep > 1 && selectedLineCount > 0) {
                         <span class="ot-pill ot-pill-soft">{{ selectedTotalQuantity }} adet</span>
                     }
                 </button>
@@ -335,54 +464,50 @@
                             edilmez ve ürünler karşı ödemeli olarak tarafınıza iade edilir.
                         </p>
 
-                        @for (product of order!.products; track product.id) {
-                            <div class="ot-return-product" [class.picked]="quantityOf(product) > 0">
+                        @for (item of order!.items; track item.lineId) {
+                            <div class="ot-return-product" [class.picked]="quantityOf(item) > 0">
                                 <div class="ot-thumb">
-                                    @if (product.imageUrl) {
-                                        <img [src]="product.imageUrl" [alt]="product.name"/>
+                                    @if (item.imageUrl) {
+                                        <img [src]="item.imageUrl" [alt]="item.productName || ''"/>
                                     } @else {
                                         <i class="fa-regular fa-image"></i>
                                     }
                                 </div>
                                 <div class="ot-product-info">
-                                    <div class="ot-product-name">{{ product.name }}</div>
-                                    @if (product.variantText) {
-                                        <span class="ot-tag">{{ product.variantText }}</span>
+                                    <div class="ot-product-name">{{ item.productName || '—' }}</div>
+                                    @if (optionsText(item)) {
+                                        <span class="ot-tag">{{ optionsText(item) }}</span>
                                     }
-                                    <div class="ot-hint">Birim fiyat {{ product.unitPrice | number:'1.2-2' }} {{ product.currencyCode }}</div>
+                                    <div class="ot-hint">Birim fiyat {{ item.unitPrice | number:'1.2-2' }} {{ currencyCode }}</div>
 
-                                    @if (product.isReturnable) {
-                                        <select class="ot-select" [ngModel]="quantityOf(product)"
-                                                (ngModelChange)="onQuantityChange(product, $event)">
-                                            @for (count of quantityOptions(product); track count) {
-                                                @if (count === 0) {
-                                                    <option [ngValue]="0">İade etmiyorum</option>
-                                                } @else {
-                                                    <option [ngValue]="count">{{ count }} adet iade edeceğim</option>
-                                                }
+                                    <select class="ot-select" [ngModel]="quantityOf(item)"
+                                            (ngModelChange)="onQuantityChange(item, $event)">
+                                        @for (count of quantityOptions(item); track count) {
+                                            @if (count === 0) {
+                                                <option [ngValue]="0">İade etmiyorum</option>
+                                            } @else {
+                                                <option [ngValue]="count">{{ count }} adet iade edeceğim</option>
+                                            }
+                                        }
+                                    </select>
+                                    @if (quantityOf(item) > 0) {
+                                        <select class="ot-select" [class.invalid]="!reasonOf(item)"
+                                                [ngModel]="reasonOf(item)"
+                                                (ngModelChange)="onReasonChange(item, $event)">
+                                            <option value="">Neden iade ediyorsunuz?</option>
+                                            @for (reason of reasons; track reason.returnCode) {
+                                                <option [value]="reason.returnCode">{{ reason.returnReasonDescription }}</option>
                                             }
                                         </select>
-                                        @if (quantityOf(product) > 0) {
-                                            <select class="ot-select" [class.invalid]="!reasonOf(product)"
-                                                    [ngModel]="reasonOf(product)"
-                                                    (ngModelChange)="onReasonChange(product, $event)">
-                                                <option value="">Neden iade ediyorsunuz?</option>
-                                                @for (reason of options?.reasons; track reason.id) {
-                                                    <option [value]="reason.id">{{ reason.name }}</option>
-                                                }
-                                            </select>
-                                        }
-                                    } @else {
-                                        <span class="ot-pill ot-pill-danger">Bu ürün iade edilemez</span>
                                     }
                                 </div>
                             </div>
                         }
 
-                        @if (selectedProductCount > 0) {
+                        @if (selectedLineCount > 0) {
                             <div class="ot-summary-bar">
-                                <span><strong>{{ selectedProductCount }}</strong> ürün · <strong>{{ selectedTotalQuantity }}</strong> adet</span>
-                                <span>Tahmini tutar <strong>{{ selectedTotalAmount | number:'1.2-2' }} {{ order!.currencyCode }}</strong></span>
+                                <span><strong>{{ selectedLineCount }}</strong> ürün · <strong>{{ selectedTotalQuantity }}</strong> adet</span>
+                                <span>Tahmini tutar <strong>{{ selectedTotalAmount | number:'1.2-2' }} {{ currencyCode }}</strong></span>
                             </div>
                         }
                     </div>
@@ -412,18 +537,15 @@
                             </p>
 
                             <div class="ot-options">
-                                @for (resolution of options?.resolutions; track resolution.id) {
-                                    <label class="ot-option" [class.selected]="selectedResolutionId === resolution.id">
-                                        <input type="radio" [checked]="selectedResolutionId === resolution.id"
-                                               (change)="selectedResolutionId = resolution.id"/>
+                                @for (action of actions; track action.actionCode) {
+                                    <label class="ot-option" [class.selected]="selectedActionCode === action.actionCode">
+                                        <input type="radio" [checked]="selectedActionCode === action.actionCode"
+                                               (change)="selectedActionCode = action.actionCode"/>
                                         <span class="ot-option-mark"></span>
-                                        <span>
-                                            <strong>{{ resolution.name }}</strong>
-                                            @if (resolution.description) {
-                                                <small>{{ resolution.description }}</small>
-                                            }
-                                        </span>
+                                        <strong>{{ action.actionDescription }}</strong>
                                     </label>
+                                } @empty {
+                                    <span class="ot-hint">Tanımlı bir işlem tipi bulunamadı.</span>
                                 }
                             </div>
 
@@ -449,25 +571,21 @@
                     @if (returnStep === 3) {
                         <div class="ot-card-body">
                             <div class="ot-options">
-                                @for (company of options?.cargoCompanies; track company.id) {
-                                    <label class="ot-option" [class.selected]="selectedCargoCompanyId === company.id">
-                                        <input type="radio" [checked]="selectedCargoCompanyId === company.id"
+                                @for (company of cargoCompanies; track company.cargoExtensionId) {
+                                    <label class="ot-option" [class.selected]="selectedCargoExtensionId === company.cargoExtensionId">
+                                        <input type="radio" [checked]="selectedCargoExtensionId === company.cargoExtensionId"
                                                (change)="selectCargoCompany(company)"/>
                                         <span class="ot-option-mark"></span>
-                                        @if (company.logoUrl) {
-                                            <img [src]="company.logoUrl" [alt]="company.name" class="ot-cargo-logo"/>
-                                        } @else {
-                                            <strong>{{ company.name }}</strong>
-                                        }
+                                        <strong>{{ company.name }}</strong>
                                     </label>
                                 }
                             </div>
 
                             <div class="ot-review">
                                 <div><span class="ot-label">Ürün</span><span>{{ selectedTotalQuantity }} adet</span></div>
-                                <div><span class="ot-label">Talep</span><span>{{ resolutionName }}</span></div>
+                                <div><span class="ot-label">Talep</span><span>{{ selectedActionDescription }}</span></div>
                                 <div><span class="ot-label">Kargo</span><span>{{ selectedCargoCompany?.name || '—' }}</span></div>
-                                <div><span class="ot-label">Tahmini Tutar</span><span>{{ selectedTotalAmount | number:'1.2-2' }} {{ order!.currencyCode }}</span></div>
+                                <div><span class="ot-label">Tahmini Tutar</span><span>{{ selectedTotalAmount | number:'1.2-2' }} {{ currencyCode }}</span></div>
                             </div>
                         </div>
                     }
@@ -516,8 +634,10 @@
             </div>
             <div class="ot-dialog-body">
                 <ul class="ot-disclaimers">
-                    @for (text of options?.disclaimers; track $index) {
-                        <li>{{ text }}</li>
+                    @for (instruction of instructions; track $index) {
+                        <li>{{ instruction.content }}</li>
+                    } @empty {
+                        <li>İade talebinizi oluşturmadan önce ürünleri kontrol ettiğinizden emin olun.</li>
                     }
                 </ul>
             </div>

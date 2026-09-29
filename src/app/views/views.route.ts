@@ -74,6 +74,6 @@ export const VIEWS_ROUTES: Routes = [
     },
     {
         path: '',
-        loadChildren: () => import('@/app/views/otp/otp.route').then((mod) => mod.OTP_ROUTES)
+        loadChildren: () => import('@/app/views/order-tracking/otp/otp.route').then((mod) => mod.OTP_ROUTES)
     },
 ];

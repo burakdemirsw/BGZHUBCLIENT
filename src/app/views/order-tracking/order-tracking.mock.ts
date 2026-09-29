@@ -1,18 +1,18 @@
 import {
     AfterReturnActionOptionResponse,
     BeforeClaimInstructionOptionResponse,
-    CargoCompanyOption,
+    CargoCompanyResponse,
     CreateReturnClaimRequest,
-    CreateReturnClaimResponse,
-    OrderTrackingResponse,
+    OrderTrackingDetailResponse,
+    OrderTrackingSummaryResponse,
+    ReturnClaimDetailResponse,
+    ReturnClaimResultResponse,
     ReturnReasonOptionResponse,
 } from '@/app/core/models/order-tracking/order-tracking.models';
 
 /**
- * Test verileri.
- * URL'de companyId / extensionId yoksa sayfa bu verilerle çalışır (demo modu).
- * Ayrıca kargo şirketi listesi ve iade talebi oluşturma uçları API'de
- * bulunmadığı için bu iki akış gerçek parametrelerle de mock'tan beslenir.
+ * Demo modu test verileri.
+ * URL'de companyId / extensionId yoksa sayfa API'ye gitmeden bu verilerle çalışır.
  */
 
 /** Demo modda kabul edilen doğrulama kodu */
@@ -20,7 +20,7 @@ export const MOCK_VERIFICATION_CODE = '123456';
 
 export const MOCK_ORDER_NO = '839UG3949F';
 
-export function buildMockOrder(orderNo: string = MOCK_ORDER_NO): OrderTrackingResponse {
+export function buildMockOrderDetail(orderNo: string = MOCK_ORDER_NO): OrderTrackingDetailResponse {
     return {
         orderNumber: orderNo,
         customerName: 'Z***a B*********k',
@@ -31,6 +31,17 @@ export function buildMockOrder(orderNo: string = MOCK_ORDER_NO): OrderTrackingRe
         cargoTrackingNumber: '887949099683',
         cargoTrackingLink: null,
         canRequestReturn: true,
+        totalAmount: 4767.97,
+        totalVat: 794.66,
+        cargoAmount: 0,
+        orderNote: null,
+        deliveryAddress: {
+            recipientName: 'Z***a B*********k',
+            maskedPhone: '0(5**) *** ** 34',
+            city: 'İstanbul',
+            district: 'Kadıköy',
+            town: 'Caferağa',
+        },
         items: [
             {
                 lineId: 1,
@@ -75,49 +86,54 @@ export function buildMockOrder(orderNo: string = MOCK_ORDER_NO): OrderTrackingRe
     };
 }
 
+export function buildMockOrderSummary(orderNo: string = MOCK_ORDER_NO): OrderTrackingSummaryResponse {
+    const detail = buildMockOrderDetail(orderNo);
+    return {
+        orderNumber: detail.orderNumber,
+        customerName: detail.customerName,
+        orderDate: detail.orderDate,
+        statusName: detail.statusName,
+        cargoCompanyName: detail.cargoCompanyName,
+        cargoTrackingNumber: detail.cargoTrackingNumber,
+        canRequestReturn: detail.canRequestReturn,
+    };
+}
+
 export const MOCK_RETURN_REASONS: ReturnReasonOptionResponse[] = [
-    { returnCode: 'SIZE', returnReasonDescription: 'Beden / kalıp uymadı', sortOrder: 1 },
-    { returnCode: 'DISLIKE', returnReasonDescription: 'Ürünü beğenmedim', sortOrder: 2 },
-    { returnCode: 'DEFECT', returnReasonDescription: 'Ürün kusurlu / hatalı geldi', sortOrder: 3 },
-    { returnCode: 'WRONG', returnReasonDescription: 'Yanlış ürün gönderildi', sortOrder: 4 },
-    { returnCode: 'OTHER', returnReasonDescription: 'Diğer', sortOrder: 5 },
+    { returnCode: 'BEDEN', returnReasonDescription: 'Beden / Ölçü Uymadı', sortOrder: 10 },
+    { returnCode: 'RENK', returnReasonDescription: 'Renk Beklenenden Farklı', sortOrder: 20 },
+    { returnCode: 'BEGENMEDI', returnReasonDescription: 'Beğenmedi / Vazgeçti', sortOrder: 30 },
+    { returnCode: 'HATALI', returnReasonDescription: 'Ürün Kusurlu / Hatalı', sortOrder: 40 },
 ];
 
 export const MOCK_AFTER_RETURN_ACTIONS: AfterReturnActionOptionResponse[] = [
-    { actionCode: 'REFUND_CARD', actionDescription: 'Kredi kartıma para iadesi yapılmasını istiyorum.', sortOrder: 1 },
-    { actionCode: 'GIFT_CARD', actionDescription: 'Hediye çeki / mağaza puanı olarak iade edilsin.', sortOrder: 2 },
-    { actionCode: 'EXCHANGE', actionDescription: 'Ürünü farklı bir beden ile değiştirmek istiyorum.', sortOrder: 3 },
+    { actionCode: 'REFUND_CARD', actionDescription: 'Kredi kartıma para iadesi yapılmasını istiyorum.', sortOrder: 10 },
+    { actionCode: 'GIFT_CARD', actionDescription: 'Hediye çeki / mağaza puanı olarak iade edilsin.', sortOrder: 20 },
+    { actionCode: 'EXCHANGE', actionDescription: 'Ürünü farklı bir beden ile değiştirmek istiyorum.', sortOrder: 30 },
 ];
 
 export const MOCK_BEFORE_CLAIM_INSTRUCTIONS: BeforeClaimInstructionOptionResponse[] = [
     {
-        sortOrder: 1,
+        sortOrder: 10,
         content: 'ÖNEMLİ! 1(bir) sipariş için yalnızca 1(bir) iade talebi oluşturabilirsiniz. Ürünlerinizi teslim aldıktan sonra dikkatlice kontrol edin ve iade edilmesi gerekenleri tek seferde tek kod alarak iade edin.',
     },
     {
-        sortOrder: 2,
+        sortOrder: 20,
         content: 'ÖNEMLİ! İade paketinin içerisine sadece iade talebi oluştururken seçtiğiniz ürünleri koymalısınız. Seçilenden fazla ya da eksik ürün ulaşması durumunda iade talebiniz reddedilecektir.',
     },
     {
-        sortOrder: 3,
-        content: 'ÖNEMLİ! Firmamıza ulaşan iade ürünlerin yeniden satılmasına engel bir durum varsa iade talebiniz reddedilecek ve ürünler kargo ücreti tarafınızdan ödenecek şekilde size gönderilecektir.',
-    },
-    {
-        sortOrder: 4,
+        sortOrder: 30,
         content: 'İade talebinizi oluşturduktan sonra seçtiğiniz kargo şirketinin en yakın şubesinin adres ve telefon bilgilerini ilgili kargo şirketinin internet sitesinden öğrenebilirsiniz.',
     },
 ];
 
-/** API'de kargo şirketi listesi ucu yok — açılana kadar bu liste kullanılır */
-export const MOCK_CARGO_COMPANIES: CargoCompanyOption[] = [
-    { code: 'DHL', name: 'DHL eCommerce', customerNo: '789097600', accountTitle: 'ESRA HELVACI TEKSTİL SANAYİ VE TİCARET LİMİTED ŞİRKETİ' },
-    { code: 'YURTICI', name: 'Yurtiçi Kargo', customerNo: '456123789', accountTitle: 'ESRA HELVACI TEKSTİL SANAYİ VE TİCARET LİMİTED ŞİRKETİ' },
-    { code: 'ARAS', name: 'Aras Kargo', customerNo: '332211445', accountTitle: 'ESRA HELVACI TEKSTİL SANAYİ VE TİCARET LİMİTED ŞİRKETİ' },
+export const MOCK_CARGO_COMPANIES: CargoCompanyResponse[] = [
+    { cargoExtensionId: '11111111-1111-1111-1111-111111111111', code: 'DHL', name: 'DHL eCommerce', customerNo: '789097600', accountTitle: 'ESRA HELVACI TEKSTİL SANAYİ VE TİCARET LİMİTED ŞİRKETİ' },
+    { cargoExtensionId: '22222222-2222-2222-2222-222222222222', code: 'YURTICI', name: 'Yurtiçi Kargo', customerNo: '456123789', accountTitle: 'ESRA HELVACI TEKSTİL SANAYİ VE TİCARET LİMİTED ŞİRKETİ' },
 ];
 
-/** API'de iade talebi oluşturma ucu yok — sonuç ekranı bu değerle beslenir */
-export function buildMockReturnResult(request: CreateReturnClaimRequest): CreateReturnClaimResponse {
-    const cargo = MOCK_CARGO_COMPANIES.find(item => item.code === request.cargoCompanyCode);
+export function buildMockReturnResult(request: CreateReturnClaimRequest): ReturnClaimResultResponse {
+    const cargo = MOCK_CARGO_COMPANIES.find(item => item.cargoExtensionId === request.cargoExtensionId);
     const validUntil = new Date();
     validUntil.setDate(validUntil.getDate() + 3);
     return {
@@ -126,5 +142,64 @@ export function buildMockReturnResult(request: CreateReturnClaimRequest): Create
         cargoCustomerNo: cargo?.customerNo ?? '789097600',
         cargoAccountTitle: cargo?.accountTitle ?? 'ESRA HELVACI TEKSTİL SANAYİ VE TİCARET LİMİTED ŞİRKETİ',
         validUntil: validUntil.toISOString(),
+    };
+}
+
+/** Demo modda "mevcut iade talebi" ekranını denemek için örnek talep */
+export function buildMockReturnClaim(orderNo: string = MOCK_ORDER_NO): ReturnClaimDetailResponse {
+    return {
+        id: '99999999-9999-9999-9999-999999999999',
+        claimNumber: 'IADE-2026-000142',
+        claimDate: '2026-09-28T10:20:00',
+        orderNumber: orderNo,
+        extensionCode: 'ticimax',
+        externalClaimId: null,
+        syncSource: 1,
+        statusCode: 1,
+        statusName: 'Talep Alındı',
+        returnReasonCode: 'BEDEN',
+        returnReasonName: 'Beden / Ölçü Uymadı',
+        afterReturnActionCode: 'REFUND_CARD',
+        afterReturnActionName: 'Kredi kartıma para iadesi yapılmasını istiyorum.',
+        customerNote: null,
+        customerTypeCode: null,
+        customerCode: null,
+        cargoExtensionId: '11111111-1111-1111-1111-111111111111',
+        cargoExtensionCode: 'dhl',
+        cargoCompanyName: 'DHL eCommerce',
+        cargoCustomerNo: '789097600',
+        cargoAccountTitle: 'ESRA HELVACI TEKSTİL SANAYİ VE TİCARET LİMİTED ŞİRKETİ',
+        deliveryCompanyCode: 'dhl kargo',
+        cargoTrackingNumber: null,
+        cargoTrackingLink: null,
+        cargoSenderNumber: '430549027626045',
+        receivedDate: null,
+        note: null,
+        createdDate: '2026-09-28T10:20:00',
+        updatedDate: '2026-09-28T10:20:00',
+        items: [
+            {
+                id: '88888888-8888-8888-8888-888888888888',
+                sortOrder: 1,
+                orderLineId: null,
+                externalClaimLineId: '1',
+                sourceItemCode: null,
+                itemCode: 'ELB-001',
+                itemName: 'Puantiyeli Bel Bağlama Askılı Elbise',
+                colorCode: null,
+                colorName: null,
+                itemDim1Code: 'S',
+                usedBarcode: '8680000000001',
+                quantity: 1,
+                acceptedQuantity: 0,
+                rejectedQuantity: 0,
+                returnReasonCode: 'BEDEN',
+                returnReasonName: 'Beden / Ölçü Uymadı',
+                sourceReason: null,
+                customerNote: null,
+                statusCode: 1,
+                statusName: 'Talep Alındı',
+            },
+        ],
     };
 }

@@ -518,62 +518,6 @@
     padding: .7rem .8rem;
 }
 
-/* ── Tarihçe ── */
-.ot-timeline {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-
-    li {
-        position: relative;
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 1rem;
-        padding: 0 0 1.35rem 1.65rem;
-        border-left: 2px solid var(--ot-line);
-        margin-left: .4rem;
-
-        &:last-child {
-            border-left-color: transparent;
-            padding-bottom: 0;
-        }
-
-        &::before {
-            content: '';
-            position: absolute;
-            left: -7px;
-            top: 1px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #fff;
-            border: 3px solid var(--ot-line);
-        }
-
-        &.done {
-            border-left-color: var(--ot-success);
-
-            &::before {
-                border-color: var(--ot-success);
-                box-shadow: 0 0 0 3px var(--ot-success-soft);
-            }
-        }
-    }
-}
-
-.ot-timeline-title {
-    font-weight: 600;
-    font-size: .9rem;
-}
-
-.ot-timeline-meta {
-    font-size: .78rem;
-    color: var(--ot-muted);
-}
-
-.ot-timeline-logo { max-height: 26px; }
-
 /* ── Ürünler ── */
 .ot-product {
     display: flex;
@@ -781,8 +725,6 @@
     }
 }
 
-.ot-cargo-logo { max-height: 26px; }
-
 .ot-review {
     margin-top: 1rem;
     background: var(--ot-soft);
@@ -945,4 +887,72 @@
     .ot-btn-dark { width: 100%; }
     .ot-actionbar { flex-direction: column-reverse; }
     .ot-code-value { font-size: 1.35rem; }
+}
+
+.ot-order-note {
+    margin: 1rem 0 0;
+    padding: .7rem .9rem;
+    background: var(--ot-soft);
+    border-radius: 12px;
+}
+
+/* ── Mevcut iade talebi ── */
+.ot-claim {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--ot-line);
+
+    &:last-child { border-bottom: 0; }
+}
+
+.ot-claim-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: .9rem;
+    border-bottom: 1px dashed var(--ot-line);
+}
+
+.ot-claim-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: .9rem;
+    padding: .9rem 0;
+}
+
+.ot-claim-code {
+    background: var(--ot-success-soft);
+    border-radius: 12px;
+    padding: .75rem 1rem;
+    margin-bottom: .75rem;
+
+    strong {
+        display: block;
+        font-size: 1.15rem;
+        letter-spacing: .05em;
+        color: #0b7a4b;
+    }
+}
+
+.ot-claim-items {
+    border-top: 1px dashed var(--ot-line);
+    padding-top: .65rem;
+
+    > .ot-label { display: block; margin-bottom: .25rem; }
+}
+
+.ot-product-sm {
+    padding: .6rem 0;
+    gap: .75rem;
+    border-bottom: 1px dashed var(--ot-line);
+
+    .ot-thumb { width: 44px; height: 56px; flex: 0 0 44px; }
+}
+
+.ot-claim-line-state {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .2rem;
+    white-space: nowrap;
 }

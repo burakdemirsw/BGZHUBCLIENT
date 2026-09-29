@@ -38,7 +38,7 @@ export const routes: Routes = [
      * Parametreler verilmezse sayfa test verileriyle çalışır.
      */
     {
-        path: 'order-tracking/:companyId/:extensionId/:orderNo',
+        path: 'order-tracking/:companyId/:extensionId',
         loadComponent: () => import('./views/order-tracking/order-tracking').then(m => m.OrderTrackingPage),
         data: {title: 'Sipariş Detayı'}
     },

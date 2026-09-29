@@ -1,10 +1,13 @@
 /**
  * Sipariş Takip (public) modelleri.
- * Kaynak: v1 (46).yaml — OrderTracking controller (`/order-tracking/...`).
+ * Kaynak: v1 (47).yaml — OrderTracking controller (`/order-tracking/...`).
  * Dikkat: bu uçlar `/api` öneki olmadan sunucu kökünde yayınlanır.
  */
 
-/** URL'den gelen bağlam: /order-tracking/:companyId/:extensionId/:orderNo */
+/**
+ * URL'den gelen bağlam: /order-tracking/:companyId/:extensionId
+ * `orderNo` route'tan değil, sorgulama ekranında kullanıcıdan alınır.
+ */
 export interface OrderTrackingContext {
     companyId: string;
     extensionId: string;
@@ -18,6 +21,18 @@ export interface OrderTrackingBrandResponse {
     logoUrl: string | null;
     /** SMS gönderiminde kullanılan eklenti kodu */
     smsExtensionCode: string | null;
+}
+
+/** GET /order-tracking/{companyId}/{extensionId}/{orderNo} — doğrulama öncesi özet */
+export interface OrderTrackingSummaryResponse {
+    orderNumber: string;
+    /** API maskelenmiş ad döner */
+    customerName: string | null;
+    orderDate: string | null;
+    statusName: string | null;
+    cargoCompanyName: string | null;
+    cargoTrackingNumber: string | null;
+    canRequestReturn: boolean;
 }
 
 /** Sipariş satırı — `options` beden/renk gibi varyant metinlerini taşır */
@@ -35,13 +50,21 @@ export interface OrderTrackingItemResponse {
     options: string[];
 }
 
+/** Teslimat adresi — alıcı ve telefon maskeli gelir */
+export interface OrderTrackingAddressResponse {
+    recipientName: string | null;
+    maskedPhone: string | null;
+    city: string | null;
+    district: string | null;
+    town: string | null;
+}
+
 /**
- * GET /order-tracking/{companyId}/{extensionId}/{orderNo}
+ * GET  /order-tracking/{companyId}/{extensionId}/{orderNo}/detail
  * POST /order-tracking/{companyId}/{extensionId}/{orderNo}/verify
  */
-export interface OrderTrackingResponse {
+export interface OrderTrackingDetailResponse {
     orderNumber: string;
-    /** API maskelenmiş ad döner */
     customerName: string | null;
     orderDate: string | null;
     statusCode: number | string;
@@ -50,6 +73,11 @@ export interface OrderTrackingResponse {
     cargoTrackingNumber: string | null;
     cargoTrackingLink: string | null;
     canRequestReturn: boolean;
+    totalAmount: number | string;
+    totalVat: number | string;
+    cargoAmount: number | string;
+    orderNote: string | null;
+    deliveryAddress: OrderTrackingAddressResponse | null;
     items: OrderTrackingItemResponse[];
 }
 
@@ -87,42 +115,110 @@ export interface BeforeClaimInstructionOptionResponse {
     content: string;
 }
 
-// ─────────────────────────────────────────────────────────────
-// Aşağıdaki tiplerin OrderTracking controller'ında karşılığı YOK.
-// İade talebinin son adımı için gerekli; uçlar açılınca güncellenmeli.
-// ─────────────────────────────────────────────────────────────
-
-/** İade paketinin gönderileceği kargo şirketi seçeneği */
-export interface CargoCompanyOption {
+/** GET /order-tracking/{companyId}/cargo-companies */
+export interface CargoCompanyResponse {
+    /** İade talebinde gönderilecek kargo entegrasyonu kimliği */
+    cargoExtensionId: string;
     code: string;
     name: string;
-    logoUrl?: string | null;
-    /** Kargo şubesinde gösterilecek cari bilgi */
-    customerNo?: string | null;
-    accountTitle?: string | null;
+    /** Kargo şubesinde gösterilecek anlaşmalı müşteri numarası */
+    customerNo: string | null;
+    accountTitle: string | null;
 }
 
-export interface CreateReturnClaimItemRequest {
-    lineId: number | string;
+/** POST .../return-claim gövdesindeki iade satırı */
+export interface CreateReturnClaimLineRequest {
     quantity: number;
-    returnCode: string;
+    returnReasonCode?: string | null;
+    sourceItemCode?: string | null;
+    itemCode?: string | null;
+    colorCode?: string | null;
+    itemDim1Code?: string | null;
+    usedBarcode?: string | null;
+    orderLineId?: string | null;
+    /** Pazaryeri sipariş satırı kimliği */
+    externalClaimLineId?: string | null;
+    customerNote?: string | null;
 }
 
+/** POST /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claim */
 export interface CreateReturnClaimRequest {
-    companyId: string;
-    extensionId: string;
-    orderNo: string;
-    items: CreateReturnClaimItemRequest[];
-    actionCode: string;
-    cargoCompanyCode: string;
-    note?: string;
+    items: CreateReturnClaimLineRequest[];
+    returnReasonCode?: string | null;
+    afterReturnActionCode?: string | null;
+    /** Seçilen kargo şirketinin entegrasyon kimliği */
+    cargoExtensionId?: string | null;
+    customerNote?: string | null;
 }
 
-export interface CreateReturnClaimResponse {
+/** İade talebi sonucu — kargo şubesinde gösterilecek bilgiler */
+export interface ReturnClaimResultResponse {
     returnCode: string;
-    cargoCompanyName: string;
-    cargoCustomerNo: string;
-    cargoAccountTitle: string;
+    cargoCompanyName: string | null;
+    cargoCustomerNo: string | null;
+    cargoAccountTitle: string | null;
     /** Kodun son geçerlilik tarihi */
     validUntil: string;
+}
+
+/** GET .../return-claims/detail — talep satırı */
+export interface ReturnClaimDetailLineResponse {
+    id: string;
+    sortOrder: number | string;
+    orderLineId: string | null;
+    externalClaimLineId: string | null;
+    sourceItemCode: string | null;
+    itemCode: string | null;
+    itemName: string | null;
+    colorCode: string | null;
+    colorName: string | null;
+    itemDim1Code: string | null;
+    usedBarcode: string | null;
+    quantity: number | string;
+    acceptedQuantity: number | string;
+    rejectedQuantity: number | string;
+    returnReasonCode: string | null;
+    returnReasonName: string | null;
+    sourceReason: string | null;
+    customerNote: string | null;
+    statusCode: number | string;
+    statusName: string | null;
+}
+
+/**
+ * GET /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/detail
+ * Siparişe açılmış iade talepleri — kod açıklamaları, kargo bilgisi ve satırlarla.
+ */
+export interface ReturnClaimDetailResponse {
+    id: string;
+    claimNumber: string;
+    claimDate: string;
+    orderNumber: string;
+    extensionCode: string;
+    externalClaimId: string | null;
+    syncSource: number | string;
+    statusCode: number | string;
+    statusName: string | null;
+    returnReasonCode: string | null;
+    returnReasonName: string | null;
+    afterReturnActionCode: string | null;
+    afterReturnActionName: string | null;
+    customerNote: string | null;
+    customerTypeCode: number | string | null;
+    customerCode: string | null;
+    cargoExtensionId: string | null;
+    cargoExtensionCode: string | null;
+    cargoCompanyName: string | null;
+    cargoCustomerNo: string | null;
+    cargoAccountTitle: string | null;
+    deliveryCompanyCode: string | null;
+    cargoTrackingNumber: string | null;
+    cargoTrackingLink: string | null;
+    /** Kargo şubesinde gösterilecek iade kodu */
+    cargoSenderNumber: string | null;
+    receivedDate: string | null;
+    note: string | null;
+    createdDate: string;
+    updatedDate: string;
+    items: ReturnClaimDetailLineResponse[];
 }

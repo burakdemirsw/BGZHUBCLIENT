@@ -38,4 +38,16 @@ export const OTP_ROUTES: Routes = [
     otpRoute('after-return-actions', 'İade Sonrası İşlem Tipleri', () =>
         import('./after-return-actions/after-return-actions').then(m => m.OtpAfterReturnActionsPage),
     ),
+    otpRoute('claim-cargo-companies', 'İade Kargo Şirketleri', () =>
+        import('./claim-cargo-companies/claim-cargo-companies').then(m => m.OtpClaimCargoCompaniesPage),
+    ),
+    otpRoute('claims', 'İade Talepleri', () =>
+        import('./claims/claims').then(m => m.OtpClaimsPage),
+    ),
+    otpRoute('claims/:id', 'İade Talebi Detayı', () =>
+        import('./claims/claim-detail/claim-detail').then(m => m.OtpClaimDetailPage),
+    ),
+    otpRoute('claim-status', 'İade Talebi Durumları', () =>
+        import('./claim-status/claim-status').then(m => m.OtpClaimStatusPage),
+    ),
 ];

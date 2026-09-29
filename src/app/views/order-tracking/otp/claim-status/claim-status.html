@@ -1,0 +1,191 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-flag me-2"></i>İade Talebi Durumları</h4>
+                <button class="btn btn-primary btn-sm" (click)="openCreate()">
+                    <i class="fa-solid fa-plus me-1"></i>Yeni Durum
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info py-2">
+                    <i class="fa-solid fa-lightbulb me-1"></i>
+                    Durum açıklamaları iade talebi listesinde ve müşteri panelinde gösterilir.
+                    <strong>Eşleştirme kelimeleri</strong>, pazaryerinden gelen durum metnini bu koda bağlamak için kullanılır.
+                </div>
+
+                <div class="d-flex mb-3 gap-2">
+                    <input type="text" class="form-control form-control-sm w-auto"
+                           placeholder="Kod veya açıklama ara..."
+                           [(ngModel)]="filterText"
+                           (ngModelChange)="onFilterChange()">
+                </div>
+
+                @if (loading) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>İşlemler</th>
+                                    <th>#</th>
+                                    <th class="text-center">Sıra</th>
+                                    <th class="text-center">Kod</th>
+                                    <th>Açıklama</th>
+                                    <th>Eşleştirme Kelimeleri</th>
+                                    <th class="text-center">Kapanış</th>
+                                    <th class="text-center">Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of pagedItems; track item.id; let idx = $index) {
+                                    <tr>
+                                        <td class="text-nowrap">
+                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="openEdit(item)" title="Düzenle">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </button>
+                                            <button class="btn btn-soft-danger btn-sm" (click)="deleteItem(item)" title="Sil">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">{{ rowNumber(idx) }}</span>
+                                        </td>
+                                        <td class="text-center">{{ item.sortOrder ?? '—' }}</td>
+                                        <td class="text-center"><span class="fw-semibold">{{ item.statusCode }}</span></td>
+                                        <td>{{ item.statusDescription || '—' }}</td>
+                                        <td>
+                                            @for (keyword of keywordList(item.matchKeywords); track keyword) {
+                                                <span class="badge bg-light text-dark me-1">{{ keyword }}</span>
+                                            } @empty {
+                                                <span class="text-muted">—</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            @if (item.isClosed) {
+                                                <span class="badge bg-secondary-subtle text-secondary">Kapanış</span>
+                                            } @else {
+                                                <span class="text-muted">—</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="form-check form-switch mb-0 d-inline-flex align-items-center gap-2">
+                                                <input class="form-check-input" type="checkbox" role="switch"
+                                                       [checked]="item.isActive"
+                                                       [disabled]="togglingId === item.id"
+                                                       (click)="$event.preventDefault(); toggleActive(item)">
+                                                @if (item.isActive) {
+                                                    <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                } @else {
+                                                    <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted">Kayıt bulunamadı.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Sayfalama -->
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="small text-muted">
+                            Toplam: {{ totalCount }} kayıt
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track $index) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+@if (showModal) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ editMode ? 'Durumu Düzenle' : 'Yeni Durum' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body wms-form-body">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Durum Kodu <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" [(ngModel)]="form.statusCode"
+                                       name="statusCode" required step="1" min="0">
+                                <div class="form-text">Talep kayıtlarında bu sayı tutulur, sonradan değiştirmeyin.</div>
+                            </div>
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Açıklama <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" [(ngModel)]="form.statusDescription"
+                                       name="statusDescription" required placeholder="ör. Talep Alındı">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Eşleştirme Kelimeleri</label>
+                            <input type="text" class="form-control" [(ngModel)]="form.matchKeywords"
+                                   name="matchKeywords" placeholder="virgülle ayırın: iade talebi, return requested">
+                            <div class="form-text">
+                                Pazaryerinden gelen durum metni bu kelimelerden biriyle eşleşirse talep bu koda bağlanır.
+                            </div>
+                        </div>
+
+                        <div class="row align-items-center">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Sıra <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" [(ngModel)]="form.sortOrder"
+                                       name="sortOrder" required step="1">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="form.isClosed"
+                                           name="isClosed" id="otpClaimStatusIsClosed">
+                                    <label class="form-check-label" for="otpClaimStatusIsClosed">Talebi kapatır</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="form.isActive"
+                                           name="isActive" id="otpClaimStatusIsActive">
+                                    <label class="form-check-label" for="otpClaimStatusIsActive">Aktif</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+                    <button type="button" class="btn btn-primary" [disabled]="!isFormValid || saving" (click)="save()">
+                        {{ editMode ? 'Güncelle' : 'Kaydet' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
