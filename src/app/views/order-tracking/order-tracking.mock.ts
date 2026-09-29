@@ -136,12 +136,29 @@ export function buildMockReturnResult(request: CreateReturnClaimRequest): Return
     const cargo = MOCK_CARGO_COMPANIES.find(item => item.cargoExtensionId === request.cargoExtensionId);
     const validUntil = new Date();
     validUntil.setDate(validUntil.getDate() + 3);
+    const cargoCompanyName = cargo?.name ?? 'DHL eCommerce';
+    const cargoCustomerNo = cargo?.customerNo ?? '789097600';
     return {
         returnCode: '430549027626045',
-        cargoCompanyName: cargo?.name ?? 'DHL eCommerce',
-        cargoCustomerNo: cargo?.customerNo ?? '789097600',
+        cargoCompanyName,
+        cargoCustomerNo,
         cargoAccountTitle: cargo?.accountTitle ?? 'ESRA HELVACI TEKSTİL SANAYİ VE TİCARET LİMİTED ŞİRKETİ',
         validUntil: validUntil.toISOString(),
+        isCargoCreated: true,
+        cargo: {
+            cargo: {
+                id: '77777777-7777-7777-7777-777777777777',
+                claimNumber: 'IADE-2026-000143',
+                orderNumber: MOCK_ORDER_NO,
+                cargoCompanyName,
+                cargoCustomerNo,
+                isCargoCreated: true,
+                cargoReferenceId: '1Z9999W99999999999',
+                createdDate: new Date().toISOString(),
+            },
+            zplLabels: [],
+        },
+        cargoErrorMessage: null,
     };
 }
 
@@ -162,17 +179,14 @@ export function buildMockReturnClaim(orderNo: string = MOCK_ORDER_NO): ReturnCla
         afterReturnActionCode: 'REFUND_CARD',
         afterReturnActionName: 'Kredi kartıma para iadesi yapılmasını istiyorum.',
         customerNote: null,
-        customerTypeCode: null,
-        customerCode: null,
         cargoExtensionId: '11111111-1111-1111-1111-111111111111',
         cargoExtensionCode: 'dhl',
         cargoCompanyName: 'DHL eCommerce',
         cargoCustomerNo: '789097600',
         cargoAccountTitle: 'ESRA HELVACI TEKSTİL SANAYİ VE TİCARET LİMİTED ŞİRKETİ',
-        deliveryCompanyCode: 'dhl kargo',
+        // Demo: kargo referansı oluşmamış talep — ekranda firma kodu ile iade uyarısı gösterilir
+        cargoReferenceId: null,
         cargoTrackingNumber: null,
-        cargoTrackingLink: null,
-        cargoSenderNumber: '430549027626045',
         receivedDate: null,
         note: null,
         createdDate: '2026-09-28T10:20:00',
@@ -187,9 +201,9 @@ export function buildMockReturnClaim(orderNo: string = MOCK_ORDER_NO): ReturnCla
                 itemCode: 'ELB-001',
                 itemName: 'Puantiyeli Bel Bağlama Askılı Elbise',
                 colorCode: null,
-                colorName: null,
-                itemDim1Code: 'S',
+                colorName: 'Beden: S',
                 usedBarcode: '8680000000001',
+                sourceImageUrl: null,
                 quantity: 1,
                 acceptedQuantity: 0,
                 rejectedQuantity: 0,

@@ -123,8 +123,6 @@ export class OtpClaimCargoCompaniesPage extends WmsCrudPage<ClaimCargoCompanyRes
 
     private toPayload(form: ClaimCargoCompanyForm): UpdateClaimCargoCompanyRequest {
         return {
-            // Kargo kodu ekrandan alınmıyor; şema alanı zorunlu olduğu için null gönderilir
-            deliveryCompanyCode: null,
             cargoExtensionId: form.cargoExtensionId || null,
             customerNo: form.customerNo.trim(),
             accountTitle: form.accountTitle.trim(),

@@ -298,7 +298,7 @@ export class NebimAiChatPage implements OnInit, AfterViewChecked, OnDestroy {
     }
 
     get composerPlaceholder(): string {
-        return this.selectedMention ? 'Nebim AI\'a bir mesaj gönder...' : 'Önce + ile bir eklenti seç ya da @ yaz...';
+        return this.selectedMention ? 'BGZHUB\'a bir mesaj gönder...' : 'Önce + ile bir eklenti seç ya da @ yaz...';
     }
 
     /** Menu @ yazilarak acildiysa ilk oneri Enter/Tab ile secilir. */

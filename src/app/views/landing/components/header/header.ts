@@ -25,7 +25,7 @@ export class Header {
         { label: 'Yorumlar', id: 'reviews' },
         { label: 'İletişim', id: 'contact' },
     ];
-    appName = 'Nebim AI';
+    appName = 'BGZHUB';
 
     @HostListener('window:scroll', [])
     onWindowScroll() {

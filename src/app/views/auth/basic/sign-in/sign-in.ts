@@ -63,7 +63,7 @@ export class SignIn {
             // Kullanıcı menülerini yükle
             await this.userMenuService.loadUserMenus();
 
-            // Login sonrası her zaman Nebim AI sohbet ekranına yönlendir
+            // Login sonrası her zaman BGZHUB sohbet ekranına yönlendir
             this.router.navigateByUrl('/nebim-ai-chat');
         } catch (err: any) {
             this.loading = false;

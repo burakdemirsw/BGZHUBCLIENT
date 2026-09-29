@@ -1,93 +1,83 @@
-<div class="nebim-home">
+<div class="bgz-home" [class.is-paused]="paused()" [style.--accent]="active.accent">
+
     <header class="home-nav">
-        <div class="home-brand">
-            <span class="brand-dot"></span>
-            <span class="brand-text">NebimAI</span>
-        </div>
-        <a class="home-login" href="/auth/sign-in">Panele Giriş</a>
+        <a class="nav-brand" routerLink="/home">BGZ<span>HUB</span></a>
+        <nav class="nav-meta" aria-label="Platform">
+            <span class="nav-tag">WMS</span>
+            <span class="nav-tag">E-Ticaret</span>
+            <span class="nav-tag">Pazaryeri</span>
+        </nav>
+        <a class="nav-cta" routerLink="/auth/sign-in">
+            Panele Giriş<i class="fa-solid fa-arrow-right"></i>
+        </a>
     </header>
 
-    <section class="home-hero">
-        <div class="hero-glow glow-left"></div>
-        <div class="hero-glow glow-right"></div>
+    <main class="home-main">
 
-        <p class="hero-kicker">AI destekli ticari operasyon asistanı</p>
-        <h1 class="hero-title">NebimAI ile e-ticaret operasyonlarını tek ekrandan yönetin</h1>
-        <p class="hero-copy">
-            Sipariş, fatura, sevkiyat, transfer, stok ve WMS süreçlerini doğal dil ile analiz edin.
-            Müşteri sorularına daha hızlı yanıt verin, ekip performansını artırın.
-        </p>
+        <section class="home-lead">
+            <p class="lead-eyebrow">Uçtan uca e-ticaret operasyon platformu</p>
+            <h1 class="lead-title">
+                E-ticaret, pazaryeri ve depo operasyonlarını
+                <em>tek platformda</em> yönetin.
+            </h1>
+            <p class="lead-copy">
+                BGZHUB; stok, sipariş, sevkiyat ve müşteri iletişimini ortak bir veri
+                katmanında birleştiren geniş kapsamlı bir e-ticaret yazılım platformudur.
+            </p>
+        </section>
 
-        <div class="hero-actions">
-            <a class="btn-primary" href="/nebim-ai-chat">NebimAI Sohbeti Aç</a>
-            <a class="btn-secondary" href="#moduller">Modülleri İncele</a>
-        </div>
+        <section class="home-showcase" (mouseenter)="pause()" (mouseleave)="resume()">
 
-        <div class="hero-stats">
-            <div class="stat-card">
-                <span class="stat-value">7/24</span>
-                <span class="stat-label">Canlı asistan desteği</span>
+            <div class="showcase-stage">
+                @for (feature of features; track feature.key; let i = $index) {
+                    <article class="stage-item"
+                             [class.is-active]="i === activeIndex()"
+                             [style.--accent]="feature.accent"
+                             [attr.aria-hidden]="i === activeIndex() ? null : 'true'">
+                        <span class="stage-no">{{ no(i) }}</span>
+                        <div class="stage-body">
+                            <p class="stage-kind">
+                                <i class="{{ feature.icon }}"></i>{{ feature.short }}
+                            </p>
+                            <h2 class="stage-title">{{ feature.title }}</h2>
+                            <p class="stage-copy">{{ feature.description }}</p>
+                            <ul class="stage-chips">
+                                @for (chip of feature.chips; track chip) {
+                                    <li>{{ chip }}</li>
+                                }
+                            </ul>
+                        </div>
+                    </article>
+                }
             </div>
-            <div class="stat-card">
-                <span class="stat-value">8+</span>
-                <span class="stat-label">Operasyon modülü</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-value">%40</span>
-                <span class="stat-label">Ortalama cevap hızı artışı</span>
-            </div>
-        </div>
-    </section>
 
-    <section id="moduller" class="home-section">
-        <div class="section-head">
-            <p class="section-kicker">Modüller</p>
-            <h2>NebimAI hangi alanlarda yardımcı olur?</h2>
-        </div>
+            <ol class="showcase-index" aria-label="Özellikler">
+                @for (feature of features; track feature.key; let i = $index) {
+                    <li>
+                        <button type="button"
+                                class="index-item"
+                                [class.is-active]="i === activeIndex()"
+                                [style.--accent]="feature.accent"
+                                [attr.aria-current]="i === activeIndex() ? 'true' : null"
+                                (click)="select(i)">
+                            <span class="index-no">{{ no(i) }}</span>
+                            <span class="index-label">{{ feature.short }}</span>
+                            <i class="index-icon {{ feature.icon }}"></i>
+                            <span class="index-progress"></span>
+                        </button>
+                    </li>
+                }
+            </ol>
 
-        <div class="module-grid">
-            <article class="module-card">
-                <h3>Sipariş ve Fatura</h3>
-                <p>Sipariş durumu, iade adımları, açık fatura kalemleri ve tahsilat özetleri.</p>
-            </article>
-            <article class="module-card">
-                <h3>Sevkiyat ve Transfer</h3>
-                <p>Geciken sevkiyatlar, depo transferleri, onay bekleyen hareketler ve rota takibi.</p>
-            </article>
-            <article class="module-card">
-                <h3>Müşteri ve Ürün</h3>
-                <p>Müşteri geçmişi, iletişim notları, ürün varyantları ve katalog soruları.</p>
-            </article>
-            <article class="module-card">
-                <h3>Stok ve WMS</h3>
-                <p>Kritik stok uyarıları, sayım farkları, lokasyon verimliliği ve toplama performansı.</p>
-            </article>
-        </div>
-    </section>
+        </section>
 
-    <section class="home-section home-section-alt">
-        <div class="section-head">
-            <p class="section-kicker">Neden NebimAI?</p>
-            <h2>Operasyon ekipleri için hızlı, net ve uygulanabilir cevaplar</h2>
-        </div>
+    </main>
 
-        <div class="benefit-list">
-            <div class="benefit-item">
-                <h4>Doğal dil ile sorgu</h4>
-                <p>Teknik rapor ekranlarına boğulmadan sorunu yazın, net cevap alın.</p>
-            </div>
-            <div class="benefit-item">
-                <h4>Anlık veri bağlantısı</h4>
-                <p>Güncel konuşma, sipariş ve stok hareketleriyle karar alma süreci hızlanır.</p>
-            </div>
-            <div class="benefit-item">
-                <h4>Ekip odaklı kullanım</h4>
-                <p>Operasyon, finans ve depo ekipleri aynı dilde ortak bir yardımcı kullanır.</p>
-            </div>
-        </div>
-    </section>
-
-    <footer class="home-footer">
-        <p>NebimAI · AI destekli müşteri iletişim ve operasyon platformu</p>
+    <footer class="home-foot">
+        <span class="foot-note">Depodan pazaryerine kadar tüm süreçler aynı platformda</span>
+        <a class="foot-link" routerLink="/nebim-ai-chat">
+            AI asistanını dene<i class="fa-solid fa-arrow-up-right-from-square"></i>
+        </a>
     </footer>
+
 </div>

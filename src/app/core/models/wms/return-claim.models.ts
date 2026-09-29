@@ -2,7 +2,7 @@ import { WmsAuditFields, WmsCode } from './wms-common.models';
 
 /**
  * İade talebi (başlık) modelleri.
- * Kaynak: v1 (50).yaml - ReturnClaimResponse / CreateReturnClaimRequest /
+ * Kaynak: v1 (52).yaml - ReturnClaimResponse / CreateReturnClaimRequest /
  * UpdateReturnClaimRequest (/api/wms/return-claims)
  *
  * Talepler müşteri panelinden ya da pazaryeri aktarımından oluşur; yönetim
@@ -13,8 +13,6 @@ export interface ReturnClaimResponse extends WmsAuditFields {
     companyId: string;
     claimNumber: string | null;
     orderNumber: string | null;
-    customerTypeCode: WmsCode | null;
-    customerCode: string | null;
     extensionCode: string | null;
     companyExtensionId: string | null;
     /** Pazaryerindeki talep kimliği */
@@ -28,11 +26,7 @@ export interface ReturnClaimResponse extends WmsAuditFields {
     sourceLastModifiedDate: string | null;
     payloadHash: string | null;
     cargoExtensionId: string | null;
-    deliveryCompanyCode: string | null;
     cargoTrackingNumber: string | null;
-    cargoTrackingLink: string | null;
-    /** Kargo şubesinde gösterilen iade kodu */
-    cargoSenderNumber: string | null;
     receivedDate: string | null;
     note: string | null;
     lastSyncedDate: string | null;
@@ -47,8 +41,6 @@ export interface CreateReturnClaimRequest extends UpdateReturnClaimRequest {
 export interface UpdateReturnClaimRequest {
     claimNumber: string | null;
     orderNumber: string | null;
-    customerTypeCode: WmsCode | null;
-    customerCode: string | null;
     extensionCode: string | null;
     companyExtensionId: string | null;
     externalClaimId: string | null;
@@ -61,10 +53,7 @@ export interface UpdateReturnClaimRequest {
     sourceLastModifiedDate: string | null;
     payloadHash: string | null;
     cargoExtensionId: string | null;
-    deliveryCompanyCode: string | null;
     cargoTrackingNumber: string | null;
-    cargoTrackingLink: string | null;
-    cargoSenderNumber: string | null;
     receivedDate: string | null;
     note: string | null;
     lastSyncedDate: string | null;
@@ -83,6 +72,8 @@ export interface ReturnClaimLineResponse extends WmsAuditFields {
     orderLineId: string | null;
     externalClaimLineId: string | null;
     sourceItemCode: string | null;
+    /** Sağlayıcıdaki ürün görseli */
+    sourceImageUrl: string | null;
     itemCode: string | null;
     colorCode: string | null;
     batchCode: string | null;
@@ -108,6 +99,7 @@ export interface UpdateReturnClaimLineRequest {
     orderLineId: string | null;
     externalClaimLineId: string | null;
     sourceItemCode: string | null;
+    sourceImageUrl: string | null;
     itemCode: string | null;
     colorCode: string | null;
     batchCode: string | null;

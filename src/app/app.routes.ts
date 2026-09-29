@@ -25,13 +25,13 @@ export const routes: Routes = [
     {
         path: 'home',
         component: Landing,
-        data: {title: 'Nebim AI — AI Destekli Müşteri İletişim Platformu'}
+        data: {title: 'BGZHUB — E-ticaret, Pazaryeri ve WMS Yönetim Platformu'}
     },
     {
         matcher: nebimAiChatMatcher,
         loadComponent: () =>
             import('./views/admin/nebim-ai-chat/nebim-ai-chat/nebim-ai-chat').then(m => m.NebimAiChatPage),
-        data: {title: 'Nebim AI Chat'}
+        data: {title: 'BGZHUB AI Chat'}
     },
     /**
      * Sipariş Detay & İade İşlemleri paneli — public, guard ve layout yok.

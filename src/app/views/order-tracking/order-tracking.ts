@@ -60,6 +60,8 @@ const CURRENCY_CODE = 'TL';
  */
 const ERROR_MESSAGES: Record<string, string> = {
     ORDERTRACK_001: 'Bu sipariş koduna ait kayıt bulunamadı. Lütfen kodu kontrol edip tekrar deneyin.',
+    VERIFICATION_006: 'Çok sık kod istediniz. Lütfen bir süre bekleyip tekrar deneyin.',
+    WMS_RETURNCLAIM_002: 'Bu sipariş için zaten bir iade talebi var. Yeni talep oluşturulamaz.',
 };
 
 type PanelStep = 'search' | 'verify' | 'detail' | 'return' | 'result';
@@ -471,16 +473,15 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
 
     /** Talep satırının renk / beden gibi varyant metni */
     claimLineVariant(line: ReturnClaimDetailLineResponse): string {
-        return [line.colorName, line.itemDim1Code].filter(Boolean).join(' · ');
+        return line.colorName || '';
     }
 
     /**
-     * Talep satırı görseli — iade yanıtında görsel alanı yok,
-     * bu yüzden sipariş satırlarıyla eşleştirip oradaki görseli kullanırız.
+     * Talep satırı görseli — API satırın kendi görselini döner (`sourceImageUrl`);
+     * boşsa sipariş satırlarıyla eşleştirip oradaki görsel kullanılır.
      */
     claimLineImage(line: ReturnClaimDetailLineResponse): string | null {
-        const item = this.matchOrderItem(line);
-        return item?.imageUrl ?? null;
+        return line.sourceImageUrl || this.matchOrderItem(line)?.imageUrl || null;
     }
 
     /** Talep satırını sipariş satırıyla eşler (satır kimliği → barkod → stok kodu) */
@@ -698,6 +699,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
                 itemCode: item.stockCode,
                 usedBarcode: item.barcode,
                 // Pazaryeri satır kimliği; WMS sipariş satırı id'si panelde bilinmiyor
+                sourceImageUrl: item.imageUrl,
                 externalClaimLineId: String(item.lineId),
             }));
     }
@@ -736,6 +738,10 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
                 }
                 this.returnResult = response.data;
             }
+            if (this.cargoReferenceMissing) {
+                // Referans yoksa neden oluşmadığını yalnızca konsola yaz; müşteriye teknik metin gösterilmez
+                this.logTechnicalError('CARGO_NOT_CREATED', null, this.returnResult?.cargoErrorMessage);
+            }
             this.step = 'result';
             this.showResultModal = true;
             await this.loadReturnClaims();
@@ -756,9 +762,33 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
 
     /** İade kodunu panoya kopyalar */
     async copyReturnCode(): Promise<void> {
-        if (!this.returnResult) return;
+        await this.copyToClipboard(this.returnResult?.returnCode);
+    }
+
+    /**
+     * Kargo entegrasyonundan dönen referans numarası.
+     * `isCargoCreated` false ise ya da referans boşsa '' döner; ekranda
+     * bunun yerine firma kodumuzla iade bilgilendirmesi gösterilir.
+     */
+    get cargoReferenceId(): string {
+        if (!this.returnResult?.isCargoCreated) return '';
+        return this.returnResult.cargo?.cargo?.cargoReferenceId?.trim() ?? '';
+    }
+
+    /** Kargo referansı alınamadı — müşteri firma kodumuzla iade edecek */
+    get cargoReferenceMissing(): boolean {
+        return !!this.returnResult && !this.cargoReferenceId;
+    }
+
+    /** Kargo referans numarasını panoya kopyalar */
+    async copyCargoReferenceId(): Promise<void> {
+        await this.copyToClipboard(this.cargoReferenceId);
+    }
+
+    private async copyToClipboard(value: string | null | undefined): Promise<void> {
+        if (!value) return;
         try {
-            await navigator.clipboard.writeText(this.returnResult.returnCode);
+            await navigator.clipboard.writeText(value);
         } catch {
             /* pano erişimi yoksa sessizce geç */
         }

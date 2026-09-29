@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'http://192.168.1.160:5018/api',
+  apiBaseUrl: 'https://hubapi.raftakip.com/api',
 };

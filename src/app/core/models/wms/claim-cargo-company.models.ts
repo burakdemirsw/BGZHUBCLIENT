@@ -2,8 +2,8 @@ import { WmsAuditFields, WmsCode } from './wms-common.models';
 
 /**
  * İade kargo şirketi tanımları (şirket bazlı).
- * Kaynak: v1 (48).yaml - ClaimCargoCompanyResponse / CreateClaimCargoCompanyRequest /
- * UpdateClaimCargoCompanyRequest (/api/wms/claim-cargo-companies)
+ * Kaynak: v1 (52).yaml - ReturnClaimCargoCompanyResponse / CreateReturnClaimCargoCompanyRequest /
+ * UpdateReturnClaimCargoCompanyRequest (/api/wms/return-claim-cargo-companies)
  *
  * Sipariş takip panelinde iade talebinin 3. adımındaki kargo şirketi listesini besler;
  * `customerNo` ve `accountTitle` müşteriye gösterilen "Kargo Cari Bilgimiz" alanıdır.
@@ -11,8 +11,6 @@ import { WmsAuditFields, WmsCode } from './wms-common.models';
 export interface ClaimCargoCompanyResponse extends WmsAuditFields {
     id: string;
     companyId: string;
-    /** WMS kargo şirketi kodu (dbo.DeliveryCompany) */
-    deliveryCompanyCode: string | null;
     /** Kargo entegrasyonunun extension kaydı */
     cargoExtensionId: string | null;
     customerNo: string | null;
@@ -27,7 +25,6 @@ export interface CreateClaimCargoCompanyRequest extends UpdateClaimCargoCompanyR
 }
 
 export interface UpdateClaimCargoCompanyRequest {
-    deliveryCompanyCode: string | null;
     cargoExtensionId: string | null;
     customerNo: string | null;
     accountTitle: string | null;

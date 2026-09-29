@@ -73,35 +73,13 @@
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <div class="col-md-3">
-                                    <div class="claim-field">
-                                        <span class="claim-label">Kargo Firma Kodu</span>
-                                        <span class="claim-value">{{ claim!.deliveryCompanyCode || '—' }}</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="claim-field">
-                                        <span class="claim-label">İade Kargo Kodu</span>
-                                        <span class="claim-value fw-semibold">{{ claim!.cargoSenderNumber || '—' }}</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class="claim-field">
                                         <span class="claim-label">Kargo Takip No</span>
-                                        <span class="claim-value">
-                                            @if (claim!.cargoTrackingNumber) {
-                                                @if (claim!.cargoTrackingLink) {
-                                                    <a [href]="claim!.cargoTrackingLink" target="_blank" rel="noopener">
-                                                        {{ claim!.cargoTrackingNumber }}
-                                                    </a>
-                                                } @else {
-                                                    {{ claim!.cargoTrackingNumber }}
-                                                }
-                                            } @else { — }
-                                        </span>
+                                        <span class="claim-value">{{ claim!.cargoTrackingNumber || '—' }}</span>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class="claim-field">
                                         <span class="claim-label">Teslim Alınma</span>
                                         <span class="claim-value">
@@ -155,6 +133,7 @@
                                         <thead class="table-light">
                                             <tr>
                                                 <th>#</th>
+                                                <th>Görsel</th>
                                                 <th>Ürün</th>
                                                 <th>Barkod</th>
                                                 <th class="text-center">Adet</th>
@@ -169,6 +148,13 @@
                                                 <tr>
                                                     <td>
                                                         <span class="badge bg-primary-subtle text-primary">{{ idx + 1 }}</span>
+                                                    </td>
+                                                    <td>
+                                                        @if (line.sourceImageUrl) {
+                                                            <img [src]="line.sourceImageUrl" [alt]="lineTitle(line)" class="claim-line-thumb"/>
+                                                        } @else {
+                                                            <span class="text-muted">—</span>
+                                                        }
                                                     </td>
                                                     <td>
                                                         <span class="fw-semibold">{{ lineTitle(line) }}</span>
@@ -187,7 +173,7 @@
                                                 </tr>
                                             } @empty {
                                                 <tr>
-                                                    <td colspan="8" class="text-center text-muted">Talep satırı bulunamadı.</td>
+                                                    <td colspan="9" class="text-center text-muted">Talep satırı bulunamadı.</td>
                                                 </tr>
                                             }
                                         </tbody>

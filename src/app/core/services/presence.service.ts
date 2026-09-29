@@ -1,6 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface OnlineUser {
     id: string;
@@ -10,7 +11,8 @@ export interface OnlineUser {
     online: boolean;
 }
 
-const HUB_URL = 'https://localhost:8991/hubs/presence';
+/** Hub, API ile aynı sunucuda ama `/api` öneki olmadan yayınlanıyor */
+const HUB_URL = `${environment.apiBaseUrl.replace(/\/api\/?$/, '')}/hubs/presence`;
 
 @Injectable({ providedIn: 'root' })
 export class PresenceService implements OnDestroy {

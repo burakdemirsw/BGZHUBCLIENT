@@ -6,12 +6,12 @@ import {
     UpdateBeforeClaimInstructionRequest,
 } from '../../models/wms/before-claim-instruction.models';
 
-/** /api/wms/before-claim-instructions - iade talebi öncesi bilgilendirme maddeleri */
+/** /api/wms/before-return-claim-instructions - iade talebi öncesi bilgilendirme maddeleri */
 @Injectable({ providedIn: 'root' })
 export class WmsBeforeClaimInstructionsService extends WmsCompanyCrudService<
     BeforeClaimInstructionResponse,
     Omit<CreateBeforeClaimInstructionRequest, 'companyId'>,
     UpdateBeforeClaimInstructionRequest
 > {
-    protected readonly resource = 'before-claim-instructions';
+    protected readonly resource = 'before-return-claim-instructions';
 }

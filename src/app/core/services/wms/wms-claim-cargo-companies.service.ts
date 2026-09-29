@@ -6,12 +6,12 @@ import {
     UpdateClaimCargoCompanyRequest,
 } from '../../models/wms/claim-cargo-company.models';
 
-/** /api/wms/claim-cargo-companies - şirket bazlı iade kargo şirketleri */
+/** /api/wms/return-claim-cargo-companies - şirket bazlı iade kargo şirketleri */
 @Injectable({ providedIn: 'root' })
 export class WmsClaimCargoCompaniesService extends WmsCompanyCrudService<
     ClaimCargoCompanyResponse,
     Omit<CreateClaimCargoCompanyRequest, 'companyId'>,
     UpdateClaimCargoCompanyRequest
 > {
-    protected readonly resource = 'claim-cargo-companies';
+    protected readonly resource = 'return-claim-cargo-companies';
 }

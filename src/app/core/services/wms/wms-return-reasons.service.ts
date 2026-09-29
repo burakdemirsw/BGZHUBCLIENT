@@ -6,12 +6,12 @@ import {
     UpdateReturnReasonRequest,
 } from '../../models/wms/return-reason.models';
 
-/** /api/wms/return-reasons - şirket bazlı iade nedenleri */
+/** /api/wms/return-claim-reasons - şirket bazlı iade nedenleri */
 @Injectable({ providedIn: 'root' })
 export class WmsReturnReasonsService extends WmsCompanyCrudService<
     ReturnReasonResponse,
     Omit<CreateReturnReasonRequest, 'companyId'>,
     UpdateReturnReasonRequest
 > {
-    protected readonly resource = 'return-reasons';
+    protected readonly resource = 'return-claim-reasons';
 }

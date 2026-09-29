@@ -153,10 +153,22 @@ export class UserMenuService {
   }
 
   /**
+   * Kod tarafında tanımlı statik menü bölümlerinin sidebar'a eklenip eklenmeyeceği.
+   *
+   * Soru & Cevap, Sistem ve WMS menüleri artık veritabanındaki `Menus` tablosuna
+   * kaydedildiği için manuel ekleme KAPALIDIR; açık bırakılsaydı menüler iki kez
+   * görünürdü. Statik listeler (`MARKETPLACE_QUESTIONS_MENU_ITEMS`,
+   * `SYSTEM_MENU_ITEMS`, `WMS_MENU_ITEMS`) referans olarak korunur; veritabanı
+   * kayıtları silinirse bu bayrak `true` yapılarak eski davranışa dönülebilir.
+   */
+  private static readonly USE_STATIC_MENUS: boolean = false;
+
+  /**
    * Veritabanından gelen menülere kod tarafında tanımlı statik bölümleri ekler.
-   * Soru & Cevap, Sistem ve WMS menüleri veritabanına kaydedilmediği için buradan eklenir.
+   * `USE_STATIC_MENUS` kapalıyken menüler yalnızca veritabanından gelir.
    */
   private withStaticMenus(items: MenuItemType[]): MenuItemType[] {
+    if (!UserMenuService.USE_STATIC_MENUS) return items;
     return [...items, ...MARKETPLACE_QUESTIONS_MENU_ITEMS, ...SYSTEM_MENU_ITEMS, ...WMS_MENU_ITEMS];
   }
 

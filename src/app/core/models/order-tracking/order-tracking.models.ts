@@ -1,6 +1,6 @@
 /**
  * Sipariş Takip (public) modelleri.
- * Kaynak: v1 (47).yaml — OrderTracking controller (`/order-tracking/...`).
+ * Kaynak: v1 (52).yaml — OrderTracking controller (`/order-tracking/...`).
  * Dikkat: bu uçlar `/api` öneki olmadan sunucu kökünde yayınlanır.
  */
 
@@ -131,9 +131,10 @@ export interface CreateReturnClaimLineRequest {
     quantity: number;
     returnReasonCode?: string | null;
     sourceItemCode?: string | null;
+    /** Sağlayıcıdaki ürün görseli */
+    sourceImageUrl?: string | null;
     itemCode?: string | null;
     colorCode?: string | null;
-    itemDim1Code?: string | null;
     usedBarcode?: string | null;
     orderLineId?: string | null;
     /** Pazaryeri sipariş satırı kimliği */
@@ -151,6 +152,26 @@ export interface CreateReturnClaimRequest {
     customerNote?: string | null;
 }
 
+/** Kargo entegrasyonunda oluşan iade gönderisi — WmsReturnClaimCargoResponse */
+export interface ReturnClaimCargoResponse {
+    id: string;
+    claimNumber: string;
+    orderNumber: string;
+    cargoCompanyName: string;
+    cargoCustomerNo: string | null;
+    /** Kargo kaydı gerçekten oluşturulabildi mi? */
+    isCargoCreated: boolean;
+    /** Şubede gösterilecek kargo referans numarası — oluşmadıysa null */
+    cargoReferenceId: string | null;
+    createdDate: string;
+}
+
+/** Kargo kaydı ve yazdırılacak ZPL etiketleri */
+export interface ReturnClaimCargoResultResponse {
+    cargo: ReturnClaimCargoResponse;
+    zplLabels: string[];
+}
+
 /** İade talebi sonucu — kargo şubesinde gösterilecek bilgiler */
 export interface ReturnClaimResultResponse {
     returnCode: string;
@@ -159,6 +180,12 @@ export interface ReturnClaimResultResponse {
     cargoAccountTitle: string | null;
     /** Kodun son geçerlilik tarihi */
     validUntil: string;
+    /** Kargo entegrasyonundan referans numarası alındı mı? */
+    isCargoCreated: boolean;
+    /** Kargo kaydı oluşturulamadıysa null */
+    cargo: ReturnClaimCargoResultResponse | null;
+    /** Teknik hata metni — müşteriye gösterilmez, yalnızca loglanır */
+    cargoErrorMessage: string | null;
 }
 
 /** GET .../return-claims/detail — talep satırı */
@@ -172,8 +199,9 @@ export interface ReturnClaimDetailLineResponse {
     itemName: string | null;
     colorCode: string | null;
     colorName: string | null;
-    itemDim1Code: string | null;
     usedBarcode: string | null;
+    /** Sağlayıcıdaki ürün görseli */
+    sourceImageUrl: string | null;
     quantity: number | string;
     acceptedQuantity: number | string;
     rejectedQuantity: number | string;
@@ -204,18 +232,14 @@ export interface ReturnClaimDetailResponse {
     afterReturnActionCode: string | null;
     afterReturnActionName: string | null;
     customerNote: string | null;
-    customerTypeCode: number | string | null;
-    customerCode: string | null;
     cargoExtensionId: string | null;
     cargoExtensionCode: string | null;
     cargoCompanyName: string | null;
     cargoCustomerNo: string | null;
     cargoAccountTitle: string | null;
-    deliveryCompanyCode: string | null;
+    /** Kargo entegrasyonundan dönen referans numarası — oluşmadıysa null */
+    cargoReferenceId: string | null;
     cargoTrackingNumber: string | null;
-    cargoTrackingLink: string | null;
-    /** Kargo şubesinde gösterilecek iade kodu */
-    cargoSenderNumber: string | null;
     receivedDate: string | null;
     note: string | null;
     createdDate: string;

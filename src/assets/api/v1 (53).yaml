@@ -10049,10 +10049,10 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfWmsOrderImportSettingResponse"
       security:
         - Bearer: []
-  /api/wms/after-return-actions/paged:
+  /api/wms/after-return-claim-actions/paged:
     post:
       tags:
-        - AfterReturnAction
+        - AfterReturnClaimAction
       requestBody:
         content:
           application/json:
@@ -10071,19 +10071,22 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfAfterReturnActionResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfAfterReturnClaimActionRes\
+                  ponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfAfterReturnActionResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfAfterReturnClaimActionRes\
+                  ponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfAfterReturnActionResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfAfterReturnClaimActionRes\
+                  ponse"
       security:
         - Bearer: []
-  /api/wms/after-return-actions/{id}:
+  /api/wms/after-return-claim-actions/{id}:
     get:
       tags:
-        - AfterReturnAction
+        - AfterReturnClaimAction
       parameters:
         - name: id
           in: path
@@ -10097,30 +10100,30 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfAfterReturnActionResponse"
+                $ref: "#/components/schemas/ApiResponseOfAfterReturnClaimActionResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfAfterReturnActionResponse"
+                $ref: "#/components/schemas/ApiResponseOfAfterReturnClaimActionResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfAfterReturnActionResponse"
+                $ref: "#/components/schemas/ApiResponseOfAfterReturnClaimActionResponse"
       security:
         - Bearer: []
-  /api/wms/after-return-actions:
+  /api/wms/after-return-claim-actions:
     post:
       tags:
-        - AfterReturnAction
+        - AfterReturnClaimAction
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateAfterReturnActionRequest"
+              $ref: "#/components/schemas/CreateAfterReturnClaimActionRequest"
           text/json:
             schema:
-              $ref: "#/components/schemas/CreateAfterReturnActionRequest"
+              $ref: "#/components/schemas/CreateAfterReturnClaimActionRequest"
           application/*+json:
             schema:
-              $ref: "#/components/schemas/CreateAfterReturnActionRequest"
+              $ref: "#/components/schemas/CreateAfterReturnClaimActionRequest"
         required: true
       responses:
         "200":
@@ -10128,19 +10131,19 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfAfterReturnActionResponse"
+                $ref: "#/components/schemas/ApiResponseOfAfterReturnClaimActionResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfAfterReturnActionResponse"
+                $ref: "#/components/schemas/ApiResponseOfAfterReturnClaimActionResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfAfterReturnActionResponse"
+                $ref: "#/components/schemas/ApiResponseOfAfterReturnClaimActionResponse"
       security:
         - Bearer: []
-  /api/wms/after-return-actions/update/{id}:
+  /api/wms/after-return-claim-actions/update/{id}:
     post:
       tags:
-        - AfterReturnAction
+        - AfterReturnClaimAction
       parameters:
         - name: id
           in: path
@@ -10152,13 +10155,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateAfterReturnActionRequest"
+              $ref: "#/components/schemas/UpdateAfterReturnClaimActionRequest"
           text/json:
             schema:
-              $ref: "#/components/schemas/UpdateAfterReturnActionRequest"
+              $ref: "#/components/schemas/UpdateAfterReturnClaimActionRequest"
           application/*+json:
             schema:
-              $ref: "#/components/schemas/UpdateAfterReturnActionRequest"
+              $ref: "#/components/schemas/UpdateAfterReturnClaimActionRequest"
         required: true
       responses:
         "200":
@@ -10175,10 +10178,10 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
-  /api/wms/after-return-actions/delete/{id}:
+  /api/wms/after-return-claim-actions/delete/{id}:
     post:
       tags:
-        - AfterReturnAction
+        - AfterReturnClaimAction
       parameters:
         - name: id
           in: path
@@ -10505,10 +10508,10 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
-  /api/wms/before-claim-instructions/paged:
+  /api/wms/before-return-claim-instructions/paged:
     post:
       tags:
-        - BeforeClaimInstruction
+        - BeforeReturnClaimInstruction
       requestBody:
         content:
           application/json:
@@ -10527,22 +10530,22 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfBeforeClaimInstructionRes\
-                  ponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfBeforeReturnClaimInstruct\
+                  ionResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfBeforeClaimInstructionRes\
-                  ponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfBeforeReturnClaimInstruct\
+                  ionResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfBeforeClaimInstructionRes\
-                  ponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfBeforeReturnClaimInstruct\
+                  ionResponse"
       security:
         - Bearer: []
-  /api/wms/before-claim-instructions/{id}:
+  /api/wms/before-return-claim-instructions/{id}:
     get:
       tags:
-        - BeforeClaimInstruction
+        - BeforeReturnClaimInstruction
       parameters:
         - name: id
           in: path
@@ -10556,30 +10559,30 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfBeforeClaimInstructionResponse"
+                $ref: "#/components/schemas/ApiResponseOfBeforeReturnClaimInstructionResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfBeforeClaimInstructionResponse"
+                $ref: "#/components/schemas/ApiResponseOfBeforeReturnClaimInstructionResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfBeforeClaimInstructionResponse"
+                $ref: "#/components/schemas/ApiResponseOfBeforeReturnClaimInstructionResponse"
       security:
         - Bearer: []
-  /api/wms/before-claim-instructions:
+  /api/wms/before-return-claim-instructions:
     post:
       tags:
-        - BeforeClaimInstruction
+        - BeforeReturnClaimInstruction
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateBeforeClaimInstructionRequest"
+              $ref: "#/components/schemas/CreateBeforeReturnClaimInstructionRequest"
           text/json:
             schema:
-              $ref: "#/components/schemas/CreateBeforeClaimInstructionRequest"
+              $ref: "#/components/schemas/CreateBeforeReturnClaimInstructionRequest"
           application/*+json:
             schema:
-              $ref: "#/components/schemas/CreateBeforeClaimInstructionRequest"
+              $ref: "#/components/schemas/CreateBeforeReturnClaimInstructionRequest"
         required: true
       responses:
         "200":
@@ -10587,19 +10590,19 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfBeforeClaimInstructionResponse"
+                $ref: "#/components/schemas/ApiResponseOfBeforeReturnClaimInstructionResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfBeforeClaimInstructionResponse"
+                $ref: "#/components/schemas/ApiResponseOfBeforeReturnClaimInstructionResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfBeforeClaimInstructionResponse"
+                $ref: "#/components/schemas/ApiResponseOfBeforeReturnClaimInstructionResponse"
       security:
         - Bearer: []
-  /api/wms/before-claim-instructions/update/{id}:
+  /api/wms/before-return-claim-instructions/update/{id}:
     post:
       tags:
-        - BeforeClaimInstruction
+        - BeforeReturnClaimInstruction
       parameters:
         - name: id
           in: path
@@ -10611,13 +10614,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateBeforeClaimInstructionRequest"
+              $ref: "#/components/schemas/UpdateBeforeReturnClaimInstructionRequest"
           text/json:
             schema:
-              $ref: "#/components/schemas/UpdateBeforeClaimInstructionRequest"
+              $ref: "#/components/schemas/UpdateBeforeReturnClaimInstructionRequest"
           application/*+json:
             schema:
-              $ref: "#/components/schemas/UpdateBeforeClaimInstructionRequest"
+              $ref: "#/components/schemas/UpdateBeforeReturnClaimInstructionRequest"
         required: true
       responses:
         "200":
@@ -10634,10 +10637,10 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
-  /api/wms/before-claim-instructions/delete/{id}:
+  /api/wms/before-return-claim-instructions/delete/{id}:
     post:
       tags:
-        - BeforeClaimInstruction
+        - BeforeReturnClaimInstruction
       parameters:
         - name: id
           in: path
@@ -10964,158 +10967,6 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
-  /api/wms/claim-cargo-companies/paged:
-    post:
-      tags:
-        - ClaimCargoCompany
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PaginationRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/PaginationRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/PaginationRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfClaimCargoCompanyResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfClaimCargoCompanyResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfClaimCargoCompanyResponse"
-      security:
-        - Bearer: []
-  /api/wms/claim-cargo-companies/{id}:
-    get:
-      tags:
-        - ClaimCargoCompany
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimCargoCompanyResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimCargoCompanyResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimCargoCompanyResponse"
-      security:
-        - Bearer: []
-  /api/wms/claim-cargo-companies:
-    post:
-      tags:
-        - ClaimCargoCompany
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateClaimCargoCompanyRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/CreateClaimCargoCompanyRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/CreateClaimCargoCompanyRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimCargoCompanyResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimCargoCompanyResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimCargoCompanyResponse"
-      security:
-        - Bearer: []
-  /api/wms/claim-cargo-companies/update/{id}:
-    post:
-      tags:
-        - ClaimCargoCompany
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateClaimCargoCompanyRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/UpdateClaimCargoCompanyRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/UpdateClaimCargoCompanyRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/wms/claim-cargo-companies/delete/{id}:
-    post:
-      tags:
-        - ClaimCargoCompany
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
   /api/wms/claims/paged:
     post:
       tags:
@@ -11398,158 +11249,6 @@ paths:
     post:
       tags:
         - ClaimLine
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/wms/claim-status/paged:
-    post:
-      tags:
-        - ClaimStatus
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AdminPaginationRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/AdminPaginationRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/AdminPaginationRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfClaimStatusResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfClaimStatusResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfClaimStatusResponse"
-      security:
-        - Bearer: []
-  /api/wms/claim-status/{id}:
-    get:
-      tags:
-        - ClaimStatus
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimStatusResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimStatusResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimStatusResponse"
-      security:
-        - Bearer: []
-  /api/wms/claim-status:
-    post:
-      tags:
-        - ClaimStatus
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateClaimStatusRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/CreateClaimStatusRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/CreateClaimStatusRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimStatusResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimStatusResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfClaimStatusResponse"
-      security:
-        - Bearer: []
-  /api/wms/claim-status/update/{id}:
-    post:
-      tags:
-        - ClaimStatus
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateClaimStatusRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/UpdateClaimStatusRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/UpdateClaimStatusRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfObject"
-      security:
-        - Bearer: []
-  /api/wms/claim-status/delete/{id}:
-    post:
-      tags:
-        - ClaimStatus
       parameters:
         - name: id
           in: path
@@ -24859,6 +24558,313 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
+  /api/wms/return-claim-cargo-companies/paged:
+    post:
+      tags:
+        - ReturnClaimCargoCompany
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnClaimCargoCompanyRe\
+                  sponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnClaimCargoCompanyRe\
+                  sponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnClaimCargoCompanyRe\
+                  sponse"
+      security:
+        - Bearer: []
+  /api/wms/return-claim-cargo-companies/{id}:
+    get:
+      tags:
+        - ReturnClaimCargoCompany
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimCargoCompanyResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimCargoCompanyResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimCargoCompanyResponse"
+      security:
+        - Bearer: []
+  /api/wms/return-claim-cargo-companies:
+    post:
+      tags:
+        - ReturnClaimCargoCompany
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReturnClaimCargoCompanyRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateReturnClaimCargoCompanyRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateReturnClaimCargoCompanyRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimCargoCompanyResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimCargoCompanyResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimCargoCompanyResponse"
+      security:
+        - Bearer: []
+  /api/wms/return-claim-cargo-companies/update/{id}:
+    post:
+      tags:
+        - ReturnClaimCargoCompany
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReturnClaimCargoCompanyRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReturnClaimCargoCompanyRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateReturnClaimCargoCompanyRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/wms/return-claim-cargo-companies/delete/{id}:
+    post:
+      tags:
+        - ReturnClaimCargoCompany
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/wms/return-claim-cargos/paged:
+    post:
+      tags:
+        - ReturnClaimCargo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/PaginationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnClaimCargoResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnClaimCargoResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnClaimCargoResponse"
+      security:
+        - Bearer: []
+  /api/wms/return-claim-cargos/{id}:
+    get:
+      tags:
+        - ReturnClaimCargo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimCargoResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimCargoResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimCargoResponse"
+      security:
+        - Bearer: []
+  /api/wms/return-claim-cargos:
+    post:
+      tags:
+        - ReturnClaimCargo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReturnClaimCargoRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateReturnClaimCargoRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateReturnClaimCargoRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimCargoResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimCargoResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimCargoResponse"
+      security:
+        - Bearer: []
+  /api/wms/return-claim-cargos/update/{id}:
+    post:
+      tags:
+        - ReturnClaimCargo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReturnClaimCargoRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReturnClaimCargoRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateReturnClaimCargoRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/wms/return-claim-cargos/delete/{id}:
+    post:
+      tags:
+        - ReturnClaimCargo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
   /api/wms/return-claims/paged:
     post:
       tags:
@@ -25163,10 +25169,10 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
-  /api/wms/return-reasons/paged:
+  /api/wms/return-claim-reasons/paged:
     post:
       tags:
-        - ReturnReason
+        - ReturnClaimReason
       requestBody:
         content:
           application/json:
@@ -25185,19 +25191,19 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnReasonResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnClaimReasonResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnReasonResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnClaimReasonResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnReasonResponse"
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnClaimReasonResponse"
       security:
         - Bearer: []
-  /api/wms/return-reasons/{id}:
+  /api/wms/return-claim-reasons/{id}:
     get:
       tags:
-        - ReturnReason
+        - ReturnClaimReason
       parameters:
         - name: id
           in: path
@@ -25211,30 +25217,30 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfReturnReasonResponse"
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimReasonResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfReturnReasonResponse"
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimReasonResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfReturnReasonResponse"
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimReasonResponse"
       security:
         - Bearer: []
-  /api/wms/return-reasons:
+  /api/wms/return-claim-reasons:
     post:
       tags:
-        - ReturnReason
+        - ReturnClaimReason
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateReturnReasonRequest"
+              $ref: "#/components/schemas/CreateReturnClaimReasonRequest"
           text/json:
             schema:
-              $ref: "#/components/schemas/CreateReturnReasonRequest"
+              $ref: "#/components/schemas/CreateReturnClaimReasonRequest"
           application/*+json:
             schema:
-              $ref: "#/components/schemas/CreateReturnReasonRequest"
+              $ref: "#/components/schemas/CreateReturnClaimReasonRequest"
         required: true
       responses:
         "200":
@@ -25242,19 +25248,19 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfReturnReasonResponse"
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimReasonResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfReturnReasonResponse"
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimReasonResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfReturnReasonResponse"
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimReasonResponse"
       security:
         - Bearer: []
-  /api/wms/return-reasons/update/{id}:
+  /api/wms/return-claim-reasons/update/{id}:
     post:
       tags:
-        - ReturnReason
+        - ReturnClaimReason
       parameters:
         - name: id
           in: path
@@ -25266,13 +25272,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateReturnReasonRequest"
+              $ref: "#/components/schemas/UpdateReturnClaimReasonRequest"
           text/json:
             schema:
-              $ref: "#/components/schemas/UpdateReturnReasonRequest"
+              $ref: "#/components/schemas/UpdateReturnClaimReasonRequest"
           application/*+json:
             schema:
-              $ref: "#/components/schemas/UpdateReturnReasonRequest"
+              $ref: "#/components/schemas/UpdateReturnClaimReasonRequest"
         required: true
       responses:
         "200":
@@ -25289,10 +25295,162 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
-  /api/wms/return-reasons/delete/{id}:
+  /api/wms/return-claim-reasons/delete/{id}:
     post:
       tags:
-        - ReturnReason
+        - ReturnClaimReason
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/wms/return-claim-status/paged:
+    post:
+      tags:
+        - ReturnClaimStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminPaginationRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/AdminPaginationRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/AdminPaginationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnClaimStatusResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnClaimStatusResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfPagedResultOfReturnClaimStatusResponse"
+      security:
+        - Bearer: []
+  /api/wms/return-claim-status/{id}:
+    get:
+      tags:
+        - ReturnClaimStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimStatusResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimStatusResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimStatusResponse"
+      security:
+        - Bearer: []
+  /api/wms/return-claim-status:
+    post:
+      tags:
+        - ReturnClaimStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReturnClaimStatusRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateReturnClaimStatusRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateReturnClaimStatusRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimStatusResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimStatusResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfReturnClaimStatusResponse"
+      security:
+        - Bearer: []
+  /api/wms/return-claim-status/update/{id}:
+    post:
+      tags:
+        - ReturnClaimStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReturnClaimStatusRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReturnClaimStatusRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/UpdateReturnClaimStatusRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfObject"
+      security:
+        - Bearer: []
+  /api/wms/return-claim-status/delete/{id}:
+    post:
+      tags:
+        - ReturnClaimStatus
       parameters:
         - name: id
           in: path
@@ -29494,13 +29652,16 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnReasonOptionResponse"
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimReasonOptionRespon\
+                  se"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnReasonOptionResponse"
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimReasonOptionRespon\
+                  se"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnReasonOptionResponse"
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimReasonOptionRespon\
+                  se"
       security:
         - Bearer: []
   /order-tracking/{companyId}/after-return-actions:
@@ -29520,16 +29681,16 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsAfterReturnActionOptionRespon\
-                  se"
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsAfterReturnClaimActionOptionR\
+                  esponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsAfterReturnActionOptionRespon\
-                  se"
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsAfterReturnClaimActionOptionR\
+                  esponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsAfterReturnActionOptionRespon\
-                  se"
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsAfterReturnClaimActionOptionR\
+                  esponse"
       security:
         - Bearer: []
   /order-tracking/{companyId}/before-claim-instructions:
@@ -29549,16 +29710,16 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsBeforeClaimInstructionRespons\
-                  e"
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsBeforeReturnClaimInstructionR\
+                  esponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsBeforeClaimInstructionRespons\
-                  e"
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsBeforeReturnClaimInstructionR\
+                  esponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsBeforeClaimInstructionRespons\
-                  e"
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsBeforeReturnClaimInstructionR\
+                  esponse"
       security:
         - Bearer: []
   /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claim:
@@ -29682,6 +29843,257 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimDetailResponse"
+      security:
+        - Bearer: []
+  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/{claimNumber}/cargo:
+    post:
+      tags:
+        - OrderTracking
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: extensionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: orderNo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claimNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWmsReturnClaimCargoRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateWmsReturnClaimCargoRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateWmsReturnClaimCargoRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResultResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResultResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResultResponse"
+      security:
+        - Bearer: []
+  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/{claimNumber}/cargo/cancel:
+    post:
+      tags:
+        - OrderTracking
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: extensionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: orderNo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claimNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResponse"
+      security:
+        - Bearer: []
+  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/cargos:
+    get:
+      tags:
+        - OrderTracking
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: extensionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: orderNo
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimCargoResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimCargoResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimCargoResponse"
+      security:
+        - Bearer: []
+  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/{claimNumber}/approve:
+    post:
+      tags:
+        - OrderTracking
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: extensionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: orderNo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claimNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: "null"
+                - $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+          text/json:
+            schema:
+              oneOf:
+                - type: "null"
+                - $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+          application/*+json:
+            schema:
+              oneOf:
+                - type: "null"
+                - $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimDecisionResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimDecisionResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimDecisionResponse"
+      security:
+        - Bearer: []
+  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/{claimNumber}/reject:
+    post:
+      tags:
+        - OrderTracking
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: extensionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: orderNo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claimNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: "null"
+                - $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+          text/json:
+            schema:
+              oneOf:
+                - type: "null"
+                - $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+          application/*+json:
+            schema:
+              oneOf:
+                - type: "null"
+                - $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimDecisionResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimDecisionResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimDecisionResponse"
       security:
         - Bearer: []
   /order-tracking/{companyId}/cargo-companies:
@@ -34250,7 +34662,7 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfYurticiTrackingResponse"
       security:
         - Bearer: []
-  /api/Extension/mng/package-status:
+  /api/Extension/dhl/package-status:
     post:
       tags:
         - Extension
@@ -34258,13 +34670,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ExtensionRequestOfMngPackageStatusQuery"
+              $ref: "#/components/schemas/ExtensionRequestOfDhlPackageStatusQuery"
           text/json:
             schema:
-              $ref: "#/components/schemas/ExtensionRequestOfMngPackageStatusQuery"
+              $ref: "#/components/schemas/ExtensionRequestOfDhlPackageStatusQuery"
           application/*+json:
             schema:
-              $ref: "#/components/schemas/ExtensionRequestOfMngPackageStatusQuery"
+              $ref: "#/components/schemas/ExtensionRequestOfDhlPackageStatusQuery"
         required: true
       responses:
         "200":
@@ -34272,13 +34684,13 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfMngPackageStatusResponse"
+                $ref: "#/components/schemas/ApiResponseOfDhlPackageStatusResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfMngPackageStatusResponse"
+                $ref: "#/components/schemas/ApiResponseOfDhlPackageStatusResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfMngPackageStatusResponse"
+                $ref: "#/components/schemas/ApiResponseOfDhlPackageStatusResponse"
       security:
         - Bearer: []
   /api/Extension/surat/tracking:
@@ -34343,7 +34755,7 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfHepsijetTrackingData"
       security:
         - Bearer: []
-  /api/Extension/mng/create-cargo:
+  /api/Extension/dhl/create-cargo:
     post:
       tags:
         - Extension
@@ -34372,6 +34784,37 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfCreateCargoResponse"
+      security:
+        - Bearer: []
+  /api/Extension/dhl/create-return-cargo:
+    post:
+      tags:
+        - Extension
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtensionRequestOfCreateReturnCargoRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/ExtensionRequestOfCreateReturnCargoRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/ExtensionRequestOfCreateReturnCargoRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCreateReturnCargoResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCreateReturnCargoResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfCreateReturnCargoResponse"
       security:
         - Bearer: []
   /api/Extension/aras/create-cargo:
@@ -34498,7 +34941,7 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfCreateCargoResponse"
       security:
         - Bearer: []
-  /api/Extension/mng/cancel-cargo:
+  /api/Extension/dhl/cancel-cargo:
     post:
       tags:
         - Extension
@@ -37012,7 +37455,7 @@ components:
         sortDescending:
           type: boolean
           default: false
-    AfterReturnActionResponse:
+    AfterReturnClaimActionResponse:
       required:
         - id
         - companyId
@@ -38636,7 +39079,7 @@ components:
             - array
           items:
             $ref: "#/components/schemas/AiUsageByDayResponse"
-    ApiResponseOfAfterReturnActionResponse:
+    ApiResponseOfAfterReturnClaimActionResponse:
       type: object
       properties:
         statusCode:
@@ -38648,7 +39091,7 @@ components:
         data:
           oneOf:
             - type: "null"
-            - $ref: "#/components/schemas/AfterReturnActionResponse"
+            - $ref: "#/components/schemas/AfterReturnClaimActionResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -39564,7 +40007,7 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfBeforeClaimInstructionResponse:
+    ApiResponseOfBeforeReturnClaimInstructionResponse:
       type: object
       properties:
         statusCode:
@@ -39576,7 +40019,7 @@ components:
         data:
           oneOf:
             - type: "null"
-            - $ref: "#/components/schemas/BeforeClaimInstructionResponse"
+            - $ref: "#/components/schemas/BeforeReturnClaimInstructionResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -40266,38 +40709,6 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfClaimCargoCompanyResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/ClaimCargoCompanyResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
     ApiResponseOfClaimLineResponse:
       type: object
       properties:
@@ -40375,38 +40786,6 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/ClaimStatusMappingResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfClaimStatusResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/ClaimStatusResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -41226,6 +41605,38 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfCreateReturnCargoResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/CreateReturnCargoResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfCurrencyDescResponse:
       type: object
       properties:
@@ -41719,6 +42130,38 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/DeliveryCompanyResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfDhlPackageStatusResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/DhlPackageStatusResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -46082,7 +46525,7 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfListOfWmsAfterReturnActionOptionResponse:
+    ApiResponseOfListOfWmsAfterReturnClaimActionOptionResponse:
       type: object
       properties:
         statusCode:
@@ -46096,7 +46539,7 @@ components:
             - "null"
             - array
           items:
-            $ref: "#/components/schemas/WmsAfterReturnActionOptionResponse"
+            $ref: "#/components/schemas/WmsAfterReturnClaimActionOptionResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -46116,7 +46559,7 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfListOfWmsBeforeClaimInstructionResponse:
+    ApiResponseOfListOfWmsBeforeReturnClaimInstructionResponse:
       type: object
       properties:
         statusCode:
@@ -46130,7 +46573,7 @@ components:
             - "null"
             - array
           items:
-            $ref: "#/components/schemas/WmsBeforeClaimInstructionResponse"
+            $ref: "#/components/schemas/WmsBeforeReturnClaimInstructionResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -46252,6 +46695,40 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfListOfWmsReturnClaimCargoResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/WmsReturnClaimCargoResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfListOfWmsReturnClaimDetailResponse:
       type: object
       properties:
@@ -46320,7 +46797,7 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfListOfWmsReturnReasonOptionResponse:
+    ApiResponseOfListOfWmsReturnClaimReasonOptionResponse:
       type: object
       properties:
         statusCode:
@@ -46334,7 +46811,7 @@ components:
             - "null"
             - array
           items:
-            $ref: "#/components/schemas/WmsReturnReasonOptionResponse"
+            $ref: "#/components/schemas/WmsReturnClaimReasonOptionResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -46623,38 +47100,6 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/MessageResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfMngPackageStatusResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/MngPackageStatusResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -47887,7 +48332,7 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfPagedResultOfAfterReturnActionResponse:
+    ApiResponseOfPagedResultOfAfterReturnClaimActionResponse:
       type: object
       properties:
         statusCode:
@@ -47899,7 +48344,7 @@ components:
         data:
           oneOf:
             - type: "null"
-            - $ref: "#/components/schemas/PagedResultOfAfterReturnActionResponse"
+            - $ref: "#/components/schemas/PagedResultOfAfterReturnClaimActionResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -48207,7 +48652,7 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfPagedResultOfBeforeClaimInstructionResponse:
+    ApiResponseOfPagedResultOfBeforeReturnClaimInstructionResponse:
       type: object
       properties:
         statusCode:
@@ -48219,7 +48664,7 @@ components:
         data:
           oneOf:
             - type: "null"
-            - $ref: "#/components/schemas/PagedResultOfBeforeClaimInstructionResponse"
+            - $ref: "#/components/schemas/PagedResultOfBeforeReturnClaimInstructionResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -48284,38 +48729,6 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/PagedResultOfCityResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfPagedResultOfClaimCargoCompanyResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/PagedResultOfClaimCargoCompanyResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -48412,38 +48825,6 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/PagedResultOfClaimStatusMappingResponse"
-        dataCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: int32
-        traceId:
-          type:
-            - "null"
-            - string
-        errorCode:
-          type:
-            - "null"
-            - string
-        innerError:
-          type:
-            - "null"
-            - string
-    ApiResponseOfPagedResultOfClaimStatusResponse:
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        data:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/PagedResultOfClaimStatusResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -51791,6 +52172,70 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfPagedResultOfReturnClaimCargoCompanyResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/PagedResultOfReturnClaimCargoCompanyResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfPagedResultOfReturnClaimCargoResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/PagedResultOfReturnClaimCargoResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfPagedResultOfReturnClaimLineResponse:
       type: object
       properties:
@@ -51804,6 +52249,38 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/PagedResultOfReturnClaimLineResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfPagedResultOfReturnClaimReasonResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/PagedResultOfReturnClaimReasonResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -51855,7 +52332,7 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfPagedResultOfReturnReasonResponse:
+    ApiResponseOfPagedResultOfReturnClaimStatusResponse:
       type: object
       properties:
         statusCode:
@@ -51867,7 +52344,7 @@ components:
         data:
           oneOf:
             - type: "null"
-            - $ref: "#/components/schemas/PagedResultOfReturnReasonResponse"
+            - $ref: "#/components/schemas/PagedResultOfReturnClaimStatusResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -53615,6 +54092,70 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfReturnClaimCargoCompanyResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ReturnClaimCargoCompanyResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfReturnClaimCargoResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ReturnClaimCargoResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfReturnClaimLineResponse:
       type: object
       properties:
@@ -53628,6 +54169,38 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/ReturnClaimLineResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfReturnClaimReasonResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ReturnClaimReasonResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -53679,7 +54252,7 @@ components:
           type:
             - "null"
             - string
-    ApiResponseOfReturnReasonResponse:
+    ApiResponseOfReturnClaimStatusResponse:
       type: object
       properties:
         statusCode:
@@ -53691,7 +54264,7 @@ components:
         data:
           oneOf:
             - type: "null"
-            - $ref: "#/components/schemas/ReturnReasonResponse"
+            - $ref: "#/components/schemas/ReturnClaimStatusResponse"
         dataCount:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -55855,6 +56428,102 @@ components:
           type:
             - "null"
             - string
+    ApiResponseOfWmsReturnClaimCargoResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/WmsReturnClaimCargoResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfWmsReturnClaimCargoResultResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/WmsReturnClaimCargoResultResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
+    ApiResponseOfWmsReturnClaimDecisionResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        data:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/WmsReturnClaimDecisionResponse"
+        dataCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        traceId:
+          type:
+            - "null"
+            - string
+        errorCode:
+          type:
+            - "null"
+            - string
+        innerError:
+          type:
+            - "null"
+            - string
     ApiResponseOfWmsReturnClaimResultResponse:
       type: object
       properties:
@@ -56481,7 +57150,7 @@ components:
         updatedDate:
           type: string
           format: date-time
-    BeforeClaimInstructionResponse:
+    BeforeReturnClaimInstructionResponse:
       required:
         - id
         - companyId
@@ -58104,30 +58773,7 @@ components:
           type:
             - "null"
             - string
-    CargoPieceInfo:
-      type: object
-      properties:
-        barcode:
-          type:
-            - "null"
-            - string
-        desi:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        kg:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        content:
-          type:
-            - "null"
-            - string
-    CargoRecipientInfo:
+    CargoPartyInfo:
       type: object
       properties:
         fullName:
@@ -58177,6 +58823,29 @@ components:
             - "null"
             - string
         refCustomerId:
+          type:
+            - "null"
+            - string
+    CargoPieceInfo:
+      type: object
+      properties:
+        barcode:
+          type:
+            - "null"
+            - string
+        desi:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        kg:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        content:
           type:
             - "null"
             - string
@@ -59559,58 +60228,6 @@ components:
         updatedDate:
           type: string
           format: date-time
-    ClaimCargoCompanyResponse:
-      required:
-        - id
-        - companyId
-        - cargoExtensionId
-        - customerNo
-        - accountTitle
-        - sortOrder
-        - isActive
-        - createdUserId
-        - createdDate
-        - lastUpdatedUserId
-        - updatedDate
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        companyId:
-          type: string
-          format: uuid
-        cargoExtensionId:
-          type: string
-          format: uuid
-        customerNo:
-          type:
-            - "null"
-            - string
-        accountTitle:
-          type:
-            - "null"
-            - string
-        sortOrder:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        isActive:
-          type: boolean
-        createdUserId:
-          type: string
-          format: uuid
-        createdDate:
-          type: string
-          format: date-time
-        lastUpdatedUserId:
-          type: string
-          format: uuid
-        updatedDate:
-          type: string
-          format: date-time
     ClaimLineResponse:
       required:
         - id
@@ -59942,60 +60559,6 @@ components:
             - string
           format: uint8
         isAutoCreated:
-          type: boolean
-        createdUserId:
-          type: string
-          format: uuid
-        createdDate:
-          type: string
-          format: date-time
-        lastUpdatedUserId:
-          type: string
-          format: uuid
-        updatedDate:
-          type: string
-          format: date-time
-    ClaimStatusResponse:
-      required:
-        - id
-        - statusCode
-        - statusDescription
-        - matchKeywords
-        - isClosed
-        - sortOrder
-        - isActive
-        - createdUserId
-        - createdDate
-        - lastUpdatedUserId
-        - updatedDate
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: uint8
-        statusDescription:
-          type:
-            - "null"
-            - string
-        matchKeywords:
-          type:
-            - "null"
-            - string
-        isClosed:
-          type: boolean
-        sortOrder:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        isActive:
           type: boolean
         createdUserId:
           type: string
@@ -61614,7 +62177,7 @@ components:
         updatedDate:
           type: string
           format: date-time
-    CreateAfterReturnActionRequest:
+    CreateAfterReturnClaimActionRequest:
       required:
         - companyId
         - actionCode
@@ -62134,7 +62697,7 @@ components:
             - string
         isActive:
           type: boolean
-    CreateBeforeClaimInstructionRequest:
+    CreateBeforeReturnClaimInstructionRequest:
       required:
         - companyId
         - sortOrder
@@ -62171,7 +62734,7 @@ components:
         order:
           $ref: "#/components/schemas/CargoOrderInfo"
         recipient:
-          $ref: "#/components/schemas/CargoRecipientInfo"
+          $ref: "#/components/schemas/CargoPartyInfo"
         pieces:
           type: array
           items:
@@ -62243,38 +62806,6 @@ components:
           type:
             - "null"
             - string
-        isActive:
-          type: boolean
-    CreateClaimCargoCompanyRequest:
-      required:
-        - companyId
-        - cargoExtensionId
-        - customerNo
-        - accountTitle
-        - sortOrder
-        - isActive
-      type: object
-      properties:
-        companyId:
-          type: string
-          format: uuid
-        cargoExtensionId:
-          type: string
-          format: uuid
-        customerNo:
-          type:
-            - "null"
-            - string
-        accountTitle:
-          type:
-            - "null"
-            - string
-        sortOrder:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
         isActive:
           type: boolean
     CreateClaimLineRequest:
@@ -62560,40 +63091,6 @@ components:
             - string
           format: uint8
         isAutoCreated:
-          type: boolean
-    CreateClaimStatusRequest:
-      required:
-        - statusCode
-        - statusDescription
-        - matchKeywords
-        - isClosed
-        - sortOrder
-        - isActive
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: uint8
-        statusDescription:
-          type:
-            - "null"
-            - string
-        matchKeywords:
-          type:
-            - "null"
-            - string
-        isClosed:
-          type: boolean
-        sortOrder:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        isActive:
           type: boolean
     CreateCloudinarySettingRequest:
       required:
@@ -67379,6 +67876,170 @@ components:
           type:
             - "null"
             - string
+    CreateReturnCargoRequest:
+      type: object
+      properties:
+        order:
+          $ref: "#/components/schemas/CargoOrderInfo"
+        shipper:
+          $ref: "#/components/schemas/CargoPartyInfo"
+        pieces:
+          type: array
+          items:
+            $ref: "#/components/schemas/CargoPieceInfo"
+    CreateReturnCargoResponse:
+      required:
+        - providerCode
+        - orderNumber
+        - referenceId
+        - orderInvoiceId
+        - orderInvoiceDetailId
+        - shipperBranchCode
+        - returnLabelUrl
+        - rawResponse
+      type: object
+      properties:
+        providerCode:
+          type: string
+        orderNumber:
+          type: string
+        referenceId:
+          type: string
+        orderInvoiceId:
+          type:
+            - "null"
+            - string
+        orderInvoiceDetailId:
+          type:
+            - "null"
+            - string
+        shipperBranchCode:
+          type:
+            - "null"
+            - string
+        returnLabelUrl:
+          type:
+            - "null"
+            - string
+        rawResponse:
+          type:
+            - "null"
+            - string
+    CreateReturnClaimCargoCompanyRequest:
+      required:
+        - companyId
+        - cargoExtensionId
+        - customerNo
+        - accountTitle
+        - sortOrder
+        - isActive
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        cargoExtensionId:
+          type: string
+          format: uuid
+        customerNo:
+          type:
+            - "null"
+            - string
+        accountTitle:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
+    CreateReturnClaimCargoRequest:
+      required:
+        - companyId
+        - returnClaimId
+        - claimNumber
+        - orderNumber
+        - cargoExtensionId
+        - referenceNumber
+        - trackingNumber
+        - trackingUrl
+        - paymentType
+        - pieceCount
+        - desi
+        - kg
+        - isCancelled
+        - cancelledDate
+        - createdIp
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        returnClaimId:
+          type: string
+          format: uuid
+        claimNumber:
+          type:
+            - "null"
+            - string
+        orderNumber:
+          type:
+            - "null"
+            - string
+        cargoExtensionId:
+          type: string
+          format: uuid
+        referenceNumber:
+          type:
+            - "null"
+            - string
+        trackingNumber:
+          type:
+            - "null"
+            - string
+        trackingUrl:
+          type:
+            - "null"
+            - string
+        paymentType:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: uint8
+        pieceCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        desi:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        kg:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isCancelled:
+          type: boolean
+        cancelledDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        createdIp:
+          type:
+            - "null"
+            - string
     CreateReturnClaimLineRequest:
       required:
         - claimHeaderId
@@ -67492,13 +68153,39 @@ components:
           type:
             - "null"
             - string
+    CreateReturnClaimReasonRequest:
+      required:
+        - companyId
+        - returnCode
+        - returnReasonDescription
+        - sortOrder
+        - isActive
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        returnCode:
+          type:
+            - "null"
+            - string
+        returnReasonDescription:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
     CreateReturnClaimRequest:
       required:
         - companyId
         - claimNumber
         - orderNumber
-        - customerTypeCode
-        - customerCode
         - extensionCode
         - companyExtensionId
         - externalClaimId
@@ -67511,10 +68198,8 @@ components:
         - sourceLastModifiedDate
         - payloadHash
         - cargoExtensionId
-        - deliveryCompanyCode
+        - cargoReferenceId
         - cargoTrackingNumber
-        - cargoTrackingLink
-        - cargoSenderNumber
         - receivedDate
         - note
         - lastSyncedDate
@@ -67529,17 +68214,6 @@ components:
             - "null"
             - string
         orderNumber:
-          type:
-            - "null"
-            - string
-        customerTypeCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: uint8
-        customerCode:
           type:
             - "null"
             - string
@@ -67597,19 +68271,11 @@ components:
             - "null"
             - string
           format: uuid
-        deliveryCompanyCode:
+        cargoReferenceId:
           type:
             - "null"
             - string
         cargoTrackingNumber:
-          type:
-            - "null"
-            - string
-        cargoTrackingLink:
-          type:
-            - "null"
-            - string
-        cargoSenderNumber:
           type:
             - "null"
             - string
@@ -67629,26 +68295,27 @@ components:
           type:
             - "null"
             - string
-    CreateReturnReasonRequest:
+    CreateReturnClaimStatusRequest:
       required:
-        - companyId
-        - returnCode
-        - returnReasonDescription
+        - statusCode
+        - statusDescription
+        - isClosed
         - sortOrder
         - isActive
       type: object
       properties:
-        companyId:
-          type: string
-          format: uuid
-        returnCode:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: uint8
+        statusDescription:
           type:
             - "null"
             - string
-        returnReasonDescription:
-          type:
-            - "null"
-            - string
+        isClosed:
+          type: boolean
         sortOrder:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -69056,6 +69723,35 @@ components:
           type:
             - "null"
             - string
+    CreateWmsReturnClaimCargoRequest:
+      type: object
+      properties:
+        cargoExtensionId:
+          type:
+            - "null"
+            - string
+          format: uuid
+        pieceCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        desi:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        kg:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
     CreateWmsReturnClaimLineRequest:
       required:
         - quantity
@@ -69134,6 +69830,27 @@ components:
           type:
             - "null"
             - string
+        pieceCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        desi:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        kg:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
     CurrencyDescResponse:
       required:
         - id
@@ -70037,6 +70754,53 @@ components:
         updatedDate:
           type: string
           format: date-time
+    DhlPackageStatusQuery:
+      type: object
+      properties:
+        shipmentId:
+          type:
+            - "null"
+            - string
+    DhlPackageStatusResponse:
+      type: object
+      properties:
+        statuses:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/DhlShipmentStatus"
+        rawJson:
+          type:
+            - "null"
+            - string
+    DhlShipmentStatus:
+      type: object
+      properties:
+        shipmentId:
+          type:
+            - "null"
+            - string
+        statusCode:
+          type:
+            - "null"
+            - string
+        statusName:
+          type:
+            - "null"
+            - string
+        statusDate:
+          type:
+            - "null"
+            - string
+        recipientName:
+          type:
+            - "null"
+            - string
+        deliveryDate:
+          type:
+            - "null"
+            - string
     DistrictDescResponse:
       required:
         - id
@@ -70865,6 +71629,32 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/CreateCargoRequest"
+    ExtensionRequestOfCreateReturnCargoRequest:
+      required:
+        - companyId
+        - payload
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        payload:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/CreateReturnCargoRequest"
+    ExtensionRequestOfDhlPackageStatusQuery:
+      required:
+        - companyId
+        - payload
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        payload:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/DhlPackageStatusQuery"
     ExtensionRequestOfGraphQlQueryRequest:
       required:
         - companyId
@@ -71333,19 +72123,6 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/IkasStockQuery"
-    ExtensionRequestOfMngPackageStatusQuery:
-      required:
-        - companyId
-        - payload
-      type: object
-      properties:
-        companyId:
-          type: string
-          format: uuid
-        payload:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/MngPackageStatusQuery"
     ExtensionRequestOfModanisaOrderQuery:
       required:
         - companyId
@@ -78666,53 +79443,6 @@ components:
         updatedDate:
           type: string
           format: date-time
-    MngPackageStatusQuery:
-      type: object
-      properties:
-        shipmentId:
-          type:
-            - "null"
-            - string
-    MngPackageStatusResponse:
-      type: object
-      properties:
-        statuses:
-          type:
-            - "null"
-            - array
-          items:
-            $ref: "#/components/schemas/MngShipmentStatus"
-        rawJson:
-          type:
-            - "null"
-            - string
-    MngShipmentStatus:
-      type: object
-      properties:
-        shipmentId:
-          type:
-            - "null"
-            - string
-        statusCode:
-          type:
-            - "null"
-            - string
-        statusName:
-          type:
-            - "null"
-            - string
-        statusDate:
-          type:
-            - "null"
-            - string
-        recipientName:
-          type:
-            - "null"
-            - string
-        deliveryDate:
-          type:
-            - "null"
-            - string
     ModanisaOrderQuery:
       type: object
       properties:
@@ -82448,6 +83178,8 @@ components:
         - totalAmount
         - totalVat
         - cargoAmount
+        - paymentTypeCode
+        - paymentTypeName
         - orderNote
         - deliveryAddress
         - items
@@ -82506,6 +83238,17 @@ components:
             - number
             - string
           format: double
+        paymentTypeCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - "null"
+            - integer
+            - string
+          format: int32
+        paymentTypeName:
+          type:
+            - "null"
+            - string
         orderNote:
           type:
             - "null"
@@ -82831,7 +83574,7 @@ components:
         updatedDate:
           type: string
           format: date-time
-    PagedResultOfAfterReturnActionResponse:
+    PagedResultOfAfterReturnClaimActionResponse:
       required:
         - items
         - pageNumber
@@ -82847,7 +83590,7 @@ components:
             - "null"
             - array
           items:
-            $ref: "#/components/schemas/AfterReturnActionResponse"
+            $ref: "#/components/schemas/AfterReturnClaimActionResponse"
         pageNumber:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -83281,7 +84024,7 @@ components:
           type: boolean
         hasNextPage:
           type: boolean
-    PagedResultOfBeforeClaimInstructionResponse:
+    PagedResultOfBeforeReturnClaimInstructionResponse:
       required:
         - items
         - pageNumber
@@ -83297,7 +84040,7 @@ components:
             - "null"
             - array
           items:
-            $ref: "#/components/schemas/BeforeClaimInstructionResponse"
+            $ref: "#/components/schemas/BeforeReturnClaimInstructionResponse"
         pageNumber:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -83388,51 +84131,6 @@ components:
             - array
           items:
             $ref: "#/components/schemas/CityResponse"
-        pageNumber:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        pageSize:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        totalCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        totalPages:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        hasPreviousPage:
-          type: boolean
-        hasNextPage:
-          type: boolean
-    PagedResultOfClaimCargoCompanyResponse:
-      required:
-        - items
-        - pageNumber
-        - pageSize
-        - totalCount
-        - totalPages
-        - hasPreviousPage
-        - hasNextPage
-      type: object
-      properties:
-        items:
-          type:
-            - "null"
-            - array
-          items:
-            $ref: "#/components/schemas/ClaimCargoCompanyResponse"
         pageNumber:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -83568,51 +84266,6 @@ components:
             - array
           items:
             $ref: "#/components/schemas/ClaimStatusMappingResponse"
-        pageNumber:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        pageSize:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        totalCount:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        totalPages:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        hasPreviousPage:
-          type: boolean
-        hasNextPage:
-          type: boolean
-    PagedResultOfClaimStatusResponse:
-      required:
-        - items
-        - pageNumber
-        - pageSize
-        - totalCount
-        - totalPages
-        - hasPreviousPage
-        - hasNextPage
-      type: object
-      properties:
-        items:
-          type:
-            - "null"
-            - array
-          items:
-            $ref: "#/components/schemas/ClaimStatusResponse"
         pageNumber:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -88321,6 +88974,96 @@ components:
           type: boolean
         hasNextPage:
           type: boolean
+    PagedResultOfReturnClaimCargoCompanyResponse:
+      required:
+        - items
+        - pageNumber
+        - pageSize
+        - totalCount
+        - totalPages
+        - hasPreviousPage
+        - hasNextPage
+      type: object
+      properties:
+        items:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/ReturnClaimCargoCompanyResponse"
+        pageNumber:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalPages:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        hasPreviousPage:
+          type: boolean
+        hasNextPage:
+          type: boolean
+    PagedResultOfReturnClaimCargoResponse:
+      required:
+        - items
+        - pageNumber
+        - pageSize
+        - totalCount
+        - totalPages
+        - hasPreviousPage
+        - hasNextPage
+      type: object
+      properties:
+        items:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/ReturnClaimCargoResponse"
+        pageNumber:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalPages:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        hasPreviousPage:
+          type: boolean
+        hasNextPage:
+          type: boolean
     PagedResultOfReturnClaimLineResponse:
       required:
         - items
@@ -88338,6 +89081,51 @@ components:
             - array
           items:
             $ref: "#/components/schemas/ReturnClaimLineResponse"
+        pageNumber:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        pageSize:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        totalPages:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        hasPreviousPage:
+          type: boolean
+        hasNextPage:
+          type: boolean
+    PagedResultOfReturnClaimReasonResponse:
+      required:
+        - items
+        - pageNumber
+        - pageSize
+        - totalCount
+        - totalPages
+        - hasPreviousPage
+        - hasNextPage
+      type: object
+      properties:
+        items:
+          type:
+            - "null"
+            - array
+          items:
+            $ref: "#/components/schemas/ReturnClaimReasonResponse"
         pageNumber:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -88411,7 +89199,7 @@ components:
           type: boolean
         hasNextPage:
           type: boolean
-    PagedResultOfReturnReasonResponse:
+    PagedResultOfReturnClaimStatusResponse:
       required:
         - items
         - pageNumber
@@ -88427,7 +89215,7 @@ components:
             - "null"
             - array
           items:
-            $ref: "#/components/schemas/ReturnReasonResponse"
+            $ref: "#/components/schemas/ReturnClaimStatusResponse"
         pageNumber:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -91395,6 +92183,161 @@ components:
           type:
             - "null"
             - string
+    ReturnClaimCargoCompanyResponse:
+      required:
+        - id
+        - companyId
+        - cargoExtensionId
+        - customerNo
+        - accountTitle
+        - sortOrder
+        - isActive
+        - createdUserId
+        - createdDate
+        - lastUpdatedUserId
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        cargoExtensionId:
+          type: string
+          format: uuid
+        customerNo:
+          type:
+            - "null"
+            - string
+        accountTitle:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
+        createdUserId:
+          type: string
+          format: uuid
+        createdDate:
+          type: string
+          format: date-time
+        lastUpdatedUserId:
+          type: string
+          format: uuid
+        updatedDate:
+          type: string
+          format: date-time
+    ReturnClaimCargoResponse:
+      required:
+        - id
+        - companyId
+        - returnClaimId
+        - claimNumber
+        - orderNumber
+        - cargoExtensionId
+        - referenceNumber
+        - trackingNumber
+        - trackingUrl
+        - paymentType
+        - pieceCount
+        - desi
+        - kg
+        - isCancelled
+        - cancelledDate
+        - createdIp
+        - createdUserId
+        - createdDate
+        - lastUpdatedUserId
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        returnClaimId:
+          type: string
+          format: uuid
+        claimNumber:
+          type:
+            - "null"
+            - string
+        orderNumber:
+          type:
+            - "null"
+            - string
+        cargoExtensionId:
+          type: string
+          format: uuid
+        referenceNumber:
+          type:
+            - "null"
+            - string
+        trackingNumber:
+          type:
+            - "null"
+            - string
+        trackingUrl:
+          type:
+            - "null"
+            - string
+        paymentType:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: uint8
+        pieceCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        desi:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        kg:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isCancelled:
+          type: boolean
+        cancelledDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        createdIp:
+          type:
+            - "null"
+            - string
+        createdUserId:
+          type: string
+          format: uuid
+        createdDate:
+          type: string
+          format: date-time
+        lastUpdatedUserId:
+          type: string
+          format: uuid
+        updatedDate:
+          type: string
+          format: date-time
     ReturnClaimLineResponse:
       required:
         - id
@@ -91528,14 +92471,60 @@ components:
         updatedDate:
           type: string
           format: date-time
+    ReturnClaimReasonResponse:
+      required:
+        - id
+        - companyId
+        - returnCode
+        - returnReasonDescription
+        - sortOrder
+        - isActive
+        - createdUserId
+        - createdDate
+        - lastUpdatedUserId
+        - updatedDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        returnCode:
+          type:
+            - "null"
+            - string
+        returnReasonDescription:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
+        createdUserId:
+          type: string
+          format: uuid
+        createdDate:
+          type: string
+          format: date-time
+        lastUpdatedUserId:
+          type: string
+          format: uuid
+        updatedDate:
+          type: string
+          format: date-time
     ReturnClaimResponse:
       required:
         - id
         - companyId
         - claimNumber
         - orderNumber
-        - customerTypeCode
-        - customerCode
         - extensionCode
         - companyExtensionId
         - externalClaimId
@@ -91548,10 +92537,8 @@ components:
         - sourceLastModifiedDate
         - payloadHash
         - cargoExtensionId
-        - deliveryCompanyCode
+        - cargoReferenceId
         - cargoTrackingNumber
-        - cargoTrackingLink
-        - cargoSenderNumber
         - receivedDate
         - note
         - lastSyncedDate
@@ -91573,17 +92560,6 @@ components:
             - "null"
             - string
         orderNumber:
-          type:
-            - "null"
-            - string
-        customerTypeCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: uint8
-        customerCode:
           type:
             - "null"
             - string
@@ -91641,19 +92617,11 @@ components:
             - "null"
             - string
           format: uuid
-        deliveryCompanyCode:
+        cargoReferenceId:
           type:
             - "null"
             - string
         cargoTrackingNumber:
-          type:
-            - "null"
-            - string
-        cargoTrackingLink:
-          type:
-            - "null"
-            - string
-        cargoSenderNumber:
           type:
             - "null"
             - string
@@ -91685,12 +92653,12 @@ components:
         updatedDate:
           type: string
           format: date-time
-    ReturnReasonResponse:
+    ReturnClaimStatusResponse:
       required:
         - id
-        - companyId
-        - returnCode
-        - returnReasonDescription
+        - statusCode
+        - statusDescription
+        - isClosed
         - sortOrder
         - isActive
         - createdUserId
@@ -91702,17 +92670,18 @@ components:
         id:
           type: string
           format: uuid
-        companyId:
-          type: string
-          format: uuid
-        returnCode:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: uint8
+        statusDescription:
           type:
             - "null"
             - string
-        returnReasonDescription:
-          type:
-            - "null"
-            - string
+        isClosed:
+          type: boolean
         sortOrder:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -98887,7 +99856,7 @@ components:
             - array
           items:
             $ref: "#/components/schemas/UnansweredOperationItem"
-    UpdateAfterReturnActionRequest:
+    UpdateAfterReturnClaimActionRequest:
       required:
         - actionCode
         - actionDescription
@@ -99420,7 +100389,7 @@ components:
             - string
         isActive:
           type: boolean
-    UpdateBeforeClaimInstructionRequest:
+    UpdateBeforeReturnClaimInstructionRequest:
       required:
         - sortOrder
         - content
@@ -99470,34 +100439,6 @@ components:
           type:
             - "null"
             - string
-        isActive:
-          type: boolean
-    UpdateClaimCargoCompanyRequest:
-      required:
-        - cargoExtensionId
-        - customerNo
-        - accountTitle
-        - sortOrder
-        - isActive
-      type: object
-      properties:
-        cargoExtensionId:
-          type: string
-          format: uuid
-        customerNo:
-          type:
-            - "null"
-            - string
-        accountTitle:
-          type:
-            - "null"
-            - string
-        sortOrder:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
         isActive:
           type: boolean
     UpdateClaimLineRequest:
@@ -99775,40 +100716,6 @@ components:
             - string
           format: uint8
         isAutoCreated:
-          type: boolean
-    UpdateClaimStatusRequest:
-      required:
-        - statusCode
-        - statusDescription
-        - matchKeywords
-        - isClosed
-        - sortOrder
-        - isActive
-      type: object
-      properties:
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: uint8
-        statusDescription:
-          type:
-            - "null"
-            - string
-        matchKeywords:
-          type:
-            - "null"
-            - string
-        isClosed:
-          type: boolean
-        sortOrder:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        isActive:
           type: boolean
     UpdateCloudinarySettingRequest:
       required:
@@ -104503,6 +105410,113 @@ components:
             - string
         isBlocked:
           type: boolean
+    UpdateReturnClaimCargoCompanyRequest:
+      required:
+        - cargoExtensionId
+        - customerNo
+        - accountTitle
+        - sortOrder
+        - isActive
+      type: object
+      properties:
+        cargoExtensionId:
+          type: string
+          format: uuid
+        customerNo:
+          type:
+            - "null"
+            - string
+        accountTitle:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
+    UpdateReturnClaimCargoRequest:
+      required:
+        - returnClaimId
+        - claimNumber
+        - orderNumber
+        - cargoExtensionId
+        - referenceNumber
+        - trackingNumber
+        - trackingUrl
+        - paymentType
+        - pieceCount
+        - desi
+        - kg
+        - isCancelled
+        - cancelledDate
+        - createdIp
+      type: object
+      properties:
+        returnClaimId:
+          type: string
+          format: uuid
+        claimNumber:
+          type:
+            - "null"
+            - string
+        orderNumber:
+          type:
+            - "null"
+            - string
+        cargoExtensionId:
+          type: string
+          format: uuid
+        referenceNumber:
+          type:
+            - "null"
+            - string
+        trackingNumber:
+          type:
+            - "null"
+            - string
+        trackingUrl:
+          type:
+            - "null"
+            - string
+        paymentType:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: uint8
+        pieceCount:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        desi:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        kg:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isCancelled:
+          type: boolean
+        cancelledDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        createdIp:
+          type:
+            - "null"
+            - string
     UpdateReturnClaimLineRequest:
       required:
         - claimHeaderId
@@ -104612,12 +105626,34 @@ components:
           type:
             - "null"
             - string
+    UpdateReturnClaimReasonRequest:
+      required:
+        - returnCode
+        - returnReasonDescription
+        - sortOrder
+        - isActive
+      type: object
+      properties:
+        returnCode:
+          type:
+            - "null"
+            - string
+        returnReasonDescription:
+          type:
+            - "null"
+            - string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
+        isActive:
+          type: boolean
     UpdateReturnClaimRequest:
       required:
         - claimNumber
         - orderNumber
-        - customerTypeCode
-        - customerCode
         - extensionCode
         - companyExtensionId
         - externalClaimId
@@ -104630,10 +105666,8 @@ components:
         - sourceLastModifiedDate
         - payloadHash
         - cargoExtensionId
-        - deliveryCompanyCode
+        - cargoReferenceId
         - cargoTrackingNumber
-        - cargoTrackingLink
-        - cargoSenderNumber
         - receivedDate
         - note
         - lastSyncedDate
@@ -104645,17 +105679,6 @@ components:
             - "null"
             - string
         orderNumber:
-          type:
-            - "null"
-            - string
-        customerTypeCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: uint8
-        customerCode:
           type:
             - "null"
             - string
@@ -104713,19 +105736,11 @@ components:
             - "null"
             - string
           format: uuid
-        deliveryCompanyCode:
+        cargoReferenceId:
           type:
             - "null"
             - string
         cargoTrackingNumber:
-          type:
-            - "null"
-            - string
-        cargoTrackingLink:
-          type:
-            - "null"
-            - string
-        cargoSenderNumber:
           type:
             - "null"
             - string
@@ -104745,22 +105760,27 @@ components:
           type:
             - "null"
             - string
-    UpdateReturnReasonRequest:
+    UpdateReturnClaimStatusRequest:
       required:
-        - returnCode
-        - returnReasonDescription
+        - statusCode
+        - statusDescription
+        - isClosed
         - sortOrder
         - isActive
       type: object
       properties:
-        returnCode:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: uint8
+        statusDescription:
           type:
             - "null"
             - string
-        returnReasonDescription:
-          type:
-            - "null"
-            - string
+        isClosed:
+          type: boolean
         sortOrder:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -107539,7 +108559,7 @@ components:
             - string
     WebUrunTipi:
       type: integer
-    WmsAfterReturnActionOptionResponse:
+    WmsAfterReturnClaimActionOptionResponse:
       required:
         - actionCode
         - actionDescription
@@ -107556,7 +108576,7 @@ components:
             - integer
             - string
           format: int32
-    WmsBeforeClaimInstructionResponse:
+    WmsBeforeReturnClaimInstructionResponse:
       required:
         - sortOrder
         - content
@@ -111285,6 +112305,107 @@ components:
             - integer
             - string
           format: int32
+    WmsReturnClaimCargoResponse:
+      required:
+        - id
+        - claimNumber
+        - orderNumber
+        - cargoCompanyName
+        - cargoCustomerNo
+        - isSuccess
+        - cargoReferenceId
+        - createdDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        claimNumber:
+          type: string
+        orderNumber:
+          type: string
+        cargoCompanyName:
+          type: string
+        cargoCustomerNo:
+          type:
+            - "null"
+            - string
+        isSuccess:
+          type: boolean
+        cargoReferenceId:
+          type:
+            - "null"
+            - string
+        createdDate:
+          type: string
+          format: date-time
+    WmsReturnClaimCargoResultResponse:
+      required:
+        - cargo
+        - zplLabels
+      type: object
+      properties:
+        cargo:
+          $ref: "#/components/schemas/WmsReturnClaimCargoResponse"
+        zplLabels:
+          type: array
+          items:
+            type: string
+    WmsReturnClaimDecisionRequest:
+      type: object
+      properties:
+        note:
+          type:
+            - "null"
+            - string
+    WmsReturnClaimDecisionResponse:
+      required:
+        - id
+        - claimNumber
+        - orderNumber
+        - statusCode
+        - statusName
+        - note
+        - decisionDate
+        - isSmsSent
+        - maskedPhone
+        - smsError
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        claimNumber:
+          type: string
+        orderNumber:
+          type: string
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: uint8
+        statusName:
+          type:
+            - "null"
+            - string
+        note:
+          type:
+            - "null"
+            - string
+        decisionDate:
+          type: string
+          format: date-time
+        isSmsSent:
+          type: boolean
+        maskedPhone:
+          type:
+            - "null"
+            - string
+        smsError:
+          type:
+            - "null"
+            - string
     WmsReturnClaimDetailLineResponse:
       required:
         - id
@@ -111420,17 +112541,13 @@ components:
         - afterReturnActionCode
         - afterReturnActionName
         - customerNote
-        - customerTypeCode
-        - customerCode
         - cargoExtensionId
         - cargoExtensionCode
         - cargoCompanyName
         - cargoCustomerNo
         - cargoAccountTitle
-        - deliveryCompanyCode
+        - cargoReferenceId
         - cargoTrackingNumber
-        - cargoTrackingLink
-        - cargoSenderNumber
         - receivedDate
         - note
         - createdDate
@@ -111490,17 +112607,6 @@ components:
           type:
             - "null"
             - string
-        customerTypeCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - "null"
-            - integer
-            - string
-          format: uint8
-        customerCode:
-          type:
-            - "null"
-            - string
         cargoExtensionId:
           type:
             - "null"
@@ -111522,19 +112628,11 @@ components:
           type:
             - "null"
             - string
-        deliveryCompanyCode:
+        cargoReferenceId:
           type:
             - "null"
             - string
         cargoTrackingNumber:
-          type:
-            - "null"
-            - string
-        cargoTrackingLink:
-          type:
-            - "null"
-            - string
-        cargoSenderNumber:
           type:
             - "null"
             - string
@@ -111613,7 +112711,7 @@ components:
         - statusCode
         - returnReasonCode
         - afterReturnActionCode
-        - deliveryCompanyCode
+        - cargoReferenceId
         - cargoTrackingNumber
         - items
       type: object
@@ -111640,7 +112738,7 @@ components:
           type:
             - "null"
             - string
-        deliveryCompanyCode:
+        cargoReferenceId:
           type:
             - "null"
             - string
@@ -111652,6 +112750,23 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/WmsReturnClaimLineListResponse"
+    WmsReturnClaimReasonOptionResponse:
+      required:
+        - returnCode
+        - returnReasonDescription
+        - sortOrder
+      type: object
+      properties:
+        returnCode:
+          type: string
+        returnReasonDescription:
+          type: string
+        sortOrder:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
     WmsReturnClaimResultResponse:
       required:
         - returnCode
@@ -111659,6 +112774,9 @@ components:
         - cargoCustomerNo
         - cargoAccountTitle
         - validUntil
+        - isCargoCreated
+        - cargo
+        - cargoErrorMessage
       type: object
       properties:
         returnCode:
@@ -111678,23 +112796,16 @@ components:
         validUntil:
           type: string
           format: date-time
-    WmsReturnReasonOptionResponse:
-      required:
-        - returnCode
-        - returnReasonDescription
-        - sortOrder
-      type: object
-      properties:
-        returnCode:
-          type: string
-        returnReasonDescription:
-          type: string
-        sortOrder:
-          pattern: ^-?(?:0|[1-9]\d*)$
+        isCargoCreated:
+          type: boolean
+        cargo:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/WmsReturnClaimCargoResultResponse"
+        cargoErrorMessage:
           type:
-            - integer
+            - "null"
             - string
-          format: int32
     WmsSettingCategoryResponse:
       required:
         - categoryCode
@@ -111970,16 +113081,14 @@ tags:
   - name: WmsItemImport
   - name: WmsOrderImport
   - name: WmsOrderImportSettings
-  - name: AfterReturnAction
+  - name: AfterReturnClaimAction
   - name: Batch
   - name: BatchDesc
-  - name: BeforeClaimInstruction
+  - name: BeforeReturnClaimInstruction
   - name: City
   - name: CityDesc
-  - name: ClaimCargoCompany
   - name: Claim
   - name: ClaimLine
-  - name: ClaimStatus
   - name: ClaimStatusMapping
   - name: CodeSequence
   - name: Color
@@ -112067,9 +113176,12 @@ tags:
   - name: PivotingShelf
   - name: Process
   - name: ProcessDesc
+  - name: ReturnClaimCargoCompany
+  - name: ReturnClaimCargo
   - name: ReturnClaim
   - name: ReturnClaimLine
-  - name: ReturnReason
+  - name: ReturnClaimReason
+  - name: ReturnClaimStatus
   - name: SettingCategory
   - name: SettingCategoryDesc
   - name: SettingDefinition

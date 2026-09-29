@@ -6,12 +6,12 @@ import {
     UpdateAfterReturnActionRequest,
 } from '../../models/wms/after-return-action.models';
 
-/** /api/wms/after-return-actions - şirket bazlı iade sonrası işlem tipleri */
+/** /api/wms/after-return-claim-actions - şirket bazlı iade sonrası işlem tipleri */
 @Injectable({ providedIn: 'root' })
 export class WmsAfterReturnActionsService extends WmsCompanyCrudService<
     AfterReturnActionResponse,
     Omit<CreateAfterReturnActionRequest, 'companyId'>,
     UpdateAfterReturnActionRequest
 > {
-    protected readonly resource = 'after-return-actions';
+    protected readonly resource = 'after-return-claim-actions';
 }

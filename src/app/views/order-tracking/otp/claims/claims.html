@@ -53,17 +53,7 @@
                                         </td>
                                         <td class="small">{{ reasonName(item.returnReasonCode) }}</td>
                                         <td class="small otp-value">{{ actionName(item.afterReturnActionCode) }}</td>
-                                        <td class="small">
-                                            @if (item.cargoTrackingNumber) {
-                                                @if (item.cargoTrackingLink) {
-                                                    <a [href]="item.cargoTrackingLink" target="_blank" rel="noopener">{{ item.cargoTrackingNumber }}</a>
-                                                } @else {
-                                                    {{ item.cargoTrackingNumber }}
-                                                }
-                                            } @else {
-                                                <span class="text-muted">—</span>
-                                            }
-                                        </td>
+                                        <td class="small">{{ item.cargoTrackingNumber || '—' }}</td>
                                     </tr>
                                 } @empty {
                                     <tr>

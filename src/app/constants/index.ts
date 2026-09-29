@@ -8,13 +8,13 @@ export const currency: CurrencyType = '$'
 export const currentYear = new Date().getFullYear()
 
 export const credits = {
-  website: 'https://SellenticAI.com/',
-  name: 'Nebim AI',
+  website: 'https://bgzhub.com/',
+  name: 'BGZHUB',
 }
 
-export const appName = 'Nebim AI'
-export const appTitle = 'Nebim AI'
-export const appDescription: string = 'Nebim AI'
+export const appName = 'BGZHUB'
+export const appTitle = 'BGZHUB'
+export const appDescription: string = 'BGZHUB — E-ticaret, pazaryeri ve WMS operasyonlarını tek platformda yöneten geniş kapsamlı ticari yazılım'
 
 export const basePath: string = ''
 

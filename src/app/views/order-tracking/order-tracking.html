@@ -291,29 +291,30 @@
                                     }
                                 </div>
 
-                                @if (claim.cargoSenderNumber) {
+                                @if (claim.cargoCustomerNo) {
                                     <div class="ot-claim-code">
-                                        <span class="ot-label">İade Kargo Kodunuz</span>
-                                        <strong>{{ claim.cargoSenderNumber }}</strong>
-                                        @if (claim.cargoCustomerNo) {
-                                            <span class="ot-hint">
-                                                Kargo cari: {{ claim.cargoCustomerNo }}
-                                                @if (claim.cargoAccountTitle) { — {{ claim.cargoAccountTitle }} }
-                                            </span>
+                                        <span class="ot-label">Kargo Cari Bilgimiz</span>
+                                        <strong>{{ claim.cargoCustomerNo }}</strong>
+                                        @if (claim.cargoAccountTitle) {
+                                            <span class="ot-hint">{{ claim.cargoAccountTitle }}</span>
                                         }
                                     </div>
                                 }
 
-                                @if (claim.cargoTrackingNumber) {
+                                @if (claim.cargoReferenceId) {
+                                    <div class="ot-claim-code">
+                                        <span class="ot-label">Kargo Referans Numaranız</span>
+                                        <strong>{{ claim.cargoReferenceId }}</strong>
+                                    </div>
+                                } @else if (claim.cargoCustomerNo) {
                                     <p class="ot-hint">
-                                        @if (claim.cargoTrackingLink) {
-                                            <a [href]="claim.cargoTrackingLink" target="_blank" rel="noopener">
-                                                İade kargo takip no: {{ claim.cargoTrackingNumber }}
-                                            </a>
-                                        } @else {
-                                            İade kargo takip no: {{ claim.cargoTrackingNumber }}
-                                        }
+                                        Kargo referans numarası oluşturulamadı, bu alan boş. İade paketinizi kargo şubesine
+                                        <strong>{{ claim.cargoCustomerNo }}</strong> firma kodumuzla teslim etmeniz gerekiyor.
                                     </p>
+                                }
+
+                                @if (claim.cargoTrackingNumber) {
+                                    <p class="ot-hint">İade kargo takip no: {{ claim.cargoTrackingNumber }}</p>
                                 }
 
                                 <div class="ot-claim-items">
@@ -671,10 +672,32 @@
                     </button>
                 </div>
 
+                @if (cargoReferenceId) {
+                    <div class="ot-code-card">
+                        <span class="ot-label">Kargo Referans Numaranız</span>
+                        <div class="ot-code-value">{{ cargoReferenceId }}</div>
+                        <button type="button" class="ot-btn ot-btn-ghost ot-btn-sm" (click)="copyCargoReferenceId()">
+                            <i class="fa-regular fa-copy"></i> Referansı Kopyala
+                        </button>
+                    </div>
+                }
+
                 <div class="ot-cari">
-                    <span class="ot-label">Kargo Cari Bilgimiz</span>
+                    <span class="ot-label">Kargo Cari Bilgimiz (Firma Kodumuz)</span>
                     <div>{{ returnResult!.cargoCustomerNo }} — {{ returnResult!.cargoAccountTitle }}</div>
                 </div>
+
+                @if (cargoReferenceMissing) {
+                    <div class="ot-alert ot-alert-warn">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>
+                            Kargo referans numaranız <strong>oluşturulamadı</strong>, bu alan şu an boş.
+                            İade paketinizi <strong>{{ returnResult!.cargoCompanyName }}</strong> şubesine götürüp
+                            yukarıdaki <strong>{{ returnResult!.cargoCustomerNo }}</strong> firma kodumuzla
+                            (gönderici cari hesabımız) iade etmeniz gerekiyor.
+                        </span>
+                    </div>
+                }
 
                 <div class="ot-alert ot-alert-warn">
                     <i class="fa-solid fa-circle-exclamation"></i>

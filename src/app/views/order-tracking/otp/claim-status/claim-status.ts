@@ -12,7 +12,6 @@ import {
 interface ClaimStatusForm {
     statusCode: number;
     statusDescription: string;
-    matchKeywords: string;
     isClosed: boolean;
     sortOrder: number;
     isActive: boolean;
@@ -21,7 +20,6 @@ interface ClaimStatusForm {
 const EMPTY_FORM: ClaimStatusForm = {
     statusCode: 0,
     statusDescription: '',
-    matchKeywords: '',
     isClosed: false,
     sortOrder: 0,
     isActive: true,
@@ -29,9 +27,8 @@ const EMPTY_FORM: ClaimStatusForm = {
 
 /**
  * İade talebi durumları — talep listesinde ve müşteri panelinde gösterilen
- * durum metinlerini yönetir. `matchKeywords`, pazaryerinden gelen durum
- * metnini bu koda eşlemek için kullanılır.
- * Uç nokta: /api/wms/claim-status
+ * durum metinlerini yönetir.
+ * Uç nokta: /api/wms/return-claim-status
  */
 @Component({
     selector: 'app-otp-claim-status-page',
@@ -54,7 +51,6 @@ export class OtpClaimStatusPage extends WmsCrudPage<ClaimStatusResponse, ClaimSt
         return {
             statusCode: Number(item.statusCode ?? 0),
             statusDescription: item.statusDescription || '',
-            matchKeywords: item.matchKeywords || '',
             isClosed: item.isClosed,
             sortOrder: Number(item.sortOrder ?? 0),
             isActive: item.isActive,
@@ -72,15 +68,6 @@ export class OtpClaimStatusPage extends WmsCrudPage<ClaimStatusResponse, ClaimSt
             Number(this.form.statusCode) >= 0 &&
             Number.isInteger(Number(this.form.sortOrder))
         );
-    }
-
-    /** Eşleştirme anahtarları virgülle ayrılır; listede rozet olarak gösterilir */
-    keywordList(matchKeywords: string | null): string[] {
-        if (!matchKeywords) return [];
-        return matchKeywords
-            .split(',')
-            .map(keyword => keyword.trim())
-            .filter(Boolean);
     }
 
     protected createItem(form: ClaimStatusForm) {
@@ -110,7 +97,6 @@ export class OtpClaimStatusPage extends WmsCrudPage<ClaimStatusResponse, ClaimSt
         return {
             statusCode: Number(form.statusCode),
             statusDescription: form.statusDescription.trim(),
-            matchKeywords: form.matchKeywords.trim(),
             isClosed: form.isClosed,
             sortOrder: Number(form.sortOrder),
             isActive: form.isActive,
