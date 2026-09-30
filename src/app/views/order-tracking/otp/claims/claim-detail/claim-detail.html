@@ -1,189 +1,358 @@
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="card-title mb-0">
-                    <i class="fa-solid fa-box-open me-2"></i>İade Talebi Detayı
-                </h4>
-                <a class="btn btn-light btn-sm" routerLink="/otp/claims">
-                    <i class="fa-solid fa-arrow-left me-1"></i>Listeye Dön
-                </a>
-            </div>
-
-            <div class="card-body page-surface">
-                @if (loading) {
-                    <div class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <p class="mt-2 text-muted">Yükleniyor...</p>
-                    </div>
-                } @else if (errorMessage) {
-                    <div class="alert alert-danger mb-0">{{ errorMessage }}</div>
-                } @else if (claim) {
-                    <!-- Başlık bilgileri -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-3">
-                            <div class="claim-field">
-                                <span class="claim-label">Talep No</span>
-                                <span class="claim-value fw-semibold">{{ claim!.claimNumber || '—' }}</span>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="claim-field">
-                                <span class="claim-label">Sipariş No</span>
-                                <span class="claim-value">{{ claim!.orderNumber || '—' }}</span>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="claim-field">
-                                <span class="claim-label">Talep Tarihi</span>
-                                <span class="claim-value">{{ claim!.claimDate | date:'dd.MM.yyyy HH:mm' }}</span>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="claim-field">
-                                <span class="claim-label">Durum</span>
-                                <span class="badge bg-info-subtle text-info">{{ statusName(claim!.statusCode) }}</span>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="claim-field">
-                                <span class="claim-label">İade Nedeni</span>
-                                <span class="claim-value">{{ reasonName(claim!.returnReasonCode) }}</span>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="claim-field">
-                                <span class="claim-label">Talep Tipi</span>
-                                <span class="claim-value">{{ actionName(claim!.afterReturnActionCode) }}</span>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="claim-field">
-                                <span class="claim-label">Kaynak</span>
-                                <span class="claim-value">{{ claim!.extensionCode || '—' }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Kargo bilgileri -->
-                    <div class="card mb-3">
-                        <div class="card-header py-2">
-                            <h6 class="mb-0"><i class="fa-solid fa-truck-fast me-2"></i>Kargo Bilgileri</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <div class="claim-field">
-                                        <span class="claim-label">Kargo Takip No</span>
-                                        <span class="claim-value">{{ claim!.cargoTrackingNumber || '—' }}</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="claim-field">
-                                        <span class="claim-label">Teslim Alınma</span>
-                                        <span class="claim-value">
-                                            {{ claim!.receivedDate ? (claim!.receivedDate | date:'dd.MM.yyyy HH:mm') : '—' }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Notlar -->
-                    @if (claim!.customerNote || claim!.note) {
-                        <div class="card mb-3">
-                            <div class="card-header py-2">
-                                <h6 class="mb-0"><i class="fa-regular fa-note-sticky me-2"></i>Notlar</h6>
-                            </div>
-                            <div class="card-body">
-                                @if (claim!.customerNote) {
-                                    <div class="claim-field mb-2">
-                                        <span class="claim-label">Müşteri Notu</span>
-                                        <span class="claim-value">{{ claim!.customerNote }}</span>
-                                    </div>
-                                }
-                                @if (claim!.note) {
-                                    <div class="claim-field">
-                                        <span class="claim-label">İç Not</span>
-                                        <span class="claim-value">{{ claim!.note }}</span>
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    }
-
-                    <!-- Satırlar -->
-                    <div class="card mb-0">
-                        <div class="card-header d-flex justify-content-between align-items-center py-2">
-                            <h6 class="mb-0"><i class="fa-solid fa-list me-2"></i>Talep Satırları</h6>
-                            <span class="small text-muted">
-                                Toplam {{ totalQuantity }} adet · Kabul {{ totalAccepted }} · Ret {{ totalRejected }}
+@if (loading) {
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 mb-0 text-muted">Yükleniyor...</p>
+        </div>
+    </div>
+} @else if (errorMessage) {
+    <div class="alert alert-danger d-flex justify-content-between align-items-center">
+        <span>{{ errorMessage }}</span>
+        <a class="btn btn-light btn-sm" routerLink="/otp/claims">
+            <i class="fa-solid fa-arrow-left me-1"></i>Listeye Dön
+        </a>
+    </div>
+} @else if (claim) {
+    <!-- Üst şerit: talep kimliği, durum ve karar butonları -->
+    <div class="card claim-hero mb-3">
+        <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                <div class="d-flex gap-3">
+                    <span class="claim-hero-icon"><i class="fa-solid fa-box-open"></i></span>
+                    <div>
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <h4 class="mb-0">{{ claim!.claimNumber || 'İade Talebi' }}</h4>
+                            <span class="badge" [ngClass]="statusBadgeClass(claim!.statusCode)">
+                                {{ statusName(claim!.statusCode) }}
                             </span>
                         </div>
-                        <div class="card-body">
-                            @if (linesLoading) {
-                                <div class="text-center py-3">
-                                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                </div>
-                            } @else {
-                                <div class="table-responsive">
-                                    <table class="table table-centered table-hover mb-0">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Görsel</th>
-                                                <th>Ürün</th>
-                                                <th>Barkod</th>
-                                                <th class="text-center">Adet</th>
-                                                <th class="text-center">Kabul</th>
-                                                <th class="text-center">Ret</th>
-                                                <th>İade Nedeni</th>
-                                                <th>Durum</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @for (line of lines; track line.id; let idx = $index) {
-                                                <tr>
-                                                    <td>
-                                                        <span class="badge bg-primary-subtle text-primary">{{ idx + 1 }}</span>
-                                                    </td>
-                                                    <td>
-                                                        @if (line.sourceImageUrl) {
-                                                            <img [src]="line.sourceImageUrl" [alt]="lineTitle(line)" class="claim-line-thumb"/>
-                                                        } @else {
-                                                            <span class="text-muted">—</span>
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                        <span class="fw-semibold">{{ lineTitle(line) }}</span>
-                                                        @if (line.customerNote) {
-                                                            <div class="small text-muted">{{ line.customerNote }}</div>
-                                                        }
-                                                    </td>
-                                                    <td class="small">{{ line.usedBarcode || '—' }}</td>
-                                                    <td class="text-center">{{ line.quantity }}</td>
-                                                    <td class="text-center">{{ line.acceptedQuantity }}</td>
-                                                    <td class="text-center">{{ line.rejectedQuantity }}</td>
-                                                    <td class="small">{{ reasonName(line.returnReasonCode) }}</td>
-                                                    <td>
-                                                        <span class="badge bg-info-subtle text-info">{{ statusName(line.statusCode) }}</span>
-                                                    </td>
-                                                </tr>
-                                            } @empty {
-                                                <tr>
-                                                    <td colspan="9" class="text-center text-muted">Talep satırı bulunamadı.</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
+                        <div class="text-muted small mt-1">
+                            <i class="fa-regular fa-file-lines me-1"></i>Sipariş {{ claim!.orderNumber || '—' }}
+                            <span class="mx-2">·</span>
+                            <i class="fa-regular fa-clock me-1"></i>{{ claim!.claimDate | date:'dd.MM.yyyy HH:mm' }}
+                            @if (claim!.extensionCode) {
+                                <span class="mx-2">·</span>
+                                <i class="fa-solid fa-store me-1"></i>{{ claim!.extensionCode }}
                             }
                         </div>
                     </div>
-                }
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-light btn-sm" routerLink="/otp/claims">
+                        <i class="fa-solid fa-arrow-left me-1"></i>Listeye Dön
+                    </a>
+                    @if (canDecide) {
+                        <button class="btn btn-success btn-sm" (click)="openDecision('approve')">
+                            <i class="fa-solid fa-circle-check me-1"></i>Onayla
+                        </button>
+                        <button class="btn btn-danger btn-sm" (click)="openDecision('reject')">
+                            <i class="fa-solid fa-circle-xmark me-1"></i>Reddet
+                        </button>
+                    }
+                </div>
+            </div>
+
+            @if (decisionBlockedReason) {
+                <div class="alert alert-light border mt-3 mb-0 py-2 small">
+                    <i class="fa-solid fa-circle-info me-1 text-muted"></i>{{ decisionBlockedReason }}
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Karar sonucu bildirimi -->
+    @if (decisionResult) {
+        <div class="alert alert-success alert-dismissible d-flex align-items-start gap-2">
+            <i class="fa-solid fa-circle-check mt-1"></i>
+            <div class="flex-grow-1">
+                <div class="fw-semibold">
+                    Talep "{{ decisionResult!.statusName || statusName(decisionResult!.statusCode) }}" durumuna alındı.
+                </div>
+                <div class="small">
+                    {{ decisionResult!.decisionDate | date:'dd.MM.yyyy HH:mm' }}
+                    <span class="mx-1">·</span>
+                    @if (decisionResult!.isSmsSent) {
+                        Bilgilendirme SMS'i {{ decisionResult!.maskedPhone || 'müşteriye' }} gönderildi.
+                    } @else if (!decisionSmsRequested) {
+                        <span class="text-muted">Bilgilendirme SMS'i istenmedi.</span>
+                    } @else {
+                        <span class="text-danger">
+                            Bilgilendirme SMS'i gönderilemedi{{ decisionResult!.smsError ? ': ' + decisionResult!.smsError : '.' }}
+                        </span>
+                    }
+                </div>
+            </div>
+            <button type="button" class="btn-close" (click)="dismissDecisionResult()"></button>
+        </div>
+    }
+
+    <!-- Özet sayaçlar -->
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-3">
+            <div class="card mb-0 claim-stat">
+                <div class="card-body">
+                    <span class="claim-label">Talep Edilen</span>
+                    <h4 class="mb-0 mt-1">{{ totalQuantity }} <small class="text-muted fs-6">adet</small></h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card mb-0 claim-stat claim-stat-success">
+                <div class="card-body">
+                    <span class="claim-label">Kabul</span>
+                    <h4 class="mb-0 mt-1 text-success">{{ totalAccepted }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card mb-0 claim-stat claim-stat-danger">
+                <div class="card-body">
+                    <span class="claim-label">Ret</span>
+                    <h4 class="mb-0 mt-1 text-danger">{{ totalRejected }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card mb-0 claim-stat">
+                <div class="card-body">
+                    <span class="claim-label">Satır</span>
+                    <h4 class="mb-0 mt-1">{{ lines.length }}</h4>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <div class="row g-3">
+        <!-- Talep satırları -->
+        <div class="col-lg-8">
+            <div class="card mb-0 h-100">
+                <div class="card-header d-flex justify-content-between align-items-center py-2">
+                    <h6 class="mb-0"><i class="fa-solid fa-list me-2"></i>Talep Satırları</h6>
+                    <span class="badge bg-primary-subtle text-primary">{{ lines.length }} satır</span>
+                </div>
+                <div class="card-body page-surface">
+                    @if (linesLoading) {
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        </div>
+                    } @else {
+                        <div class="table-responsive">
+                            <table class="table table-centered table-hover mb-0 bg-white">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Ürün</th>
+                                        <th class="text-center">Adet</th>
+                                        <th class="text-center">Kabul</th>
+                                        <th class="text-center">Ret</th>
+                                        <th>İade Nedeni</th>
+                                        <th>Durum</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (line of lines; track line.id; let idx = $index) {
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-primary-subtle text-primary">{{ idx + 1 }}</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    @if (line.sourceImageUrl) {
+                                                        <img [src]="line.sourceImageUrl" [alt]="lineTitle(line)" class="claim-line-thumb"/>
+                                                    } @else {
+                                                        <span class="claim-line-thumb claim-line-thumb-empty">
+                                                            <i class="fa-regular fa-image text-muted"></i>
+                                                        </span>
+                                                    }
+                                                    <div>
+                                                        <span class="fw-semibold">{{ lineTitle(line) }}</span>
+                                                        <div class="small text-muted">
+                                                            {{ line.usedBarcode || 'Barkod yok' }}
+                                                        </div>
+                                                        @if (line.customerNote) {
+                                                            <div class="small text-muted fst-italic otp-description">
+                                                                “{{ line.customerNote }}”
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center fw-semibold">{{ line.quantity }}</td>
+                                            <td class="text-center text-success">{{ line.acceptedQuantity }}</td>
+                                            <td class="text-center text-danger">{{ line.rejectedQuantity }}</td>
+                                            <td class="small otp-description">{{ reasonName(line.returnReasonCode) }}</td>
+                                            <td>
+                                                <span class="badge" [ngClass]="statusBadgeClass(line.statusCode)">
+                                                    {{ statusName(line.statusCode) }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    } @empty {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted">Talep satırı bulunamadı.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Yan panel: talep, kargo, müşteri ve not bilgileri -->
+        <div class="col-lg-4">
+            <div class="card mb-3">
+                <div class="card-header py-2">
+                    <h6 class="mb-0"><i class="fa-solid fa-circle-info me-2"></i>Talep Bilgileri</h6>
+                </div>
+                <div class="card-body page-surface">
+                    <div class="claim-field mb-3">
+                        <span class="claim-label">İade Nedeni</span>
+                        <span class="claim-value">{{ reasonName(claim!.returnReasonCode) }}</span>
+                    </div>
+                    <div class="claim-field mb-3">
+                        <span class="claim-label">Talep Tipi</span>
+                        <span class="claim-value">{{ actionName(claim!.afterReturnActionCode) }}</span>
+                    </div>
+                    <div class="claim-field mb-0">
+                        <span class="claim-label">Kaynak</span>
+                        <span class="claim-value">{{ claim!.extensionCode || '—' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header py-2">
+                    <h6 class="mb-0"><i class="fa-solid fa-truck-fast me-2"></i>Kargo Bilgileri</h6>
+                </div>
+                <div class="card-body page-surface">
+                    <div class="claim-field mb-3">
+                        <span class="claim-label">Kargo Takip No</span>
+                        <span class="claim-value">{{ claim!.cargoTrackingNumber || '—' }}</span>
+                    </div>
+                    <div class="claim-field mb-0">
+                        <span class="claim-label">Teslim Alınma</span>
+                        <span class="claim-value">
+                            {{ claim!.receivedDate ? (claim!.receivedDate | date:'dd.MM.yyyy HH:mm') : '—' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            @if (hasPaymentInfo) {
+                <div class="card mb-3">
+                    <div class="card-header py-2">
+                        <h6 class="mb-0"><i class="fa-solid fa-building-columns me-2"></i>Müşteri ve Ödeme</h6>
+                    </div>
+                    <div class="card-body page-surface">
+                        <div class="claim-field mb-3">
+                            <span class="claim-label">Ad / Ünvan</span>
+                            <span class="claim-value">{{ claim!.customerDescription || '—' }}</span>
+                        </div>
+                        <div class="claim-field mb-3">
+                            <span class="claim-label">IBAN</span>
+                            <span class="claim-value">{{ claim!.iban || '—' }}</span>
+                        </div>
+                        <div class="claim-field mb-0">
+                            <span class="claim-label">Hesap Sahibi</span>
+                            <span class="claim-value">{{ claim!.ibanAccountDescription || '—' }}</span>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (claim!.customerNote || claim!.note) {
+                <div class="card mb-0">
+                    <div class="card-header py-2">
+                        <h6 class="mb-0"><i class="fa-regular fa-note-sticky me-2"></i>Notlar</h6>
+                    </div>
+                    <div class="card-body page-surface">
+                        @if (claim!.customerNote) {
+                            <div class="claim-field" [class.mb-3]="!!claim!.note">
+                                <span class="claim-label">Müşteri Notu</span>
+                                <span class="claim-value">{{ claim!.customerNote }}</span>
+                            </div>
+                        }
+                        @if (claim!.note) {
+                            <div class="claim-field">
+                                <span class="claim-label">İç Not</span>
+                                <span class="claim-value">{{ claim!.note }}</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<!-- Onay / ret modalı -->
+@if (decision) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        @if (decision === 'approve') {
+                            <i class="fa-solid fa-circle-check text-success me-2"></i>Talebi Onayla
+                        } @else {
+                            <i class="fa-solid fa-circle-xmark text-danger me-2"></i>Talebi Reddet
+                        }
+                    </h5>
+                    <button type="button" class="btn-close" (click)="closeDecision()"></button>
+                </div>
+                <div class="modal-body wms-form-body">
+                    <p class="mb-3">
+                        <span class="fw-semibold">{{ claim?.claimNumber }}</span> numaralı talep
+                        @if (decision === 'approve') {
+                            <span class="text-success fw-semibold">onaylanacak</span>
+                        } @else {
+                            <span class="text-danger fw-semibold">reddedilecek</span>
+                        }
+                        ve müşteriye bilgilendirme gönderilecek. Bu işlem geri alınamaz.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label">Açıklama</label>
+                        <textarea class="form-control" rows="3" name="decisionNote"
+                                  [(ngModel)]="decisionNote"
+                                  [disabled]="decisionSaving"
+                                  placeholder="Kararın gerekçesi (isteğe bağlı)"></textarea>
+                        <div class="form-text">Bu metin müşteriye gönderilen bilgilendirmede kullanılır.</div>
+                    </div>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" role="switch" id="decisionSendSms"
+                               name="decisionSendSms"
+                               [(ngModel)]="decisionSendSms"
+                               [disabled]="decisionSaving">
+                        <label class="form-check-label" for="decisionSendSms">
+                            Müşteriye bilgilendirme SMS'i gönder
+                        </label>
+                        <div class="form-text">
+                            Kapatırsan karar yine uygulanır, müşteriye SMS gitmez.
+                        </div>
+                    </div>
+                    @if (decisionError) {
+                        <div class="alert alert-danger mt-3 mb-0 py-2">{{ decisionError }}</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" (click)="closeDecision()" [disabled]="decisionSaving">
+                        Vazgeç
+                    </button>
+                    <button type="button"
+                            class="btn"
+                            [ngClass]="decision === 'approve' ? 'btn-success' : 'btn-danger'"
+                            [disabled]="decisionSaving"
+                            (click)="submitDecision()">
+                        @if (decisionSaving) {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        {{ decision === 'approve' ? 'Onayla' : 'Reddet' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

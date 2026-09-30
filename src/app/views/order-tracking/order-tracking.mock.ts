@@ -23,7 +23,7 @@ export const MOCK_ORDER_NO = '839UG3949F';
 export function buildMockOrderDetail(orderNo: string = MOCK_ORDER_NO): OrderTrackingDetailResponse {
     return {
         orderNumber: orderNo,
-        customerName: 'Z***a B*********k',
+        customerName: 'Zeynep Balcık',
         orderDate: '2026-09-26T12:13:00',
         statusCode: 5,
         statusName: 'Teslim Edildi',
@@ -34,10 +34,17 @@ export function buildMockOrderDetail(orderNo: string = MOCK_ORDER_NO): OrderTrac
         totalAmount: 4767.97,
         totalVat: 794.66,
         cargoAmount: 0,
+        // Demo modda havale ile ödenmiş sipariş — iade akışında IBAN alanları zorunlu olur
+        paymentTypeCode: 'BankPayment',
+        paymentTypeName: 'Havale / EFT',
+        providerPaymentTypeCode: 3,
+        invoiceNumber: 'EHV2026000001234',
+        invoiceDate: '2026-09-27T09:00:00',
+        invoiceUrl: 'https://example.com/fatura/EHV2026000001234.pdf',
         orderNote: null,
         deliveryAddress: {
-            recipientName: 'Z***a B*********k',
-            maskedPhone: '0(5**) *** ** 34',
+            recipientName: 'Zeynep Balcık',
+            maskedPhone: '0(532) 418 22 34',
             city: 'İstanbul',
             district: 'Kadıköy',
             town: 'Caferağa',
@@ -90,7 +97,8 @@ export function buildMockOrderSummary(orderNo: string = MOCK_ORDER_NO): OrderTra
     const detail = buildMockOrderDetail(orderNo);
     return {
         orderNumber: detail.orderNumber,
-        customerName: detail.customerName,
+        // Doğrulama öncesi özet ekranında ad maskeli gelir; detayda tam hâli gösterilir
+        customerName: 'Z***p B***ı*',
         orderDate: detail.orderDate,
         statusName: detail.statusName,
         cargoCompanyName: detail.cargoCompanyName,
@@ -179,6 +187,9 @@ export function buildMockReturnClaim(orderNo: string = MOCK_ORDER_NO): ReturnCla
         afterReturnActionCode: 'REFUND_CARD',
         afterReturnActionName: 'Kredi kartıma para iadesi yapılmasını istiyorum.',
         customerNote: null,
+        iban: null,
+        ibanAccountDescription: null,
+        customerDescription: null,
         cargoExtensionId: '11111111-1111-1111-1111-111111111111',
         cargoExtensionCode: 'dhl',
         cargoCompanyName: 'DHL eCommerce',

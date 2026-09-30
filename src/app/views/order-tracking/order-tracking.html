@@ -119,7 +119,7 @@
         @if (step === 'verify') {
             <section class="ot-card ot-hero">
                 <span class="ot-hero-icon ot-hero-icon-accent"><i class="fa-solid fa-shield-halved"></i></span>
-                <h1 class="ot-hero-title">Sipariş Doğrulama</h1>
+                <h1 class="ot-hero-title" (dblclick)="skipVerificationForDev()">Sipariş Doğrulama</h1>
 
                 @if (searchResult) {
                     <div class="ot-hero-tag">
@@ -188,58 +188,97 @@
                     <div>
                         <span class="ot-label">Sipariş No</span>
                         <div class="ot-order-no">{{ order!.orderNumber }}</div>
+                        <span class="ot-order-date">
+                            {{ (order!.orderDate | date:'dd.MM.yyyy HH:mm') || '—' }}
+                        </span>
                     </div>
-                    <span class="ot-pill ot-pill-success">{{ order!.statusName || '—' }}</span>
+                    <div class="ot-head-side">
+                        <span class="ot-pill ot-pill-success">{{ order!.statusName || '—' }}</span>
+                        <button type="button" class="ot-icon-btn" (click)="reloadOrder()"
+                                [disabled]="refreshingOrder" title="Sipariş bilgilerini yenile"
+                                aria-label="Sipariş bilgilerini yenile">
+                            <i class="fa-solid fa-rotate-right" [class.fa-spin]="refreshingOrder"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="ot-stats">
-                    <div class="ot-stat">
-                        <span class="ot-label">Müşteri</span>
-                        <span class="ot-value">{{ order!.customerName || '—' }}</span>
+
+                <div class="ot-order-amount">
+                    <span class="ot-label">Toplam Tutar</span>
+                    <strong>{{ orderTotal | number:'1.2-2' }} {{ currencyCode }}</strong>
+                    @if (cargoAmount > 0) {
+                        <span class="ot-hint">Kargo ücreti: {{ cargoAmount | number:'1.2-2' }} {{ currencyCode }}</span>
+                    }
+                </div>
+
+                <dl class="ot-facts">
+                    <div class="ot-fact">
+                        <dt>Müşteri</dt>
+                        <dd>{{ order!.customerName || '—' }}</dd>
                     </div>
-                    <div class="ot-stat">
-                        <span class="ot-label">Sipariş Tarihi</span>
-                        <span class="ot-value">{{ (order!.orderDate | date:'dd.MM.yyyy HH:mm') || '—' }}</span>
-                    </div>
-                    <div class="ot-stat">
-                        <span class="ot-label">Toplam Tutar</span>
-                        <span class="ot-value ot-value-strong">{{ orderTotal | number:'1.2-2' }} {{ currencyCode }}</span>
-                    </div>
-                    @if (order!.cargoCompanyName) {
-                        <div class="ot-stat">
-                            <span class="ot-label">Kargo</span>
-                            <span class="ot-value">{{ order!.cargoCompanyName }}</span>
-                            @if (order!.cargoTrackingNumber) {
-                                <span class="ot-hint">
-                                    @if (order!.cargoTrackingLink) {
-                                        <a [href]="order!.cargoTrackingLink" target="_blank" rel="noopener">
-                                            Takip No: {{ order!.cargoTrackingNumber }}
-                                        </a>
-                                    } @else {
-                                        Takip No: {{ order!.cargoTrackingNumber }}
-                                    }
-                                </span>
-                            }
+                    @if (order!.paymentTypeName) {
+                        <div class="ot-fact">
+                            <dt>Ödeme</dt>
+                            <dd>{{ order!.paymentTypeName }}</dd>
                         </div>
                     }
-                    @if (cargoAmount > 0) {
-                        <div class="ot-stat">
-                            <span class="ot-label">Kargo Ücreti</span>
-                            <span class="ot-value">{{ cargoAmount | number:'1.2-2' }} {{ currencyCode }}</span>
+                    @if (order!.cargoCompanyName) {
+                        <div class="ot-fact">
+                            <dt>Kargo</dt>
+                            <dd>
+                                {{ order!.cargoCompanyName }}
+                                @if (order!.cargoTrackingNumber) {
+                                    <span class="ot-fact-sub">
+                                        @if (order!.cargoTrackingLink) {
+                                            <a [href]="order!.cargoTrackingLink" target="_blank" rel="noopener">
+                                                Takip No: {{ order!.cargoTrackingNumber }}
+                                            </a>
+                                        } @else {
+                                            Takip No: {{ order!.cargoTrackingNumber }}
+                                        }
+                                    </span>
+                                }
+                            </dd>
+                        </div>
+                    }
+                    @if (order!.invoiceNumber || order!.invoiceUrl) {
+                        <div class="ot-fact">
+                            <dt>Fatura</dt>
+                            <dd>
+                                {{ order!.invoiceNumber || '—' }}
+                                <span class="ot-fact-sub">
+                                    @if (order!.invoiceDate) {
+                                        {{ order!.invoiceDate | date:'dd.MM.yyyy' }}
+                                    }
+                                    @if (order!.invoiceUrl) {
+                                        @if (order!.invoiceDate) { · }
+                                        <a [href]="order!.invoiceUrl" target="_blank" rel="noopener">
+                                            <i class="fa-regular fa-file-lines"></i> Faturayı görüntüle
+                                        </a>
+                                    }
+                                </span>
+                            </dd>
                         </div>
                     }
                     @if (order!.deliveryAddress; as address) {
-                        <div class="ot-stat">
-                            <span class="ot-label">Teslimat</span>
-                            <span class="ot-value">{{ address.recipientName || '—' }}</span>
-                            <span class="ot-hint">
-                                {{ address.city || '' }}@if (address.district) { / {{ address.district }} }
-                                @if (address.maskedPhone) {
-                                    <br/>{{ address.maskedPhone }}
-                                }
-                            </span>
+                        <div class="ot-fact">
+                            <dt>Teslimat</dt>
+                            <dd>
+                                {{ address.recipientName || '—' }}
+                                <span class="ot-fact-sub">
+                                    {{ address.city || '' }}@if (address.district) { / {{ address.district }} }
+                                    @if (address.maskedPhone) { · {{ address.maskedPhone }} }
+                                </span>
+                            </dd>
                         </div>
                     }
-                </div>
+                </dl>
+
+                @if (detailError) {
+                    <div class="ot-alert ot-alert-danger">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>{{ detailError }}</span>
+                    </div>
+                }
 
                 @if (order!.orderNote) {
                     <p class="ot-hint ot-order-note">
@@ -303,12 +342,12 @@
 
                                 @if (claim.cargoReferenceId) {
                                     <div class="ot-claim-code">
-                                        <span class="ot-label">Kargo Referans Numaranız</span>
+                                        <span class="ot-label">Kargo Numaranız</span>
                                         <strong>{{ claim.cargoReferenceId }}</strong>
                                     </div>
                                 } @else if (claim.cargoCustomerNo) {
                                     <p class="ot-hint">
-                                        Kargo referans numarası oluşturulamadı, bu alan boş. İade paketinizi kargo şubesine
+                                        Kargo numarası oluşturulamadı, bu alan boş. İade paketinizi kargo şubesine
                                         <strong>{{ claim.cargoCustomerNo }}</strong> firma kodumuzla teslim etmeniz gerekiyor.
                                     </p>
                                 }
@@ -438,7 +477,12 @@
                     <span class="ot-label">İade İşlemleri</span>
                     <div class="ot-order-no">{{ order!.orderNumber }}</div>
                 </div>
-                <span class="ot-result-customer">{{ order!.customerName || '' }}</span>
+                <div class="ot-return-head-side">
+                    <span class="ot-result-customer">{{ order!.customerName || '' }}</span>
+                    <button type="button" class="ot-link" (click)="backToDetail()">
+                        <i class="fa-solid fa-arrow-left"></i> Sipariş Detayı
+                    </button>
+                </div>
             </section>
 
             <!-- 1. Adım: ürün seçimi -->
@@ -550,6 +594,28 @@
                                 }
                             </div>
 
+                            @if (isIbanRequired) {
+                                <div class="ot-field-grid">
+                                    <div>
+                                        <label class="ot-field-label">IBAN <span>(zorunlu)</span></label>
+                                        <input type="text" class="ot-input" maxlength="34" [(ngModel)]="returnIban"
+                                               [class.invalid]="isIbanInvalidVisible"
+                                               placeholder="TR00 0000 0000 0000 0000 0000 00">
+                                    </div>
+                                    <div>
+                                        <label class="ot-field-label">Hesap Sahibi <span>(zorunlu)</span></label>
+                                        <input type="text" class="ot-input" maxlength="200" [(ngModel)]="returnIbanAccountName"
+                                               placeholder="IBAN'ın sahibi olan kişi ya da firma">
+                                    </div>
+                                </div>
+                                <p class="ot-hint">
+                                    Siparişinizin ödemesi havale / EFT ile alındığı için iade tutarı bu hesaba aktarılacaktır.
+                                    @if (isIbanInvalidVisible) {
+                                        <strong>Girdiğiniz IBAN geçersiz görünüyor.</strong>
+                                    }
+                                </p>
+                            }
+
                             <label class="ot-field-label">Eklemek istediğiniz not <span>(opsiyonel)</span></label>
                             <textarea class="ot-textarea" rows="2" maxlength="500" [(ngModel)]="returnNote"
                                       placeholder="İade ile ilgili bize iletmek istedikleriniz"></textarea>
@@ -585,6 +651,9 @@
                             <div class="ot-review">
                                 <div><span class="ot-label">Ürün</span><span>{{ selectedTotalQuantity }} adet</span></div>
                                 <div><span class="ot-label">Talep</span><span>{{ selectedActionDescription }}</span></div>
+                                @if (isIbanRequired) {
+                                    <div><span class="ot-label">IBAN</span><span>{{ returnIban || '—' }}</span></div>
+                                }
                                 <div><span class="ot-label">Kargo</span><span>{{ selectedCargoCompany?.name || '—' }}</span></div>
                                 <div><span class="ot-label">Tahmini Tutar</span><span>{{ selectedTotalAmount | number:'1.2-2' }} {{ currencyCode }}</span></div>
                             </div>
@@ -656,29 +725,32 @@
         <div class="ot-dialog">
             <div class="ot-dialog-head">
                 <span class="ot-dialog-icon ot-dialog-icon-success"><i class="fa-solid fa-check"></i></span>
-                <h2>İade Kodunuz Hazır</h2>
+                <h2>İade Talebiniz Oluşturuldu</h2>
                 <p>
                     Seçtiğiniz ürünleri tek pakete koyup <strong>{{ returnResult!.cargoCompanyName }}</strong> şubesine
-                    gidin; cari bilgimizi ve aşağıdaki kodu şube yetkilisine gösterin.
+                    gidin; şube yetkilisine aşağıdaki kargo numarasını ve cari bilgimizi gösterin.
                 </p>
             </div>
 
             <div class="ot-dialog-body">
-                <div class="ot-code-card">
-                    <span class="ot-label">İade Kargo Kodunuz</span>
-                    <div class="ot-code-value">{{ returnResult!.returnCode }}</div>
-                    <button type="button" class="ot-btn ot-btn-ghost ot-btn-sm" (click)="copyReturnCode()">
-                        <i class="fa-regular fa-copy"></i> Kodu Kopyala
-                    </button>
-                </div>
-
                 @if (cargoReferenceId) {
                     <div class="ot-code-card">
-                        <span class="ot-label">Kargo Referans Numaranız</span>
+                        <span class="ot-label">Kargo Numaranız</span>
                         <div class="ot-code-value">{{ cargoReferenceId }}</div>
                         <button type="button" class="ot-btn ot-btn-ghost ot-btn-sm" (click)="copyCargoReferenceId()">
-                            <i class="fa-regular fa-copy"></i> Referansı Kopyala
+                            <i class="fa-regular fa-copy"></i> Numarayı Kopyala
                         </button>
+                        <span class="ot-hint">Kargo şubesinde gönderiniz bu numarayla oluşturulur.</span>
+                    </div>
+                } @else {
+                    <div class="ot-alert ot-alert-warn">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>
+                            Kargo numaranız <strong>oluşturulamadı</strong>. İade paketinizi
+                            <strong>{{ returnResult!.cargoCompanyName }}</strong> şubesine götürüp aşağıdaki
+                            <strong>{{ returnResult!.cargoCustomerNo }}</strong> firma kodumuzla
+                            (gönderici cari hesabımız) iade etmeniz gerekiyor.
+                        </span>
                     </div>
                 }
 
@@ -687,26 +759,32 @@
                     <div>{{ returnResult!.cargoCustomerNo }} — {{ returnResult!.cargoAccountTitle }}</div>
                 </div>
 
-                @if (cargoReferenceMissing) {
-                    <div class="ot-alert ot-alert-warn">
-                        <i class="fa-solid fa-circle-exclamation"></i>
-                        <span>
-                            Kargo referans numaranız <strong>oluşturulamadı</strong>, bu alan şu an boş.
-                            İade paketinizi <strong>{{ returnResult!.cargoCompanyName }}</strong> şubesine götürüp
-                            yukarıdaki <strong>{{ returnResult!.cargoCustomerNo }}</strong> firma kodumuzla
-                            (gönderici cari hesabımız) iade etmeniz gerekiyor.
-                        </span>
-                    </div>
-                }
+                <div class="ot-code-card ot-code-card-soft">
+                    <span class="ot-label">İade Fiş Numaranız</span>
+                    <div class="ot-code-value">{{ returnResult!.returnCode }}</div>
+                    <button type="button" class="ot-btn ot-btn-ghost ot-btn-sm" (click)="copyReturnCode()">
+                        <i class="fa-regular fa-copy"></i> Fiş No Kopyala
+                    </button>
+                    <span class="ot-hint">Talebinizi takip ederken bu numarayı kullanırsınız.</span>
+                </div>
 
                 <div class="ot-alert ot-alert-warn">
                     <i class="fa-solid fa-circle-exclamation"></i>
-                    <span>Şube çalışanına sormasa bile iade kodunuz olduğunu belirtin, işlemi bu kodla yaptırın.</span>
+                    <span>
+                        @if (cargoReferenceId) {
+                            Şube çalışanına sormasa bile iade gönderisi olduğunu belirtin, işlemi bu kargo
+                            numarasıyla yaptırın.
+                        } @else {
+                            Şube çalışanına sormasa bile iade gönderisi olduğunu belirtin, işlemi firma
+                            kodumuzla yaptırın.
+                        }
+                    </span>
                 </div>
 
                 <p class="ot-hint">
-                    Kod <strong>{{ returnResult!.validUntil | date:'dd.MM.yyyy' }}</strong> tarihinde kargo şirketinin
-                    son alım saatine kadar geçerlidir. Süre dolduğunda iade süre sınırı içinde yeniden kod alabilirsiniz.
+                    Talebiniz <strong>{{ returnResult!.validUntil | date:'dd.MM.yyyy' }}</strong> tarihinde kargo
+                    şirketinin son alım saatine kadar geçerlidir. Süre dolduğunda iade süre sınırı içinde yeniden
+                    talep oluşturabilirsiniz.
                 </p>
             </div>
 

@@ -1,24 +1,46 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { WmsReturnClaimsService } from '@/app/core/services/wms/wms-return-claims.service';
 import { WmsReturnClaimLinesService } from '@/app/core/services/wms/wms-return-claim-lines.service';
 import { WmsClaimStatusesService } from '@/app/core/services/wms/wms-claim-statuses.service';
 import { WmsReturnReasonsService } from '@/app/core/services/wms/wms-return-reasons.service';
 import { WmsAfterReturnActionsService } from '@/app/core/services/wms/wms-after-return-actions.service';
+import { OrderTrackingService } from '@/app/core/services/order-tracking.service';
+import { AuthStateService } from '@/app/core/services/auth-state.service';
+import { ExtensionManagementService } from '@/app/core/services/extension-management.service';
+import { CompanyExtension } from '@/app/core/models/extension/company-extension.models';
 import {
     ReturnClaimLineResponse,
     ReturnClaimResponse,
 } from '@/app/core/models/wms/return-claim.models';
+import {
+    ReturnClaimDecisionRequest,
+    ReturnClaimDecisionResponse,
+} from '@/app/core/models/order-tracking/order-tracking.models';
 import { ClaimCodeLabels, buildClaimCodeLabels } from '../claim-code-labels';
 
+/** Onay / ret akışının hangi yönde çalıştığı */
+type ClaimDecision = 'approve' | 'reject';
+
+/** Karar uçlarının istediği sipariş kırılımı */
+interface ClaimDecisionTarget {
+    companyId: string;
+    extensionId: string;
+    orderNo: string;
+    claimNumber: string;
+}
+
 /**
- * İade talebi detayı — başlık bilgileri ve talep satırları.
- * Uç noktalar: /api/wms/return-claims/{id} ve /api/wms/return-claim-lines
+ * İade talebi detayı — başlık bilgileri, talep satırları ve karar (onay / ret) işlemi.
+ * Uç noktalar:
+ *   /api/wms/return-claims/{id}, /api/wms/return-claim-lines
+ *   /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/{claimNumber}/approve|reject
  */
 @Component({
     selector: 'app-otp-claim-detail-page',
-    imports: [CommonModule, RouterLink],
+    imports: [CommonModule, FormsModule, RouterLink],
     templateUrl: './claim-detail.html',
     styleUrls: ['./claim-detail.scss'],
 })
@@ -29,13 +51,35 @@ export class OtpClaimDetailPage implements OnInit {
     private readonly statusService = inject(WmsClaimStatusesService);
     private readonly reasonsService = inject(WmsReturnReasonsService);
     private readonly actionsService = inject(WmsAfterReturnActionsService);
+    private readonly orderTrackingService = inject(OrderTrackingService);
+    private readonly authState = inject(AuthStateService);
+    private readonly extensionService = inject(ExtensionManagementService);
 
     claim: ReturnClaimResponse | null = null;
     lines: ReturnClaimLineResponse[] = [];
-    labels: ClaimCodeLabels = { statuses: {}, reasons: {}, actions: {} };
+    labels: ClaimCodeLabels = { statuses: {}, reasons: {}, actions: {}, closed: {} };
     loading = false;
     linesLoading = false;
     errorMessage = '';
+
+    // ────── Karar (onay / ret) durumu ──────
+    /** Açık modalın yönü; `null` ise modal kapalı */
+    decision: ClaimDecision | null = null;
+    decisionNote = '';
+    /** Karar sonrası müşteriye bilgilendirme SMS'i gitsin mi */
+    decisionSendSms = true;
+    decisionSaving = false;
+    decisionError = '';
+    /** Sonuç bildiriminde SMS'in neden gitmediğini ayırt etmek için son seçim */
+    decisionSmsRequested = true;
+    /** Son kararın sonucu — yeni durum ve SMS bilgilendirmesinin akıbeti */
+    decisionResult: ReturnClaimDecisionResponse | null = null;
+    /**
+     * Karar uçlarının istediği pazaryeri kimliği. Talep yanıtı (v1 (56).yaml -
+     * ReturnClaimResponse) yalnızca `extensionCode` döndüğü için, kimlik şirketin
+     * extension listesinden bu kodla çözülür.
+     */
+    private extensionId: string | null = null;
 
     ngOnInit(): void {
         const id = this.route.snapshot.paramMap.get('id') ?? '';
@@ -60,13 +104,55 @@ export class OtpClaimDetailPage implements OnInit {
                 return;
             }
             this.claim = response.data;
-            await this.loadLines(this.claim.id);
+            await Promise.all([
+                this.loadLines(this.claim.id),
+                this.resolveExtensionId(this.claim.extensionCode),
+            ]);
         } catch (err) {
             console.error('İade talebi yüklenemedi:', err);
             this.errorMessage = 'Talep kaydı yüklenemedi.';
         } finally {
             this.loading = false;
         }
+    }
+
+    /**
+     * Talebin sağlayıcı kodunu (`ticimax`, `trendyol` ...) şirketin extension
+     * kayıtlarıyla eşleştirip karar uçlarının istediği `extensionId`'yi bulur.
+     */
+    private async resolveExtensionId(extensionCode: string | null): Promise<void> {
+        this.extensionId = null;
+        const companyId = this.companyId;
+        if (!extensionCode || !companyId) return;
+
+        try {
+            const response = await this.extensionService.getCompanyExtensions(companyId);
+            const extensions = this.extractArray<CompanyExtension>(response);
+            const code = extensionCode.trim().toLowerCase();
+            const match = extensions.find(item => (item.extensionCode || '').trim().toLowerCase() === code);
+            this.extensionId = match?.extensionId || null;
+        } catch (err) {
+            console.error('Şirket entegrasyonları alınamadı:', err);
+        }
+    }
+
+    /** API farklı sarmalayıcılarla dönebildiği için liste tek yerde normalize edilir */
+    private extractArray<T>(response: unknown): T[] {
+        if (Array.isArray(response)) return response as T[];
+        if (!response || typeof response !== 'object') return [];
+
+        const source = response as { data?: unknown; items?: unknown; result?: unknown; $values?: unknown };
+        if (Array.isArray(source.$values)) return source.$values as T[];
+        if (Array.isArray(source.items)) return source.items as T[];
+        if (Array.isArray(source.result)) return source.result as T[];
+        if (Array.isArray(source.data)) return source.data as T[];
+
+        if (source.data && typeof source.data === 'object') {
+            const nested = source.data as { items?: unknown; $values?: unknown };
+            if (Array.isArray(nested.items)) return nested.items as T[];
+            if (Array.isArray(nested.$values)) return nested.$values as T[];
+        }
+        return [];
     }
 
     private async loadLines(claimHeaderId: string): Promise<void> {
@@ -81,8 +167,21 @@ export class OtpClaimDetailPage implements OnInit {
         }
     }
 
+    // ────── Kod → metin çevirileri ──────
     statusName(statusCode: unknown): string {
         return this.labels.statuses[String(statusCode ?? '')] || '—';
+    }
+
+    /** Durum rozetinin rengi — kabul yeşil, red kırmızı, iptal gri */
+    statusBadgeClass(statusCode: unknown): string {
+        switch (Number(statusCode)) {
+            case 4: return 'bg-success-subtle text-success';
+            case 5: return 'bg-danger-subtle text-danger';
+            case 9: return 'bg-secondary-subtle text-secondary';
+            case 2:
+            case 3: return 'bg-warning-subtle text-warning';
+            default: return 'bg-info-subtle text-info';
+        }
     }
 
     reasonName(returnCode: string | null): string {
@@ -102,6 +201,12 @@ export class OtpClaimDetailPage implements OnInit {
         return variant ? `${code} (${variant})` : code;
     }
 
+    /** Müşteri / ödeme kartı yalnızca dolu alan varsa gösterilir */
+    get hasPaymentInfo(): boolean {
+        const claim = this.claim;
+        return !!(claim?.customerDescription || claim?.iban || claim?.ibanAccountDescription);
+    }
+
     get totalQuantity(): number {
         return this.lines.reduce((total, line) => total + Number(line.quantity ?? 0), 0);
     }
@@ -112,5 +217,119 @@ export class OtpClaimDetailPage implements OnInit {
 
     get totalRejected(): number {
         return this.lines.reduce((total, line) => total + Number(line.rejectedQuantity ?? 0), 0);
+    }
+
+    // ────── Karar akışı ──────
+    /** Talep kapandı mı (kabul / red / iptal) — kapalı taleplere yeni karar verilemez */
+    get isClosed(): boolean {
+        return !!this.claim && this.labels.closed[String(this.claim.statusCode ?? '')] === true;
+    }
+
+    /** Şirket kimliği kaydın kendisinden, yoksa oturumdan okunur */
+    private get companyId(): string {
+        return this.claim?.companyId || this.authState.profile?.companyId || '';
+    }
+
+    /**
+     * Karar uçları sipariş kırılımıyla çalıştığı için pazaryeri kimliği, sipariş no
+     * ve talep no eksiksiz olmalı; eksikse buton yerine nedenini yazan uyarı çıkar.
+     */
+    get decisionTarget(): ClaimDecisionTarget | null {
+        const claim = this.claim;
+        if (!claim?.orderNumber || !claim.claimNumber) return null;
+
+        const companyId = this.companyId;
+        if (!companyId || !this.extensionId) return null;
+
+        return {
+            companyId,
+            extensionId: this.extensionId,
+            orderNo: claim.orderNumber,
+            claimNumber: claim.claimNumber,
+        };
+    }
+
+    get canDecide(): boolean {
+        return !!this.claim && !this.isClosed && !!this.decisionTarget;
+    }
+
+    /** Karar verilemiyorsa nedenini tek cümlede açıklar */
+    get decisionBlockedReason(): string {
+        const claim = this.claim;
+        if (!claim || this.canDecide) return '';
+        if (this.isClosed) return `Talep "${this.statusName(claim.statusCode)}" durumunda; yeni karar verilemez.`;
+        if (!claim.orderNumber || !claim.claimNumber) {
+            return 'Talebin sipariş no veya talep no bilgisi eksik olduğu için karar verilemiyor.';
+        }
+        if (!this.extensionId) {
+            return `"${claim.extensionCode || 'Bilinmeyen'}" entegrasyonu şirket kayıtlarında bulunamadığı için karar verilemiyor.`;
+        }
+        return 'Talep karara bağlanamıyor.';
+    }
+
+    openDecision(decision: ClaimDecision): void {
+        this.decision = decision;
+        this.decisionNote = '';
+        this.decisionSendSms = true;
+        this.decisionError = '';
+    }
+
+    closeDecision(): void {
+        if (this.decisionSaving) return;
+        this.decision = null;
+        this.decisionNote = '';
+        this.decisionError = '';
+    }
+
+    /** Modaldaki onay butonu — kararı gönderir, başarılıysa kaydı tazeler */
+    async submitDecision(): Promise<void> {
+        const target = this.decisionTarget;
+        const decision = this.decision;
+        if (!target || !decision || this.decisionSaving) return;
+
+        this.decisionSaving = true;
+        this.decisionError = '';
+        try {
+            const request: ReturnClaimDecisionRequest = {
+                note: this.decisionNote.trim() || null,
+                isSendSms: this.decisionSendSms,
+            };
+            this.decisionSmsRequested = this.decisionSendSms;
+            const response = decision === 'approve'
+                ? await this.orderTrackingService.approveReturnClaim(
+                    target.companyId, target.extensionId, target.orderNo, target.claimNumber, request)
+                : await this.orderTrackingService.rejectReturnClaim(
+                    target.companyId, target.extensionId, target.orderNo, target.claimNumber, request);
+
+            if (!response.isSuccess || !response.data) {
+                this.decisionError = response.innerError || 'İşlem tamamlanamadı, lütfen tekrar deneyin.';
+                return;
+            }
+
+            this.decisionResult = response.data;
+            this.decision = null;
+            this.decisionNote = '';
+            if (this.claim) await this.refresh(this.claim.id);
+        } catch (err) {
+            console.error('Talep kararı gönderilemedi:', err);
+            this.decisionError = 'İşlem tamamlanamadı, lütfen tekrar deneyin.';
+        } finally {
+            this.decisionSaving = false;
+        }
+    }
+
+    /** Karardan sonra başlık ve satırları yeniden okur (durum alanları değişir) */
+    private async refresh(id: string): Promise<void> {
+        try {
+            const response = await this.claimsService.getById(id);
+            if (response.isSuccess && response.data) this.claim = response.data;
+            await this.loadLines(id);
+        } catch (err) {
+            console.error('İade talebi yenilenemedi:', err);
+        }
+    }
+
+    dismissDecisionResult(): void {
+        this.decisionResult = null;
     }
 }

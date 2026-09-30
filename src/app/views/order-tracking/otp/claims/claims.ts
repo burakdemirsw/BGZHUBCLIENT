@@ -29,7 +29,7 @@ export class OtpClaimsPage extends WmsListPage<ReturnClaimResponse> {
     private readonly actionsService = inject(WmsAfterReturnActionsService);
 
     /** Kodların ekranda gösterilecek karşılıkları */
-    labels: ClaimCodeLabels = { statuses: {}, reasons: {}, actions: {} };
+    labels: ClaimCodeLabels = { statuses: {}, reasons: {}, actions: {}, closed: {} };
 
     override ngOnInit(): void {
         super.ngOnInit();

@@ -11,6 +11,8 @@ import {
     OrderTrackingDetailResponse,
     OrderTrackingSummaryResponse,
     OrderTrackingVerificationResponse,
+    ReturnClaimDecisionRequest,
+    ReturnClaimDecisionResponse,
     ReturnClaimDetailResponse,
     ReturnClaimResultResponse,
     ReturnReasonOptionResponse,
@@ -89,10 +91,13 @@ export class OrderTrackingService {
         });
     }
 
-    /** İade sonrası işlem tipleri — 2. adımdaki "Nasıl bir işlem talep ediyorsunuz?" listesi */
-    getAfterReturnActions(companyId: string): Promise<ApiResponse<AfterReturnActionOptionResponse[]>> {
+    /**
+     * İade sonrası işlem tipleri — 2. adımdaki "Nasıl bir işlem talep ediyorsunuz?" listesi.
+     * Seçenekler tüm şirketlerde ortak olduğu için uç şirket parametresi almaz.
+     */
+    getAfterReturnActions(): Promise<ApiResponse<AfterReturnActionOptionResponse[]>> {
         return this.http.get<AfterReturnActionOptionResponse[]>({
-            fullEndPoint: `${ROOT_URL}/order-tracking/${companyId}/after-return-actions`,
+            fullEndPoint: `${ROOT_URL}/order-tracking/after-return-actions`,
         });
     }
 
@@ -132,6 +137,49 @@ export class OrderTrackingService {
         return this.http.get<ReturnClaimDetailResponse[]>({
             fullEndPoint: `${this.orderUrl(companyId, extensionId, orderNo)}/return-claims/detail`,
         });
+    }
+
+    /**
+     * Talebi onaylar (durum: Kabul) ve müşteriye bilgilendirme SMS'i gönderir.
+     * Personel işlemidir; SMS gönderilemese bile karar korunur, sebebi yanıtta döner.
+     */
+    approveReturnClaim(
+        companyId: string,
+        extensionId: string,
+        orderNo: string,
+        claimNumber: string,
+        request: ReturnClaimDecisionRequest,
+    ): Promise<ApiResponse<ReturnClaimDecisionResponse>> {
+        return this.decideReturnClaim('approve', companyId, extensionId, orderNo, claimNumber, request);
+    }
+
+    /** Talebi reddeder (durum: Red) ve müşteriye bilgilendirme SMS'i gönderir. */
+    rejectReturnClaim(
+        companyId: string,
+        extensionId: string,
+        orderNo: string,
+        claimNumber: string,
+        request: ReturnClaimDecisionRequest,
+    ): Promise<ApiResponse<ReturnClaimDecisionResponse>> {
+        return this.decideReturnClaim('reject', companyId, extensionId, orderNo, claimNumber, request);
+    }
+
+    private decideReturnClaim(
+        decision: 'approve' | 'reject',
+        companyId: string,
+        extensionId: string,
+        orderNo: string,
+        claimNumber: string,
+        request: ReturnClaimDecisionRequest,
+    ): Promise<ApiResponse<ReturnClaimDecisionResponse>> {
+        const claimSegment = encodeURIComponent(claimNumber.trim());
+        return this.http.post<ReturnClaimDecisionResponse>(
+            {
+                fullEndPoint:
+                    `${this.orderUrl(companyId, extensionId, orderNo)}/return-claims/${claimSegment}/${decision}`,
+            },
+            request,
+        );
     }
 
     private orderUrl(companyId: string, extensionId: string, orderNo: string): string {

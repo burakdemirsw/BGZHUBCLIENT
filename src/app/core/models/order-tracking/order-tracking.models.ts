@@ -50,7 +50,10 @@ export interface OrderTrackingItemResponse {
     options: string[];
 }
 
-/** Teslimat adresi — alıcı ve telefon maskeli gelir */
+/**
+ * Teslimat adresi. Doğrulama öncesi özet ekranında maskeli, doğrulama sonrası
+ * sipariş detayında açık gelir — panel gelen değeri olduğu gibi gösterir.
+ */
 export interface OrderTrackingAddressResponse {
     recipientName: string | null;
     maskedPhone: string | null;
@@ -60,11 +63,19 @@ export interface OrderTrackingAddressResponse {
 }
 
 /**
+ * Siparişin ödeme tipi — iade tutarının nereye döneceğini belirler.
+ * `CCPayment` karta iade, `BankPayment` banka hesabına iade (IBAN gerekir),
+ * `GiftCodePayment` hediye çeki / puan. Tanımsız ödeme tipinde API `null` döner.
+ */
+export type OrderTrackingPaymentTypeCode = 'CCPayment' | 'BankPayment' | 'GiftCodePayment';
+
+/**
  * GET  /order-tracking/{companyId}/{extensionId}/{orderNo}/detail
  * POST /order-tracking/{companyId}/{extensionId}/{orderNo}/verify
  */
 export interface OrderTrackingDetailResponse {
     orderNumber: string;
+    /** Doğrulama sonrası açık ad — panelde maskelenmez */
     customerName: string | null;
     orderDate: string | null;
     statusCode: number | string;
@@ -76,6 +87,15 @@ export interface OrderTrackingDetailResponse {
     totalAmount: number | string;
     totalVat: number | string;
     cargoAmount: number | string;
+    paymentTypeCode: OrderTrackingPaymentTypeCode | null;
+    paymentTypeName: string | null;
+    /** Sağlayıcının (Ticimax) sayısal ödeme tipi kodu */
+    providerPaymentTypeCode: number | string | null;
+    /** Fatura bilgileri — fatura kesilmediyse üçü de null gelir */
+    invoiceNumber: string | null;
+    invoiceDate: string | null;
+    /** Faturanın (varsa e-fatura) görüntüleme adresi */
+    invoiceUrl: string | null;
     orderNote: string | null;
     deliveryAddress: OrderTrackingAddressResponse | null;
     items: OrderTrackingItemResponse[];
@@ -102,7 +122,7 @@ export interface ReturnReasonOptionResponse {
     sortOrder: number | string;
 }
 
-/** GET /order-tracking/{companyId}/after-return-actions */
+/** GET /order-tracking/after-return-actions — seçenekler tüm şirketlerde ortak */
 export interface AfterReturnActionOptionResponse {
     actionCode: string;
     actionDescription: string;
@@ -150,6 +170,12 @@ export interface CreateReturnClaimRequest {
     /** Seçilen kargo şirketinin entegrasyon kimliği */
     cargoExtensionId?: string | null;
     customerNote?: string | null;
+    /** Para iadesi için müşterinin IBAN'ı — en fazla 34 karakter */
+    iban?: string | null;
+    /** Hesap sahibinin adı / ünvanı — en fazla 200 karakter */
+    ibanAccountDescription?: string | null;
+    /** Müşterinin talepte belirttiği ad / ünvan — en fazla 200 karakter */
+    customerDescription?: string | null;
 }
 
 /** Kargo entegrasyonunda oluşan iade gönderisi — WmsReturnClaimCargoResponse */
@@ -232,6 +258,12 @@ export interface ReturnClaimDetailResponse {
     afterReturnActionCode: string | null;
     afterReturnActionName: string | null;
     customerNote: string | null;
+    /** Para iadesi için müşterinin IBAN'ı */
+    iban: string | null;
+    /** IBAN'ın ait olduğu hesap sahibinin adı / ünvanı */
+    ibanAccountDescription: string | null;
+    /** Müşterinin talepte belirttiği ad / ünvan */
+    customerDescription: string | null;
     cargoExtensionId: string | null;
     cargoExtensionCode: string | null;
     cargoCompanyName: string | null;
@@ -245,4 +277,35 @@ export interface ReturnClaimDetailResponse {
     createdDate: string;
     updatedDate: string;
     items: ReturnClaimDetailLineResponse[];
+}
+
+/**
+ * Onay / ret kararının gövdesi.
+ * Kaynak: v1 (56).yaml - WmsReturnClaimDecisionRequest
+ * (.../return-claims/{claimNumber}/approve|reject)
+ */
+export interface ReturnClaimDecisionRequest {
+    /** Karara eklenen açıklama — müşteriye giden bilgilendirmede kullanılır */
+    note: string | null;
+    /** Müşteriye bilgilendirme SMS'i gönderilsin mi (backend varsayılanı: true) */
+    isSendSms: boolean;
+}
+
+/**
+ * Karar sonucu — talebin yeni durumu ve bilgilendirme SMS'inin akıbeti.
+ * SMS gönderilemese bile karar korunur; sebebi `smsError` alanında döner.
+ * Kaynak: v1 (56).yaml - WmsReturnClaimDecisionResponse
+ */
+export interface ReturnClaimDecisionResponse {
+    id: string;
+    claimNumber: string;
+    orderNumber: string;
+    statusCode: number | string;
+    statusName: string | null;
+    note: string | null;
+    decisionDate: string;
+    isSmsSent: boolean;
+    /** Bilgilendirmenin gittiği maskelenmiş telefon */
+    maskedPhone: string | null;
+    smsError: string | null;
 }

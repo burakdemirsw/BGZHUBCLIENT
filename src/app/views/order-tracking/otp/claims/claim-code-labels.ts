@@ -10,6 +10,8 @@ export interface ClaimCodeLabels {
     reasons: Record<string, string>;
     /** actionCode → talep tipi açıklaması */
     actions: Record<string, string>;
+    /** statusCode → durum talebi kapatıyor mu (kabul / red / iptal) */
+    closed: Record<string, boolean>;
 }
 
 /**
@@ -29,9 +31,11 @@ export async function buildClaimCodeLabels(
     ]);
 
     const statuses: Record<string, string> = {};
+    const closed: Record<string, boolean> = {};
     for (const status of statusList) {
         const code = String(status.statusCode ?? '');
         statuses[code] = status.statusDescription || code;
+        closed[code] = !!status.isClosed;
     }
 
     const reasons: Record<string, string> = {};
@@ -44,5 +48,5 @@ export async function buildClaimCodeLabels(
         if (action.actionCode) actions[action.actionCode] = action.actionDescription || action.actionCode;
     }
 
-    return { statuses, reasons, actions };
+    return { statuses, reasons, actions, closed };
 }

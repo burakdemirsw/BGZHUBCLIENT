@@ -10057,13 +10057,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PaginationRequest"
+              $ref: "#/components/schemas/AdminPaginationRequest"
           text/json:
             schema:
-              $ref: "#/components/schemas/PaginationRequest"
+              $ref: "#/components/schemas/AdminPaginationRequest"
           application/*+json:
             schema:
-              $ref: "#/components/schemas/PaginationRequest"
+              $ref: "#/components/schemas/AdminPaginationRequest"
         required: true
       responses:
         "200":
@@ -29664,17 +29664,10 @@ paths:
                   se"
       security:
         - Bearer: []
-  /order-tracking/{companyId}/after-return-actions:
+  /order-tracking/after-return-actions:
     get:
       tags:
         - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
       responses:
         "200":
           description: OK
@@ -29845,102 +29838,6 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimDetailResponse"
       security:
         - Bearer: []
-  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/{claimNumber}/cargo:
-    post:
-      tags:
-        - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: orderNo
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: claimNumber
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateWmsReturnClaimCargoRequest"
-          text/json:
-            schema:
-              $ref: "#/components/schemas/CreateWmsReturnClaimCargoRequest"
-          application/*+json:
-            schema:
-              $ref: "#/components/schemas/CreateWmsReturnClaimCargoRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResultResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResultResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResultResponse"
-      security:
-        - Bearer: []
-  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/{claimNumber}/cargo/cancel:
-    post:
-      tags:
-        - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: orderNo
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: claimNumber
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResponse"
-      security:
-        - Bearer: []
   /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/cargos:
     get:
       tags:
@@ -30094,6 +29991,102 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimDecisionResponse"
+      security:
+        - Bearer: []
+  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/{claimNumber}/cargo:
+    post:
+      tags:
+        - OrderTracking
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: extensionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: orderNo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claimNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWmsReturnClaimCargoRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CreateWmsReturnClaimCargoRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CreateWmsReturnClaimCargoRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResultResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResultResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResultResponse"
+      security:
+        - Bearer: []
+  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/{claimNumber}/cargo/cancel:
+    post:
+      tags:
+        - OrderTracking
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: extensionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: orderNo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claimNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResponse"
       security:
         - Bearer: []
   /order-tracking/{companyId}/cargo-companies:
@@ -37458,7 +37451,6 @@ components:
     AfterReturnClaimActionResponse:
       required:
         - id
-        - companyId
         - actionCode
         - actionDescription
         - sortOrder
@@ -37469,9 +37461,6 @@ components:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
-        companyId:
           type: string
           format: uuid
         actionCode:
@@ -62179,15 +62168,11 @@ components:
           format: date-time
     CreateAfterReturnClaimActionRequest:
       required:
-        - companyId
         - actionCode
         - actionDescription
         - sortOrder
       type: object
       properties:
-        companyId:
-          type: string
-          format: uuid
         actionCode:
           type:
             - "null"
@@ -68045,22 +68030,15 @@ components:
         - claimHeaderId
         - companyId
         - sortOrder
-        - orderLineId
         - externalClaimLineId
-        - sourceItemCode
         - sourceImageUrl
         - itemCode
         - colorCode
         - itemDim1Code
         - batchCode
-        - usedBarcode
+        - barcode
         - quantity
-        - acceptedQuantity
-        - rejectedQuantity
         - returnReasonCode
-        - sourceReason
-        - customerNote
-        - statusCode
         - createdIp
       type: object
       properties:
@@ -68076,16 +68054,7 @@ components:
             - integer
             - string
           format: int32
-        orderLineId:
-          type:
-            - "null"
-            - string
-          format: uuid
         externalClaimLineId:
-          type:
-            - "null"
-            - string
-        sourceItemCode:
           type:
             - "null"
             - string
@@ -68109,7 +68078,7 @@ components:
           type:
             - "null"
             - string
-        usedBarcode:
+        barcode:
           type:
             - "null"
             - string
@@ -68119,36 +68088,10 @@ components:
             - integer
             - string
           format: int32
-        acceptedQuantity:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        rejectedQuantity:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
         returnReasonCode:
           type:
             - "null"
             - string
-        sourceReason:
-          type:
-            - "null"
-            - string
-        customerNote:
-          type:
-            - "null"
-            - string
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: uint8
         createdIp:
           type:
             - "null"
@@ -68187,16 +68130,16 @@ components:
         - claimNumber
         - orderNumber
         - extensionCode
-        - companyExtensionId
-        - externalClaimId
         - syncSource
         - claimDate
         - statusCode
         - returnReasonCode
         - afterReturnActionCode
         - customerNote
+        - iban
+        - ibanAccountDescription
+        - customerDescription
         - sourceLastModifiedDate
-        - payloadHash
         - cargoExtensionId
         - cargoReferenceId
         - cargoTrackingNumber
@@ -68218,15 +68161,6 @@ components:
             - "null"
             - string
         extensionCode:
-          type:
-            - "null"
-            - string
-        companyExtensionId:
-          type:
-            - "null"
-            - string
-          format: uuid
-        externalClaimId:
           type:
             - "null"
             - string
@@ -68257,15 +68191,23 @@ components:
           type:
             - "null"
             - string
+        iban:
+          type:
+            - "null"
+            - string
+        ibanAccountDescription:
+          type:
+            - "null"
+            - string
+        customerDescription:
+          type:
+            - "null"
+            - string
         sourceLastModifiedDate:
           type:
             - "null"
             - string
           format: date-time
-        payloadHash:
-          type:
-            - "null"
-            - string
         cargoExtensionId:
           type:
             - "null"
@@ -69767,10 +69709,6 @@ components:
           type:
             - "null"
             - string
-        sourceItemCode:
-          type:
-            - "null"
-            - string
         itemCode:
           type:
             - "null"
@@ -69783,7 +69721,7 @@ components:
           type:
             - "null"
             - string
-        usedBarcode:
+        barcode:
           type:
             - "null"
             - string
@@ -69791,16 +69729,7 @@ components:
           type:
             - "null"
             - string
-        orderLineId:
-          type:
-            - "null"
-            - string
-          format: uuid
         externalClaimLineId:
-          type:
-            - "null"
-            - string
-        customerNote:
           type:
             - "null"
             - string
@@ -69827,6 +69756,14 @@ components:
             - string
           format: uuid
         customerNote:
+          type:
+            - "null"
+            - string
+        iban:
+          type:
+            - "null"
+            - string
+        ibanAccountDescription:
           type:
             - "null"
             - string
@@ -83174,11 +83111,15 @@ components:
         - cargoCompanyName
         - cargoTrackingNumber
         - cargoTrackingLink
+        - invoiceNumber
+        - invoiceDate
+        - invoiceUrl
         - canRequestReturn
         - totalAmount
         - totalVat
         - cargoAmount
         - paymentTypeCode
+        - providerPaymentTypeCode
         - paymentTypeName
         - orderNote
         - deliveryAddress
@@ -83218,6 +83159,19 @@ components:
           type:
             - "null"
             - string
+        invoiceNumber:
+          type:
+            - "null"
+            - string
+        invoiceDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        invoiceUrl:
+          type:
+            - "null"
+            - string
         canRequestReturn:
           type: boolean
         totalAmount:
@@ -83239,6 +83193,10 @@ components:
             - string
           format: double
         paymentTypeCode:
+          type:
+            - "null"
+            - string
+        providerPaymentTypeCode:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
             - "null"
@@ -92344,22 +92302,15 @@ components:
         - claimHeaderId
         - companyId
         - sortOrder
-        - orderLineId
         - externalClaimLineId
-        - sourceItemCode
         - sourceImageUrl
         - itemCode
         - colorCode
         - itemDim1Code
         - batchCode
-        - usedBarcode
+        - barcode
         - quantity
-        - acceptedQuantity
-        - rejectedQuantity
         - returnReasonCode
-        - sourceReason
-        - customerNote
-        - statusCode
         - createdIp
         - createdUserId
         - createdDate
@@ -92382,16 +92333,7 @@ components:
             - integer
             - string
           format: int32
-        orderLineId:
-          type:
-            - "null"
-            - string
-          format: uuid
         externalClaimLineId:
-          type:
-            - "null"
-            - string
-        sourceItemCode:
           type:
             - "null"
             - string
@@ -92415,7 +92357,7 @@ components:
           type:
             - "null"
             - string
-        usedBarcode:
+        barcode:
           type:
             - "null"
             - string
@@ -92425,36 +92367,10 @@ components:
             - integer
             - string
           format: int32
-        acceptedQuantity:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        rejectedQuantity:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
         returnReasonCode:
           type:
             - "null"
             - string
-        sourceReason:
-          type:
-            - "null"
-            - string
-        customerNote:
-          type:
-            - "null"
-            - string
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: uint8
         createdIp:
           type:
             - "null"
@@ -92526,16 +92442,16 @@ components:
         - claimNumber
         - orderNumber
         - extensionCode
-        - companyExtensionId
-        - externalClaimId
         - syncSource
         - claimDate
         - statusCode
         - returnReasonCode
         - afterReturnActionCode
         - customerNote
+        - iban
+        - ibanAccountDescription
+        - customerDescription
         - sourceLastModifiedDate
-        - payloadHash
         - cargoExtensionId
         - cargoReferenceId
         - cargoTrackingNumber
@@ -92567,15 +92483,6 @@ components:
           type:
             - "null"
             - string
-        companyExtensionId:
-          type:
-            - "null"
-            - string
-          format: uuid
-        externalClaimId:
-          type:
-            - "null"
-            - string
         syncSource:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -92603,15 +92510,23 @@ components:
           type:
             - "null"
             - string
+        iban:
+          type:
+            - "null"
+            - string
+        ibanAccountDescription:
+          type:
+            - "null"
+            - string
+        customerDescription:
+          type:
+            - "null"
+            - string
         sourceLastModifiedDate:
           type:
             - "null"
             - string
           format: date-time
-        payloadHash:
-          type:
-            - "null"
-            - string
         cargoExtensionId:
           type:
             - "null"
@@ -105521,22 +105436,15 @@ components:
       required:
         - claimHeaderId
         - sortOrder
-        - orderLineId
         - externalClaimLineId
-        - sourceItemCode
         - sourceImageUrl
         - itemCode
         - colorCode
         - itemDim1Code
         - batchCode
-        - usedBarcode
+        - barcode
         - quantity
-        - acceptedQuantity
-        - rejectedQuantity
         - returnReasonCode
-        - sourceReason
-        - customerNote
-        - statusCode
         - createdIp
       type: object
       properties:
@@ -105549,16 +105457,7 @@ components:
             - integer
             - string
           format: int32
-        orderLineId:
-          type:
-            - "null"
-            - string
-          format: uuid
         externalClaimLineId:
-          type:
-            - "null"
-            - string
-        sourceItemCode:
           type:
             - "null"
             - string
@@ -105582,7 +105481,7 @@ components:
           type:
             - "null"
             - string
-        usedBarcode:
+        barcode:
           type:
             - "null"
             - string
@@ -105592,36 +105491,10 @@ components:
             - integer
             - string
           format: int32
-        acceptedQuantity:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        rejectedQuantity:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
         returnReasonCode:
           type:
             - "null"
             - string
-        sourceReason:
-          type:
-            - "null"
-            - string
-        customerNote:
-          type:
-            - "null"
-            - string
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: uint8
         createdIp:
           type:
             - "null"
@@ -105655,16 +105528,16 @@ components:
         - claimNumber
         - orderNumber
         - extensionCode
-        - companyExtensionId
-        - externalClaimId
         - syncSource
         - claimDate
         - statusCode
         - returnReasonCode
         - afterReturnActionCode
         - customerNote
+        - iban
+        - ibanAccountDescription
+        - customerDescription
         - sourceLastModifiedDate
-        - payloadHash
         - cargoExtensionId
         - cargoReferenceId
         - cargoTrackingNumber
@@ -105683,15 +105556,6 @@ components:
             - "null"
             - string
         extensionCode:
-          type:
-            - "null"
-            - string
-        companyExtensionId:
-          type:
-            - "null"
-            - string
-          format: uuid
-        externalClaimId:
           type:
             - "null"
             - string
@@ -105722,15 +105586,23 @@ components:
           type:
             - "null"
             - string
+        iban:
+          type:
+            - "null"
+            - string
+        ibanAccountDescription:
+          type:
+            - "null"
+            - string
+        customerDescription:
+          type:
+            - "null"
+            - string
         sourceLastModifiedDate:
           type:
             - "null"
             - string
           format: date-time
-        payloadHash:
-          type:
-            - "null"
-            - string
         cargoExtensionId:
           type:
             - "null"
@@ -112312,7 +112184,7 @@ components:
         - orderNumber
         - cargoCompanyName
         - cargoCustomerNo
-        - isSuccess
+        - isCargoCreated
         - cargoReferenceId
         - createdDate
       type: object
@@ -112330,7 +112202,7 @@ components:
           type:
             - "null"
             - string
-        isSuccess:
+        isCargoCreated:
           type: boolean
         cargoReferenceId:
           type:
@@ -112358,6 +112230,9 @@ components:
           type:
             - "null"
             - string
+        isSendSms:
+          type: boolean
+          default: true
     WmsReturnClaimDecisionResponse:
       required:
         - id
@@ -112410,25 +112285,17 @@ components:
       required:
         - id
         - sortOrder
-        - orderLineId
         - externalClaimLineId
-        - sourceItemCode
         - itemCode
         - itemName
         - colorCode
         - colorName
         - itemDim1Code
-        - usedBarcode
+        - barcode
         - sourceImageUrl
         - quantity
-        - acceptedQuantity
-        - rejectedQuantity
         - returnReasonCode
         - returnReasonName
-        - sourceReason
-        - customerNote
-        - statusCode
-        - statusName
       type: object
       properties:
         id:
@@ -112440,16 +112307,7 @@ components:
             - integer
             - string
           format: int32
-        orderLineId:
-          type:
-            - "null"
-            - string
-          format: uuid
         externalClaimLineId:
-          type:
-            - "null"
-            - string
-        sourceItemCode:
           type:
             - "null"
             - string
@@ -112473,7 +112331,7 @@ components:
           type:
             - "null"
             - string
-        usedBarcode:
+        barcode:
           type:
             - "null"
             - string
@@ -112487,41 +112345,11 @@ components:
             - integer
             - string
           format: int32
-        acceptedQuantity:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
-        rejectedQuantity:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: int32
         returnReasonCode:
           type:
             - "null"
             - string
         returnReasonName:
-          type:
-            - "null"
-            - string
-        sourceReason:
-          type:
-            - "null"
-            - string
-        customerNote:
-          type:
-            - "null"
-            - string
-        statusCode:
-          pattern: ^-?(?:0|[1-9]\d*)$
-          type:
-            - integer
-            - string
-          format: uint8
-        statusName:
           type:
             - "null"
             - string
@@ -112532,7 +112360,6 @@ components:
         - claimDate
         - orderNumber
         - extensionCode
-        - externalClaimId
         - syncSource
         - statusCode
         - statusName
@@ -112541,6 +112368,9 @@ components:
         - afterReturnActionCode
         - afterReturnActionName
         - customerNote
+        - iban
+        - ibanAccountDescription
+        - customerDescription
         - cargoExtensionId
         - cargoExtensionCode
         - cargoCompanyName
@@ -112567,10 +112397,6 @@ components:
           type: string
         extensionCode:
           type: string
-        externalClaimId:
-          type:
-            - "null"
-            - string
         syncSource:
           pattern: ^-?(?:0|[1-9]\d*)$
           type:
@@ -112604,6 +112430,18 @@ components:
             - "null"
             - string
         customerNote:
+          type:
+            - "null"
+            - string
+        iban:
+          type:
+            - "null"
+            - string
+        ibanAccountDescription:
+          type:
+            - "null"
+            - string
+        customerDescription:
           type:
             - "null"
             - string
@@ -112658,11 +112496,10 @@ components:
     WmsReturnClaimLineListResponse:
       required:
         - sortOrder
-        - sourceItemCode
         - itemCode
         - colorCode
         - itemDim1Code
-        - usedBarcode
+        - barcode
         - quantity
         - returnReasonCode
       type: object
@@ -112673,10 +112510,6 @@ components:
             - integer
             - string
           format: int32
-        sourceItemCode:
-          type:
-            - "null"
-            - string
         itemCode:
           type:
             - "null"
@@ -112689,7 +112522,7 @@ components:
           type:
             - "null"
             - string
-        usedBarcode:
+        barcode:
           type:
             - "null"
             - string
@@ -112774,6 +112607,7 @@ components:
         - cargoCustomerNo
         - cargoAccountTitle
         - validUntil
+        - validDayLimit
         - isCargoCreated
         - cargo
         - cargoErrorMessage
@@ -112796,6 +112630,12 @@ components:
         validUntil:
           type: string
           format: date-time
+        validDayLimit:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+            - integer
+            - string
+          format: int32
         isCargoCreated:
           type: boolean
         cargo:

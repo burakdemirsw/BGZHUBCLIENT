@@ -2,7 +2,11 @@
     display: block;
 }
 
-/* Beyaz alanları kırmak için off-white form arka planı */
+/* Beyaz alanları kırmak için off-white yüzeyler */
+.page-surface {
+    background-color: #f7f7f9;
+}
+
 .wms-form-body {
     background-color: #f7f7f9;
 }
@@ -40,6 +44,33 @@
     word-break: break-word;
 }
 
+/* Üst şerit — talep kimliği ve karar butonları */
+.claim-hero-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    border-radius: 0.75rem;
+    background-color: #f7f7f9;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+/* Sayaç kartları — kabul yeşil, ret kırmızı kenarlıkla ayrışır */
+.claim-stat .card-body {
+    padding: 0.85rem 1rem;
+}
+
+.claim-stat-success {
+    border-left: 3px solid var(--bs-success, #22c55e);
+}
+
+.claim-stat-danger {
+    border-left: 3px solid var(--bs-danger, #ef4444);
+}
+
 .claim-line-thumb {
     width: 40px;
     height: 52px;
@@ -47,4 +78,11 @@
     border-radius: 0.375rem;
     border: 1px solid #e9ecef;
     background: #fff;
+    flex: 0 0 40px;
+}
+
+.claim-line-thumb-empty {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }

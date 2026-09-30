@@ -19,6 +19,7 @@ import {
     ReturnReasonOptionResponse,
 } from '@/app/core/models/order-tracking/order-tracking.models';
 import { OrderTrackingService } from '@/app/core/services/order-tracking.service';
+import { environment } from '@/environments/environment';
 import {
     MOCK_AFTER_RETURN_ACTIONS,
     MOCK_BEFORE_CLAIM_INSTRUCTIONS,
@@ -34,6 +35,12 @@ import {
 
 /** Demo modda ağ gecikmesini taklit etme süresi */
 const MOCK_DELAY_MS = 400;
+
+/**
+ * Geliştirme kolaylığı: SMS beklemeden sipariş detayına geçmek için sabit kod.
+ * Yalnızca `environment.production` false iken çalışır, production build'de kabul edilmez.
+ */
+const DEV_BYPASS_CODE = '111111';
 
 /**
  * Aynı sipariş için iki SMS isteği arasında beklenmesi gereken süre (1 dakika).
@@ -135,6 +142,9 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
     /** Siparişe daha önce açılmış iade talepleri */
     returnClaims: ReturnClaimDetailResponse[] = [];
     claimsLoading = false;
+    /** Detay ekranındaki yenile butonu — istek sürerken ikon döner */
+    refreshingOrder = false;
+    detailError = '';
 
     // ── İade talebi ──
     reasons: ReturnReasonOptionResponse[] = [];
@@ -150,6 +160,9 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
     selectedActionCode = '';
     selectedCargoExtensionId = '';
     returnNote = '';
+    /** Para iadesi bilgileri — havale ile ödenen siparişlerde zorunlu */
+    returnIban = '';
+    returnIbanAccountName = '';
     submittingReturn = false;
     returnError = '';
 
@@ -304,7 +317,15 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
         this.verifying = true;
         this.verifyError = '';
         try {
-            if (this.isDemo) {
+            if (this.isDevBypassCode) {
+                // Geliştirme kodu: doğrulama atlanır, sipariş detayı doğrudan çekilir
+                const order = await this.fetchOrderDetail();
+                if (!order) {
+                    this.verifyError = this.detailFetchError;
+                    return;
+                }
+                this.order = order;
+            } else if (this.isDemo) {
                 await this.delay();
                 if (this.verificationCode !== MOCK_VERIFICATION_CODE) {
                     this.verifyError = 'Doğrulama kodu hatalı. (Test kodu: ' + MOCK_VERIFICATION_CODE + ')';
@@ -324,14 +345,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
                 }
                 this.order = response.data;
             }
-            this.clearCountdown();
-            this.step = 'detail';
-            await this.loadReturnClaims();
-            // Sorgu ekranında "İade Talebi Yap" ile gelindiyse doğrudan iade akışı açılır
-            if (this.returnAfterVerify) {
-                this.returnAfterVerify = false;
-                if (this.canOpenReturnFlow) await this.openReturnFlow();
-            }
+            await this.enterOrderDetail();
         } catch (err) {
             this.verifyError = this.messageFrom(err, 'Doğrulama kodu hatalı ya da süresi dolmuş.');
         } finally {
@@ -339,10 +353,94 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
         }
     }
 
+    /**
+     * Gizli geliştirme kısayolu: "Sipariş Doğrulama" başlığına çift tıklanınca
+     * SMS doğrulaması atlanır ve sipariş detayı doğrudan açılır.
+     * `environment.production` true iken hiçbir şey yapmaz.
+     */
+    async skipVerificationForDev(): Promise<void> {
+        if (environment.production || this.verifying) return;
+        this.verifying = true;
+        this.verifyError = '';
+        try {
+            const order = await this.fetchOrderDetail();
+            if (!order) {
+                this.verifyError = this.detailFetchError;
+                return;
+            }
+            this.order = order;
+            await this.enterOrderDetail();
+        } catch (err) {
+            this.verifyError = this.messageFrom(err, 'Sipariş detayı alınamadı.');
+        } finally {
+            this.verifying = false;
+        }
+    }
+
+    /** Sipariş detayını ve iade taleplerini API'den yeniden çeker */
+    async reloadOrder(): Promise<void> {
+        if (this.refreshingOrder) return;
+        this.refreshingOrder = true;
+        this.detailError = '';
+        try {
+            const order = await this.fetchOrderDetail();
+            if (!order) {
+                this.detailError = this.detailFetchError;
+                return;
+            }
+            this.order = order;
+            await this.loadReturnClaims();
+        } catch (err) {
+            this.detailError = this.messageFrom(err, 'Sipariş bilgileri yenilenemedi.');
+        } finally {
+            this.refreshingOrder = false;
+        }
+    }
+
+    /** Doğrulama tamamlandıktan sonra detay adımına geçiş */
+    private async enterOrderDetail(): Promise<void> {
+        this.detailError = '';
+        this.clearCountdown();
+        this.step = 'detail';
+        await this.loadReturnClaims();
+        // Sorgu ekranında "İade Talebi Yap" ile gelindiyse doğrudan iade akışı açılır
+        if (this.returnAfterVerify) {
+            this.returnAfterVerify = false;
+            if (this.canOpenReturnFlow) await this.openReturnFlow();
+        }
+    }
+
     /** Doğrulama kodu alanı sadece rakam kabul eder */
     onCodeInput(value: string): void {
         this.verificationCode = (value || '').replace(/[^0-9]/g, '').slice(0, CODE_LENGTH);
         this.verifyError = '';
+    }
+
+    /** Geliştirme kodu girildi mi — production build'de her zaman false */
+    private get isDevBypassCode(): boolean {
+        return !environment.production && this.verificationCode === DEV_BYPASS_CODE;
+    }
+
+    /** `fetchOrderDetail` başarısız olduğunda gösterilecek mesaj */
+    private detailFetchError = '';
+
+    /** Sipariş detayını çeker — doğrulama atlandığında ve yenilemede kullanılır */
+    private async fetchOrderDetail(): Promise<OrderTrackingDetailResponse | null> {
+        this.detailFetchError = '';
+        if (this.isDemo) {
+            await this.delay();
+            return buildMockOrderDetail(this.context.orderNo);
+        }
+        const response = await this.service.getOrderDetail(
+            this.context.companyId,
+            this.context.extensionId,
+            this.context.orderNo,
+        );
+        if (!response.isSuccess || !response.data) {
+            this.detailFetchError = this.messageFromResponse(response, 'Sipariş detayı alınamadı.');
+            return null;
+        }
+        return response.data;
     }
 
     get isCodeComplete(): boolean {
@@ -529,6 +627,8 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
         this.selectedActionCode = '';
         this.selectedCargoExtensionId = '';
         this.returnNote = '';
+        this.returnIban = '';
+        this.returnIbanAccountName = '';
         this.returnStep = 1;
         this.returnError = '';
     }
@@ -548,7 +648,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
             } else {
                 const [reasons, actions, instructions, cargoCompanies] = await Promise.all([
                     this.service.getReturnReasons(this.context.companyId),
-                    this.service.getAfterReturnActions(this.context.companyId),
+                    this.service.getAfterReturnActions(),
                     this.service.getBeforeClaimInstructions(this.context.companyId),
                     this.service.getCargoCompanies(this.context.companyId),
                 ]);
@@ -636,8 +736,45 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
         return values.length > 0 && values.every(item => !!item.returnCode);
     }
 
+    /** Ödeme havale/EFT ile alındıysa iade tutarı müşterinin hesabına aktarılır */
+    get isBankPayment(): boolean {
+        return this.order?.paymentTypeCode === 'BankPayment';
+    }
+
+    /** IBAN alanları yalnızca banka hesabına iade yapılacak siparişlerde sorulur */
+    get isIbanRequired(): boolean {
+        return this.isBankPayment;
+    }
+
+    /** 2 harf ülke kodu + 2 kontrol hanesi; TR IBAN'ları toplam 26 karakterdir */
+    get isIbanValid(): boolean {
+        const iban = this.normalizedIban;
+        if (!/^[A-Z]{2}[0-9]{2}[A-Z0-9]{10,30}$/.test(iban)) return false;
+        return !iban.startsWith('TR') || iban.length === 26;
+    }
+
+    get isIbanAccountNameValid(): boolean {
+        return this.returnIbanAccountName.trim().length >= 3;
+    }
+
+    /** Yazılmaya başlanmış ama henüz geçerli olmayan IBAN kırmızı gösterilir */
+    get isIbanInvalidVisible(): boolean {
+        return this.returnIban.trim().length > 0 && !this.isIbanValid;
+    }
+
     get isStep2Valid(): boolean {
-        return !!this.selectedActionCode;
+        if (!this.selectedActionCode) return false;
+        if (!this.isIbanRequired) return true;
+        return this.isIbanValid && this.isIbanAccountNameValid;
+    }
+
+    /** 2. adımda eksik olan alanı anlatan uyarı */
+    private get step2ErrorMessage(): string {
+        if (!this.selectedActionCode) return 'Lütfen nasıl bir işlem talep ettiğinizi seçin.';
+        if (!this.isIbanValid) {
+            return 'Siparişin ödemesi havale/EFT ile alındığı için iade tutarının aktarılacağı geçerli bir IBAN girmelisiniz.';
+        }
+        return "Lütfen IBAN'ın ait olduğu hesap sahibinin adını / ünvanını yazın.";
     }
 
     get isStep3Valid(): boolean {
@@ -663,7 +800,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
             return;
         }
         if (this.returnStep === 2 && !this.isStep2Valid) {
-            this.returnError = 'Lütfen nasıl bir işlem talep ettiğinizi seçin.';
+            this.returnError = this.step2ErrorMessage;
             return;
         }
         this.goToReturnStep(this.returnStep + 1);
@@ -681,6 +818,19 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
     selectCargoCompany(company: CargoCompanyResponse): void {
         this.selectedCargoExtensionId = company.cargoExtensionId;
         this.returnError = '';
+    }
+
+    /**
+     * Talep sahibinin adı / ünvanı — sipariş detayından gelir, müşteriye tekrar sorulmaz.
+     */
+    private get claimCustomerDescription(): string | null {
+        const address = this.order?.deliveryAddress;
+        return this.order?.customerName?.trim() || address?.recipientName?.trim() || null;
+    }
+
+    /** IBAN boşluklarla yazılabildiği için gönderimden önce sadeleştirilir */
+    private get normalizedIban(): string {
+        return this.returnIban.replace(/\s+/g, '').toUpperCase();
     }
 
     /** Seçilen satırların hepsi aynı nedeni taşıyorsa talebin genel nedeni olarak gönderilir */
@@ -707,6 +857,12 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
     /** İade talebini oluşturur ve iade kargo kodunu gösterir */
     async submitReturn(): Promise<void> {
         if (this.submittingReturn) return;
+        if (!this.isStep2Valid && this.isStep1Valid) {
+            // Havale ile ödenen siparişte IBAN alınmadan talep kapatılamaz
+            this.returnStep = 2;
+            this.returnError = this.step2ErrorMessage;
+            return;
+        }
         if (!this.isStep1Valid || !this.isStep2Valid || !this.isStep3Valid) {
             this.returnError = 'Lütfen tüm adımları tamamlayın.';
             return;
@@ -717,6 +873,9 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
             afterReturnActionCode: this.selectedActionCode,
             cargoExtensionId: this.selectedCargoExtensionId || null,
             customerNote: this.returnNote?.trim() || null,
+            iban: this.normalizedIban || null,
+            ibanAccountDescription: this.returnIbanAccountName?.trim() || null,
+            customerDescription: this.claimCustomerDescription,
         };
 
         this.submittingReturn = true;

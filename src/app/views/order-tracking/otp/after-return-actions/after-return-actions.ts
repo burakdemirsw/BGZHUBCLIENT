@@ -24,7 +24,8 @@ const EMPTY_FORM: AfterReturnActionForm = {
 /**
  * İade sonrası işlem tipleri — sipariş takip panelinde müşteriye sorulan
  * "Nasıl bir işlem talep ediyorsunuz?" listesini yönetir.
- * Uç nokta: /api/wms/after-return-actions
+ * Kayıtlar sistem genelinde ortaktır (şirket bazlı değil).
+ * Uç nokta: /api/wms/after-return-claim-actions
  */
 @Component({
     selector: 'app-otp-after-return-actions-page',

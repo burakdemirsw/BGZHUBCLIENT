@@ -3,6 +3,7 @@ import { HttpClientService } from '../http-client.service';
 import { AuthStateService } from '../auth-state.service';
 import { ApiResponse } from '../../models/api-response.model';
 import {
+    AdminPaginationRequest,
     DEFAULT_PAGINATION,
     PagedResult,
     PaginationRequest,
@@ -43,17 +44,28 @@ export abstract class WmsResourceService {
     }
 
     /**
-     * Sayfalı istek gövdesi. `companyId` oturumdan doldurulur; şirketten
-     * bağımsız kaynaklarda da istek şeması bu alanı zorunlu tuttuğu için gönderilir.
+     * Sayfalama gövdesinde `companyId` gönderilsin mi? Şirketten bağımsız
+     * kaynakların çoğunda istek şeması bu alanı beklediği için varsayılan `true`;
+     * `AdminPaginationRequest` kullanan uçlarda servis bunu `false` yapar.
+     */
+    protected readonly sendsCompanyIdInPagedBody: boolean = true;
+
+    /**
+     * Sayfalı istek gövdesi. `sendsCompanyIdInPagedBody` true ise `companyId`
+     * oturumdan doldurulur, değilse gövdeden tamamen çıkarılır.
      */
     protected pagedBody<TRequest extends Partial<PaginationRequest>>(
         request?: TRequest,
-    ): TRequest & PaginationRequest {
-        return {
-            ...DEFAULT_PAGINATION,
-            ...request,
-            companyId: request?.companyId || this.companyId,
-        } as TRequest & PaginationRequest;
+    ): TRequest & AdminPaginationRequest {
+        const body = { ...DEFAULT_PAGINATION, ...request } as TRequest & PaginationRequest;
+
+        if (!this.sendsCompanyIdInPagedBody) {
+            delete (body as Partial<PaginationRequest>).companyId;
+            return body;
+        }
+
+        body.companyId = request?.companyId || this.companyId;
+        return body;
     }
 
     /** `POST {resource}/list` — filtreli, açıklamalarla zenginleştirilmiş liste */
