@@ -377,22 +377,6 @@
                                                     {{ line.quantity }} adet
                                                     @if (line.returnReasonName) { · {{ line.returnReasonName }} }
                                                 </div>
-                                                @if (line.customerNote) {
-                                                    <div class="ot-hint">
-                                                        <i class="fa-regular fa-comment-dots"></i> {{ line.customerNote }}
-                                                    </div>
-                                                }
-                                            </div>
-                                            <div class="ot-claim-line-state">
-                                                @if (line.statusName) {
-                                                    <span class="ot-pill ot-pill-soft">{{ line.statusName }}</span>
-                                                }
-                                                @if (toNumber(line.acceptedQuantity) > 0) {
-                                                    <span class="ot-hint">{{ line.acceptedQuantity }} kabul</span>
-                                                }
-                                                @if (toNumber(line.rejectedQuantity) > 0) {
-                                                    <span class="ot-hint">{{ line.rejectedQuantity }} ret</span>
-                                                }
                                             </div>
                                         </div>
                                     } @empty {

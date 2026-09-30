@@ -9,8 +9,6 @@ import { WmsReturnReasonsService } from '@/app/core/services/wms/wms-return-reas
 import { WmsAfterReturnActionsService } from '@/app/core/services/wms/wms-after-return-actions.service';
 import { OrderTrackingService } from '@/app/core/services/order-tracking.service';
 import { AuthStateService } from '@/app/core/services/auth-state.service';
-import { ExtensionManagementService } from '@/app/core/services/extension-management.service';
-import { CompanyExtension } from '@/app/core/models/extension/company-extension.models';
 import {
     ReturnClaimLineResponse,
     ReturnClaimResponse,
@@ -24,19 +22,11 @@ import { ClaimCodeLabels, buildClaimCodeLabels } from '../claim-code-labels';
 /** Onay / ret akışının hangi yönde çalıştığı */
 type ClaimDecision = 'approve' | 'reject';
 
-/** Karar uçlarının istediği sipariş kırılımı */
-interface ClaimDecisionTarget {
-    companyId: string;
-    extensionId: string;
-    orderNo: string;
-    claimNumber: string;
-}
-
 /**
  * İade talebi detayı — başlık bilgileri, talep satırları ve karar (onay / ret) işlemi.
  * Uç noktalar:
  *   /api/wms/return-claims/{id}, /api/wms/return-claim-lines
- *   /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/{claimNumber}/approve|reject
+ *   /order-tracking/return-claims/approve|reject (POST, gövde: companyId + claimNumber)
  */
 @Component({
     selector: 'app-otp-claim-detail-page',
@@ -53,7 +43,6 @@ export class OtpClaimDetailPage implements OnInit {
     private readonly actionsService = inject(WmsAfterReturnActionsService);
     private readonly orderTrackingService = inject(OrderTrackingService);
     private readonly authState = inject(AuthStateService);
-    private readonly extensionService = inject(ExtensionManagementService);
 
     claim: ReturnClaimResponse | null = null;
     lines: ReturnClaimLineResponse[] = [];
@@ -74,12 +63,6 @@ export class OtpClaimDetailPage implements OnInit {
     decisionSmsRequested = true;
     /** Son kararın sonucu — yeni durum ve SMS bilgilendirmesinin akıbeti */
     decisionResult: ReturnClaimDecisionResponse | null = null;
-    /**
-     * Karar uçlarının istediği pazaryeri kimliği. Talep yanıtı (v1 (56).yaml -
-     * ReturnClaimResponse) yalnızca `extensionCode` döndüğü için, kimlik şirketin
-     * extension listesinden bu kodla çözülür.
-     */
-    private extensionId: string | null = null;
 
     ngOnInit(): void {
         const id = this.route.snapshot.paramMap.get('id') ?? '';
@@ -104,55 +87,13 @@ export class OtpClaimDetailPage implements OnInit {
                 return;
             }
             this.claim = response.data;
-            await Promise.all([
-                this.loadLines(this.claim.id),
-                this.resolveExtensionId(this.claim.extensionCode),
-            ]);
+            await this.loadLines(this.claim.id);
         } catch (err) {
             console.error('İade talebi yüklenemedi:', err);
             this.errorMessage = 'Talep kaydı yüklenemedi.';
         } finally {
             this.loading = false;
         }
-    }
-
-    /**
-     * Talebin sağlayıcı kodunu (`ticimax`, `trendyol` ...) şirketin extension
-     * kayıtlarıyla eşleştirip karar uçlarının istediği `extensionId`'yi bulur.
-     */
-    private async resolveExtensionId(extensionCode: string | null): Promise<void> {
-        this.extensionId = null;
-        const companyId = this.companyId;
-        if (!extensionCode || !companyId) return;
-
-        try {
-            const response = await this.extensionService.getCompanyExtensions(companyId);
-            const extensions = this.extractArray<CompanyExtension>(response);
-            const code = extensionCode.trim().toLowerCase();
-            const match = extensions.find(item => (item.extensionCode || '').trim().toLowerCase() === code);
-            this.extensionId = match?.extensionId || null;
-        } catch (err) {
-            console.error('Şirket entegrasyonları alınamadı:', err);
-        }
-    }
-
-    /** API farklı sarmalayıcılarla dönebildiği için liste tek yerde normalize edilir */
-    private extractArray<T>(response: unknown): T[] {
-        if (Array.isArray(response)) return response as T[];
-        if (!response || typeof response !== 'object') return [];
-
-        const source = response as { data?: unknown; items?: unknown; result?: unknown; $values?: unknown };
-        if (Array.isArray(source.$values)) return source.$values as T[];
-        if (Array.isArray(source.items)) return source.items as T[];
-        if (Array.isArray(source.result)) return source.result as T[];
-        if (Array.isArray(source.data)) return source.data as T[];
-
-        if (source.data && typeof source.data === 'object') {
-            const nested = source.data as { items?: unknown; $values?: unknown };
-            if (Array.isArray(nested.items)) return nested.items as T[];
-            if (Array.isArray(nested.$values)) return nested.$values as T[];
-        }
-        return [];
     }
 
     private async loadLines(claimHeaderId: string): Promise<void> {
@@ -196,8 +137,8 @@ export class OtpClaimDetailPage implements OnInit {
 
     /** Satırdaki ürünün kod ve varyant bilgisi tek metinde */
     lineTitle(line: ReturnClaimLineResponse): string {
-        const code = line.itemCode || line.sourceItemCode || 'Ürün';
-        const variant = [line.colorCode, line.batchCode].filter(Boolean).join(' · ');
+        const code = line.itemCode || 'Ürün';
+        const variant = [line.colorCode, line.itemDim1Code, line.batchCode].filter(Boolean).join(' · ');
         return variant ? `${code} (${variant})` : code;
     }
 
@@ -209,14 +150,6 @@ export class OtpClaimDetailPage implements OnInit {
 
     get totalQuantity(): number {
         return this.lines.reduce((total, line) => total + Number(line.quantity ?? 0), 0);
-    }
-
-    get totalAccepted(): number {
-        return this.lines.reduce((total, line) => total + Number(line.acceptedQuantity ?? 0), 0);
-    }
-
-    get totalRejected(): number {
-        return this.lines.reduce((total, line) => total + Number(line.rejectedQuantity ?? 0), 0);
     }
 
     // ────── Karar akışı ──────
@@ -231,22 +164,14 @@ export class OtpClaimDetailPage implements OnInit {
     }
 
     /**
-     * Karar uçları sipariş kırılımıyla çalıştığı için pazaryeri kimliği, sipariş no
-     * ve talep no eksiksiz olmalı; eksikse buton yerine nedenini yazan uyarı çıkar.
+     * Karar uçları yalnızca şirket ve talep numarasıyla çalışır; ikisinden biri
+     * eksikse buton yerine nedenini yazan uyarı çıkar.
      */
-    get decisionTarget(): ClaimDecisionTarget | null {
-        const claim = this.claim;
-        if (!claim?.orderNumber || !claim.claimNumber) return null;
-
+    private get decisionTarget(): { companyId: string; claimNumber: string } | null {
+        const claimNumber = this.claim?.claimNumber;
         const companyId = this.companyId;
-        if (!companyId || !this.extensionId) return null;
-
-        return {
-            companyId,
-            extensionId: this.extensionId,
-            orderNo: claim.orderNumber,
-            claimNumber: claim.claimNumber,
-        };
+        if (!claimNumber || !companyId) return null;
+        return { companyId, claimNumber };
     }
 
     get canDecide(): boolean {
@@ -258,12 +183,7 @@ export class OtpClaimDetailPage implements OnInit {
         const claim = this.claim;
         if (!claim || this.canDecide) return '';
         if (this.isClosed) return `Talep "${this.statusName(claim.statusCode)}" durumunda; yeni karar verilemez.`;
-        if (!claim.orderNumber || !claim.claimNumber) {
-            return 'Talebin sipariş no veya talep no bilgisi eksik olduğu için karar verilemiyor.';
-        }
-        if (!this.extensionId) {
-            return `"${claim.extensionCode || 'Bilinmeyen'}" entegrasyonu şirket kayıtlarında bulunamadığı için karar verilemiyor.`;
-        }
+        if (!claim.claimNumber) return 'Talebin talep no bilgisi eksik olduğu için karar verilemiyor.';
         return 'Talep karara bağlanamıyor.';
     }
 
@@ -291,15 +211,15 @@ export class OtpClaimDetailPage implements OnInit {
         this.decisionError = '';
         try {
             const request: ReturnClaimDecisionRequest = {
+                companyId: target.companyId,
+                claimNumber: target.claimNumber,
                 note: this.decisionNote.trim() || null,
                 isSendSms: this.decisionSendSms,
             };
             this.decisionSmsRequested = this.decisionSendSms;
             const response = decision === 'approve'
-                ? await this.orderTrackingService.approveReturnClaim(
-                    target.companyId, target.extensionId, target.orderNo, target.claimNumber, request)
-                : await this.orderTrackingService.rejectReturnClaim(
-                    target.companyId, target.extensionId, target.orderNo, target.claimNumber, request);
+                ? await this.orderTrackingService.approveReturnClaim(request)
+                : await this.orderTrackingService.rejectReturnClaim(request);
 
             if (!response.isSuccess || !response.data) {
                 this.decisionError = response.innerError || 'İşlem tamamlanamadı, lütfen tekrar deneyin.';

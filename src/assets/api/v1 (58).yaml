@@ -29443,134 +29443,115 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfObject"
       security:
         - Bearer: []
-  /order-tracking/brand/{companyId}/{extensionId}:
-    get:
-      tags:
-        - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfWmsOrderTrackingBrandResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfWmsOrderTrackingBrandResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfWmsOrderTrackingBrandResponse"
-      security:
-        - Bearer: []
-  /order-tracking/{companyId}/{extensionId}/{orderNo}:
-    get:
-      tags:
-        - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: orderNo
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderTrackingSummaryResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderTrackingSummaryResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderTrackingSummaryResponse"
-      security:
-        - Bearer: []
-  /order-tracking/{companyId}/{extensionId}/{orderNo}/detail:
-    get:
-      tags:
-        - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: orderNo
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderTrackingDetailResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderTrackingDetailResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfOrderTrackingDetailResponse"
-      security:
-        - Bearer: []
-  /order-tracking/{companyId}/{extensionId}/{orderNo}/verification-code:
+  /order-tracking/brand:
     post:
       tags:
         - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: orderNo
-          in: path
-          required: true
-          schema:
-            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingBrandRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingBrandRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingBrandRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsOrderTrackingBrandResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsOrderTrackingBrandResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsOrderTrackingBrandResponse"
+      security:
+        - Bearer: []
+  /order-tracking/order:
+    post:
+      tags:
+        - OrderTracking
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingSummaryResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingSummaryResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingSummaryResponse"
+      security:
+        - Bearer: []
+  /order-tracking/order/detail:
+    post:
+      tags:
+        - OrderTracking
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingDetailResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingDetailResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfOrderTrackingDetailResponse"
+      security:
+        - Bearer: []
+  /order-tracking/order/verification-code:
+    post:
+      tags:
+        - OrderTracking
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -29586,28 +29567,10 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfOrderTrackingVerificationResponse"
       security:
         - Bearer: []
-  /order-tracking/{companyId}/{extensionId}/{orderNo}/verify:
+  /order-tracking/order/verify:
     post:
       tags:
         - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: orderNo
-          in: path
-          required: true
-          schema:
-            type: string
       requestBody:
         content:
           application/json:
@@ -29635,17 +29598,22 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfOrderTrackingDetailResponse"
       security:
         - Bearer: []
-  /order-tracking/{companyId}/return-reasons:
-    get:
+  /order-tracking/return-reasons:
+    post:
       tags:
         - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnCatalogRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnCatalogRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnCatalogRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -29665,78 +29633,96 @@ paths:
       security:
         - Bearer: []
   /order-tracking/after-return-actions:
-    get:
-      tags:
-        - OrderTracking
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsAfterReturnClaimActionOptionR\
-                  esponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsAfterReturnClaimActionOptionR\
-                  esponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsAfterReturnClaimActionOptionR\
-                  esponse"
-      security:
-        - Bearer: []
-  /order-tracking/{companyId}/before-claim-instructions:
-    get:
-      tags:
-        - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsBeforeReturnClaimInstructionR\
-                  esponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsBeforeReturnClaimInstructionR\
-                  esponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsBeforeReturnClaimInstructionR\
-                  esponse"
-      security:
-        - Bearer: []
-  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claim:
     post:
       tags:
         - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: orderNo
-          in: path
-          required: true
-          schema:
-            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsAfterReturnClaimActionOptionR\
+                  esponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsAfterReturnClaimActionOptionR\
+                  esponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsAfterReturnClaimActionOptionR\
+                  esponse"
+      security:
+        - Bearer: []
+  /order-tracking/before-claim-instructions:
+    post:
+      tags:
+        - OrderTracking
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnCatalogRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnCatalogRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnCatalogRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsBeforeReturnClaimInstructionR\
+                  esponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsBeforeReturnClaimInstructionR\
+                  esponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsBeforeReturnClaimInstructionR\
+                  esponse"
+      security:
+        - Bearer: []
+  /order-tracking/cargo-companies:
+    post:
+      tags:
+        - OrderTracking
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnCatalogRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnCatalogRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnCatalogRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsCargoCompanyResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsCargoCompanyResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsCargoCompanyResponse"
+      security:
+        - Bearer: []
+  /order-tracking/return-claim:
+    post:
+      tags:
+        - OrderTracking
       requestBody:
         content:
           application/json:
@@ -29764,220 +29750,146 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimResultResponse"
       security:
         - Bearer: []
-  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims:
-    get:
-      tags:
-        - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: orderNo
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimListResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimListResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimListResponse"
-      security:
-        - Bearer: []
-  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/detail:
-    get:
-      tags:
-        - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: orderNo
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimDetailResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimDetailResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimDetailResponse"
-      security:
-        - Bearer: []
-  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/cargos:
-    get:
-      tags:
-        - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: orderNo
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimCargoResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimCargoResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimCargoResponse"
-      security:
-        - Bearer: []
-  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/{claimNumber}/approve:
+  /order-tracking/return-claims:
     post:
       tags:
         - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: orderNo
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: claimNumber
-          in: path
-          required: true
-          schema:
-            type: string
       requestBody:
         content:
           application/json:
             schema:
-              oneOf:
-                - type: "null"
-                - $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
           text/json:
             schema:
-              oneOf:
-                - type: "null"
-                - $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
           application/*+json:
             schema:
-              oneOf:
-                - type: "null"
-                - $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
+        required: true
       responses:
         "200":
           description: OK
           content:
             text/plain:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimDecisionResponse"
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimListResponse"
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimDecisionResponse"
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimListResponse"
             text/json:
               schema:
-                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimDecisionResponse"
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimListResponse"
       security:
         - Bearer: []
-  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/{claimNumber}/reject:
+  /order-tracking/return-claims/detail:
     post:
       tags:
         - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: orderNo
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: claimNumber
-          in: path
-          required: true
-          schema:
-            type: string
       requestBody:
         content:
           application/json:
             schema:
-              oneOf:
-                - type: "null"
-                - $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
           text/json:
             schema:
-              oneOf:
-                - type: "null"
-                - $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
           application/*+json:
             schema:
-              oneOf:
-                - type: "null"
-                - $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimDetailResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimDetailResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimDetailResponse"
+      security:
+        - Bearer: []
+  /order-tracking/return-claims/cargos:
+    post:
+      tags:
+        - OrderTracking
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/OrderTrackingOrderRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimCargoResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimCargoResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimCargoResponse"
+      security:
+        - Bearer: []
+  /order-tracking/return-claims/by-company:
+    post:
+      tags:
+        - OrderTracking
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WmsCompanyReturnClaimRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/WmsCompanyReturnClaimRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/WmsCompanyReturnClaimRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimDetailResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimDetailResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfListOfWmsReturnClaimDetailResponse"
+      security:
+        - Bearer: []
+  /order-tracking/return-claims/approve:
+    post:
+      tags:
+        - OrderTracking
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -29993,33 +29905,41 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimDecisionResponse"
       security:
         - Bearer: []
-  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/{claimNumber}/cargo:
+  /order-tracking/return-claims/reject:
     post:
       tags:
         - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: orderNo
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: claimNumber
-          in: path
-          required: true
-          schema:
-            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/WmsReturnClaimDecisionRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimDecisionResponse"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimDecisionResponse"
+            text/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimDecisionResponse"
+      security:
+        - Bearer: []
+  /order-tracking/return-claims/cargo:
+    post:
+      tags:
+        - OrderTracking
       requestBody:
         content:
           application/json:
@@ -30047,33 +29967,22 @@ paths:
                 $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResultResponse"
       security:
         - Bearer: []
-  /order-tracking/{companyId}/{extensionId}/{orderNo}/return-claims/{claimNumber}/cargo/cancel:
+  /order-tracking/return-claims/cargo/cancel:
     post:
       tags:
         - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: extensionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: orderNo
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: claimNumber
-          in: path
-          required: true
-          schema:
-            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CancelWmsReturnClaimCargoRequest"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/CancelWmsReturnClaimCargoRequest"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/CancelWmsReturnClaimCargoRequest"
+        required: true
       responses:
         "200":
           description: OK
@@ -30087,32 +29996,6 @@ paths:
             text/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseOfWmsReturnClaimCargoResponse"
-      security:
-        - Bearer: []
-  /order-tracking/{companyId}/cargo-companies:
-    get:
-      tags:
-        - OrderTracking
-      parameters:
-        - name: companyId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsCargoCompanyResponse"
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsCargoCompanyResponse"
-            text/json:
-              schema:
-                $ref: "#/components/schemas/ApiResponseOfListOfWmsCargoCompanyResponse"
       security:
         - Bearer: []
   /api/marketplace-questions/by-company/{companyId}/platforms:
@@ -58681,6 +58564,24 @@ components:
           type:
             - "null"
             - string
+    CancelWmsReturnClaimCargoRequest:
+      required:
+        - companyId
+        - extensionId
+        - orderNo
+        - claimNumber
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        extensionId:
+          type: string
+          format: uuid
+        orderNo:
+          type: string
+        claimNumber:
+          type: string
     CargoOrderInfo:
       type: object
       properties:
@@ -69666,8 +69567,23 @@ components:
             - "null"
             - string
     CreateWmsReturnClaimCargoRequest:
+      required:
+        - companyId
+        - extensionId
+        - orderNo
+        - claimNumber
       type: object
       properties:
+        companyId:
+          type: string
+          format: uuid
+        extensionId:
+          type: string
+          format: uuid
+        orderNo:
+          type: string
+        claimNumber:
+          type: string
         cargoExtensionId:
           type:
             - "null"
@@ -69735,9 +69651,20 @@ components:
             - string
     CreateWmsReturnClaimRequest:
       required:
+        - companyId
+        - extensionId
+        - orderNo
         - items
       type: object
       properties:
+        companyId:
+          type: string
+          format: uuid
+        extensionId:
+          type: string
+          format: uuid
+        orderNo:
+          type: string
         items:
           type: array
           items:
@@ -83101,6 +83028,14 @@ components:
           type:
             - "null"
             - string
+    OrderTrackingBrandRequest:
+      required:
+        - companyId
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
     OrderTrackingDetailResponse:
       required:
         - orderNumber
@@ -83288,6 +83223,21 @@ components:
           type: array
           items:
             type: string
+    OrderTrackingOrderRequest:
+      required:
+        - companyId
+        - extensionId
+        - orderNo
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        extensionId:
+          type: string
+          format: uuid
+        orderNo:
+          type: string
     OrderTrackingSettingDefinitionResponse:
       required:
         - id
@@ -107242,9 +107192,20 @@ components:
           format: date-time
     VerifyOrderTrackingRequest:
       required:
+        - companyId
+        - extensionId
+        - orderNo
         - key
       type: object
       properties:
+        companyId:
+          type: string
+          format: uuid
+        extensionId:
+          type: string
+          format: uuid
+        orderNo:
+          type: string
         key:
           type: string
     WarehousePostalAddressResponse:
@@ -108483,6 +108444,28 @@ components:
             - "null"
             - string
         accountTitle:
+          type:
+            - "null"
+            - string
+    WmsCompanyReturnClaimRequest:
+      required:
+        - companyId
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        startDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        endDate:
+          type:
+            - "null"
+            - string
+          format: date-time
+        claimNumber:
           type:
             - "null"
             - string
@@ -112177,6 +112160,14 @@ components:
             - integer
             - string
           format: int32
+    WmsReturnCatalogRequest:
+      required:
+        - companyId
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
     WmsReturnClaimCargoResponse:
       required:
         - id
@@ -112224,8 +112215,16 @@ components:
           items:
             type: string
     WmsReturnClaimDecisionRequest:
+      required:
+        - companyId
+        - claimNumber
       type: object
       properties:
+        companyId:
+          type: string
+          format: uuid
+        claimNumber:
+          type: string
         note:
           type:
             - "null"

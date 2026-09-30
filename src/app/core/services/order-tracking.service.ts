@@ -5,15 +5,24 @@ import { environment } from '../../../environments/environment';
 import {
     AfterReturnActionOptionResponse,
     BeforeClaimInstructionOptionResponse,
+    CancelReturnClaimCargoRequest,
     CargoCompanyResponse,
+    CompanyReturnClaimRequest,
+    CreateReturnClaimCargoRequest,
     CreateReturnClaimRequest,
+    OrderTrackingBrandRequest,
     OrderTrackingBrandResponse,
     OrderTrackingDetailResponse,
+    OrderTrackingOrderRequest,
     OrderTrackingSummaryResponse,
     OrderTrackingVerificationResponse,
+    ReturnCatalogRequest,
+    ReturnClaimCargoResponse,
+    ReturnClaimCargoResultResponse,
     ReturnClaimDecisionRequest,
     ReturnClaimDecisionResponse,
     ReturnClaimDetailResponse,
+    ReturnClaimListResponse,
     ReturnClaimResultResponse,
     ReturnReasonOptionResponse,
     VerifyOrderTrackingRequest,
@@ -21,168 +30,175 @@ import {
 
 /**
  * OrderTracking uçları `/api` öneki olmadan sunucu kökünde yayınlanıyor
- * (v1.yaml: `/order-tracking/...`), bu yüzden istekler `fullEndPoint` ile atılır.
+ * (v1 (58).yaml: `/order-tracking/...`), bu yüzden istekler `fullEndPoint` ile atılır.
  */
 const ROOT_URL = environment.apiBaseUrl.replace(/\/api\/?$/, '');
 
-/** Sipariş takip paneli servisi — OrderTrackingController karşılığı */
+/**
+ * Sipariş takip paneli servisi — OrderTrackingController karşılığı.
+ *
+ * Controller'ın tüm uçları POST'tur: şirket / eklenti / sipariş bilgisi URL'de
+ * değil istek gövdesinde taşınır. Buradaki `companyId` oturumdan değil, public
+ * panelin route parametresinden gelir (panelde token yok); bu yüzden gövdede
+ * yer alması zorunludur — form alanı olarak sorulmaz.
+ */
 @Injectable({ providedIn: 'root' })
 export class OrderTrackingService {
     constructor(private http: HttpClientService) {}
 
     /** Doğrulama ekranında gösterilen marka adı / logosu */
-    getBrand(companyId: string, extensionId: string): Promise<ApiResponse<OrderTrackingBrandResponse>> {
-        return this.http.get<OrderTrackingBrandResponse>({
-            fullEndPoint: `${ROOT_URL}/order-tracking/brand/${companyId}/${extensionId}`,
-        });
+    getBrand(request: OrderTrackingBrandRequest): Promise<ApiResponse<OrderTrackingBrandResponse>> {
+        return this.http.post<OrderTrackingBrandResponse>({ fullEndPoint: this.url('brand') }, request);
     }
 
     /** Sipariş numarasıyla özet bilgi (doğrulama öncesi) */
-    getOrderSummary(
-        companyId: string,
-        extensionId: string,
-        orderNo: string,
-    ): Promise<ApiResponse<OrderTrackingSummaryResponse>> {
-        return this.http.get<OrderTrackingSummaryResponse>({
-            fullEndPoint: this.orderUrl(companyId, extensionId, orderNo),
-        });
+    getOrderSummary(request: OrderTrackingOrderRequest): Promise<ApiResponse<OrderTrackingSummaryResponse>> {
+        return this.http.post<OrderTrackingSummaryResponse>({ fullEndPoint: this.url('order') }, this.orderBody(request));
     }
 
     /** Siparişin tam detayı (ürünler, tutarlar, teslimat adresi) */
-    getOrderDetail(
-        companyId: string,
-        extensionId: string,
-        orderNo: string,
-    ): Promise<ApiResponse<OrderTrackingDetailResponse>> {
-        return this.http.get<OrderTrackingDetailResponse>({
-            fullEndPoint: `${this.orderUrl(companyId, extensionId, orderNo)}/detail`,
-        });
+    getOrderDetail(request: OrderTrackingOrderRequest): Promise<ApiResponse<OrderTrackingDetailResponse>> {
+        return this.http.post<OrderTrackingDetailResponse>(
+            { fullEndPoint: this.url('order/detail') },
+            this.orderBody(request),
+        );
     }
 
     /** Siparişin telefonuna SMS doğrulama kodu gönderir */
-    sendVerificationCode(
-        companyId: string,
-        extensionId: string,
-        orderNo: string,
-    ): Promise<ApiResponse<OrderTrackingVerificationResponse>> {
+    sendVerificationCode(request: OrderTrackingOrderRequest): Promise<ApiResponse<OrderTrackingVerificationResponse>> {
         return this.http.post<OrderTrackingVerificationResponse>(
-            { fullEndPoint: `${this.orderUrl(companyId, extensionId, orderNo)}/verification-code` },
-            {},
+            { fullEndPoint: this.url('order/verification-code') },
+            this.orderBody(request),
         );
     }
 
     /** Kodu doğrular ve siparişin tam detayını döner */
-    verify(
-        companyId: string,
-        extensionId: string,
-        orderNo: string,
-        request: VerifyOrderTrackingRequest,
-    ): Promise<ApiResponse<OrderTrackingDetailResponse>> {
+    verify(request: VerifyOrderTrackingRequest): Promise<ApiResponse<OrderTrackingDetailResponse>> {
         return this.http.post<OrderTrackingDetailResponse>(
-            { fullEndPoint: `${this.orderUrl(companyId, extensionId, orderNo)}/verify` },
-            request,
+            { fullEndPoint: this.url('order/verify') },
+            this.orderBody(request),
         );
     }
 
     /** İade nedenleri — 1. adımdaki "Neden iade ediyorsunuz?" listesi */
-    getReturnReasons(companyId: string): Promise<ApiResponse<ReturnReasonOptionResponse[]>> {
-        return this.http.get<ReturnReasonOptionResponse[]>({
-            fullEndPoint: `${ROOT_URL}/order-tracking/${companyId}/return-reasons`,
-        });
+    getReturnReasons(request: ReturnCatalogRequest): Promise<ApiResponse<ReturnReasonOptionResponse[]>> {
+        return this.http.post<ReturnReasonOptionResponse[]>({ fullEndPoint: this.url('return-reasons') }, request);
     }
 
     /**
      * İade sonrası işlem tipleri — 2. adımdaki "Nasıl bir işlem talep ediyorsunuz?" listesi.
-     * Seçenekler tüm şirketlerde ortak olduğu için uç şirket parametresi almaz.
+     * Seçenekler tüm şirketlerde ortak olduğu için gövde almaz.
      */
     getAfterReturnActions(): Promise<ApiResponse<AfterReturnActionOptionResponse[]>> {
-        return this.http.get<AfterReturnActionOptionResponse[]>({
-            fullEndPoint: `${ROOT_URL}/order-tracking/after-return-actions`,
-        });
+        return this.http.post<AfterReturnActionOptionResponse[]>({ fullEndPoint: this.url('after-return-actions') }, {});
     }
 
     /** Talep öncesi bilgilendirme maddeleri — uyarı modalının içeriği */
-    getBeforeClaimInstructions(companyId: string): Promise<ApiResponse<BeforeClaimInstructionOptionResponse[]>> {
-        return this.http.get<BeforeClaimInstructionOptionResponse[]>({
-            fullEndPoint: `${ROOT_URL}/order-tracking/${companyId}/before-claim-instructions`,
-        });
-    }
-
-    /** İade paketinin gönderilebileceği kargo şirketleri — 3. adım */
-    getCargoCompanies(companyId: string): Promise<ApiResponse<CargoCompanyResponse[]>> {
-        return this.http.get<CargoCompanyResponse[]>({
-            fullEndPoint: `${ROOT_URL}/order-tracking/${companyId}/cargo-companies`,
-        });
-    }
-
-    /** İade talebi oluşturur, iade kargo kodunu döner */
-    createReturnClaim(
-        companyId: string,
-        extensionId: string,
-        orderNo: string,
-        request: CreateReturnClaimRequest,
-    ): Promise<ApiResponse<ReturnClaimResultResponse>> {
-        return this.http.post<ReturnClaimResultResponse>(
-            { fullEndPoint: `${this.orderUrl(companyId, extensionId, orderNo)}/return-claim` },
+    getBeforeClaimInstructions(
+        request: ReturnCatalogRequest,
+    ): Promise<ApiResponse<BeforeClaimInstructionOptionResponse[]>> {
+        return this.http.post<BeforeClaimInstructionOptionResponse[]>(
+            { fullEndPoint: this.url('before-claim-instructions') },
             request,
         );
     }
 
+    /** İade paketinin gönderilebileceği kargo şirketleri — 3. adım */
+    getCargoCompanies(request: ReturnCatalogRequest): Promise<ApiResponse<CargoCompanyResponse[]>> {
+        return this.http.post<CargoCompanyResponse[]>({ fullEndPoint: this.url('cargo-companies') }, request);
+    }
+
+    /** İade talebi oluşturur, iade kargo kodunu döner */
+    createReturnClaim(request: CreateReturnClaimRequest): Promise<ApiResponse<ReturnClaimResultResponse>> {
+        return this.http.post<ReturnClaimResultResponse>(
+            { fullEndPoint: this.url('return-claim') },
+            this.orderBody(request),
+        );
+    }
+
+    /** Siparişe açılmış iade talepleri — özet liste */
+    getReturnClaims(request: OrderTrackingOrderRequest): Promise<ApiResponse<ReturnClaimListResponse[]>> {
+        return this.http.post<ReturnClaimListResponse[]>(
+            { fullEndPoint: this.url('return-claims') },
+            this.orderBody(request),
+        );
+    }
+
     /** Siparişe açılmış iade talepleri (kod açıklamaları, kargo bilgisi, satırlar) */
-    getReturnClaimDetails(
-        companyId: string,
-        extensionId: string,
-        orderNo: string,
-    ): Promise<ApiResponse<ReturnClaimDetailResponse[]>> {
-        return this.http.get<ReturnClaimDetailResponse[]>({
-            fullEndPoint: `${this.orderUrl(companyId, extensionId, orderNo)}/return-claims/detail`,
-        });
+    getReturnClaimDetails(request: OrderTrackingOrderRequest): Promise<ApiResponse<ReturnClaimDetailResponse[]>> {
+        return this.http.post<ReturnClaimDetailResponse[]>(
+            { fullEndPoint: this.url('return-claims/detail') },
+            this.orderBody(request),
+        );
+    }
+
+    /** Siparişin iade taleplerinde oluşmuş kargo gönderileri */
+    getReturnClaimCargos(request: OrderTrackingOrderRequest): Promise<ApiResponse<ReturnClaimCargoResponse[]>> {
+        return this.http.post<ReturnClaimCargoResponse[]>(
+            { fullEndPoint: this.url('return-claims/cargos') },
+            this.orderBody(request),
+        );
+    }
+
+    /** Şirketin iade talepleri — tarih aralığı / talep numarasıyla filtrelenebilir */
+    getCompanyReturnClaims(request: CompanyReturnClaimRequest): Promise<ApiResponse<ReturnClaimDetailResponse[]>> {
+        return this.http.post<ReturnClaimDetailResponse[]>(
+            { fullEndPoint: this.url('return-claims/by-company') },
+            request,
+        );
     }
 
     /**
      * Talebi onaylar (durum: Kabul) ve müşteriye bilgilendirme SMS'i gönderir.
      * Personel işlemidir; SMS gönderilemese bile karar korunur, sebebi yanıtta döner.
      */
-    approveReturnClaim(
-        companyId: string,
-        extensionId: string,
-        orderNo: string,
-        claimNumber: string,
-        request: ReturnClaimDecisionRequest,
-    ): Promise<ApiResponse<ReturnClaimDecisionResponse>> {
-        return this.decideReturnClaim('approve', companyId, extensionId, orderNo, claimNumber, request);
+    approveReturnClaim(request: ReturnClaimDecisionRequest): Promise<ApiResponse<ReturnClaimDecisionResponse>> {
+        return this.decideReturnClaim('approve', request);
     }
 
     /** Talebi reddeder (durum: Red) ve müşteriye bilgilendirme SMS'i gönderir. */
-    rejectReturnClaim(
-        companyId: string,
-        extensionId: string,
-        orderNo: string,
-        claimNumber: string,
-        request: ReturnClaimDecisionRequest,
-    ): Promise<ApiResponse<ReturnClaimDecisionResponse>> {
-        return this.decideReturnClaim('reject', companyId, extensionId, orderNo, claimNumber, request);
+    rejectReturnClaim(request: ReturnClaimDecisionRequest): Promise<ApiResponse<ReturnClaimDecisionResponse>> {
+        return this.decideReturnClaim('reject', request);
+    }
+
+    /** Talebe iade kargo gönderisi oluşturur, ZPL etiketlerini döner */
+    createReturnClaimCargo(
+        request: CreateReturnClaimCargoRequest,
+    ): Promise<ApiResponse<ReturnClaimCargoResultResponse>> {
+        return this.http.post<ReturnClaimCargoResultResponse>(
+            { fullEndPoint: this.url('return-claims/cargo') },
+            this.claimCargoBody(request),
+        );
+    }
+
+    /** Oluşturulmuş iade kargo gönderisini iptal eder */
+    cancelReturnClaimCargo(request: CancelReturnClaimCargoRequest): Promise<ApiResponse<ReturnClaimCargoResponse>> {
+        return this.http.post<ReturnClaimCargoResponse>(
+            { fullEndPoint: this.url('return-claims/cargo/cancel') },
+            this.claimCargoBody(request),
+        );
     }
 
     private decideReturnClaim(
         decision: 'approve' | 'reject',
-        companyId: string,
-        extensionId: string,
-        orderNo: string,
-        claimNumber: string,
         request: ReturnClaimDecisionRequest,
     ): Promise<ApiResponse<ReturnClaimDecisionResponse>> {
-        const claimSegment = encodeURIComponent(claimNumber.trim());
         return this.http.post<ReturnClaimDecisionResponse>(
-            {
-                fullEndPoint:
-                    `${this.orderUrl(companyId, extensionId, orderNo)}/return-claims/${claimSegment}/${decision}`,
-            },
-            request,
+            { fullEndPoint: this.url(`return-claims/${decision}`) },
+            { ...request, claimNumber: request.claimNumber.trim() },
         );
     }
 
-    private orderUrl(companyId: string, extensionId: string, orderNo: string): string {
-        return `${ROOT_URL}/order-tracking/${companyId}/${extensionId}/${encodeURIComponent(orderNo.trim())}`;
+    /** Sipariş numarası kullanıcıdan geldiği için gönderimden önce sadeleştirilir */
+    private orderBody<T extends OrderTrackingOrderRequest>(request: T): T {
+        return { ...request, orderNo: request.orderNo.trim() };
+    }
+
+    private claimCargoBody<T extends OrderTrackingOrderRequest & { claimNumber: string }>(request: T): T {
+        return { ...this.orderBody(request), claimNumber: request.claimNumber.trim() };
+    }
+
+    private url(path: string): string {
+        return `${ROOT_URL}/order-tracking/${path}`;
     }
 }

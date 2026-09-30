@@ -12,6 +12,7 @@ import {
     OrderTrackingContext,
     OrderTrackingDetailResponse,
     OrderTrackingItemResponse,
+    OrderTrackingOrderRequest,
     OrderTrackingSummaryResponse,
     ReturnClaimDetailLineResponse,
     ReturnClaimDetailResponse,
@@ -187,6 +188,19 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
         this.clearCountdown();
     }
 
+    /**
+     * Sipariş kırılımıyla çalışan POST uçlarının ortak gövdesi.
+     * `companyId` / `extensionId` oturumdan değil, public panelin route
+     * parametrelerinden gelir; sipariş no sorgulama ekranında girilir.
+     */
+    private orderRequest(orderNo: string = this.context.orderNo): OrderTrackingOrderRequest {
+        return {
+            companyId: this.context.companyId,
+            extensionId: this.context.extensionId,
+            orderNo,
+        };
+    }
+
     // ────────────────────────── Marka ──────────────────────────
 
     private async loadBrand(): Promise<void> {
@@ -195,7 +209,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
             return;
         }
         try {
-            const response = await this.service.getBrand(this.context.companyId, this.context.extensionId);
+            const response = await this.service.getBrand({ companyId: this.context.companyId });
             if (response.isSuccess && response.data) this.brand = response.data;
         } catch {
             /* marka bilgisi zorunlu değil, sessizce geçilir */
@@ -228,7 +242,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
                 await this.delay();
                 this.searchResult = buildMockOrderSummary(orderNo.toUpperCase());
             } else {
-                const response = await this.service.getOrderSummary(this.context.companyId, this.context.extensionId, orderNo);
+                const response = await this.service.getOrderSummary(this.orderRequest(orderNo));
                 if (!response.isSuccess || !response.data) {
                     this.searchError = this.messageFromResponse(
                         response,
@@ -289,11 +303,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
                 this.markCodeSent();
                 this.startCountdown(MIN_RESEND_SECONDS);
             } else {
-                const response = await this.service.sendVerificationCode(
-                    this.context.companyId,
-                    this.context.extensionId,
-                    this.context.orderNo,
-                );
+                const response = await this.service.sendVerificationCode(this.orderRequest());
                 if (!response.isSuccess || !response.data) {
                     this.verifyError = this.messageFromResponse(response, 'Doğrulama kodu gönderilemedi. Lütfen tekrar deneyin.');
                     return;
@@ -333,12 +343,10 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
                 }
                 this.order = buildMockOrderDetail(this.context.orderNo);
             } else {
-                const response = await this.service.verify(
-                    this.context.companyId,
-                    this.context.extensionId,
-                    this.context.orderNo,
-                    { key: this.verificationCode },
-                );
+                const response = await this.service.verify({
+                    ...this.orderRequest(),
+                    key: this.verificationCode,
+                });
                 if (!response.isSuccess || !response.data) {
                     this.verifyError = this.messageFromResponse(response, 'Doğrulama kodu hatalı ya da süresi dolmuş.');
                     return;
@@ -431,11 +439,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
             await this.delay();
             return buildMockOrderDetail(this.context.orderNo);
         }
-        const response = await this.service.getOrderDetail(
-            this.context.companyId,
-            this.context.extensionId,
-            this.context.orderNo,
-        );
+        const response = await this.service.getOrderDetail(this.orderRequest());
         if (!response.isSuccess || !response.data) {
             this.detailFetchError = this.messageFromResponse(response, 'Sipariş detayı alınamadı.');
             return null;
@@ -533,11 +537,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
             if (this.isDemo) {
                 this.returnClaims = [];
             } else {
-                const response = await this.service.getReturnClaimDetails(
-                    this.context.companyId,
-                    this.context.extensionId,
-                    this.context.orderNo,
-                );
+                const response = await this.service.getReturnClaimDetails(this.orderRequest());
                 this.returnClaims = response.data ?? [];
             }
         } catch (err) {
@@ -588,16 +588,11 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
         if (!items.length) return null;
         const sameText = (a: unknown, b: unknown) => !!a && !!b && String(a).toLowerCase() === String(b).toLowerCase();
         return (
-            items.find((item) => sameText(item.lineId, line.orderLineId)) ??
-            items.find((item) => sameText(item.barcode, line.usedBarcode)) ??
-            items.find((item) => sameText(item.stockCode, line.itemCode) || sameText(item.stockCode, line.sourceItemCode)) ??
+            items.find((item) => sameText(item.lineId, line.externalClaimLineId)) ??
+            items.find((item) => sameText(item.barcode, line.barcode)) ??
+            items.find((item) => sameText(item.stockCode, line.itemCode)) ??
             null
         );
-    }
-
-    /** Şablonda sayısal karşılaştırma için — API bu alanları metin de dönebilir */
-    toNumber(value: number | string | null | undefined): number {
-        return Number(value) || 0;
     }
 
     /** Detay ekranında "İade İşlemleri" — uyarı modalını açar */
@@ -646,11 +641,12 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
                 this.instructions = MOCK_BEFORE_CLAIM_INSTRUCTIONS;
                 this.cargoCompanies = MOCK_CARGO_COMPANIES;
             } else {
+                const catalogRequest = { companyId: this.context.companyId };
                 const [reasons, actions, instructions, cargoCompanies] = await Promise.all([
-                    this.service.getReturnReasons(this.context.companyId),
+                    this.service.getReturnReasons(catalogRequest),
                     this.service.getAfterReturnActions(),
-                    this.service.getBeforeClaimInstructions(this.context.companyId),
-                    this.service.getCargoCompanies(this.context.companyId),
+                    this.service.getBeforeClaimInstructions(catalogRequest),
+                    this.service.getCargoCompanies(catalogRequest),
                 ]);
                 this.reasons = this.sorted(reasons.data ?? []);
                 this.actions = this.sorted(actions.data ?? []);
@@ -820,14 +816,6 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
         this.returnError = '';
     }
 
-    /**
-     * Talep sahibinin adı / ünvanı — sipariş detayından gelir, müşteriye tekrar sorulmaz.
-     */
-    private get claimCustomerDescription(): string | null {
-        const address = this.order?.deliveryAddress;
-        return this.order?.customerName?.trim() || address?.recipientName?.trim() || null;
-    }
-
     /** IBAN boşluklarla yazılabildiği için gönderimden önce sadeleştirilir */
     private get normalizedIban(): string {
         return this.returnIban.replace(/\s+/g, '').toUpperCase();
@@ -847,9 +835,9 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
                 quantity: this.quantityOf(item),
                 returnReasonCode: this.reasonOf(item),
                 itemCode: item.stockCode,
-                usedBarcode: item.barcode,
-                // Pazaryeri satır kimliği; WMS sipariş satırı id'si panelde bilinmiyor
+                barcode: item.barcode,
                 sourceImageUrl: item.imageUrl,
+                // Pazaryeri satır kimliği; WMS sipariş satırı id'si panelde bilinmiyor
                 externalClaimLineId: String(item.lineId),
             }));
     }
@@ -868,6 +856,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
             return;
         }
         const request: CreateReturnClaimRequest = {
+            ...this.orderRequest(),
             items: this.buildClaimLines(),
             returnReasonCode: this.commonReturnReasonCode,
             afterReturnActionCode: this.selectedActionCode,
@@ -875,7 +864,6 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
             customerNote: this.returnNote?.trim() || null,
             iban: this.normalizedIban || null,
             ibanAccountDescription: this.returnIbanAccountName?.trim() || null,
-            customerDescription: this.claimCustomerDescription,
         };
 
         this.submittingReturn = true;
@@ -885,12 +873,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
                 await this.delay();
                 this.returnResult = buildMockReturnResult(request);
             } else {
-                const response = await this.service.createReturnClaim(
-                    this.context.companyId,
-                    this.context.extensionId,
-                    this.context.orderNo,
-                    request,
-                );
+                const response = await this.service.createReturnClaim(request);
                 if (!response.isSuccess || !response.data) {
                     this.returnError = this.messageFromResponse(response, 'İade talebi oluşturulamadı. Lütfen tekrar deneyin.');
                     return;

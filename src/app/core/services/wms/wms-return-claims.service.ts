@@ -10,7 +10,7 @@ import {
  * /api/wms/return-claims - şirket bazlı iade talepleri (başlık).
  *
  * Onay / ret kararları bu uçta değil, sipariş kırılımıyla çalışan
- * `/order-tracking/.../return-claims/{claimNumber}/approve|reject` uçlarındadır;
+ * `/order-tracking/return-claims/approve|reject` (POST) uçlarındadır;
  * bkz. `OrderTrackingService.approveReturnClaim`.
  */
 @Injectable({ providedIn: 'root' })

@@ -58,17 +58,9 @@
     font-size: 1.1rem;
 }
 
-/* Sayaç kartları — kabul yeşil, ret kırmızı kenarlıkla ayrışır */
+/* Sayaç kartları */
 .claim-stat .card-body {
     padding: 0.85rem 1rem;
-}
-
-.claim-stat-success {
-    border-left: 3px solid var(--bs-success, #22c55e);
-}
-
-.claim-stat-danger {
-    border-left: 3px solid var(--bs-danger, #ef4444);
 }
 
 .claim-line-thumb {

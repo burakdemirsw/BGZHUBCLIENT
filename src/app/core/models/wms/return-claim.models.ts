@@ -75,29 +75,29 @@ export interface UpdateReturnClaimRequest {
 
 /**
  * İade talebi satırı.
- * Kaynak: v1 (50).yaml - ReturnClaimLineResponse (/api/wms/return-claim-lines)
+ * Kaynak: v1 (57).yaml - ReturnClaimLineResponse (/api/wms/return-claim-lines)
+ *
+ * Satır yalnızca hangi üründen kaç adet iade edildiğini tutar: kabul/ret adedi,
+ * satır durumu, satır notu ve sipariş satırı bağı belge başlığına taşındı
+ * (bkz. `ReturnClaimResponse`). Ürün kodları WMS kataloğuna bağlı değildir;
+ * sağlayıcıda ne ise o yazılır.
  */
 export interface ReturnClaimLineResponse extends WmsAuditFields {
     id: string;
     claimHeaderId: string;
     companyId: string;
     sortOrder: WmsCode;
-    orderLineId: string | null;
     externalClaimLineId: string | null;
-    sourceItemCode: string | null;
     /** Sağlayıcıdaki ürün görseli */
     sourceImageUrl: string | null;
     itemCode: string | null;
     colorCode: string | null;
+    /** Beden / ölçü kodu */
+    itemDim1Code: string | null;
     batchCode: string | null;
-    usedBarcode: string | null;
+    barcode: string | null;
     quantity: WmsCode;
-    acceptedQuantity: WmsCode;
-    rejectedQuantity: WmsCode;
     returnReasonCode: string | null;
-    sourceReason: string | null;
-    customerNote: string | null;
-    statusCode: WmsCode;
     createdIp: string | null;
 }
 
@@ -109,20 +109,14 @@ export interface CreateReturnClaimLineRequest extends UpdateReturnClaimLineReque
 export interface UpdateReturnClaimLineRequest {
     claimHeaderId: string;
     sortOrder: WmsCode;
-    orderLineId: string | null;
     externalClaimLineId: string | null;
-    sourceItemCode: string | null;
     sourceImageUrl: string | null;
     itemCode: string | null;
     colorCode: string | null;
+    itemDim1Code: string | null;
     batchCode: string | null;
-    usedBarcode: string | null;
+    barcode: string | null;
     quantity: WmsCode;
-    acceptedQuantity: WmsCode;
-    rejectedQuantity: WmsCode;
     returnReasonCode: string | null;
-    sourceReason: string | null;
-    customerNote: string | null;
-    statusCode: WmsCode;
     createdIp: string | null;
 }
