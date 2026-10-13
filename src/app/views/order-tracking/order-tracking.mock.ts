@@ -115,9 +115,8 @@ export const MOCK_RETURN_REASONS: ReturnReasonOptionResponse[] = [
 ];
 
 export const MOCK_AFTER_RETURN_ACTIONS: AfterReturnActionOptionResponse[] = [
-    { actionCode: 'REFUND_CARD', actionDescription: 'Kredi kartıma para iadesi yapılmasını istiyorum.', sortOrder: 10 },
-    { actionCode: 'GIFT_CARD', actionDescription: 'Hediye çeki / mağaza puanı olarak iade edilsin.', sortOrder: 20 },
-    { actionCode: 'EXCHANGE', actionDescription: 'Ürünü farklı bir beden ile değiştirmek istiyorum.', sortOrder: 30 },
+    { actionCode: 'CCPAY', actionDescription: 'Kredi kartıma para iadesi yapılmasını istiyorum.', sortOrder: 10 },
+    { actionCode: 'BANK', actionDescription: 'Banka hesabıma para iadesi yapılmasını istiyorum.', sortOrder: 20 },
 ];
 
 export const MOCK_BEFORE_CLAIM_INSTRUCTIONS: BeforeClaimInstructionOptionResponse[] = [
@@ -184,8 +183,8 @@ export function buildMockReturnClaim(orderNo: string = MOCK_ORDER_NO): ReturnCla
         statusName: 'Talep Alındı',
         returnReasonCode: 'BEDEN',
         returnReasonName: 'Beden / Ölçü Uymadı',
-        afterReturnActionCode: 'REFUND_CARD',
-        afterReturnActionName: 'Kredi kartıma para iadesi yapılmasını istiyorum.',
+        afterReturnActionCode: 'BANK',
+        afterReturnActionName: 'Banka hesabıma para iadesi yapılmasını istiyorum.',
         customerNote: null,
         iban: null,
         ibanAccountDescription: null,

@@ -1,0 +1,231 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-link me-2"></i>Sipariş Bağlantıları</h4>
+                <button class="btn btn-primary btn-sm" (click)="openCreate()">
+                    <i class="fa-solid fa-plus me-1"></i>Yeni Bağlantı
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info py-2">
+                    <i class="fa-solid fa-lightbulb me-1"></i>
+                    Bağlantıyı açan müşteri <strong>SMS doğrulaması yapmadan</strong> sipariş detayını görür ve iade
+                    talebi oluşturabilir. Bağlantıyı yalnızca siparişin sahibine gönderin; gerekirse listeden kapatın.
+                </div>
+
+                <div class="d-flex mb-3 gap-2">
+                    <input type="text" class="form-control form-control-sm w-auto"
+                           placeholder="Sipariş no ara..."
+                           [(ngModel)]="filterText"
+                           (ngModelChange)="onFilterChange()">
+                </div>
+
+                @if (loading) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>İşlemler</th>
+                                    <th>#</th>
+                                    <th>Sipariş No</th>
+                                    <th>Sağlayıcı</th>
+                                    <th>Oluşturma</th>
+                                    <th>Geçerlilik</th>
+                                    <th class="text-center">Açılma</th>
+                                    <th>Son SMS</th>
+                                    <th class="text-center">Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of pagedItems; track item.id; let idx = $index) {
+                                    <tr>
+                                        <td class="text-nowrap">
+                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="copyLink(item.url, item.id)"
+                                                    title="Bağlantıyı kopyala">
+                                                <i class="fa-solid" [class.fa-check]="copiedId === item.id"
+                                                   [class.fa-copy]="copiedId !== item.id"></i>
+                                            </button>
+                                            <button class="btn btn-soft-primary btn-sm me-1" (click)="sendSms(item)"
+                                                    [disabled]="!canUse(item) || sendingSmsId === item.id"
+                                                    title="Müşteriye SMS ile gönder">
+                                                @if (sendingSmsId === item.id) {
+                                                    <span class="spinner-border spinner-border-sm"></span>
+                                                } @else {
+                                                    <i class="fa-solid fa-comment-sms"></i>
+                                                }
+                                            </button>
+                                            <a class="btn btn-soft-primary btn-sm" [href]="item.url" target="_blank" rel="noopener"
+                                               title="Müşterinin göreceği sayfayı aç">
+                                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">{{ rowNumber(idx) }}</span>
+                                        </td>
+                                        <td><span class="fw-semibold">{{ item.orderNumber }}</span></td>
+                                        <td class="small">{{ item.extensionName || '—' }}</td>
+                                        <td class="small">{{ item.createdDate | date:'dd.MM.yyyy HH:mm' }}</td>
+                                        <td class="small">
+                                            {{ item.expireDate | date:'dd.MM.yyyy HH:mm' }}
+                                            @if (item.isExpired) {
+                                                <span class="badge bg-warning-subtle text-warning ms-1">Süresi doldu</span>
+                                            }
+                                        </td>
+                                        <td class="text-center small">
+                                            <span class="fw-semibold">{{ item.accessCount }}</span>
+                                            @if (item.lastAccessDate) {
+                                                <div class="text-muted">{{ item.lastAccessDate | date:'dd.MM.yyyy HH:mm' }}</div>
+                                            }
+                                        </td>
+                                        <td class="small">{{ (item.smsSentDate | date:'dd.MM.yyyy HH:mm') || '—' }}</td>
+                                        <td class="text-center">
+                                            <div class="form-check form-switch mb-0 d-inline-flex align-items-center gap-2">
+                                                <input class="form-check-input" type="checkbox" role="switch"
+                                                       [checked]="item.isActive"
+                                                       [disabled]="togglingId === item.id"
+                                                       (click)="$event.preventDefault(); toggleActive(item)">
+                                                @if (item.isActive) {
+                                                    <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                } @else {
+                                                    <span class="badge bg-danger-subtle text-danger">Pasif</span>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td colspan="9" class="text-center text-muted">Kayıt bulunamadı.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Sayfalama -->
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="small text-muted">
+                            Toplam: {{ totalCount }} kayıt
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track $index) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+@if (showModal) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ createResult ? 'Bağlantı Hazır' : 'Yeni Sipariş Bağlantısı' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+
+                @if (createResult; as result) {
+                    <div class="modal-body otp-form-body">
+                        <p class="mb-2">
+                            <strong>{{ result.link.orderNumber }}</strong> numaralı sipariş için bağlantı oluşturuldu.
+                            Bağlantı <strong>{{ result.link.expireDate | date:'dd.MM.yyyy HH:mm' }}</strong> tarihine kadar geçerlidir.
+                        </p>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" [value]="result.link.url" readonly>
+                            <button class="btn btn-primary" type="button" (click)="copyLink(result.link.url, 'new')">
+                                <i class="fa-solid me-1" [class.fa-check]="copiedId === 'new'"
+                                   [class.fa-copy]="copiedId !== 'new'"></i>
+                                {{ copiedId === 'new' ? 'Kopyalandı' : 'Kopyala' }}
+                            </button>
+                        </div>
+                        @if (form.isSendSms) {
+                            @if (result.isSmsSent) {
+                                <div class="alert alert-success py-2 mb-0">
+                                    <i class="fa-solid fa-circle-check me-1"></i>{{ smsResultText(result) }}
+                                </div>
+                            } @else {
+                                <div class="alert alert-warning py-2 mb-0">
+                                    <i class="fa-solid fa-triangle-exclamation me-1"></i>{{ smsResultText(result) }}
+                                    Bağlantıyı kopyalayıp başka bir kanaldan iletebilirsiniz.
+                                </div>
+                            }
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" (click)="closeModal()">Tamam</button>
+                    </div>
+                } @else {
+                    <div class="modal-body otp-form-body">
+                        <form>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Sağlayıcı <span class="text-danger">*</span></label>
+                                    <select class="form-select" [(ngModel)]="form.extensionId" name="extensionId"
+                                            [disabled]="providersLoading">
+                                        <option value="">Seçiniz</option>
+                                        @for (provider of providers; track provider.extensionId) {
+                                            <option [value]="provider.extensionId">{{ provider.name }}</option>
+                                        }
+                                    </select>
+                                    @if (!providersLoading && !providers.length) {
+                                        <div class="form-text text-danger">
+                                            Siparişi okunabilen etkin bir entegrasyon (ör. Ticimax) bulunamadı.
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Sipariş No <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" [(ngModel)]="form.orderNo" name="orderNo"
+                                           required placeholder="Sağlayıcıdaki sipariş numarası" (keyup.enter)="createLink()">
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" [(ngModel)]="form.isSendSms"
+                                       name="isSendSms" id="otpOrderLinkSendSms">
+                                <label class="form-check-label" for="otpOrderLinkSendSms">
+                                    Bağlantıyı siparişteki telefona SMS ile gönder
+                                </label>
+                            </div>
+
+                            @if (formError) {
+                                <div class="alert alert-danger py-2 mt-3 mb-0">
+                                    <i class="fa-solid fa-circle-exclamation me-1"></i>{{ formError }}
+                                </div>
+                            }
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+                        <button type="button" class="btn btn-primary" [disabled]="!isFormValid || saving" (click)="createLink()">
+                            @if (saving) {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            Bağlantı Oluştur
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}

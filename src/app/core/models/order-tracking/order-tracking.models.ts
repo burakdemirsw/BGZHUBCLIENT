@@ -165,7 +165,10 @@ export interface ReturnReasonOptionResponse {
     sortOrder: number | string;
 }
 
-/** POST /order-tracking/after-return-actions — seçenekler tüm şirketlerde ortak */
+/**
+ * POST /order-tracking/after-return-actions — seçenekler tüm şirketlerde ortak.
+ * `actionCode`: `CCPAY` karta iade, `BANK` banka hesabına iade (IBAN gerekir).
+ */
 export interface AfterReturnActionOptionResponse {
     actionCode: string;
     actionDescription: string;
@@ -360,6 +363,47 @@ export interface ReturnClaimDetailResponse {
     items: ReturnClaimDetailLineResponse[];
 }
 
+// ────────────────────────── Talep iptal / silme (personel) ──────────────────────────
+
+/**
+ * POST /order-tracking/return-claims/cancel — WmsReturnClaimCancelRequest.
+ * Talep numarası şirket içinde benzersiz olduğu için sipariş kırılımı istenmez.
+ */
+export interface ReturnClaimCancelRequest {
+    companyId: string;
+    claimNumber: string;
+    /** İptal açıklaması — belgenin `note` alanına yazılır */
+    note: string | null;
+}
+
+/**
+ * İptal sonucu — WmsReturnClaimCancelResponse.
+ * Açık kargo gönderisi firmada iptal edilemezse talep yine iptal edilir;
+ * `hasOpenCargo` true kalır ve sebebi `cargoError`'dadır. İptal tekrar
+ * çağrılarak gönderi iptali yeniden denenebilir.
+ */
+export interface ReturnClaimCancelResponse {
+    id: string;
+    claimNumber: string;
+    orderNumber: string;
+    statusCode: number | string;
+    statusName: string | null;
+    note: string | null;
+    cancelledDate: string;
+    hasOpenCargo: boolean;
+    cargoError: string | null;
+}
+
+/**
+ * POST /order-tracking/return-claims/delete — WmsReturnClaimDeleteRequest.
+ * Satırlar ve gönderi kayıtları belgeyle birlikte silinir; açık gönderisi
+ * olan talep silinmez (WMS_RETURNCLAIM_014).
+ */
+export interface ReturnClaimDeleteRequest {
+    companyId: string;
+    claimNumber: string;
+}
+
 /**
  * Onay / ret kararının gövdesi.
  * Kaynak: v1 (58).yaml - WmsReturnClaimDecisionRequest
@@ -392,4 +436,99 @@ export interface ReturnClaimDecisionResponse {
     /** Bilgilendirmenin gittiği maskelenmiş telefon */
     maskedPhone: string | null;
     smsError: string | null;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Sipariş bağlantısı — şirketin müşteriye SMS doğrulamasız gönderdiği link
+// Kaynak: OrderTrackingController `links*` (personel) ve `link/*` (müşteri) uçları
+// ══════════════════════════════════════════════════════════════════════════════
+
+/** POST /order-tracking/links — CreateOrderTrackingLinkRequest */
+export interface CreateOrderTrackingLinkRequest {
+    companyId: string;
+    extensionId: string;
+    orderNo: string;
+    /** Bağlantı siparişin teslimat telefonuna SMS ile de gönderilsin mi */
+    isSendSms: boolean;
+}
+
+/** POST /order-tracking/links/status — bağlantıyı kapatır / yeniden açar */
+export interface OrderTrackingLinkStatusRequest {
+    companyId: string;
+    id: string;
+    isActive: boolean;
+}
+
+/** POST /order-tracking/links/sms — bağlantıyı SMS ile yeniden gönderir */
+export interface OrderTrackingLinkSmsRequest {
+    companyId: string;
+    id: string;
+}
+
+/** POST /order-tracking/links/providers */
+export interface OrderTrackingLinkProviderRequest {
+    companyId: string;
+}
+
+/** Personel listesindeki bağlantı — OrderTrackingLinkResponse */
+export interface OrderTrackingLinkResponse {
+    id: string;
+    extensionId: string;
+    extensionName: string | null;
+    orderNumber: string;
+    /** Müşteriye gönderilecek tam adres */
+    url: string;
+    expireDate: string;
+    isActive: boolean;
+    isExpired: boolean;
+    /** Müşterinin bağlantıyı kaç kez açtığı */
+    accessCount: number;
+    lastAccessDate: string | null;
+    smsSentDate: string | null;
+    createdDate: string;
+}
+
+/**
+ * Bağlantı oluşturma / SMS gönderme sonucu. SMS gönderilemese bile bağlantı
+ * geçerlidir; sebebi `smsError`'dadır.
+ */
+export interface OrderTrackingLinkResultResponse {
+    link: OrderTrackingLinkResponse;
+    isSmsSent: boolean;
+    maskedPhone: string | null;
+    smsError: string | null;
+}
+
+/** Şirkette etkin ve sipariş okuması desteklenen sağlayıcı */
+export interface OrderTrackingLinkProviderResponse {
+    extensionId: string;
+    code: string;
+    name: string;
+}
+
+/** Müşteri uçlarının gövdesi — sipariş yalnızca bağlantının anahtarından çözülür */
+export interface OrderTrackingLinkTokenRequest {
+    token: string;
+}
+
+/**
+ * POST /order-tracking/link/order — bağlantının siparişi. Şirket / sağlayıcı
+ * kimliği marka ve iade kataloğu uçlarını çağırmak için döner.
+ */
+export interface OrderTrackingLinkOrderResponse {
+    companyId: string;
+    extensionId: string;
+    orderNumber: string;
+    expireDate: string;
+    order: OrderTrackingDetailResponse;
+}
+
+/**
+ * POST /order-tracking/link/return-claim — CreateWmsReturnClaimByLinkRequest.
+ * `claim` içindeki şirket / sağlayıcı / sipariş alanları backend'de dikkate
+ * alınmaz; hepsi bağlantıdan okunur.
+ */
+export interface CreateReturnClaimByLinkRequest {
+    token: string;
+    claim: CreateReturnClaimRequest;
 }

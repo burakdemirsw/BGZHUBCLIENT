@@ -19,20 +19,43 @@
         }
 
         <!-- ── Adım göstergesi ── -->
-        <nav class="ot-steps">
-            @for (item of stepLabels; track item.key; let i = $index) {
-                <div class="ot-step" [class.active]="isStepActive(item.key)" [class.done]="isStepDone(item.key)">
-                    <span class="ot-step-dot">
-                        @if (isStepDone(item.key)) {
-                            <i class="fa-solid fa-check"></i>
-                        } @else {
-                            {{ i + 1 }}
-                        }
-                    </span>
-                    <span class="ot-step-label">{{ item.label }}</span>
-                </div>
-            }
-        </nav>
+        @if (!linkError) {
+            <nav class="ot-steps">
+                @for (item of stepLabels; track item.key; let i = $index) {
+                    <div class="ot-step" [class.active]="isStepActive(item.key)" [class.done]="isStepDone(item.key)">
+                        <span class="ot-step-dot">
+                            @if (isStepDone(item.key)) {
+                                <i class="fa-solid fa-check"></i>
+                            } @else {
+                                {{ i + 1 }}
+                            }
+                        </span>
+                        <span class="ot-step-label">{{ item.label }}</span>
+                    </div>
+                }
+            </nav>
+        }
+
+        <!-- ══════════════ Sipariş bağlantısı açılıyor / açılamadı ══════════════ -->
+        @if (isLinkMode && !order) {
+            <section class="ot-card ot-hero">
+                @if (linkError) {
+                    <span class="ot-hero-icon ot-hero-icon-accent"><i class="fa-solid fa-link-slash"></i></span>
+                    <h1 class="ot-hero-title">Bağlantı Açılamadı</h1>
+                    <div class="ot-alert ot-alert-danger">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>{{ linkError }}</span>
+                    </div>
+                } @else {
+                    <span class="ot-hero-icon"><i class="fa-solid fa-box-open"></i></span>
+                    <h1 class="ot-hero-title">Siparişiniz Açılıyor</h1>
+                    <p class="ot-hero-sub">
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        Sipariş bilgileriniz yükleniyor, lütfen bekleyin.
+                    </p>
+                }
+            </section>
+        }
 
         <!-- ══════════════ 1. Sorgulama ══════════════ -->
         @if (step === 'search') {
@@ -352,9 +375,9 @@
                                     </p>
                                 }
 
-                                @if (claim.cargoTrackingNumber) {
+                                <!-- @if (claim.cargoTrackingNumber) {
                                     <p class="ot-hint">İade kargo takip no: {{ claim.cargoTrackingNumber }}</p>
-                                }
+                                } -->
 
                                 <div class="ot-claim-items">
                                     <span class="ot-label">İade Edilen Ürünler</span>
@@ -435,9 +458,11 @@
             }
 
             <div class="ot-actionbar">
-                <button type="button" class="ot-btn ot-btn-ghost" (click)="backToSearch()">
-                    <i class="fa-solid fa-arrow-left"></i> Yeni Sorgu
-                </button>
+                @if (!isLinkMode) {
+                    <button type="button" class="ot-btn ot-btn-ghost" (click)="backToSearch()">
+                        <i class="fa-solid fa-arrow-left"></i> Yeni Sorgu
+                    </button>
+                }
                 @if (canOpenReturnFlow) {
                     <button type="button" class="ot-btn ot-btn-rose ot-btn-grow" (click)="openReturnFlow()" [disabled]="loadingOptions">
                         @if (loadingOptions) {
@@ -452,6 +477,13 @@
                     </span>
                 }
             </div>
+
+            @if (isLinkMode && linkExpireDate) {
+                <p class="ot-hint">
+                    <i class="fa-regular fa-clock"></i>
+                    Bu bağlantı {{ linkExpireDate | date:'dd.MM.yyyy HH:mm' }} tarihine kadar geçerlidir.
+                </p>
+            }
         }
 
         <!-- ══════════════ 4. İade talebi ══════════════ -->
@@ -566,7 +598,7 @@
                             </p>
 
                             <div class="ot-options">
-                                @for (action of actions; track action.actionCode) {
+                                @for (action of availableActions; track action.actionCode) {
                                     <label class="ot-option" [class.selected]="selectedActionCode === action.actionCode">
                                         <input type="radio" [checked]="selectedActionCode === action.actionCode"
                                                (change)="selectedActionCode = action.actionCode"/>
@@ -593,7 +625,7 @@
                                     </div>
                                 </div>
                                 <p class="ot-hint">
-                                    Siparişinizin ödemesi havale / EFT ile alındığı için iade tutarı bu hesaba aktarılacaktır.
+                                    İade tutarı bu hesaba havale / EFT ile aktarılacaktır.
                                     @if (isIbanInvalidVisible) {
                                         <strong>Girdiğiniz IBAN geçersiz görünüyor.</strong>
                                     }

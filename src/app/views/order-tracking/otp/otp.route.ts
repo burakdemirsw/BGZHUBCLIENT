@@ -50,4 +50,7 @@ export const OTP_ROUTES: Routes = [
     otpRoute('claim-status', 'İade Talebi Durumları', () =>
         import('./claim-status/claim-status').then(m => m.OtpClaimStatusPage),
     ),
+    otpRoute('order-links', 'Sipariş Bağlantıları', () =>
+        import('./order-links/order-links').then(m => m.OtpOrderLinksPage),
+    ),
 ];

@@ -1,0 +1,88 @@
+<div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    @if (isCancel) {
+                        <i class="fa-solid fa-ban text-warning me-2"></i>Talebi İptal Et
+                    } @else {
+                        <i class="fa-solid fa-trash text-danger me-2"></i>Talebi Sil
+                    }
+                </h5>
+                <button type="button" class="btn-close" (click)="close()"></button>
+            </div>
+            <div class="modal-body wms-form-body">
+                <p class="mb-2">
+                    <span class="fw-semibold">{{ claim.claimNumber }}</span> numaralı talep
+                    @if (claim.orderNumber) {
+                        (sipariş {{ claim.orderNumber }})
+                    }
+                    @if (isCargoRetry) {
+                        zaten iptal edilmiş.
+                    } @else if (isCancel) {
+                        <span class="text-warning fw-semibold">iptal edilecek</span>.
+                    } @else {
+                        <span class="text-danger fw-semibold">kalıcı olarak silinecek</span>.
+                    }
+                </p>
+                @if (statusName) {
+                    <p class="small text-muted mb-3">Mevcut durum: {{ statusName }}</p>
+                }
+
+                @if (isCargoRetry) {
+                    <div class="alert alert-warning py-2 small mb-0">
+                        <i class="fa-solid fa-truck-fast me-1"></i>
+                        Önceki iptalde kargo gönderisi firmada kapatılamadı. Gönderinin iptali yeniden denenecek.
+                    </div>
+                } @else if (isCancel) {
+                    <ul class="small text-muted ps-3 mb-3">
+                        <li>İptal edilen talep, müşterinin aynı siparişe yeni talep açmasını engellemez.</li>
+                        @if (hasOpenCargo) {
+                            <li>Talebin açık kargo gönderisi kargo firmasında da iptal edilecek.</li>
+                        }
+                    </ul>
+                    <label class="form-label" for="claimActionNote">Açıklama</label>
+                    <textarea class="form-control" rows="3" id="claimActionNote" name="claimActionNote"
+                              [(ngModel)]="note"
+                              [disabled]="saving"
+                              placeholder="İptal gerekçesi (isteğe bağlı)"></textarea>
+                    <div class="form-text">Talebin iç notuna yazılır; müşteriye gönderilmez.</div>
+                } @else if (isDeleteBlocked) {
+                    <div class="alert alert-warning py-2 small mb-0">
+                        <i class="fa-solid fa-truck-fast me-1"></i>
+                        Talebin açık kargo gönderisi var. Gönderinin kargo firmasında sahipsiz kalmaması için
+                        önce talebi iptal edin, ardından silin.
+                    </div>
+                } @else {
+                    <div class="alert alert-danger py-2 small mb-0">
+                        Talep, ürün satırları ve kargo kayıtlarıyla birlikte silinecek. Bu işlem geri alınamaz.
+                        Kaydın izi kalsın istiyorsanız silmek yerine iptal edin.
+                    </div>
+                }
+
+                @if (error) {
+                    <div class="alert alert-danger mt-3 mb-0 py-2">{{ error }}</div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" (click)="close()" [disabled]="saving">Vazgeç</button>
+                <button type="button" class="btn"
+                        [class.btn-warning]="isCancel"
+                        [class.btn-danger]="!isCancel"
+                        [disabled]="saving || isDeleteBlocked"
+                        (click)="submit()">
+                    @if (saving) {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    @if (isCargoRetry) {
+                        Gönderiyi İptal Et
+                    } @else if (isCancel) {
+                        İptal Et
+                    } @else {
+                        Sil
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -36,7 +36,16 @@ export const routes: Routes = [
     /**
      * Sipariş Detay & İade İşlemleri paneli — public, guard ve layout yok.
      * Parametreler verilmezse sayfa test verileriyle çalışır.
+     *
+     * `order-tracking/link/:token` şirketin müşteriye gönderdiği bağlantıdır: SMS
+     * doğrulaması olmadan sipariş detayı ve iade talebi açılır. Aynı segment
+     * sayısındaki `:companyId/:extensionId` rotasından önce gelmelidir.
      */
+    {
+        path: 'order-tracking/link/:token',
+        loadComponent: () => import('./views/order-tracking/order-tracking').then(m => m.OrderTrackingPage),
+        data: {title: 'Sipariş Detayı'}
+    },
     {
         path: 'order-tracking/:companyId/:extensionId',
         loadComponent: () => import('./views/order-tracking/order-tracking').then(m => m.OrderTrackingPage),

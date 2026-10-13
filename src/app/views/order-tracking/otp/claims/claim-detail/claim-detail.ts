@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { WmsReturnClaimsService } from '@/app/core/services/wms/wms-return-claims.service';
 import { WmsReturnClaimLinesService } from '@/app/core/services/wms/wms-return-claim-lines.service';
 import { WmsClaimStatusesService } from '@/app/core/services/wms/wms-claim-statuses.service';
@@ -18,24 +18,35 @@ import {
     ReturnClaimDecisionResponse,
 } from '@/app/core/models/order-tracking/order-tracking.models';
 import { ClaimCodeLabels, buildClaimCodeLabels } from '../claim-code-labels';
+import {
+    ClaimAction,
+    ClaimActionNotice,
+    ClaimActionResult,
+    canCancelClaim,
+    claimActionNotice,
+    claimStatusBadgeClass,
+} from '../claim-actions';
+import { OtpClaimActionModal } from '../claim-action-modal/claim-action-modal';
 
 /** Onay / ret akışının hangi yönde çalıştığı */
 type ClaimDecision = 'approve' | 'reject';
 
 /**
- * İade talebi detayı — başlık bilgileri, talep satırları ve karar (onay / ret) işlemi.
+ * İade talebi detayı — başlık bilgileri, talep satırları, karar (onay / ret),
+ * iptal ve kalıcı silme işlemleri.
  * Uç noktalar:
  *   /api/wms/return-claims/{id}, /api/wms/return-claim-lines
- *   /order-tracking/return-claims/approve|reject (POST, gövde: companyId + claimNumber)
+ *   /order-tracking/return-claims/approve|reject|cancel|delete (POST, gövde: companyId + claimNumber)
  */
 @Component({
     selector: 'app-otp-claim-detail-page',
-    imports: [CommonModule, FormsModule, RouterLink],
+    imports: [CommonModule, FormsModule, RouterLink, OtpClaimActionModal],
     templateUrl: './claim-detail.html',
     styleUrls: ['./claim-detail.scss'],
 })
 export class OtpClaimDetailPage implements OnInit {
     private readonly route = inject(ActivatedRoute);
+    private readonly router = inject(Router);
     private readonly claimsService = inject(WmsReturnClaimsService);
     private readonly linesService = inject(WmsReturnClaimLinesService);
     private readonly statusService = inject(WmsClaimStatusesService);
@@ -63,6 +74,12 @@ export class OtpClaimDetailPage implements OnInit {
     decisionSmsRequested = true;
     /** Son kararın sonucu — yeni durum ve SMS bilgilendirmesinin akıbeti */
     decisionResult: ReturnClaimDecisionResponse | null = null;
+
+    // ────── İptal / silme durumu ──────
+    /** Açık modalın işlemi; `null` ise modal kapalı */
+    claimAction: ClaimAction | null = null;
+    /** Son iptalin sonucu — kargo gönderisi kapatılamadıysa uyarı olarak gösterilir */
+    actionNotice: ClaimActionNotice | null = null;
 
     ngOnInit(): void {
         const id = this.route.snapshot.paramMap.get('id') ?? '';
@@ -113,17 +130,7 @@ export class OtpClaimDetailPage implements OnInit {
         return this.labels.statuses[String(statusCode ?? '')] || '—';
     }
 
-    /** Durum rozetinin rengi — kabul yeşil, red kırmızı, iptal gri */
-    statusBadgeClass(statusCode: unknown): string {
-        switch (Number(statusCode)) {
-            case 4: return 'bg-success-subtle text-success';
-            case 5: return 'bg-danger-subtle text-danger';
-            case 9: return 'bg-secondary-subtle text-secondary';
-            case 2:
-            case 3: return 'bg-warning-subtle text-warning';
-            default: return 'bg-info-subtle text-info';
-        }
-    }
+    readonly statusBadgeClass = claimStatusBadgeClass;
 
     reasonName(returnCode: string | null): string {
         if (!returnCode) return '—';
@@ -251,5 +258,34 @@ export class OtpClaimDetailPage implements OnInit {
 
     dismissDecisionResult(): void {
         this.decisionResult = null;
+    }
+
+    // ────── İptal / silme akışı ──────
+    get canCancel(): boolean {
+        return !!this.claim && canCancelClaim(this.claim);
+    }
+
+    openAction(action: ClaimAction): void {
+        this.claimAction = action;
+    }
+
+    closeAction(): void {
+        this.claimAction = null;
+    }
+
+    /** Silinen talebin detayı kalmadığı için listeye dönülür; iptalde kayıt tazelenir */
+    async onActionCompleted(result: ClaimActionResult): Promise<void> {
+        this.claimAction = null;
+        if (result.action === 'delete') {
+            await this.router.navigate(['/otp/claims']);
+            return;
+        }
+        this.decisionResult = null;
+        this.actionNotice = claimActionNotice(result);
+        await this.refresh(result.claimId);
+    }
+
+    dismissActionNotice(): void {
+        this.actionNotice = null;
     }
 }

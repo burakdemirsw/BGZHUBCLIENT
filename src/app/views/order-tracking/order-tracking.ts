@@ -12,6 +12,7 @@ import {
     OrderTrackingContext,
     OrderTrackingDetailResponse,
     OrderTrackingItemResponse,
+    OrderTrackingLinkOrderResponse,
     OrderTrackingOrderRequest,
     OrderTrackingSummaryResponse,
     ReturnClaimDetailLineResponse,
@@ -20,6 +21,7 @@ import {
     ReturnReasonOptionResponse,
 } from '@/app/core/models/order-tracking/order-tracking.models';
 import { OrderTrackingService } from '@/app/core/services/order-tracking.service';
+import { OrderTrackingLinksService } from '@/app/core/services/order-tracking-links.service';
 import { environment } from '@/environments/environment';
 import {
     MOCK_AFTER_RETURN_ACTIONS,
@@ -59,6 +61,13 @@ const CODE_LENGTH = 6;
 const CURRENCY_CODE = 'TL';
 
 /**
+ * İade tutarının nereye döneceğini belirleyen işlem tipi kodları
+ * (WmsAfterReturnClaimActions — `actionCode`).
+ */
+const ACTION_CODE_CARD = 'CCPAY';
+const ACTION_CODE_BANK = 'BANK';
+
+/**
  * API hata kodlarının kullanıcıya gösterilecek karşılıkları.
  *
  * ⚠ Bu sayfa müşteriye açıktır: backend'den gelen hata metinleri (`innerError`,
@@ -70,9 +79,25 @@ const ERROR_MESSAGES: Record<string, string> = {
     ORDERTRACK_001: 'Bu sipariş koduna ait kayıt bulunamadı. Lütfen kodu kontrol edip tekrar deneyin.',
     VERIFICATION_006: 'Çok sık kod istediniz. Lütfen bir süre bekleyip tekrar deneyin.',
     WMS_RETURNCLAIM_002: 'Bu sipariş için zaten bir iade talebi var. Yeni talep oluşturulamaz.',
+    ORDERTRACK_008: 'Bu bağlantı geçersiz ya da kullanıma kapatılmış. Lütfen mağazayla iletişime geçin.',
+    ORDERTRACK_009: 'Bu bağlantının süresi dolmuş. Yeni bir bağlantı için lütfen mağazayla iletişime geçin.',
 };
 
+/** Sipariş bağlantısı açılamadığında, hata kodu eşlenemezse gösterilen mesaj */
+const LINK_ERROR_FALLBACK = 'Sipariş bilgilerinize şu anda ulaşılamıyor. Lütfen daha sonra tekrar deneyin.';
+
 type PanelStep = 'search' | 'verify' | 'detail' | 'return' | 'result';
+
+const STEP_LABELS: { key: PanelStep; label: string }[] = [
+    { key: 'search', label: 'Sorgulama' },
+    { key: 'verify', label: 'Doğrulama' },
+    { key: 'detail', label: 'Sipariş Detayı' },
+    { key: 'return', label: 'İade Talebi' },
+    { key: 'result', label: 'İade Kodu' },
+];
+
+/** Bağlantıyla gelen müşteri bu adımları görmez: sipariş bağlantıdan çözülür, SMS istenmez */
+const LINK_SKIPPED_STEPS: PanelStep[] = ['search', 'verify'];
 
 /** Doğrulama adımının alt durumu */
 type VerifyPhase = 'idle' | 'code-sent';
@@ -90,6 +115,11 @@ interface ReturnSelection {
  * Uçlar: OrderTracking controller (`/order-tracking/...`, `/api` öneki yok).
  *
  * Akış: sipariş sorgulama → SMS doğrulama → sipariş detayı → iade talebi (3 adım) → iade kodu.
+ *
+ * Bağlantı modu — Route: /order-tracking/link/:token. Şirketin müşteriye gönderdiği
+ * bağlantıdır; sorgulama ve SMS doğrulaması atlanır, sayfa doğrudan sipariş
+ * detayıyla açılır. Sipariş, iade talepleri ve talep oluşturma `link/*` uçlarından
+ * yalnızca anahtarla çağrılır; iade kataloğu ve marka şirket bazlı uçlardan gelir.
  */
 @Component({
     selector: 'app-order-tracking',
@@ -98,13 +128,7 @@ interface ReturnSelection {
     styleUrls: ['./order-tracking.scss'],
 })
 export class OrderTrackingPage implements OnInit, OnDestroy {
-    readonly stepLabels: { key: PanelStep; label: string }[] = [
-        { key: 'search', label: 'Sorgulama' },
-        { key: 'verify', label: 'Doğrulama' },
-        { key: 'detail', label: 'Sipariş Detayı' },
-        { key: 'return', label: 'İade Talebi' },
-        { key: 'result', label: 'İade Kodu' },
-    ];
+    stepLabels: { key: PanelStep; label: string }[] = STEP_LABELS;
 
     readonly currencyCode = CURRENCY_CODE;
     /** Test modunda sorgulanabilecek örnek sipariş kodu */
@@ -115,6 +139,14 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
     isDemo = false;
 
     step: PanelStep = 'search';
+
+    // ── Sipariş bağlantısı ──
+    /** Route'taki bağlantı anahtarı; doluysa sayfa bağlantı modunda çalışır */
+    linkToken = '';
+    linkLoading = false;
+    linkError = '';
+    /** Bağlantının geçerlilik bitişi — detayda bilgi olarak gösterilir */
+    linkExpireDate: string | null = null;
 
     // ── Marka ──
     brand: OrderTrackingBrandResponse | null = null;
@@ -161,7 +193,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
     selectedActionCode = '';
     selectedCargoExtensionId = '';
     returnNote = '';
-    /** Para iadesi bilgileri — havale ile ödenen siparişlerde zorunlu */
+    /** Para iadesi bilgileri — banka hesabına iade (BANK) seçildiğinde zorunlu */
     returnIban = '';
     returnIbanAccountName = '';
     submittingReturn = false;
@@ -171,10 +203,21 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
     returnResult: ReturnClaimResultResponse | null = null;
     showResultModal = false;
 
-    constructor(private route: ActivatedRoute, private service: OrderTrackingService) {}
+    constructor(
+        private route: ActivatedRoute,
+        private service: OrderTrackingService,
+        private linkService: OrderTrackingLinksService,
+    ) {}
 
     ngOnInit(): void {
         const params = this.route.snapshot.paramMap;
+        this.linkToken = params.get('token') ?? '';
+        if (this.isLinkMode) {
+            this.stepLabels = STEP_LABELS.filter(item => !LINK_SKIPPED_STEPS.includes(item.key));
+            this.step = 'detail';
+            void this.openFromLink();
+            return;
+        }
         this.context = {
             companyId: params.get('companyId') ?? '',
             extensionId: params.get('extensionId') ?? '',
@@ -199,6 +242,41 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
             extensionId: this.context.extensionId,
             orderNo,
         };
+    }
+
+    // ────────────────────────── Sipariş bağlantısı ──────────────────────────
+
+    get isLinkMode(): boolean {
+        return !!this.linkToken;
+    }
+
+    /**
+     * Bağlantıyla gelindiğinde siparişi anahtardan çözer ve doğrudan detaya geçer.
+     * Şirket / sağlayıcı kimliği marka ve iade kataloğu uçları için bağlamda tutulur.
+     */
+    private async openFromLink(): Promise<void> {
+        this.linkLoading = true;
+        this.linkError = '';
+        try {
+            const response = await this.linkService.getLinkOrder({ token: this.linkToken });
+            if (!response.isSuccess || !response.data) {
+                this.linkError = this.messageFromResponse(response, LINK_ERROR_FALLBACK);
+                return;
+            }
+            this.applyLinkOrder(response.data);
+            void this.loadBrand();
+            await this.loadReturnClaims();
+        } catch (err) {
+            this.linkError = this.messageFrom(err, LINK_ERROR_FALLBACK);
+        } finally {
+            this.linkLoading = false;
+        }
+    }
+
+    private applyLinkOrder(data: OrderTrackingLinkOrderResponse): void {
+        this.context = { companyId: data.companyId, extensionId: data.extensionId, orderNo: data.orderNumber };
+        this.linkExpireDate = data.expireDate;
+        this.order = data.order;
     }
 
     // ────────────────────────── Marka ──────────────────────────
@@ -439,6 +517,15 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
             await this.delay();
             return buildMockOrderDetail(this.context.orderNo);
         }
+        if (this.isLinkMode) {
+            const linkResponse = await this.linkService.getLinkOrder({ token: this.linkToken });
+            if (!linkResponse.isSuccess || !linkResponse.data) {
+                this.detailFetchError = this.messageFromResponse(linkResponse, 'Sipariş detayı alınamadı.');
+                return null;
+            }
+            this.linkExpireDate = linkResponse.data.expireDate;
+            return linkResponse.data.order;
+        }
         const response = await this.service.getOrderDetail(this.orderRequest());
         if (!response.isSuccess || !response.data) {
             this.detailFetchError = this.messageFromResponse(response, 'Sipariş detayı alınamadı.');
@@ -537,7 +624,9 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
             if (this.isDemo) {
                 this.returnClaims = [];
             } else {
-                const response = await this.service.getReturnClaimDetails(this.orderRequest());
+                const response = this.isLinkMode
+                    ? await this.linkService.getLinkReturnClaims({ token: this.linkToken })
+                    : await this.service.getReturnClaimDetails(this.orderRequest());
                 this.returnClaims = response.data ?? [];
             }
         } catch (err) {
@@ -619,7 +708,9 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
 
     private resetReturnForm(): void {
         this.selections = {};
-        this.selectedActionCode = '';
+        // Ödeme tipine tek işlem tipi uyuyorsa seçili gelir
+        const actions = this.availableActions;
+        this.selectedActionCode = actions.length === 1 ? actions[0].actionCode : '';
         this.selectedCargoExtensionId = '';
         this.returnNote = '';
         this.returnIban = '';
@@ -732,14 +823,24 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
         return values.length > 0 && values.every(item => !!item.returnCode);
     }
 
-    /** Ödeme havale/EFT ile alındıysa iade tutarı müşterinin hesabına aktarılır */
-    get isBankPayment(): boolean {
-        return this.order?.paymentTypeCode === 'BankPayment';
+    /** Ödeme kredi kartıyla (online) alındıysa iade tutarı aynı karta döner */
+    get isCardPayment(): boolean {
+        return this.order?.paymentTypeCode === 'CCPayment';
     }
 
-    /** IBAN alanları yalnızca banka hesabına iade yapılacak siparişlerde sorulur */
+    /**
+     * Siparişin ödeme tipine uyan işlem tipleri: kartla ödenen siparişte banka
+     * hesabına iade (BANK), havale ve kapıda ödemede (nakit / kredi kartı) ise
+     * karta iade (CCPAY) sunulmaz.
+     */
+    get availableActions(): AfterReturnActionOptionResponse[] {
+        const hiddenCode = this.isCardPayment ? ACTION_CODE_BANK : ACTION_CODE_CARD;
+        return this.actions.filter(action => action.actionCode !== hiddenCode);
+    }
+
+    /** IBAN alanları yalnızca banka hesabına iade (BANK) seçildiğinde sorulur */
     get isIbanRequired(): boolean {
-        return this.isBankPayment;
+        return this.selectedActionCode === ACTION_CODE_BANK;
     }
 
     /** 2 harf ülke kodu + 2 kontrol hanesi; TR IBAN'ları toplam 26 karakterdir */
@@ -768,7 +869,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
     private get step2ErrorMessage(): string {
         if (!this.selectedActionCode) return 'Lütfen nasıl bir işlem talep ettiğinizi seçin.';
         if (!this.isIbanValid) {
-            return 'Siparişin ödemesi havale/EFT ile alındığı için iade tutarının aktarılacağı geçerli bir IBAN girmelisiniz.';
+            return 'İade tutarının aktarılacağı geçerli bir IBAN girmelisiniz.';
         }
         return "Lütfen IBAN'ın ait olduğu hesap sahibinin adını / ünvanını yazın.";
     }
@@ -846,7 +947,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
     async submitReturn(): Promise<void> {
         if (this.submittingReturn) return;
         if (!this.isStep2Valid && this.isStep1Valid) {
-            // Havale ile ödenen siparişte IBAN alınmadan talep kapatılamaz
+            // Banka hesabına iadede IBAN alınmadan talep kapatılamaz
             this.returnStep = 2;
             this.returnError = this.step2ErrorMessage;
             return;
@@ -873,7 +974,10 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
                 await this.delay();
                 this.returnResult = buildMockReturnResult(request);
             } else {
-                const response = await this.service.createReturnClaim(request);
+                // Bağlantı modunda sipariş istekten değil bağlantının anahtarından çözülür
+                const response = this.isLinkMode
+                    ? await this.linkService.createLinkReturnClaim({ token: this.linkToken, claim: request })
+                    : await this.service.createReturnClaim(request);
                 if (!response.isSuccess || !response.data) {
                     this.returnError = this.messageFromResponse(response, 'İade talebi oluşturulamadı. Lütfen tekrar deneyin.');
                     return;

@@ -50,6 +50,14 @@
                             <i class="fa-solid fa-circle-xmark me-1"></i>Reddet
                         </button>
                     }
+                    @if (canCancel) {
+                        <button class="btn btn-soft-warning btn-sm" (click)="openAction('cancel')">
+                            <i class="fa-solid fa-ban me-1"></i>İptal Et
+                        </button>
+                    }
+                    <button class="btn btn-soft-danger btn-sm" (click)="openAction('delete')">
+                        <i class="fa-solid fa-trash me-1"></i>Sil
+                    </button>
                 </div>
             </div>
 
@@ -84,6 +92,19 @@
                 </div>
             </div>
             <button type="button" class="btn-close" (click)="dismissDecisionResult()"></button>
+        </div>
+    }
+
+    <!-- İptal sonucu bildirimi -->
+    @if (actionNotice) {
+        <div class="alert alert-dismissible d-flex align-items-start gap-2"
+             [class.alert-success]="actionNotice!.type === 'success'"
+             [class.alert-warning]="actionNotice!.type === 'warning'">
+            <i class="fa-solid mt-1"
+               [class.fa-circle-check]="actionNotice!.type === 'success'"
+               [class.fa-triangle-exclamation]="actionNotice!.type === 'warning'"></i>
+            <span class="flex-grow-1">{{ actionNotice!.text }}</span>
+            <button type="button" class="btn-close" (click)="dismissActionNotice()"></button>
         </div>
     }
 
@@ -324,4 +345,14 @@
             </div>
         </div>
     </div>
+}
+
+<!-- İptal / silme onay modalı -->
+@if (claimAction && claim) {
+    <app-otp-claim-action-modal
+        [claim]="claim"
+        [action]="claimAction"
+        [statusName]="statusName(claim.statusCode)"
+        (completed)="onActionCompleted($event)"
+        (closed)="closeAction()"/>
 }

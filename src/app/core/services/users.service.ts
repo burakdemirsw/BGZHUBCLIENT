@@ -8,6 +8,7 @@ import { AuthResponse, RegisterRequest, RegisterWithCompanyRequest } from '../mo
 @Injectable({
   providedIn: 'root',
 })
+  
 export class UsersService {
   constructor(private http: HttpClientService) {}
 

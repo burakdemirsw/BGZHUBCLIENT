@@ -19,8 +19,11 @@ import {
     ReturnCatalogRequest,
     ReturnClaimCargoResponse,
     ReturnClaimCargoResultResponse,
+    ReturnClaimCancelRequest,
+    ReturnClaimCancelResponse,
     ReturnClaimDecisionRequest,
     ReturnClaimDecisionResponse,
+    ReturnClaimDeleteRequest,
     ReturnClaimDetailResponse,
     ReturnClaimListResponse,
     ReturnClaimResultResponse,
@@ -159,6 +162,25 @@ export class OrderTrackingService {
     /** Talebi reddeder (durum: Red) ve müşteriye bilgilendirme SMS'i gönderir. */
     rejectReturnClaim(request: ReturnClaimDecisionRequest): Promise<ApiResponse<ReturnClaimDecisionResponse>> {
         return this.decideReturnClaim('reject', request);
+    }
+
+    /**
+     * Talebi iptal eder (durum: İptal). Açık kargo gönderisi firmada da iptal edilir;
+     * firma iptali başaramazsa talep yine iptal edilir, sebebi `cargoError`'da döner.
+     */
+    cancelReturnClaim(request: ReturnClaimCancelRequest): Promise<ApiResponse<ReturnClaimCancelResponse>> {
+        return this.http.post<ReturnClaimCancelResponse>(
+            { fullEndPoint: this.url('return-claims/cancel') },
+            { ...request, claimNumber: request.claimNumber.trim() },
+        );
+    }
+
+    /** Talebi satırları ve gönderi kayıtlarıyla birlikte kalıcı olarak siler */
+    deleteReturnClaim(request: ReturnClaimDeleteRequest): Promise<ApiResponse<object>> {
+        return this.http.post<object>(
+            { fullEndPoint: this.url('return-claims/delete') },
+            { ...request, claimNumber: request.claimNumber.trim() },
+        );
     }
 
     /** Talebe iade kargo gönderisi oluşturur, ZPL etiketlerini döner */

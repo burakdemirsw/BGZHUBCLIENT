@@ -7,6 +7,7 @@ import { PaginationRequest, buildPaginationRequest, PagedResult } from '../model
 @Injectable({
   providedIn: 'root',
 })
+  
 export class CustomerTypesService {
   constructor(private http: HttpClientService) {}
 
