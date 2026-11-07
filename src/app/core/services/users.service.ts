@@ -23,11 +23,15 @@ export class UsersService {
     return this.http.get<UserResponse>({ controller: 'Users' }, id);
   }
 
+  /** Oturumdaki kullanıcının şirketine yeni kullanıcı ekler; şirket backend'de token'dan belirlenir. */
   create(request: CreateUserRequest): Promise<ApiResponse<UserResponse>> {
     return this.http.post<UserResponse>({ controller: 'Users' }, request);
   }
 
-  /** Yeni kullanıcı oluşturur; şirket backend tarafında token'dan belirlenir. */
+  /**
+   * Dışarıdan üyelik: her kayıtta kullanıcı için YENİ şirket açılır.
+   * Var olan şirkete kullanıcı eklemek için `create` kullanılır.
+   */
   register(request: RegisterRequest): Promise<ApiResponse<AuthResponse>> {
     return this.http.post<AuthResponse>({ controller: 'Auth', action: 'register' }, request);
   }

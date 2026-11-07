@@ -671,6 +671,36 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
         return line.sourceImageUrl || this.matchOrderItem(line)?.imageUrl || null;
     }
 
+    /** Talep satırındaki ürünün KDV dahil birim fiyatı — sipariş satırından okunur */
+    claimLineUnitPrice(line: ReturnClaimDetailLineResponse): number | null {
+        const item = this.matchOrderItem(line);
+        return item ? Number(item.unitPrice ?? 0) : null;
+    }
+
+    /**
+     * Talep satırının iade tutarı (KDV dahil). Talep satırında tutar tutulmaz; sipariş
+     * satırının toplamı iade adedine oranlanır. Yuvarlanmış birim fiyatı adetle çarpmak
+     * kuruş kaydırdığı için satır toplamından gidilir. Satır eşleşmezse null.
+     */
+    claimLineAmount(line: ReturnClaimDetailLineResponse): number | null {
+        const item = this.matchOrderItem(line);
+        if (!item) return null;
+        const orderedQuantity = Number(item.quantity ?? 0);
+        const returnedQuantity = Number(line.quantity ?? 0);
+        if (orderedQuantity <= 0) return Number(item.unitPrice ?? 0) * returnedQuantity;
+        return (Number(item.totalAmount ?? 0) * returnedQuantity) / orderedQuantity;
+    }
+
+    /** Talebin toplam iade tutarı; tutarı bulunamayan satırlar toplama girmez */
+    claimTotalAmount(claim: ReturnClaimDetailResponse): number {
+        return claim.items.reduce((total, line) => total + (this.claimLineAmount(line) ?? 0), 0);
+    }
+
+    /** Tutarı sipariş satırından okunamayan talep satırı var mı */
+    hasUnpricedClaimLine(claim: ReturnClaimDetailResponse): boolean {
+        return claim.items.some(line => this.claimLineAmount(line) === null);
+    }
+
     /** Talep satırını sipariş satırıyla eşler (satır kimliği → barkod → stok kodu) */
     private matchOrderItem(line: ReturnClaimDetailLineResponse): OrderTrackingItemResponse | null {
         const items = this.order?.items ?? [];

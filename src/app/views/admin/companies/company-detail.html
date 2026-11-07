@@ -558,6 +558,17 @@
                                                     <button class="btn btn-soft-secondary btn-sm" (click)="openRolesModal(user)">
                                                         <i class="fa-solid fa-user-shield me-1"></i>Roller
                                                     </button>
+                                                    @if (!isCurrentUser(user)) {
+                                                        <button class="btn btn-soft-danger btn-sm ms-1" (click)="deleteUser(user)"
+                                                                [disabled]="deletingUserId === user.id" title="Kullanıcıyı sil">
+                                                            @if (deletingUserId === user.id) {
+                                                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                                            } @else {
+                                                                <i class="fa-solid fa-trash me-1"></i>
+                                                            }
+                                                            Sil
+                                                        </button>
+                                                    }
                                                 </td>
                                                 <td>{{ user.name }}</td>
                                                 <td>{{ user.lastName }}</td>

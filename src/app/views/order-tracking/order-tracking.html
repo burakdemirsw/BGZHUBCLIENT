@@ -250,15 +250,16 @@
                             <dd>
                                 {{ order!.cargoCompanyName }}
                                 @if (order!.cargoTrackingNumber) {
-                                    <span class="ot-fact-sub">
-                                        @if (order!.cargoTrackingLink) {
-                                            <a [href]="order!.cargoTrackingLink" target="_blank" rel="noopener">
-                                                Takip No: {{ order!.cargoTrackingNumber }}
-                                            </a>
-                                        } @else {
-                                            Takip No: {{ order!.cargoTrackingNumber }}
-                                        }
-                                    </span>
+                                    @if (order!.cargoTrackingLink) {
+                                        <a class="ot-btn ot-btn-sm ot-btn-track" [href]="order!.cargoTrackingLink"
+                                           target="_blank" rel="noopener" title="Kargonuzu takip edin">
+                                            <i class="fa-solid fa-truck-fast"></i>
+                                            <span>Takip No: <strong>{{ order!.cargoTrackingNumber }}</strong></span>
+                                            <i class="fa-solid fa-arrow-up-right-from-square ot-btn-track-out"></i>
+                                        </a>
+                                    } @else {
+                                        <span class="ot-fact-sub">Takip No: {{ order!.cargoTrackingNumber }}</span>
+                                    }
                                 }
                             </dd>
                         </div>
@@ -383,6 +384,8 @@
                                     <span class="ot-label">İade Edilen Ürünler</span>
                                     @for (line of claim.items; track line.id) {
                                         @let lineImage = claimLineImage(line);
+                                        @let lineUnitPrice = claimLineUnitPrice(line);
+                                        @let lineAmount = claimLineAmount(line);
                                         <div class="ot-product ot-product-sm">
                                             <div class="ot-thumb">
                                                 @if (lineImage) {
@@ -398,12 +401,28 @@
                                                 }
                                                 <div class="ot-hint">
                                                     {{ line.quantity }} adet
+                                                    @if (lineUnitPrice !== null) { × {{ lineUnitPrice | number:'1.2-2' }} {{ currencyCode }} }
                                                     @if (line.returnReasonName) { · {{ line.returnReasonName }} }
                                                 </div>
                                             </div>
+                                            @if (lineAmount !== null) {
+                                                <div class="ot-product-total">{{ lineAmount | number:'1.2-2' }} {{ currencyCode }}</div>
+                                            }
                                         </div>
                                     } @empty {
                                         <span class="ot-hint">Bu talepte ürün satırı bulunamadı.</span>
+                                    }
+
+                                    @if (claim.items.length) {
+                                        <div class="ot-claim-total">
+                                            <span class="ot-label">İade Tutarı</span>
+                                            <strong>{{ claimTotalAmount(claim) | number:'1.2-2' }} {{ currencyCode }}</strong>
+                                        </div>
+                                        @if (hasUnpricedClaimLine(claim)) {
+                                            <p class="ot-hint">
+                                                Bazı ürünlerin tutarı sipariş bilgisinden okunamadığı için toplama eklenmedi.
+                                            </p>
+                                        }
                                     }
                                 </div>
                             </div>

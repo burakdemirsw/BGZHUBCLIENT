@@ -10,8 +10,7 @@ import { UsersService } from '@/app/core/services/users.service';
 import { CompanySettingsService } from '@/app/core/services/company-settings.service';
 import { RolesService } from '@/app/core/services/roles.service';
 import { Company, UpdateCompanyRequest } from '@/app/core/models/customer/company.models';
-import { UserResponse, UpdateUserRequest } from '@/app/core/models/user/user.models';
-import { RegisterRequest } from '@/app/core/models/auth/auth.models';
+import { CreateUserRequest, UserResponse, UpdateUserRequest } from '@/app/core/models/user/user.models';
 import { Role, RoleUserResponse } from '@/app/core/models/role/role.models';
 import {
     CompanySettingField,
@@ -100,6 +99,8 @@ export class CompanyDetailPage implements OnInit {
     userForm: UserFormModel = this.emptyUserForm();
     /** Liste satırındaki Aktif/Pasif switch'i istek sürerken kilitler */
     togglingUserId: string | null = null;
+    /** Silme isteği süren kullanıcı — butonu kilitler */
+    deletingUserId: string | null = null;
 
     // ═══ USER ROLES ═══
     roles: Role[] = [];
@@ -525,7 +526,10 @@ export class CompanyDetailPage implements OnInit {
         }
     }
 
-    /** Yeni kullanıcı kaydı; şirket bilgisi backend tarafında token'dan alınır. */
+    /**
+     * Şirkete yeni kullanıcı ekler (`POST api/Users`); şirket backend'de oturumdaki kullanıcıdan
+     * okunur. `Auth/register` kullanılmaz: o uç her kayıtta yeni şirket açar.
+     */
     private async createUser(): Promise<void> {
         this.userModalError = '';
         if (!this.userForm.name.trim() || !this.userForm.lastName.trim()) {
@@ -543,14 +547,14 @@ export class CompanyDetailPage implements OnInit {
 
         this.userSaving = true;
         try {
-            const req: RegisterRequest = {
+            const req: CreateUserRequest = {
                 name: this.userForm.name.trim(),
                 lastName: this.userForm.lastName.trim(),
                 email: this.userForm.email.trim(),
                 password: this.userForm.password,
                 gender: this.userForm.gender,
             };
-            await this.usersService.register(req);
+            await this.usersService.create(req);
             this.showUserModal = false;
             await this.loadUsers();
         } catch (err: any) {
@@ -585,6 +589,34 @@ export class CompanyDetailPage implements OnInit {
             alert('Kullanıcı durumu güncellenirken bir hata oluştu.');
         } finally {
             this.togglingUserId = null;
+        }
+    }
+
+    /** Oturumdaki kullanıcı kendini silemez; satırında sil butonu gösterilmez */
+    isCurrentUser(user: UserResponse): boolean {
+        return user.id === this.authStateService.profile?.userId;
+    }
+
+    /**
+     * Kullanıcıyı onaydan sonra kalıcı olarak siler. Kullanıcıya bağlı geçmiş kayıt (mesaj,
+     * konuşma, talep vb.) varsa backend silmeyi reddeder; mesajı pasife almayı önerir.
+     */
+    async deleteUser(user: UserResponse): Promise<void> {
+        if (this.deletingUserId || this.isCurrentUser(user)) return;
+        const fullName = `${user.name ?? ''} ${user.lastName ?? ''}`.trim() || user.email;
+        if (!confirm(`"${fullName}" kullanıcısı kalıcı olarak silinecek. Emin misiniz?`)) return;
+
+        this.deletingUserId = user.id;
+        try {
+            await this.usersService.delete(user.id);
+            // Sayfadaki son kayıt silindiyse boş sayfada kalınmaz
+            if (this.pagedUsers.length === 1 && this.usersCurrentPage > 1) this.usersCurrentPage -= 1;
+            await this.loadUsers();
+        } catch (err: any) {
+            console.error('Delete user error:', err);
+            alert('Kullanıcı silinemedi: ' + (err?.error?.message ?? this.settingsError(err)));
+        } finally {
+            this.deletingUserId = null;
         }
     }
 
