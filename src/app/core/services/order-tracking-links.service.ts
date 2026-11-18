@@ -7,6 +7,7 @@ import { environment } from '../../../environments/environment';
 import {
     CreateOrderTrackingLinkRequest,
     CreateReturnClaimByLinkRequest,
+    OrderTrackingCargoTrackResponse,
     OrderTrackingLinkOrderResponse,
     OrderTrackingLinkProviderResponse,
     OrderTrackingLinkResponse,
@@ -87,6 +88,16 @@ export class OrderTrackingLinksService {
     /** Bağlantının siparişine açılmış iade talepleri */
     getLinkReturnClaims(request: OrderTrackingLinkTokenRequest): Promise<ApiResponse<ReturnClaimDetailResponse[]>> {
         return this.http.post<ReturnClaimDetailResponse[]>({ fullEndPoint: this.url('link/return-claims') }, request);
+    }
+
+    /** Bağlantının siparişine açılmış iade kargolarının hareketleri */
+    getLinkReturnCargoTracking(
+        request: OrderTrackingLinkTokenRequest,
+    ): Promise<ApiResponse<OrderTrackingCargoTrackResponse[]>> {
+        return this.http.post<OrderTrackingCargoTrackResponse[]>(
+            { fullEndPoint: this.url('link/return-cargo-tracking') },
+            request,
+        );
     }
 
     /** Bağlantının siparişine iade talebi açar */

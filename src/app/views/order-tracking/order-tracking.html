@@ -127,13 +127,20 @@
                             <button type="button" class="ot-btn ot-btn-rose" (click)="continueWithOrder(true)">
                                 <i class="fa-solid fa-rotate-left"></i> İade Talebi Yap
                             </button>
-                        } @else {
-                            <span class="ot-note">
-                                <i class="fa-solid fa-circle-info"></i>
-                                Bu sipariş için iade talebi oluşturulamaz.
-                            </span>
                         }
                     </div>
+
+                    @if (!searchResult!.canRequestReturn) {
+                        <div class="ot-alert ot-alert-warn ot-alert-strong" role="alert">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <div>
+                                <strong class="ot-alert-title">İade talebi oluşturulamıyor</strong>
+                                @for (reason of searchReturnBlockReasons; track $index) {
+                                    <span class="ot-alert-line">{{ reason }}</span>
+                                }
+                            </div>
+                        </div>
+                    }
                 </article>
             }
         }
@@ -315,7 +322,7 @@
                 <section class="ot-card">
                     <div class="ot-card-head">
                         <i class="fa-solid fa-rotate-left"></i>
-                        <h2>İade Talebiniz</h2>
+                        <h2>{{ returnClaims.length > 1 ? 'İade Talepleriniz' : 'İade Talebiniz' }}</h2>
                         <span class="ot-count">{{ returnClaims.length }}</span>
                     </div>
                     <div class="ot-card-body ot-card-body-flush">
@@ -431,6 +438,80 @@
                 </section>
             }
 
+            <!-- İade taleplerine açılmış iade kargoları -->
+            @if (showReturnTracking) {
+                <section class="ot-card">
+                    <div class="ot-card-head">
+                        <i class="fa-solid fa-truck-arrow-right"></i>
+                        <h2>İade Kargosu</h2>
+                    </div>
+                    <div class="ot-card-body ot-card-body-flush">
+                        @for (returnTrack of returnTracks; track $index) {
+                            <div class="ot-track">
+                                <div class="ot-track-meta">
+                                    @if (returnTrack.claimNumber) {
+                                        Talep No: <strong>{{ returnTrack.claimNumber }}</strong> ·
+                                    }
+                                    {{ returnTrack.cargoCompanyName || 'Kargo' }}
+                                    @if (returnTrack.trackingNumber) {
+                                        · Kargo No: <strong>{{ returnTrack.trackingNumber }}</strong>
+                                    }
+                                </div>
+                                <ng-container [ngTemplateOutlet]="cargoTimeline" [ngTemplateOutletContext]="{ $implicit: returnTrack }"/>
+                            </div>
+                        } @empty {
+                            <div class="ot-track">
+                                <p class="ot-hint">İade kargosu hareketleri şu anda alınamıyor. Lütfen daha sonra tekrar deneyin.</p>
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+
+            <!-- Kargo hareketleri listesi: son hareket en üstte -->
+            <ng-template #cargoTimeline let-track>
+                @if (track.isQueryFailed) {
+                    <p class="ot-hint">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        Kargo hareketleri şu anda alınamıyor. Lütfen daha sonra tekrar deneyin.
+                    </p>
+                } @else {
+                    <ol class="ot-timeline">
+                        @for (movement of track.movements; track $index) {
+                            <li class="ot-timeline-item" [class.is-current]="$first">
+                                <span class="ot-timeline-dot"></span>
+                                <div class="ot-timeline-body">
+                                    <div class="ot-timeline-head">
+                                        <strong>{{ movement.status || 'Hareket' }}</strong>
+                                        @if (movement.eventDate) {
+                                            <span class="ot-hint">{{ movement.eventDate | date:'dd.MM.yyyy HH:mm' }}</span>
+                                        }
+                                    </div>
+                                    @if (movement.location) {
+                                        <span class="ot-timeline-meta">
+                                            <i class="fa-solid fa-location-dot"></i> {{ movement.location }}
+                                        </span>
+                                    }
+                                    @if (movement.description) {
+                                        <span class="ot-hint">{{ movement.description }}</span>
+                                    }
+                                    @if (movement.deliveredTo || movement.deliveryDate) {
+                                        <span class="ot-timeline-meta">
+                                            <i class="fa-solid fa-circle-check"></i>
+                                            Teslim edildi
+                                            @if (movement.deliveredTo) { · Teslim alan: {{ movement.deliveredTo }} }
+                                            @if (movement.deliveryDate) { · {{ movement.deliveryDate | date:'dd.MM.yyyy HH:mm' }} }
+                                        </span>
+                                    }
+                                </div>
+                            </li>
+                        } @empty {
+                            <li class="ot-hint">Gönderi henüz kargo firmasında hareket görmedi.</li>
+                        }
+                    </ol>
+                }
+            </ng-template>
+
             <section class="ot-card">
                 <div class="ot-card-head">
                     <i class="fa-solid fa-bag-shopping"></i>
@@ -458,6 +539,16 @@
                                         · {{ item.statusName }}
                                     }
                                 </div>
+                                @if (claimedOf(item) > 0) {
+                                    <span class="ot-pill ot-pill-soft ot-pill-claimed">
+                                        <i class="fa-solid fa-rotate-left"></i>
+                                        @if (returnableOf(item) > 0) {
+                                            {{ claimedOf(item) }} adedi iade talebinde · {{ returnableOf(item) }} adet daha iade edilebilir
+                                        } @else {
+                                            İade talebi oluşturuldu
+                                        }
+                                    </span>
+                                }
                             </div>
                             <div class="ot-product-total">{{ item.totalAmount | number:'1.2-2' }} {{ currencyCode }}</div>
                         </div>
@@ -476,6 +567,18 @@
                 </div>
             }
 
+            @if (showReturnBlocked) {
+                <div class="ot-alert ot-alert-warn ot-alert-strong" role="alert">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <div>
+                        <strong class="ot-alert-title">İade talebi oluşturulamıyor</strong>
+                        @for (reason of returnBlockReasons; track $index) {
+                            <span class="ot-alert-line">{{ reason }}</span>
+                        }
+                    </div>
+                </div>
+            }
+
             <div class="ot-actionbar">
                 @if (!isLinkMode) {
                     <button type="button" class="ot-btn ot-btn-ghost" (click)="backToSearch()">
@@ -487,12 +590,12 @@
                         @if (loadingOptions) {
                             <span class="spinner-border spinner-border-sm me-2"></span>
                         }
-                        <i class="fa-solid fa-rotate-left"></i> İade İşlemleri
+                        <i class="fa-solid fa-rotate-left"></i> {{ returnButtonText }}
                     </button>
-                } @else {
+                } @else if (allItemsClaimed) {
                     <span class="ot-note ot-btn-grow">
                         <i class="fa-solid fa-circle-info"></i>
-                        {{ returnDisabledReason }}
+                        {{ allItemsClaimedText }}
                     </span>
                 }
             </div>
@@ -545,7 +648,9 @@
                         </p>
 
                         @for (item of order!.items; track item.lineId) {
-                            <div class="ot-return-product" [class.picked]="quantityOf(item) > 0">
+                            @let returnable = returnableOf(item);
+                            @let claimed = claimedOf(item);
+                            <div class="ot-return-product" [class.picked]="quantityOf(item) > 0" [class.claimed]="returnable === 0">
                                 <div class="ot-thumb">
                                     @if (item.imageUrl) {
                                         <img [src]="item.imageUrl" [alt]="item.productName || ''"/>
@@ -560,16 +665,29 @@
                                     }
                                     <div class="ot-hint">Birim fiyat {{ item.unitPrice | number:'1.2-2' }} {{ currencyCode }}</div>
 
-                                    <select class="ot-select" [ngModel]="quantityOf(item)"
-                                            (ngModelChange)="onQuantityChange(item, $event)">
-                                        @for (count of quantityOptions(item); track count) {
-                                            @if (count === 0) {
-                                                <option [ngValue]="0">İade etmiyorum</option>
-                                            } @else {
-                                                <option [ngValue]="count">{{ count }} adet iade edeceğim</option>
-                                            }
+                                    @if (returnable === 0) {
+                                        <span class="ot-pill ot-pill-soft ot-pill-claimed">
+                                            <i class="fa-solid fa-circle-check"></i>
+                                            Bu ürün için iade talebi oluşturulmuş
+                                        </span>
+                                    } @else {
+                                        @if (claimed > 0) {
+                                            <div class="ot-hint">
+                                                {{ claimed }} adedi için daha önce iade talebi oluşturuldu,
+                                                {{ returnable }} adet daha iade edebilirsiniz.
+                                            </div>
                                         }
-                                    </select>
+                                        <select class="ot-select" [ngModel]="quantityOf(item)"
+                                                (ngModelChange)="onQuantityChange(item, $event)">
+                                            @for (count of quantityOptions(item); track count) {
+                                                @if (count === 0) {
+                                                    <option [ngValue]="0">İade etmiyorum</option>
+                                                } @else {
+                                                    <option [ngValue]="count">{{ count }} adet iade edeceğim</option>
+                                                }
+                                            }
+                                        </select>
+                                    }
                                     @if (quantityOf(item) > 0) {
                                         <select class="ot-select" [class.invalid]="!reasonOf(item)"
                                                 [ngModel]="reasonOf(item)"

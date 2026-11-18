@@ -31,6 +31,7 @@ export function buildMockOrderDetail(orderNo: string = MOCK_ORDER_NO): OrderTrac
         cargoTrackingNumber: '887949099683',
         cargoTrackingLink: null,
         canRequestReturn: true,
+        returnBlockReasons: [],
         totalAmount: 4767.97,
         totalVat: 794.66,
         cargoAmount: 0,
@@ -62,6 +63,8 @@ export function buildMockOrderDetail(orderNo: string = MOCK_ORDER_NO): OrderTrac
                 statusCode: 5,
                 statusName: 'Teslim Edildi',
                 options: ['Beden: S'],
+                claimedQuantity: 0,
+                returnableQuantity: 1,
             },
             {
                 lineId: 2,
@@ -75,6 +78,8 @@ export function buildMockOrderDetail(orderNo: string = MOCK_ORDER_NO): OrderTrac
                 statusCode: 5,
                 statusName: 'Teslim Edildi',
                 options: ['Beden: S', 'Renk: Kırmızı'],
+                claimedQuantity: 0,
+                returnableQuantity: 1,
             },
             {
                 lineId: 3,
@@ -88,6 +93,8 @@ export function buildMockOrderDetail(orderNo: string = MOCK_ORDER_NO): OrderTrac
                 statusCode: 5,
                 statusName: 'Teslim Edildi',
                 options: ['Beden: 36'],
+                claimedQuantity: 0,
+                returnableQuantity: 2,
             },
         ],
     };
@@ -104,6 +111,7 @@ export function buildMockOrderSummary(orderNo: string = MOCK_ORDER_NO): OrderTra
         cargoCompanyName: detail.cargoCompanyName,
         cargoTrackingNumber: detail.cargoTrackingNumber,
         canRequestReturn: detail.canRequestReturn,
+        returnBlockReasons: detail.returnBlockReasons,
     };
 }
 

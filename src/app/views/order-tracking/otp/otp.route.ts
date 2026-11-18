@@ -53,4 +53,7 @@ export const OTP_ROUTES: Routes = [
     otpRoute('order-links', 'Sipariş Bağlantıları', () =>
         import('./order-links/order-links').then(m => m.OtpOrderLinksPage),
     ),
+    otpRoute('order-shipments', 'Sipariş Kargoları', () =>
+        import('./order-shipments/order-shipments').then(m => m.OtpOrderShipmentsPage),
+    ),
 ];

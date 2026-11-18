@@ -12,6 +12,7 @@ import {
     CreateReturnClaimRequest,
     OrderTrackingBrandRequest,
     OrderTrackingBrandResponse,
+    OrderTrackingCargoTrackResponse,
     OrderTrackingDetailResponse,
     OrderTrackingOrderRequest,
     OrderTrackingSummaryResponse,
@@ -19,6 +20,7 @@ import {
     ReturnCatalogRequest,
     ReturnClaimCargoResponse,
     ReturnClaimCargoResultResponse,
+    ReturnClaimCargoTrackingRequest,
     ReturnClaimCancelRequest,
     ReturnClaimCancelResponse,
     ReturnClaimDecisionRequest,
@@ -63,6 +65,14 @@ export class OrderTrackingService {
     getOrderDetail(request: OrderTrackingOrderRequest): Promise<ApiResponse<OrderTrackingDetailResponse>> {
         return this.http.post<OrderTrackingDetailResponse>(
             { fullEndPoint: this.url('order/detail') },
+            this.orderBody(request),
+        );
+    }
+
+    /** Siparişin iade kargolarının hareketleri (en yeni gönderi önce) */
+    getReturnCargoTracking(request: OrderTrackingOrderRequest): Promise<ApiResponse<OrderTrackingCargoTrackResponse[]>> {
+        return this.http.post<OrderTrackingCargoTrackResponse[]>(
+            { fullEndPoint: this.url('order/return-cargo-tracking') },
             this.orderBody(request),
         );
     }
@@ -140,6 +150,16 @@ export class OrderTrackingService {
         return this.http.post<ReturnClaimCargoResponse[]>(
             { fullEndPoint: this.url('return-claims/cargos') },
             this.orderBody(request),
+        );
+    }
+
+    /** Personel ekranı: talebin iade kargosunun hareketleri */
+    getReturnClaimCargoTracking(
+        request: ReturnClaimCargoTrackingRequest,
+    ): Promise<ApiResponse<OrderTrackingCargoTrackResponse[]>> {
+        return this.http.post<OrderTrackingCargoTrackResponse[]>(
+            { fullEndPoint: this.url('return-claims/cargo-tracking') },
+            { ...request, claimNumber: request.claimNumber.trim() },
         );
     }
 

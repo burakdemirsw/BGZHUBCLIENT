@@ -78,3 +78,50 @@
     align-items: center;
     justify-content: center;
 }
+
+/* Kargo hareketleri — noktaları dikey çizgiyle birleşen liste, son hareket vurgulu */
+.cargo-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.cargo-timeline-item {
+    position: relative;
+    display: flex;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+
+    &::before {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 14px;
+        bottom: 0;
+        width: 2px;
+        background: #e9ecef;
+    }
+
+    &:last-child {
+        padding-bottom: 0;
+
+        &::before { display: none; }
+    }
+
+    &.is-current .cargo-timeline-dot {
+        background: #0fa968;
+        box-shadow: 0 0 0 4px #e4f7ee;
+    }
+}
+
+.cargo-timeline-dot {
+    flex: 0 0 12px;
+    height: 12px;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: #adb5bd;
+}
+
+.cargo-timeline-body {
+    min-width: 0;
+}

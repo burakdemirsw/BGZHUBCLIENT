@@ -276,6 +276,89 @@
             }
         </div>
     </div>
+
+    <!-- Bu talebin iade kargosunun hareketleri -->
+    <div class="row g-3 mt-0">
+        <div class="col-12">
+            <div class="card mb-0">
+                <div class="card-header d-flex justify-content-between align-items-center py-2">
+                    <h6 class="mb-0"><i class="fa-solid fa-truck-arrow-right me-2"></i>İade Kargosu</h6>
+                    <button type="button" class="btn btn-light btn-sm" (click)="loadCargoTracking()"
+                            [disabled]="cargoTrackingLoading" title="Kargo hareketlerini yenile">
+                        <i class="fa-solid fa-rotate-right" [class.fa-spin]="cargoTrackingLoading"></i>
+                    </button>
+                </div>
+                <div class="card-body page-surface">
+                    @if (cargoTrackingLoading && !returnCargoTracks.length) {
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        </div>
+                    } @else if (cargoTrackingError) {
+                        <div class="alert alert-warning py-2 small mb-0">{{ cargoTrackingError }}</div>
+                    } @else {
+                        @for (returnTrack of returnCargoTracks; track $index; let last = $last) {
+                            <div [class.mb-4]="!last">
+                                <div class="small text-muted mb-3">
+                                    {{ returnTrack.cargoCompanyName || 'Kargo' }}
+                                    @if (returnTrack.trackingNumber) {
+                                        · Kargo No: <span class="fw-semibold text-body">{{ returnTrack.trackingNumber }}</span>
+                                    }
+                                </div>
+                                <ng-container [ngTemplateOutlet]="cargoTimeline" [ngTemplateOutletContext]="{ $implicit: returnTrack }"/>
+                            </div>
+                        } @empty {
+                            <p class="small text-muted mb-0">Bu talebe açılmış iade kargosu yok.</p>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kargo hareketleri listesi: son hareket en üstte -->
+    <ng-template #cargoTimeline let-track>
+        @if (!track.isTrackingSupported) {
+            <p class="small text-muted mb-0">
+                <i class="fa-solid fa-circle-info me-1"></i>
+                {{ track.cargoCompanyName || 'Bu kargo firması' }} için hareket sorgusu tanımlı değil.
+            </p>
+        } @else if (track.isQueryFailed) {
+            <div class="alert alert-warning py-2 small mb-0">
+                Kargo firmasından hareketler alınamadı. Lütfen daha sonra tekrar deneyin.
+            </div>
+        } @else {
+            <ul class="cargo-timeline">
+                @for (movement of track.movements; track $index) {
+                    <li class="cargo-timeline-item" [class.is-current]="$first">
+                        <span class="cargo-timeline-dot"></span>
+                        <div class="cargo-timeline-body">
+                            <div class="d-flex flex-wrap align-items-baseline gap-2">
+                                <span class="fw-semibold">{{ movement.status || 'Hareket' }}</span>
+                                @if (movement.eventDate) {
+                                    <span class="small text-muted">{{ movement.eventDate | date:'dd.MM.yyyy HH:mm' }}</span>
+                                }
+                            </div>
+                            @if (movement.location) {
+                                <div class="small"><i class="fa-solid fa-location-dot text-muted me-1"></i>{{ movement.location }}</div>
+                            }
+                            @if (movement.description) {
+                                <div class="small text-muted">{{ movement.description }}</div>
+                            }
+                            @if (movement.deliveredTo || movement.deliveryDate) {
+                                <div class="small text-success">
+                                    <i class="fa-solid fa-circle-check me-1"></i>Teslim edildi
+                                    @if (movement.deliveredTo) { · Teslim alan: {{ movement.deliveredTo }} }
+                                    @if (movement.deliveryDate) { · {{ movement.deliveryDate | date:'dd.MM.yyyy HH:mm' }} }
+                                </div>
+                            }
+                        </div>
+                    </li>
+                } @empty {
+                    <li class="small text-muted">Gönderi henüz kargo firmasında hareket görmedi.</li>
+                }
+            </ul>
+        }
+    </ng-template>
 }
 
 <!-- Onay / ret modalı -->

@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -9,6 +9,7 @@ import {
     CreateReturnClaimLineRequest,
     CreateReturnClaimRequest,
     OrderTrackingBrandResponse,
+    OrderTrackingCargoTrackResponse,
     OrderTrackingContext,
     OrderTrackingDetailResponse,
     OrderTrackingItemResponse,
@@ -78,10 +79,33 @@ const ACTION_CODE_BANK = 'BANK';
 const ERROR_MESSAGES: Record<string, string> = {
     ORDERTRACK_001: 'Bu sipariş koduna ait kayıt bulunamadı. Lütfen kodu kontrol edip tekrar deneyin.',
     VERIFICATION_006: 'Çok sık kod istediniz. Lütfen bir süre bekleyip tekrar deneyin.',
-    WMS_RETURNCLAIM_002: 'Bu sipariş için zaten bir iade talebi var. Yeni talep oluşturulamaz.',
+    WMS_RETURNCLAIM_002: 'Bu siparişteki tüm ürünler için zaten iade talebi oluşturulmuş.',
+    WMS_RETURNCLAIM_003: 'Bu sipariş için iade talebi oluşturulamaz.',
+    WMS_RETURNCLAIM_015: 'Seçtiğiniz ürün bu siparişte bulunamadı. Lütfen seçiminizi kontrol edip tekrar deneyin.',
+    WMS_RETURNCLAIM_016: 'Seçtiğiniz adet, ürünün iade edilebilir adedini aşıyor. Liste güncellendi; lütfen seçiminizi kontrol edin.',
+    WMS_RETURNCLAIM_017: 'Bu sipariş için başka bir iade talebi işleniyor. Lütfen biraz sonra tekrar deneyin.',
     ORDERTRACK_008: 'Bu bağlantı geçersiz ya da kullanıma kapatılmış. Lütfen mağazayla iletişime geçin.',
     ORDERTRACK_009: 'Bu bağlantının süresi dolmuş. Yeni bir bağlantı için lütfen mağazayla iletişime geçin.',
 };
+
+/**
+ * Talep gönderilirken sipariş iade kuralına takıldı (kapıda ödeme teslim edilmedi, süre doldu ...).
+ * Gerekçe sunucunun hata metninden değil, yeniden çekilen siparişin `returnBlockReasons` alanından okunur.
+ */
+const RETURN_NOT_ALLOWED_CODE = 'WMS_RETURNCLAIM_003';
+
+/** İade engeli gerekçesi gelmediğinde gösterilen genel mesaj */
+const RETURN_BLOCKED_FALLBACK = 'Bu sipariş için iade talebi oluşturulamaz.';
+
+/**
+ * Talep gönderilirken satırların kalan iade adedi değişti (aynı siparişe başka bir talep açılmış ya da
+ * seçim siparişle uyuşmuyor): güncel sipariş yeniden çekilir, kalan adedi aşan seçimler düzeltilir.
+ * 002 tüm ürünler talep edilmiş, 015 ürün siparişte yok, 016 kalan adet aşıldı.
+ */
+const RETURN_QUANTITY_CHANGED_CODES = ['WMS_RETURNCLAIM_002', 'WMS_RETURNCLAIM_015', 'WMS_RETURNCLAIM_016'];
+
+/** Siparişin tüm adetleri iade talebine girdiğinde gösterilen not */
+const ALL_ITEMS_CLAIMED_TEXT = 'Siparişteki tüm ürünler için iade talebi oluşturulmuş.';
 
 /** Sipariş bağlantısı açılamadığında, hata kodu eşlenemezse gösterilen mesaj */
 const LINK_ERROR_FALLBACK = 'Sipariş bilgilerinize şu anda ulaşılamıyor. Lütfen daha sonra tekrar deneyin.';
@@ -123,7 +147,7 @@ interface ReturnSelection {
  */
 @Component({
     selector: 'app-order-tracking',
-    imports: [FormsModule, DatePipe, DecimalPipe],
+    imports: [FormsModule, DatePipe, DecimalPipe, NgTemplateOutlet],
     templateUrl: './order-tracking.html',
     styleUrls: ['./order-tracking.scss'],
 })
@@ -178,6 +202,10 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
     /** Detay ekranındaki yenile butonu — istek sürerken ikon döner */
     refreshingOrder = false;
     detailError = '';
+    /** İade kargolarının hareketleri — hareketler en yeni önce */
+    returnCargoTracks: OrderTrackingCargoTrackResponse[] = [];
+    /** Kargo hareketleri isteği yanıt vermedi; gönderi bazlı hata `isQueryFailed`'dadır */
+    cargoTrackingError = false;
 
     // ── İade talebi ──
     reasons: ReturnReasonOptionResponse[] = [];
@@ -265,6 +293,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
             }
             this.applyLinkOrder(response.data);
             void this.loadBrand();
+            void this.loadReturnCargoTracking();
             await this.loadReturnClaims();
         } catch (err) {
             this.linkError = this.messageFrom(err, LINK_ERROR_FALLBACK);
@@ -353,6 +382,8 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
         if (startReturn && !this.searchResult.canRequestReturn) return;
         this.returnAfterVerify = startReturn;
         this.order = null;
+        this.returnCargoTracks = [];
+        this.cargoTrackingError = false;
         this.verifyPhase = 'idle';
         this.verificationCode = '';
         this.verifyError = '';
@@ -475,6 +506,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
                 return;
             }
             this.order = order;
+            void this.loadReturnCargoTracking();
             await this.loadReturnClaims();
         } catch (err) {
             this.detailError = this.messageFrom(err, 'Sipariş bilgileri yenilenemedi.');
@@ -488,6 +520,7 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
         this.detailError = '';
         this.clearCountdown();
         this.step = 'detail';
+        void this.loadReturnCargoTracking();
         await this.loadReturnClaims();
         // Sorgu ekranında "İade Talebi Yap" ile gelindiyse doğrudan iade akışı açılır
         if (this.returnAfterVerify) {
@@ -638,19 +671,141 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
         }
     }
 
+    /**
+     * Siparişin iade kargolarının hareketlerini çeker. Hareketler detayın yardımcı bilgisidir:
+     * istek başarısız olursa detay yine gösterilir, kartta uyarı çıkar. Demo siparişte iade
+     * talebi olmadığı için istek atılmaz. API hareketleri eskiden yeniye döner; ekranda son
+     * durum en üstte görünsün diye ters çevrilir.
+     */
+    private async loadReturnCargoTracking(): Promise<void> {
+        this.cargoTrackingError = false;
+        if (this.isDemo) {
+            this.returnCargoTracks = [];
+            return;
+        }
+        try {
+            const response = this.isLinkMode
+                ? await this.linkService.getLinkReturnCargoTracking({ token: this.linkToken })
+                : await this.service.getReturnCargoTracking(this.orderRequest());
+            if (!response.isSuccess || !response.data) {
+                this.logTechnicalError(response.errorCode, response.traceId, response.innerError);
+                this.returnCargoTracks = [];
+                this.cargoTrackingError = true;
+                return;
+            }
+            this.returnCargoTracks = response.data.map(track => ({
+                ...track,
+                movements: [...(track.movements ?? [])].reverse(),
+            }));
+        } catch (err) {
+            this.logTechnicalError(this.errorCodeOf(err), null, err);
+            this.returnCargoTracks = [];
+            this.cargoTrackingError = true;
+        }
+    }
+
+    /** Hareket sorgusu olan firmadaki iade kargoları */
+    get returnTracks(): OrderTrackingCargoTrackResponse[] {
+        return this.returnCargoTracks.filter(track => track.isTrackingSupported);
+    }
+
+    /** "İade Kargosu" kartı: hareket sorgulanabilen iade kargosu varsa ya da istek başarısızsa */
+    get showReturnTracking(): boolean {
+        if (this.returnTracks.length) return true;
+        return this.cargoTrackingError && this.returnClaims.some(claim => !!claim.cargoReferenceId);
+    }
+
     get hasReturnClaim(): boolean {
         return this.returnClaims.length > 0;
     }
 
-    /** Bir sipariş için tek iade talebi açılabilir */
+    /**
+     * İade ürün satırı ve adet bazındadır: önceki talepler olsa da iade edilebilir adedi kalan
+     * ürün varsa yeni talep açılabilir. Talebe girmiş adet (talep açık, kabul ya da red) tekrar seçilemez.
+     */
     get canOpenReturnFlow(): boolean {
-        return !!this.order?.canRequestReturn && !this.hasReturnClaim && !this.claimsLoading;
+        return !!this.order?.canRequestReturn && this.hasReturnableItem && !this.claimsLoading;
     }
 
-    /** İade butonu yerine gösterilecek açıklama */
-    get returnDisabledReason(): string {
-        if (this.hasReturnClaim) return 'Bu sipariş için zaten bir iade talebi oluşturulmuş. Yeni talep açılamaz.';
-        return 'Bu sipariş için iade talebi oluşturulamaz.';
+    /** Yeni talepte seçilebilecek adedi olan ürün var mı */
+    get hasReturnableItem(): boolean {
+        return (this.order?.items ?? []).some(item => this.returnableOf(item) > 0);
+    }
+
+    /** Siparişin tüm adetleri iade talebine girdi — engel değil bilgi olarak gösterilir */
+    get allItemsClaimed(): boolean {
+        const items = this.order?.items ?? [];
+        return !this.hasReturnableItem && items.some(item => this.claimedOf(item) > 0);
+    }
+
+    /** Satırın daha önce iade talebine girmiş adedi (iptal edilen talepler hariç) */
+    claimedOf(item: OrderTrackingItemResponse): number {
+        return Math.max(0, Math.floor(Number(item.claimedQuantity ?? 0)));
+    }
+
+    /** Yeni talepte seçilebilecek kalan adet; alan gelmezse satın alınan adet */
+    returnableOf(item: OrderTrackingItemResponse): number {
+        const purchased = Math.max(0, Math.floor(Number(item.quantity ?? 0)));
+        const returnable = Math.floor(Number(item.returnableQuantity ?? purchased));
+        return Math.min(purchased, Math.max(0, returnable));
+    }
+
+    /**
+     * Detayda iade engeli uyarısı: sipariş iade kuralına takıldıysa gösterilir. Tüm ürünler talep
+     * edildiyse engel değil bilgi olduğu için ayrı not çıkar; talepler yüklenirken genel mesaj
+     * yanıp sönmesin diye beklenir.
+     */
+    get showReturnBlocked(): boolean {
+        return !!this.order && !this.order.canRequestReturn && !this.allItemsClaimed && !this.claimsLoading;
+    }
+
+    /** Detaydaki "İade Talebi" butonunun metni: önceki talep varsa kalan ürünler içindir */
+    get returnButtonText(): string {
+        return this.hasReturnClaim ? 'Kalan Ürünler İçin İade Talebi' : 'İade İşlemleri';
+    }
+
+    /** Tüm ürünler talep edildiğinde gösterilen not */
+    readonly allItemsClaimedText = ALL_ITEMS_CLAIMED_TEXT;
+
+    /** Detaydaki iade engeli gerekçeleri — her biri ayrı satırda gösterilir */
+    get returnBlockReasons(): string[] {
+        return this.blockReasons(this.order?.returnBlockReasons);
+    }
+
+    /** Sorgu sonucunda "İade Talebi Yap" yerine gösterilecek gerekçeler */
+    get searchReturnBlockReasons(): string[] {
+        return this.blockReasons(this.searchResult?.returnBlockReasons);
+    }
+
+    /** API'nin iade engeli gerekçeleri; gerekçe gelmezse genel mesaj */
+    private blockReasons(reasons: string[] | null | undefined): string[] {
+        const cleaned = (reasons ?? [])
+            .map(reason => reason?.trim())
+            .filter((reason): reason is string => !!reason);
+        return cleaned.length ? cleaned : [RETURN_BLOCKED_FALLBACK];
+    }
+
+    /** Gerekçeler tek metinde — iade adımının hata alanı için */
+    private returnBlockText(reasons: string[] | null | undefined): string {
+        return this.blockReasons(reasons).join(' ');
+    }
+
+    /**
+     * Talep gönderilirken sipariş iade kuralına takıldıysa güncel sipariş yeniden çekilir:
+     * detay ekranı güncel duruma döner ve hata alanında engel gerekçeleri gösterilir.
+     * Gerekçe gelmezse `ERROR_MESSAGES` karşılığı yerinde kalır.
+     */
+    private async showReturnBlockReasons(): Promise<void> {
+        try {
+            const order = await this.fetchOrderDetail();
+            if (!order) return;
+            this.order = order;
+            if (order.returnBlockReasons?.length) {
+                this.returnError = this.returnBlockText(order.returnBlockReasons);
+            }
+        } catch (err) {
+            this.logTechnicalError(RETURN_NOT_ALLOWED_CODE, null, err);
+        }
     }
 
     /** Talep satırındaki ürünün adı */
@@ -733,6 +888,8 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
     /** İade akışından sipariş detayına dön */
     backToDetail(): void {
         this.showDisclaimerModal = false;
+        // İade adımının hatası detayda tekrar görünmesin; engel gerekçesi detayda buton yerinde yazar
+        this.returnError = '';
         this.step = 'detail';
     }
 
@@ -826,9 +983,12 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
         this.returnError = '';
     }
 
-    /** Adet seçim kutusunun seçenekleri: 0..satın alınan adet */
+    /**
+     * Adet seçim kutusunun seçenekleri: 0..kalan iade adedi. 2 adetlik satırın 1'i daha önce
+     * talep edildiyse yalnızca kalan 1 adet seçilebilir.
+     */
     quantityOptions(item: OrderTrackingItemResponse): number[] {
-        const max = Math.max(0, Math.floor(Number(item.quantity ?? 0)));
+        const max = this.returnableOf(item);
         return Array.from({ length: max + 1 }, (_, index) => index);
     }
 
@@ -1010,10 +1170,12 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
                     : await this.service.createReturnClaim(request);
                 if (!response.isSuccess || !response.data) {
                     this.returnError = this.messageFromResponse(response, 'İade talebi oluşturulamadı. Lütfen tekrar deneyin.');
+                    await this.handleReturnRejection(response.errorCode ?? null);
                     return;
                 }
                 this.returnResult = response.data;
             }
+            this.applyClaimedSelections();
             if (this.cargoReferenceMissing) {
                 // Referans yoksa neden oluşmadığını yalnızca konsola yaz; müşteriye teknik metin gösterilmez
                 this.logTechnicalError('CARGO_NOT_CREATED', null, this.returnResult?.cargoErrorMessage);
@@ -1023,8 +1185,75 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
             await this.loadReturnClaims();
         } catch (err) {
             this.returnError = this.messageFrom(err, 'İade talebi oluşturulamadı. Lütfen tekrar deneyin.');
+            await this.handleReturnRejection(this.errorCodeOf(err));
         } finally {
             this.submittingReturn = false;
+        }
+    }
+
+    /**
+     * Talep reddedildiyse ekran güncel siparişe döner: iade kuralına takıldıysa engel gerekçeleri
+     * gösterilir; kalan adet değiştiyse (başka bir talep açılmış) seçimler güncel adede göre düzeltilir.
+     */
+    private async handleReturnRejection(errorCode: string | null): Promise<void> {
+        if (errorCode === RETURN_NOT_ALLOWED_CODE) {
+            await this.showReturnBlockReasons();
+        } else if (errorCode && RETURN_QUANTITY_CHANGED_CODES.includes(errorCode)) {
+            await this.refreshOrderQuietly();
+            this.clampSelections();
+        }
+    }
+
+    /** Kalan iade adedini aşan seçimler kalan adede indirilir, kalanı olmayan satır seçimden çıkar */
+    private clampSelections(): void {
+        for (const item of this.order?.items ?? []) {
+            const key = this.keyOf(item);
+            const selection = this.selections[key];
+            if (!selection) continue;
+            const returnable = this.returnableOf(item);
+            if (returnable <= 0) {
+                delete this.selections[key];
+            } else if (selection.quantity > returnable) {
+                this.selections[key] = { ...selection, quantity: returnable };
+            }
+        }
+    }
+
+    /**
+     * Talep açıldı: seçilen adetler sunucuyu beklemeden siparişten düşülür, böylece detay ekranı
+     * aynı adet için yeniden talep sunmaz. Güncel değerler sonuç modalı kapanınca API'den çekilir.
+     */
+    private applyClaimedSelections(): void {
+        if (!this.order) return;
+        const items = this.order.items.map(item => {
+            const selected = this.quantityOf(item);
+            if (!selected) return item;
+            return {
+                ...item,
+                claimedQuantity: this.claimedOf(item) + selected,
+                returnableQuantity: Math.max(0, this.returnableOf(item) - selected),
+            };
+        });
+        const hasReturnable = items.some(item => this.returnableOf(item) > 0);
+        this.order = {
+            ...this.order,
+            items,
+            canRequestReturn: this.order.canRequestReturn && hasReturnable,
+            returnBlockReasons: hasReturnable ? this.order.returnBlockReasons : [ALL_ITEMS_CLAIMED_TEXT],
+        };
+    }
+
+    /**
+     * Sipariş detayı arka planda yenilenir (kalan iade adetleri). İstek başarısız olursa ekrandaki
+     * değerler kalır; demo siparişte talep kaydı tutulmadığı için yerel değerler korunur.
+     */
+    private async refreshOrderQuietly(): Promise<void> {
+        if (this.isDemo) return;
+        try {
+            const order = await this.fetchOrderDetail();
+            if (order) this.order = order;
+        } catch (err) {
+            this.logTechnicalError(this.errorCodeOf(err), null, err);
         }
     }
 
@@ -1032,8 +1261,11 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
     closeResultModal(): void {
         this.showResultModal = false;
         this.step = 'detail';
-        if (this.order) this.order = { ...this.order, canRequestReturn: false };
+        // Kalan iade adetleri sunucudan güncellenir; yerelde düşülen değerler o zamana kadar gösterilir
+        void this.refreshOrderQuietly();
         void this.loadReturnClaims();
+        // Yeni talebin iade kargosu açıldıysa hareket kartında görünsün
+        void this.loadReturnCargoTracking();
     }
 
     /** İade kodunu panoya kopyalar */
@@ -1105,6 +1337,11 @@ export class OrderTrackingPage implements OnInit, OnDestroy {
             return 'Sunucuya ulaşılamadı. Lütfen bağlantınızı kontrol edip tekrar deneyin.';
         }
         return ERROR_MESSAGES[error?.error?.errorCode ?? ''] || fallback;
+    }
+
+    /** HTTP hatasının API hata kodu (`ApiResponse.errorCode`) */
+    private errorCodeOf(err: unknown): string | null {
+        return (err as { error?: { errorCode?: string } })?.error?.errorCode ?? null;
     }
 
     /** Başarısız ApiResponse için kullanıcıya gösterilecek mesaj */

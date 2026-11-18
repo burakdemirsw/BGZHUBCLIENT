@@ -232,6 +232,14 @@
 .ot-pill-danger { background: #fdeaee; color: var(--ot-rose); }
 .ot-pill-soft { background: var(--ot-primary-soft); color: var(--ot-ink-2); }
 
+// Ürün satırındaki iade talebi bilgisi: metin uzun olabildiği için dar ekranda satır kırar
+.ot-pill-claimed {
+    white-space: normal;
+    margin-top: .35rem;
+
+    i { margin-right: .3rem; }
+}
+
 /* ── Butonlar ── */
 .ot-btn {
     display: inline-flex;
@@ -342,6 +350,27 @@
 
 .ot-alert-danger { background: #fdeaee; color: #b42340; }
 .ot-alert-warn { background: var(--ot-warn-soft); color: var(--ot-warn); }
+
+/* İade engeli gibi müşterinin mutlaka görmesi gereken uyarılar: kenarlıklı, başlıklı */
+.ot-alert-strong {
+    border: 1px solid rgba(180, 83, 9, .25);
+    border-left: 4px solid var(--ot-warn);
+    padding: .9rem 1rem;
+    font-size: .88rem;
+
+    > i {
+        font-size: 1.1rem;
+        margin-top: .1rem;
+    }
+}
+
+.ot-alert-title {
+    display: block;
+    font-weight: 700;
+    margin-bottom: .2rem;
+}
+
+.ot-alert-line { display: block; }
 
 /* ── Hero (sorgulama & doğrulama) ── */
 .ot-hero {
@@ -728,6 +757,10 @@
     &:last-of-type { border-bottom: 0; }
 
     &.picked .ot-product-name { color: var(--ot-accent); }
+
+    // Tüm adetleri talep edilmiş ürün listede kalır ama seçilemez
+    &.claimed .ot-thumb,
+    &.claimed .ot-product-name { opacity: .55; }
 }
 
 .ot-select,
@@ -1089,5 +1122,85 @@
     padding-top: .65rem;
 
     strong { font-size: 1rem; white-space: nowrap; }
+}
+
+/* ── Kargo hareketleri (gönderilen kargo / iade kargosu) ── */
+.ot-track {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--ot-line);
+
+    &:last-child { border-bottom: 0; }
+}
+
+.ot-track-meta {
+    font-size: .82rem;
+    color: var(--ot-ink-2);
+    margin-bottom: .9rem;
+}
+
+.ot-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ot-timeline-item {
+    position: relative;
+    display: flex;
+    gap: .8rem;
+    padding-bottom: 1rem;
+
+    // Noktaları birleştiren dikey çizgi; son harekette çizgi yok
+    &::before {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 14px;
+        bottom: 0;
+        width: 2px;
+        background: var(--ot-line);
+    }
+
+    &:last-child {
+        padding-bottom: 0;
+
+        &::before { display: none; }
+    }
+
+    &.is-current .ot-timeline-dot {
+        background: var(--ot-success);
+        box-shadow: 0 0 0 4px var(--ot-success-soft);
+    }
+}
+
+.ot-timeline-dot {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    margin-top: 4px;
+    border-radius: 50%;
+    background: var(--ot-muted);
+}
+
+.ot-timeline-body {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    min-width: 0;
+}
+
+.ot-timeline-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .25rem .6rem;
+    font-size: .85rem;
+}
+
+.ot-timeline-meta {
+    font-size: .78rem;
+    color: var(--ot-ink-2);
+
+    i { color: var(--ot-muted); margin-right: .2rem; }
 }
 

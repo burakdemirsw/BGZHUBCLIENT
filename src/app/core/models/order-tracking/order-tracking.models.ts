@@ -79,9 +79,15 @@ export interface OrderTrackingSummaryResponse {
     cargoCompanyName: string | null;
     cargoTrackingNumber: string | null;
     canRequestReturn: boolean;
+    /** İade talebi neden açılamıyor — müşteriye gösterilecek metinler; `canRequestReturn` true ise boş */
+    returnBlockReasons: string[];
 }
 
-/** Sipariş satırı — `options` beden/renk gibi varyant metinlerini taşır */
+/**
+ * Sipariş satırı — `options` beden/renk gibi varyant metinlerini taşır.
+ * İade adet bazındadır: `claimedQuantity` satırın iptal edilmemiş taleplere girmiş adedi (talep açık,
+ * kabul ya da red olabilir), `returnableQuantity` yeni talepte seçilebilecek kalan adettir.
+ */
 export interface OrderTrackingItemResponse {
     lineId: number | string;
     productName: string | null;
@@ -94,6 +100,8 @@ export interface OrderTrackingItemResponse {
     statusCode: number | string;
     statusName: string | null;
     options: string[];
+    claimedQuantity: number | string;
+    returnableQuantity: number | string;
 }
 
 /**
@@ -115,6 +123,48 @@ export interface OrderTrackingAddressResponse {
  */
 export type OrderTrackingPaymentTypeCode = 'CCPayment' | 'BankPayment' | 'GiftCodePayment';
 
+/** Kargo gönderisinin tek hareketi (şube, statü, teslim bilgisi) — eskiden yeniye sıralı gelir */
+export interface OrderTrackingCargoMovementResponse {
+    sequence: number | null;
+    /** "KARGO KABUL", "TESLİM EDİLDİ" ... */
+    status: string | null;
+    eventDate: string | null;
+    /** Şube / aktarma merkezi */
+    location: string | null;
+    description: string | null;
+    /** Yalnızca teslim hareketinde dolu */
+    deliveryDate: string | null;
+    /** Teslim alan kişi — API maskeli döner */
+    deliveredTo: string | null;
+}
+
+/**
+ * İade talebine açılmış kargo gönderisinin hareketleri.
+ * POST /order-tracking/order/return-cargo-tracking, /link/return-cargo-tracking (siparişin tüm iade kargoları)
+ * POST /order-tracking/return-claims/cargo-tracking (personel — yalnızca o talebinki)
+ *
+ * Hareket sorgusu yalnızca DHL (MNG) için vardır: başka firmada `isTrackingSupported`
+ * false gelir. Firma sorgusu hata verirse `isQueryFailed` true olur; ikisinde de `movements` boştur.
+ */
+export interface OrderTrackingCargoTrackResponse {
+    claimNumber: string | null;
+    cargoCompanyName: string | null;
+    /** Paketi şubeye teslim ederken kullanılan referans numarası */
+    trackingNumber: string | null;
+    isTrackingSupported: boolean;
+    isQueryFailed: boolean;
+    movements: OrderTrackingCargoMovementResponse[];
+}
+
+/**
+ * POST /order-tracking/return-claims/cargo-tracking — personel ekranı.
+ * `companyId` kayıttan / oturumdan gelir, form alanı değildir.
+ */
+export interface ReturnClaimCargoTrackingRequest {
+    companyId: string;
+    claimNumber: string;
+}
+
 /**
  * POST /order-tracking/order/detail
  * POST /order-tracking/order/verify
@@ -130,6 +180,8 @@ export interface OrderTrackingDetailResponse {
     cargoTrackingNumber: string | null;
     cargoTrackingLink: string | null;
     canRequestReturn: boolean;
+    /** İade talebi neden açılamıyor — müşteriye gösterilecek metinler; `canRequestReturn` true ise boş */
+    returnBlockReasons: string[];
     totalAmount: number | string;
     totalVat: number | string;
     cargoAmount: number | string;

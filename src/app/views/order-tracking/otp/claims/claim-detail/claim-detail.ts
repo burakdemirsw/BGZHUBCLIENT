@@ -14,6 +14,7 @@ import {
     ReturnClaimResponse,
 } from '@/app/core/models/wms/return-claim.models';
 import {
+    OrderTrackingCargoTrackResponse,
     ReturnClaimDecisionRequest,
     ReturnClaimDecisionResponse,
 } from '@/app/core/models/order-tracking/order-tracking.models';
@@ -37,6 +38,7 @@ type ClaimDecision = 'approve' | 'reject';
  * Uç noktalar:
  *   /api/wms/return-claims/{id}, /api/wms/return-claim-lines
  *   /order-tracking/return-claims/approve|reject|cancel|delete (POST, gövde: companyId + claimNumber)
+ *   /order-tracking/return-claims/cargo-tracking (POST) — talebin iade kargosu hareketleri
  */
 @Component({
     selector: 'app-otp-claim-detail-page',
@@ -81,6 +83,12 @@ export class OtpClaimDetailPage implements OnInit {
     /** Son iptalin sonucu — kargo gönderisi kapatılamadıysa uyarı olarak gösterilir */
     actionNotice: ClaimActionNotice | null = null;
 
+    // ────── İade kargosu hareketleri ──────
+    /** Talebin iade kargoları (normalde tek gönderi); hareketler en yeni önce */
+    returnCargoTracks: OrderTrackingCargoTrackResponse[] = [];
+    cargoTrackingLoading = false;
+    cargoTrackingError = '';
+
     ngOnInit(): void {
         const id = this.route.snapshot.paramMap.get('id') ?? '';
         void this.load(id);
@@ -104,6 +112,7 @@ export class OtpClaimDetailPage implements OnInit {
                 return;
             }
             this.claim = response.data;
+            void this.loadCargoTracking();
             await this.loadLines(this.claim.id);
         } catch (err) {
             console.error('İade talebi yüklenemedi:', err);
@@ -122,6 +131,38 @@ export class OtpClaimDetailPage implements OnInit {
             this.lines = [];
         } finally {
             this.linesLoading = false;
+        }
+    }
+
+    // ────── İade kargosu hareketleri ──────
+    /**
+     * Talebin iade kargosu hareketlerini çeker. Hareketler yardımcı bilgidir: alınamazsa talep
+     * detayı yine çalışır, kargo kartında uyarı gösterilir. API eskiden yeniye döner; son
+     * durum en üstte görünsün diye ters çevrilir.
+     */
+    async loadCargoTracking(): Promise<void> {
+        const target = this.decisionTarget;
+        if (!target || this.cargoTrackingLoading) return;
+
+        this.cargoTrackingLoading = true;
+        this.cargoTrackingError = '';
+        try {
+            const response = await this.orderTrackingService.getReturnClaimCargoTracking(target);
+            if (!response.isSuccess || !response.data) {
+                this.returnCargoTracks = [];
+                this.cargoTrackingError = 'Kargo hareketleri alınamadı.';
+                return;
+            }
+            this.returnCargoTracks = response.data.map(track => ({
+                ...track,
+                movements: [...(track.movements ?? [])].reverse(),
+            }));
+        } catch (err) {
+            console.error('Kargo hareketleri yüklenemedi:', err);
+            this.returnCargoTracks = [];
+            this.cargoTrackingError = 'Kargo hareketleri alınamadı.';
+        } finally {
+            this.cargoTrackingLoading = false;
         }
     }
 
@@ -283,6 +324,8 @@ export class OtpClaimDetailPage implements OnInit {
         this.decisionResult = null;
         this.actionNotice = claimActionNotice(result);
         await this.refresh(result.claimId);
+        // İptalde iade kargosu da kapanır; hareket kartı güncel durumu göstersin
+        void this.loadCargoTracking();
     }
 
     dismissActionNotice(): void {

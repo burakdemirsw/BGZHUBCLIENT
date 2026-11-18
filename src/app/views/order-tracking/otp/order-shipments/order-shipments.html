@@ -1,0 +1,211 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0"><i class="fa-solid fa-truck-fast me-2"></i>Sipariş Kargoları</h4>
+                <button class="btn btn-primary btn-sm" (click)="openCreate()">
+                    <i class="fa-solid fa-plus me-1"></i>Yeni Kargo
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info py-2">
+                    <i class="fa-solid fa-lightbulb me-1"></i>
+                    Sipariş numarasını girin; sipariş kargo firmasına bildirilir ve <strong>kargo numarası</strong> döner.
+                    Alıcı adresi ve kapıda ödeme tutarı siparişten otomatik alınır.
+                </div>
+
+                <div class="d-flex mb-3 gap-2">
+                    <input type="text" class="form-control form-control-sm w-auto"
+                           placeholder="Sipariş / kargo no ara..."
+                           [(ngModel)]="filterText"
+                           (ngModelChange)="onFilterChange()">
+                </div>
+
+                @if (loading) {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>İşlemler</th>
+                                    <th>#</th>
+                                    <th>Sipariş No</th>
+                                    <th>Sağlayıcı</th>
+                                    <th>Kargo Firması</th>
+                                    <th>Kargo No</th>
+                                    <th class="text-end">Kapıda Ödeme</th>
+                                    <th>Oluşturma</th>
+                                    <th class="text-center">Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (item of pagedItems; track item.id; let idx = $index) {
+                                    <tr>
+                                        <td class="text-nowrap">
+                                            <button class="btn btn-soft-primary btn-sm" (click)="copyNumber(item.referenceNumber, item.id)"
+                                                    title="Kargo numarasını kopyala">
+                                                <i class="fa-solid" [class.fa-check]="copiedId === item.id"
+                                                   [class.fa-copy]="copiedId !== item.id"></i>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">{{ rowNumber(idx) }}</span>
+                                        </td>
+                                        <td><span class="fw-semibold">{{ item.orderNumber }}</span></td>
+                                        <td class="small">{{ item.extensionName || item.extensionCode }}</td>
+                                        <td class="small">{{ item.cargoCompanyName || '—' }}</td>
+                                        <td>
+                                            <span class="fw-semibold">{{ item.referenceNumber }}</span>
+                                            @if (hasSeparateTrackingNumber(item)) {
+                                                <div class="small text-muted">Takip: {{ item.trackingNumber }}</div>
+                                            }
+                                        </td>
+                                        <td class="text-end small text-nowrap">
+                                            @if (item.isCashOnDelivery) {
+                                                <span class="fw-semibold">{{ item.codAmount | number:'1.2-2' }} ₺</span>
+                                            } @else {
+                                                —
+                                            }
+                                        </td>
+                                        <td class="small text-nowrap">{{ item.createdDate | date:'dd.MM.yyyy HH:mm' }}</td>
+                                        <td class="text-center">
+                                            <span class="badge" [ngClass]="statusBadge(item).cssClass">{{ statusBadge(item).text }}</span>
+                                        </td>
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td colspan="9" class="text-center text-muted">Kayıt bulunamadı.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Sayfalama -->
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="small text-muted">
+                            Toplam: {{ totalCount }} kayıt
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item" [class.disabled]="currentPage === 1">
+                                    <button class="page-link" (click)="setPage(currentPage - 1)">&laquo;</button>
+                                </li>
+                                @for (page of totalPagesArray; track $index) {
+                                    <li class="page-item" [class.active]="page === currentPage">
+                                        <button class="page-link" (click)="setPage(page)">{{ page }}</button>
+                                    </li>
+                                }
+                                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                                    <button class="page-link" (click)="setPage(currentPage + 1)">&raquo;</button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Yeni kargo modalı -->
+@if (showModal) {
+    <div class="modal fade show d-block modal-backdrop-layer" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ createResult ? 'Kargo Numarası Alındı' : 'Yeni Kargo' }}</h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+
+                @if (createResult; as result) {
+                    <div class="modal-body otp-form-body">
+                        <p class="mb-2">
+                            <strong>{{ result.orderNumber }}</strong> numaralı sipariş
+                            <strong>{{ result.cargoCompanyName }}</strong> firmasına bildirildi.
+                        </p>
+                        <label class="form-label small text-muted mb-1">Kargo No</label>
+                        <div class="input-group mb-2">
+                            <input type="text" class="form-control form-control-lg fw-semibold"
+                                   [value]="result.referenceNumber" readonly>
+                            <button class="btn btn-primary" type="button"
+                                    (click)="copyNumber(result.referenceNumber, 'new')">
+                                <i class="fa-solid me-1" [class.fa-check]="copiedId === 'new'"
+                                   [class.fa-copy]="copiedId !== 'new'"></i>
+                                {{ copiedId === 'new' ? 'Kopyalandı' : 'Kopyala' }}
+                            </button>
+                        </div>
+                        @if (hasSeparateTrackingNumber(result)) {
+                            <div class="small">Takip No: <strong>{{ result.trackingNumber }}</strong></div>
+                        }
+                        @if (result.isCashOnDelivery) {
+                            <div class="small">Kapıda ödeme: <strong>{{ result.codAmount | number:'1.2-2' }} ₺</strong></div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" (click)="closeModal()">Tamam</button>
+                    </div>
+                } @else {
+                    <div class="modal-body otp-form-body">
+                        <form>
+                            <div class="mb-3">
+                                <label class="form-label">Sağlayıcı <span class="text-danger">*</span></label>
+                                <select class="form-select" [(ngModel)]="form.extensionId" name="extensionId"
+                                        [disabled]="providersLoading">
+                                    <option value="">Seçiniz</option>
+                                    @for (provider of providers; track provider.extensionId) {
+                                        <option [value]="provider.extensionId">{{ provider.name }}</option>
+                                    }
+                                </select>
+                                @if (!providersLoading && !providers.length) {
+                                    <div class="form-text text-danger">
+                                        Siparişi okunabilen etkin bir entegrasyon (ör. Ticimax) bulunamadı.
+                                    </div>
+                                }
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Kargo Firması <span class="text-danger">*</span></label>
+                                <select class="form-select" [(ngModel)]="form.cargoExtensionId" name="cargoExtensionId"
+                                        [disabled]="cargoCompaniesLoading">
+                                    <option value="">Seçiniz</option>
+                                    @for (company of cargoCompanies; track company.cargoExtensionId) {
+                                        <option [value]="company.cargoExtensionId">{{ company.name }}</option>
+                                    }
+                                </select>
+                                @if (!cargoCompaniesLoading && !cargoCompanies.length) {
+                                    <div class="form-text text-danger">
+                                        Aktif kargo firması yok; İade Kargo Şirketleri ekranından tanımlayın.
+                                    </div>
+                                }
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label">Sipariş No <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" [(ngModel)]="form.orderNo" name="orderNo"
+                                       required placeholder="Sağlayıcıdaki sipariş numarası" (keyup.enter)="createShipment()">
+                            </div>
+
+                            @if (formError) {
+                                <div class="alert alert-danger py-2 mt-3 mb-0">
+                                    <i class="fa-solid fa-circle-exclamation me-1"></i>{{ formError }}
+                                </div>
+                            }
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" (click)="closeModal()">İptal</button>
+                        <button type="button" class="btn btn-primary" [disabled]="!isFormValid || saving" (click)="createShipment()">
+                            @if (saving) {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            Kargoya Bildir
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
